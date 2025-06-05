@@ -1,10 +1,9 @@
-
 import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
-import { ArrowUpDown, ArrowUp, ArrowDown, Download, Upload, Filter, Search, RotateCcw } from 'lucide-react';
+import { ArrowUpDown, ArrowUp, ArrowDown, Download, Upload, Filter, Search, RotateCcw, ChevronRight, ChevronDown } from 'lucide-react';
 import { SmartGridProps, GridColumnConfig, SortConfig, FilterConfig } from '@/types/smartgrid';
 import { exportToCSV, exportToExcel, parseCSV } from '@/utils/gridExport';
 import { useToast } from '@/hooks/use-toast';
@@ -33,6 +32,7 @@ export function SmartGrid({
   const [pageSize] = useState(10);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [expandedRows, setExpandedRows] = useState<Set<number>>(new Set());
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
@@ -79,6 +79,19 @@ export function SmartGrid({
         hidden: preferences.hiddenColumns.includes(col.key)
       }));
   }, [columns, preferences]);
+
+  // Toggle row expansion
+  const toggleRowExpansion = useCallback((rowIndex: number) => {
+    setExpandedRows(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(rowIndex)) {
+        newSet.delete(rowIndex);
+      } else {
+        newSet.add(rowIndex);
+      }
+      return newSet;
+    });
+  }, []);
 
   // Lazy loading effect
   useEffect(() => {
@@ -337,6 +350,34 @@ export function SmartGrid({
     const isEditing = editingCell?.rowIndex === rowIndex && editingCell?.columnKey === column.key;
     const isEditable = isColumnEditable(column, columnIndex);
 
+    // Add expand/collapse toggle for first column if nestedRowRenderer exists
+    if (columnIndex === 0 && nestedRowRenderer) {
+      const isExpanded = expandedRows.has(rowIndex);
+      return (
+        <div className="flex items-center space-x-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => toggleRowExpansion(rowIndex)}
+            className="h-6 w-6 p-0 hover:bg-gray-100"
+          >
+            {isExpanded ? (
+              <ChevronDown className="h-4 w-4" />
+            ) : (
+              <ChevronRight className="h-4 w-4" />
+            )}
+          </Button>
+          <div className="flex-1">
+            {renderCellContent(value, column, rowIndex, columnIndex, isEditing, isEditable)}
+          </div>
+        </div>
+      );
+    }
+
+    return renderCellContent(value, column, rowIndex, columnIndex, isEditing, isEditable);
+  }, [editingCell, isColumnEditable, nestedRowRenderer, expandedRows, toggleRowExpansion, handleCellEdit, handleKeyDown, loading]);
+
+  const renderCellContent = useCallback((value: any, column: GridColumnConfig, rowIndex: number, columnIndex: number, isEditing: boolean, isEditable: boolean) => {
     if (column.type === 'select' && column.options) {
       if (isEditable) {
         return (
@@ -386,7 +427,7 @@ export function SmartGrid({
     }
 
     return <span>{value}</span>;
-  }, [editingCell, isColumnEditable, handleCellEdit, handleKeyDown, loading]);
+  }, [handleCellEdit, handleKeyDown, loading]);
 
   // Update grid data when prop data changes (only if not using lazy loading)
   useEffect(() => {
@@ -515,16 +556,27 @@ export function SmartGrid({
                 </TableRow>
               ) : (
                 paginatedData.map((row, rowIndex) => (
-                  <TableRow key={rowIndex} className="hover:bg-gray-50">
-                    {orderedColumns.map((column, columnIndex) => (
-                      <TableCell key={column.key} className="relative">
-                        {renderCell(row, column, rowIndex, columnIndex)}
-                        {nestedRowRenderer && columnIndex === 0 && (
-                          <div className="mt-2">{nestedRowRenderer(row)}</div>
-                        )}
-                      </TableCell>
-                    ))}
-                  </TableRow>
+                  <React.Fragment key={rowIndex}>
+                    <TableRow className="hover:bg-gray-50">
+                      {orderedColumns.map((column, columnIndex) => (
+                        <TableCell key={column.key} className="relative">
+                          {renderCell(row, column, rowIndex, columnIndex)}
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                    {/* Nested row content */}
+                    {nestedRowRenderer && expandedRows.has(rowIndex) && (
+                      <TableRow>
+                        <TableCell colSpan={orderedColumns.length} className="p-0">
+                          <div className="bg-gray-50 border-t border-gray-200">
+                            <div className="p-4">
+                              {nestedRowRenderer(row)}
+                            </div>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </React.Fragment>
                 ))
               )}
             </TableBody>
