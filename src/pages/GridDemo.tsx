@@ -3,7 +3,7 @@ import React from 'react';
 import { SmartGrid } from '@/components/SmartGrid';
 import { downloadJsonPlugin } from '@/plugins/downloadJsonPlugin';
 import { GridColumnConfig } from '@/types/smartgrid';
-import { Search, Filter, Download, MoreHorizontal, Grid3x3, List, Settings } from 'lucide-react';
+import { Search, Filter, Download, MoreHorizontal, Grid3x3, List, Settings, Home, Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -115,30 +115,30 @@ const StatusBadge = ({ status, type }: { status: string; type: 'status' | 'billi
   const getStatusColor = (status: string, type: string) => {
     if (type === 'status') {
       switch (status) {
-        case 'Released': return 'bg-green-100 text-green-800';
-        case 'Under Execution': return 'bg-purple-100 text-purple-800';
-        case 'Initiated': return 'bg-blue-100 text-blue-800';
-        case 'Cancelled': return 'bg-red-100 text-red-800';
-        case 'Deleted': return 'bg-red-100 text-red-800';
-        case 'Confirmed': return 'bg-green-100 text-green-800';
-        default: return 'bg-gray-100 text-gray-800';
+        case 'Released': return 'bg-green-100 text-green-800 border-green-200';
+        case 'Under Execution': return 'bg-purple-100 text-purple-800 border-purple-200';
+        case 'Initiated': return 'bg-blue-100 text-blue-800 border-blue-200';
+        case 'Cancelled': return 'bg-red-100 text-red-800 border-red-200';
+        case 'Deleted': return 'bg-red-100 text-red-800 border-red-200';
+        case 'Confirmed': return 'bg-green-100 text-green-800 border-green-200';
+        default: return 'bg-gray-100 text-gray-800 border-gray-200';
       }
     } else {
       switch (status) {
-        case 'Draft Bill Raised': return 'bg-orange-100 text-orange-800';
-        case 'Not Eligible': return 'bg-red-100 text-red-800';
-        case 'Revenue Leakage': return 'bg-red-100 text-red-800';
-        case 'Invoice Created': return 'bg-blue-100 text-blue-800';
-        case 'Invoice Approved': return 'bg-green-100 text-green-800';
-        default: return 'bg-gray-100 text-gray-800';
+        case 'Draft Bill Raised': return 'bg-orange-100 text-orange-800 border-orange-200';
+        case 'Not Eligible': return 'bg-red-100 text-red-800 border-red-200';
+        case 'Revenue Leakage': return 'bg-red-100 text-red-800 border-red-200';
+        case 'Invoice Created': return 'bg-blue-100 text-blue-800 border-blue-200';
+        case 'Invoice Approved': return 'bg-green-100 text-green-800 border-green-200';
+        default: return 'bg-gray-100 text-gray-800 border-gray-200';
       }
     }
   };
 
   return (
-    <Badge variant="secondary" className={`${getStatusColor(status, type)} border-0 text-xs`}>
+    <span className={`inline-flex items-center px-2 py-1 rounded-md text-xs font-medium border ${getStatusColor(status, type)}`}>
       {status}
-    </Badge>
+    </span>
   );
 };
 
@@ -292,121 +292,162 @@ const GridDemo = () => {
       const [date, time] = value.split(' ');
       return (
         <div className="text-sm">
-          <div>{date}</div>
-          <div className="text-gray-500">{time}</div>
+          <div className="text-gray-900">{date}</div>
+          <div className="text-gray-500 text-xs">{time}</div>
         </div>
       );
     }
     if (column.key === 'departurePoint' || column.key === 'arrivalPoint') {
       return (
         <div className="flex items-center gap-1">
-          <span>{value}</span>
+          <span className="text-gray-900">{value}</span>
           <div className="w-4 h-4 bg-gray-200 rounded-full flex items-center justify-center">
-            <div className="w-1 h-1 bg-gray-600 rounded-full"></div>
+            <div className="w-1.5 h-1.5 bg-gray-600 rounded-full"></div>
           </div>
         </div>
       );
     }
-    return value;
+    return <span className="text-gray-900">{value}</span>;
   };
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white border-b border-gray-200 px-6 py-4">
-        <div className="flex items-center justify-between">
+      {/* Top Header */}
+      <div className="bg-white border-b border-gray-200">
+        <div className="flex items-center justify-between px-6 py-3">
           <div className="flex items-center space-x-4">
-            <div className="flex items-center space-x-2">
+            <Button variant="ghost" size="sm" className="p-1">
+              <Menu className="h-5 w-5 text-gray-600" />
+            </Button>
+            <div className="flex items-center space-x-3">
               <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
                 <span className="text-white font-bold text-sm">L</span>
               </div>
               <span className="text-xl font-semibold text-gray-900">Logistics</span>
             </div>
-            <div className="text-gray-400">{'>'}</div>
-            <span className="text-gray-600">Trip Execution Management</span>
           </div>
+          
           <div className="flex items-center space-x-4">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
               <Input
                 placeholder="Search"
-                className="pl-10 w-64 bg-gray-50 border-gray-200"
+                className="pl-10 w-64 bg-gray-50 border-gray-200 h-9"
               />
             </div>
-            <Button variant="ghost" size="sm">
+            <Button variant="ghost" size="sm" className="p-1">
+              <Settings className="h-5 w-5 text-gray-600" />
+            </Button>
+            <Button variant="ghost" size="sm" className="p-1">
               <div className="w-8 h-8 bg-gray-200 rounded-full"></div>
             </Button>
           </div>
         </div>
       </div>
 
-      <div className="px-6 py-6">
-        {/* Trip Plans Header */}
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center space-x-2">
-            <h1 className="text-2xl font-semibold text-gray-900">Trip Plans</h1>
-            <Badge variant="secondary" className="bg-blue-100 text-blue-800 rounded-full">
-              9
-            </Badge>
+      {/* Sidebar and Main Content */}
+      <div className="flex min-h-screen">
+        {/* Left Sidebar */}
+        <div className="w-16 bg-white border-r border-gray-200 flex flex-col items-center py-4 space-y-4">
+          <Button variant="ghost" size="sm" className="w-10 h-10 p-0">
+            <Home className="h-5 w-5 text-blue-600" />
+          </Button>
+          <Button variant="ghost" size="sm" className="w-10 h-10 p-0">
+            <div className="w-5 h-5 bg-gray-300 rounded"></div>
+          </Button>
+          <Button variant="ghost" size="sm" className="w-10 h-10 p-0">
+            <div className="w-5 h-5 bg-gray-300 rounded"></div>
+          </Button>
+          <Button variant="ghost" size="sm" className="w-10 h-10 p-0">
+            <div className="w-5 h-5 bg-gray-300 rounded"></div>
+          </Button>
+          <div className="flex-1"></div>
+          <Button variant="ghost" size="sm" className="w-10 h-10 p-0">
+            <Settings className="h-5 w-5 text-gray-400" />
+          </Button>
+        </div>
+
+        {/* Main Content */}
+        <div className="flex-1 bg-gray-50">
+          {/* Breadcrumb */}
+          <div className="bg-white border-b border-gray-200 px-6 py-2">
+            <div className="flex items-center space-x-2 text-sm">
+              <Home className="h-4 w-4 text-blue-600" />
+              <span className="text-blue-600">Home</span>
+              <span className="text-gray-400">{'>'}</span>
+              <span className="text-gray-600">Trip Execution Management</span>
+            </div>
           </div>
-          
-          <div className="flex items-center space-x-2">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-              <Input
-                placeholder="Search"
-                className="pl-10 w-80 bg-white border-gray-300"
+
+          <div className="p-6">
+            {/* Trip Plans Header */}
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center space-x-3">
+                <h1 className="text-xl font-semibold text-gray-900">Trip Plans</h1>
+                <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-blue-100 text-blue-800 border border-blue-200">
+                  9
+                </span>
+              </div>
+              
+              <div className="flex items-center space-x-2">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <Input
+                    placeholder="Search"
+                    className="pl-10 w-80 bg-white border-gray-300 h-9"
+                  />
+                </div>
+                <Button variant="outline" size="sm" className="h-9 px-3">
+                  <Settings className="h-4 w-4" />
+                </Button>
+                <Button variant="outline" size="sm" className="h-9 px-3">
+                  <Filter className="h-4 w-4" />
+                </Button>
+                <Button variant="outline" size="sm" className="h-9 px-3">
+                  <Download className="h-4 w-4" />
+                </Button>
+                <Button variant="outline" size="sm" className="h-9 px-3">
+                  <Settings className="h-4 w-4" />
+                </Button>
+                <Button variant="outline" size="sm" className="h-9 px-3">
+                  <Grid3x3 className="h-4 w-4" />
+                </Button>
+                <Button variant="outline" size="sm" className="h-9 px-3">
+                  <List className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+
+            {/* Grid */}
+            <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+              <SmartGrid
+                columns={columns}
+                data={tripData}
+                editableColumns={true}
+                mandatoryColumns={['tripPlanNo']}
+                onInlineEdit={handleInlineEdit}
+                onBulkUpdate={handleBulkUpdate}
+                onPreferenceSave={handlePreferenceSave}
+                paginationMode="pagination"
+                plugins={[downloadJsonPlugin]}
               />
             </div>
-            <Button variant="outline" size="sm">
-              <Settings className="h-4 w-4 mr-2" />
-            </Button>
-            <Button variant="outline" size="sm">
-              <Filter className="h-4 w-4 mr-2" />
-            </Button>
-            <Button variant="outline" size="sm">
-              <Download className="h-4 w-4 mr-2" />
-            </Button>
-            <Button variant="outline" size="sm">
-              <Settings className="h-4 w-4 mr-2" />
-            </Button>
-            <Button variant="outline" size="sm">
-              <Grid3x3 className="h-4 w-4" />
-            </Button>
-            <Button variant="outline" size="sm">
-              <List className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
 
-        {/* Grid */}
-        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-          <SmartGrid
-            columns={columns}
-            data={tripData}
-            editableColumns={true}
-            mandatoryColumns={['tripPlanNo']}
-            onInlineEdit={handleInlineEdit}
-            onBulkUpdate={handleBulkUpdate}
-            onPreferenceSave={handlePreferenceSave}
-            paginationMode="pagination"
-            plugins={[downloadJsonPlugin]}
-          />
-        </div>
-
-        {/* Footer */}
-        <div className="flex items-center justify-between mt-4 text-sm text-gray-500">
-          <div className="flex items-center space-x-4">
-            <Button variant="ghost" size="sm">
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-            <Button variant="ghost" size="sm">
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
+            {/* Footer */}
+            <div className="flex items-center justify-between mt-6">
+              <div className="flex items-center space-x-2">
+                <Button variant="ghost" size="sm" className="h-8 px-2">
+                  <MoreHorizontal className="h-4 w-4" />
+                </Button>
+                <Button variant="ghost" size="sm" className="h-8 px-2">
+                  <MoreHorizontal className="h-4 w-4" />
+                </Button>
+              </div>
+              <Button variant="outline" size="sm" className="text-blue-600 border-blue-200 hover:bg-blue-50">
+                Cancel
+              </Button>
+            </div>
           </div>
-          <Button variant="outline" size="sm" className="text-blue-600 border-blue-200">
-            Cancel
-          </Button>
         </div>
       </div>
     </div>
