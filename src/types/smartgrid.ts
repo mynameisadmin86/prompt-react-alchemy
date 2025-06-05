@@ -1,3 +1,4 @@
+
 export interface GridColumnConfig {
   key: string;
   label: string;
@@ -55,9 +56,10 @@ export interface SmartGridProps {
   editableColumns?: string[] | boolean;
   mandatoryColumns?: string[];
   onInlineEdit?(rowIndex: number, updatedRow: any): void;
-  onBulkUpdate?(rows: any[]): void;
-  onPreferenceSave?(preferences: any): void;
+  onBulkUpdate?(rows: any[]): Promise<void>;
+  onPreferenceSave?(preferences: any): Promise<void>;
   onDataFetch?(page: number, pageSize: number): Promise<any[]>;
+  onUpdate?(row: any): Promise<void>;
   paginationMode?: 'pagination' | 'infinite';
   nestedRowRenderer?(row: any): React.ReactNode;
 }

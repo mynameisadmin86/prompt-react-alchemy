@@ -20,6 +20,7 @@ export function SmartGrid({
   onBulkUpdate,
   onPreferenceSave,
   onDataFetch,
+  onUpdate,
   paginationMode = 'pagination',
   nestedRowRenderer
 }: SmartGridProps) {
@@ -31,6 +32,7 @@ export function SmartGrid({
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize] = useState(10);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
@@ -42,7 +44,7 @@ export function SmartGrid({
     mandatory: col.mandatory
   })), [columns]);
 
-  // Initialize preferences hook
+  // Initialize preferences hook with proper async handling
   const {
     preferences,
     updateColumnOrder,
@@ -53,7 +55,14 @@ export function SmartGrid({
     preferencesColumns,
     true, // persistPreferences
     'smartgrid-preferences',
-    onPreferenceSave
+    onPreferenceSave ? async (preferences) => {
+      try {
+        await Promise.resolve(onPreferenceSave(preferences));
+      } catch (error) {
+        console.error('Failed to save preferences:', error);
+        setError('Failed to save preferences');
+      }
+    } : undefined
   );
 
   // Apply preferences to get ordered and visible columns
@@ -71,6 +80,27 @@ export function SmartGrid({
       }));
   }, [columns, preferences]);
 
+  // Lazy loading effect
+  useEffect(() => {
+    if (onDataFetch) {
+      const fetchData = async () => {
+        setLoading(true);
+        setError(null);
+        try {
+          const newData = await onDataFetch(currentPage, pageSize);
+          setGridData(newData);
+        } catch (err) {
+          setError('Failed to fetch data');
+          console.error('Data fetch error:', err);
+        } finally {
+          setLoading(false);
+        }
+      };
+      
+      fetchData();
+    }
+  }, [onDataFetch, currentPage, pageSize]);
+
   // Determine if a column is editable
   const isColumnEditable = useCallback((column: GridColumnConfig, columnIndex: number) => {
     // First column is not editable by default
@@ -83,8 +113,13 @@ export function SmartGrid({
     return editableColumns && column.editable;
   }, [editableColumns]);
 
-  // Process data with sorting and filtering
+  // Process data with sorting and filtering (only if not using lazy loading)
   const processedData = useMemo(() => {
+    if (onDataFetch) {
+      // For lazy loading, return data as-is (sorting/filtering handled server-side)
+      return gridData;
+    }
+
     let result = [...gridData];
 
     // Apply global filter
@@ -111,18 +146,18 @@ export function SmartGrid({
     }
 
     return result;
-  }, [gridData, globalFilter, sort, orderedColumns]);
+  }, [gridData, globalFilter, sort, orderedColumns, onDataFetch]);
 
   // Pagination
   const paginatedData = useMemo(() => {
-    if (paginationMode !== 'pagination') return processedData;
+    if (paginationMode !== 'pagination' || onDataFetch) return processedData;
     const start = (currentPage - 1) * pageSize;
     return processedData.slice(start, start + pageSize);
-  }, [processedData, paginationMode, currentPage, pageSize]);
+  }, [processedData, paginationMode, currentPage, pageSize, onDataFetch]);
 
   const totalPages = Math.ceil(processedData.length / pageSize);
 
-  const handleSort = useCallback((columnKey: string) => {
+  const handleSort = useCallback(async (columnKey: string) => {
     const column = orderedColumns.find(col => col.key === columnKey);
     if (!column?.sortable) return;
 
@@ -132,20 +167,61 @@ export function SmartGrid({
     };
     
     setSort(newSort);
-  }, [orderedColumns, sort]);
 
-  const handleCellEdit = useCallback((rowIndex: number, columnKey: string, value: any) => {
-    const actualRowIndex = (currentPage - 1) * pageSize + rowIndex;
+    // If using lazy loading, fetch new data with sort
+    if (onDataFetch) {
+      setLoading(true);
+      setError(null);
+      try {
+        const newData = await onDataFetch(currentPage, pageSize);
+        setGridData(newData);
+      } catch (err) {
+        setError('Failed to sort data');
+        console.error('Sort error:', err);
+      } finally {
+        setLoading(false);
+      }
+    }
+  }, [orderedColumns, sort, onDataFetch, currentPage, pageSize]);
+
+  const handleCellEdit = useCallback(async (rowIndex: number, columnKey: string, value: any) => {
+    const actualRowIndex = onDataFetch ? rowIndex : (currentPage - 1) * pageSize + rowIndex;
     const updatedData = [...gridData];
-    updatedData[actualRowIndex] = { ...updatedData[actualRowIndex], [columnKey]: value };
+    const originalRow = updatedData[actualRowIndex];
+    const updatedRow = { ...originalRow, [columnKey]: value };
     
+    updatedData[actualRowIndex] = updatedRow;
     setGridData(updatedData);
     setEditingCell(null);
     
-    if (onInlineEdit) {
-      onInlineEdit(actualRowIndex, updatedData[actualRowIndex]);
+    // Handle single row update
+    if (onUpdate) {
+      setLoading(true);
+      setError(null);
+      try {
+        await onUpdate(updatedRow);
+        toast({
+          title: "Success",
+          description: "Row updated successfully"
+        });
+      } catch (err) {
+        // Revert the change on error
+        updatedData[actualRowIndex] = originalRow;
+        setGridData(updatedData);
+        setError('Failed to update row');
+        toast({
+          title: "Error",
+          description: "Failed to update row",
+          variant: "destructive"
+        });
+        console.error('Update error:', err);
+      } finally {
+        setLoading(false);
+      }
+    } else if (onInlineEdit) {
+      onInlineEdit(actualRowIndex, updatedRow);
     }
-  }, [gridData, currentPage, pageSize, onInlineEdit]);
+  }, [gridData, currentPage, pageSize, onInlineEdit, onUpdate, onDataFetch, toast]);
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent, rowIndex: number, columnKey: string) => {
     if (e.key === 'Enter') {
@@ -168,6 +244,7 @@ export function SmartGrid({
 
     try {
       setLoading(true);
+      setError(null);
       const text = await file.text();
       const csvData = parseCSV(text);
       
@@ -192,7 +269,9 @@ export function SmartGrid({
 
       if (onBulkUpdate) {
         await onBulkUpdate(csvData);
-        setGridData(csvData);
+        if (!onDataFetch) {
+          setGridData(csvData);
+        }
         toast({
           title: "Success",
           description: `Successfully uploaded ${csvData.length} rows`
@@ -200,6 +279,7 @@ export function SmartGrid({
       }
     } catch (error) {
       console.error('Failed to process CSV upload:', error);
+      setError('Failed to process CSV file');
       toast({
         title: "Error",
         description: "Failed to process CSV file",
@@ -211,7 +291,7 @@ export function SmartGrid({
         fileInputRef.current.value = '';
       }
     }
-  }, [validateCSVHeaders, onBulkUpdate, toast]);
+  }, [validateCSVHeaders, onBulkUpdate, onDataFetch, toast]);
 
   const handleExport = useCallback((format: 'csv' | 'excel') => {
     const filename = `export-${new Date().toISOString().split('T')[0]}.${format}`;
@@ -223,7 +303,7 @@ export function SmartGrid({
     }
   }, [processedData, orderedColumns]);
 
-  const handleResetPreferences = useCallback(() => {
+  const handleResetPreferences = useCallback(async () => {
     const defaultPreferences = {
       columnOrder: columns.map(col => col.key),
       hiddenColumns: [],
@@ -232,15 +312,24 @@ export function SmartGrid({
       filters: []
     };
     
-    savePreferences(defaultPreferences);
-    setSort(undefined);
-    setFilters([]);
-    setGlobalFilter('');
-    
-    toast({
-      title: "Success",
-      description: "Preferences have been reset to defaults"
-    });
+    try {
+      await savePreferences(defaultPreferences);
+      setSort(undefined);
+      setFilters([]);
+      setGlobalFilter('');
+      
+      toast({
+        title: "Success",
+        description: "Preferences have been reset to defaults"
+      });
+    } catch (error) {
+      setError('Failed to reset preferences');
+      toast({
+        title: "Error",
+        description: "Failed to reset preferences",
+        variant: "destructive"
+      });
+    }
   }, [columns, savePreferences, toast]);
 
   const renderCell = useCallback((row: any, column: GridColumnConfig, rowIndex: number, columnIndex: number) => {
@@ -255,6 +344,7 @@ export function SmartGrid({
             value={value || ''}
             onChange={(e) => handleCellEdit(rowIndex, column.key, e.target.value)}
             className="w-full px-2 py-1 border rounded"
+            disabled={loading}
           >
             <option value="">Select...</option>
             {column.options.map(option => (
@@ -274,16 +364,20 @@ export function SmartGrid({
             value={value || ''}
             onChange={(e) => handleCellEdit(rowIndex, column.key, e.target.value)}
             className="w-full"
+            disabled={loading}
           />
         );
       } else {
         return (
           <div
-            contentEditable
+            contentEditable={!loading}
             suppressContentEditableWarning
             onBlur={(e) => handleCellEdit(rowIndex, column.key, e.target.textContent)}
             onKeyDown={(e) => handleKeyDown(e, rowIndex, column.key)}
-            className="min-h-[20px] p-1 hover:bg-gray-50 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-500 rounded"
+            className={cn(
+              "min-h-[20px] p-1 hover:bg-gray-50 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-500 rounded",
+              loading && "opacity-50 cursor-not-allowed"
+            )}
           >
             {value}
           </div>
@@ -292,12 +386,31 @@ export function SmartGrid({
     }
 
     return <span>{value}</span>;
-  }, [editingCell, isColumnEditable, handleCellEdit, handleKeyDown]);
+  }, [editingCell, isColumnEditable, handleCellEdit, handleKeyDown, loading]);
 
-  // Update grid data when prop data changes
+  // Update grid data when prop data changes (only if not using lazy loading)
   useEffect(() => {
-    setGridData(data);
-  }, [data]);
+    if (!onDataFetch) {
+      setGridData(data);
+    }
+  }, [data, onDataFetch]);
+
+  // Error boundary component
+  if (error) {
+    return (
+      <div className="p-4 border border-red-300 rounded-lg bg-red-50">
+        <h3 className="text-lg font-medium text-red-800 mb-2">Error</h3>
+        <p className="text-red-600 mb-4">{error}</p>
+        <Button 
+          variant="outline" 
+          onClick={() => setError(null)}
+          className="text-red-700 border-red-300 hover:bg-red-100"
+        >
+          Dismiss
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">
@@ -311,12 +424,13 @@ export function SmartGrid({
               value={globalFilter}
               onChange={(e) => setGlobalFilter(e.target.value)}
               className="pl-9 w-64"
+              disabled={loading}
             />
           </div>
         </div>
 
         <div className="flex items-center space-x-2">
-          <Button variant="outline" size="sm" onClick={handleResetPreferences}>
+          <Button variant="outline" size="sm" onClick={handleResetPreferences} disabled={loading}>
             <RotateCcw className="h-4 w-4 mr-2" />
             Reset Preferences
           </Button>
@@ -329,6 +443,7 @@ export function SmartGrid({
                 accept=".csv"
                 onChange={handleBulkUpload}
                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                disabled={loading}
               />
               <Button variant="outline" size="sm" disabled={loading}>
                 <Upload className="h-4 w-4 mr-2" />
@@ -337,11 +452,11 @@ export function SmartGrid({
             </div>
           )}
           
-          <Button variant="outline" size="sm" onClick={() => handleExport('csv')}>
+          <Button variant="outline" size="sm" onClick={() => handleExport('csv')} disabled={loading}>
             <Download className="h-4 w-4 mr-2" />
             CSV
           </Button>
-          <Button variant="outline" size="sm" onClick={() => handleExport('excel')}>
+          <Button variant="outline" size="sm" onClick={() => handleExport('excel')} disabled={loading}>
             <Download className="h-4 w-4 mr-2" />
             Excel
           </Button>
@@ -364,6 +479,7 @@ export function SmartGrid({
                           size="sm"
                           onClick={() => handleSort(column.key)}
                           className="h-auto p-0 hover:bg-transparent"
+                          disabled={loading}
                         >
                           {sort?.column === column.key ? (
                             sort.direction === 'asc' ? (
@@ -430,7 +546,9 @@ export function SmartGrid({
               <PaginationItem>
                 <PaginationPrevious
                   onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-                  className={currentPage === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                  className={cn(
+                    currentPage === 1 || loading ? 'pointer-events-none opacity-50' : 'cursor-pointer'
+                  )}
                 />
               </PaginationItem>
               
@@ -441,7 +559,7 @@ export function SmartGrid({
                     <PaginationLink
                       onClick={() => setCurrentPage(pageNum)}
                       isActive={currentPage === pageNum}
-                      className="cursor-pointer"
+                      className={cn("cursor-pointer", loading && "pointer-events-none opacity-50")}
                     >
                       {pageNum}
                     </PaginationLink>
@@ -452,7 +570,9 @@ export function SmartGrid({
               <PaginationItem>
                 <PaginationNext
                   onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
-                  className={currentPage === totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                  className={cn(
+                    currentPage === totalPages || loading ? 'pointer-events-none opacity-50' : 'cursor-pointer'
+                  )}
                 />
               </PaginationItem>
             </PaginationContent>
