@@ -10,6 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useGridPreferences } from '@/hooks/useGridPreferences';
 import { CellRenderer } from './CellRenderer';
 import { cn } from '@/lib/utils';
+import { ColumnVisibilityManager } from './ColumnVisibilityManager';
 
 export function SmartGrid({
   columns,
@@ -321,7 +322,7 @@ export function SmartGrid({
     }
   }, [processedData, orderedColumns]);
 
-  // Handle reset preferences
+  // Handle reset preferences with column visibility reset
   const handleResetPreferences = useCallback(async () => {
     const defaultPreferences = {
       columnOrder: columns.map(col => col.key),
@@ -339,7 +340,7 @@ export function SmartGrid({
       
       toast({
         title: "Success",
-        description: "Preferences have been reset to defaults"
+        description: "Column preferences have been reset to defaults"
       });
     } catch (error) {
       setError('Failed to reset preferences');
@@ -535,9 +536,17 @@ export function SmartGrid({
         </div>
 
         <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto justify-end">
+          {/* Column Visibility Manager */}
+          <ColumnVisibilityManager
+            columns={columns}
+            preferences={preferences}
+            onColumnVisibilityToggle={toggleColumnVisibility}
+            onResetToDefaults={handleResetPreferences}
+          />
+
           <Button variant="outline" size="sm" onClick={handleResetPreferences} disabled={loading}>
             <RotateCcw className="h-4 w-4 mr-2" />
-            <span className="hidden sm:inline">Reset Preferences</span>
+            <span className="hidden sm:inline">Reset All</span>
           </Button>
           
           {onBulkUpdate && (
