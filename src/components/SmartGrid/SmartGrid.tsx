@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -184,7 +183,7 @@ export function SmartGrid<T extends Record<string, any>>({
       
       const updates = csvData.map(row => ({
         id: row[String(keyField)],
-        data: row
+        data: row as Partial<T>
       })).filter(update => update.id);
 
       const success = await onBulkUpdate(updates);
