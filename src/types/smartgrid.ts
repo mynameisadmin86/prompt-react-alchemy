@@ -1,3 +1,15 @@
+export interface GridColumnConfig {
+  key: string;
+  label: string;
+  editable: boolean;
+  mandatory: boolean;
+  sortable: boolean;
+  filterable: boolean;
+  hidden: boolean;
+  order: number;
+  type: "text" | "number" | "date" | "select";
+  options?: string[];
+}
 
 export interface Column<T = any> {
   id: string;
