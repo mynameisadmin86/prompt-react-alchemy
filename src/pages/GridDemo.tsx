@@ -158,7 +158,7 @@ const columns: GridColumnConfig[] = [
   {
     key: 'status',
     label: 'Status',
-    editable: true,
+    editable: false,
     mandatory: false,
     sortable: true,
     filterable: true,
@@ -170,7 +170,7 @@ const columns: GridColumnConfig[] = [
   {
     key: 'tripBillingStatus',
     label: 'Trip Billing Status',
-    editable: true,
+    editable: false,
     mandatory: false,
     sortable: true,
     filterable: true,
@@ -182,7 +182,7 @@ const columns: GridColumnConfig[] = [
   {
     key: 'plannedStartDateTime',
     label: 'Planned Start and End Date Time',
-    editable: true,
+    editable: false,
     mandatory: false,
     sortable: true,
     filterable: true,
@@ -193,7 +193,7 @@ const columns: GridColumnConfig[] = [
   {
     key: 'actualStartDateTime',
     label: 'Actual Start and End Date Time',
-    editable: true,
+    editable: false,
     mandatory: false,
     sortable: true,
     filterable: true,
