@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { SmartGrid } from '@/components/SmartGrid';
 import { downloadJsonPlugin } from '@/plugins/downloadJsonPlugin';
@@ -276,6 +277,18 @@ const GridDemo = () => {
     });
   };
 
+  // Handler for single row updates
+  const handleUpdate = async (row: any): Promise<void> => {
+    console.log('Single row update:', row);
+    // Simulate API call
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        console.log('Row update completed');
+        resolve();
+      }, 500);
+    });
+  };
+
   // Custom cell renderer matching the exact styling from image
   const customCellRenderer = (value: any, column: GridColumnConfig) => {
     if (column.key === 'status') {
@@ -311,6 +324,27 @@ const GridDemo = () => {
     }
     return <span className="text-gray-900">{value}</span>;
   };
+
+  // Nested row renderer for expandable rows
+  const nestedRowRenderer = (row: any) => (
+    <div className="p-4 bg-gray-50">
+      <h4 className="font-semibold mb-2">Trip Details</h4>
+      <div className="grid grid-cols-2 gap-4 text-sm">
+        <div>
+          <span className="font-medium">Planned Start:</span> {row.plannedStartDateTime}
+        </div>
+        <div>
+          <span className="font-medium">Planned End:</span> {row.plannedEndDateTime}
+        </div>
+        <div>
+          <span className="font-medium">Actual Start:</span> {row.actualStartDateTime}
+        </div>
+        <div>
+          <span className="font-medium">Actual End:</span> {row.actualEndDateTime}
+        </div>
+      </div>
+    </div>
+  );
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -387,110 +421,25 @@ const GridDemo = () => {
               <div className="flex items-center space-x-3">
                 <h1 className="text-xl font-semibold text-gray-900">Trip Plans</h1>
                 <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-blue-100 text-blue-800 border border-blue-200">
-                  9
+                  {tripData.length}
                 </span>
-              </div>
-              
-              <div className="flex items-center space-x-2">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                  <Input
-                    placeholder="Search"
-                    className="pl-10 w-80 bg-white border-gray-300 h-9"
-                  />
-                </div>
-                <Button variant="outline" size="sm" className="h-9 px-3">
-                  <Settings className="h-4 w-4" />
-                </Button>
-                <Button variant="outline" size="sm" className="h-9 px-3">
-                  <Filter className="h-4 w-4" />
-                </Button>
-                <Button variant="outline" size="sm" className="h-9 px-3">
-                  <Download className="h-4 w-4" />
-                </Button>
-                <Button variant="outline" size="sm" className="h-9 px-3">
-                  <Settings className="h-4 w-4" />
-                </Button>
-                <Button variant="outline" size="sm" className="h-9 px-3">
-                  <Grid3x3 className="h-4 w-4" />
-                </Button>
-                <Button variant="outline" size="sm" className="h-9 px-3">
-                  <List className="h-4 w-4" />
-                </Button>
               </div>
             </div>
 
-            {/* Grid with exact styling from image */}
-            <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead className="bg-gray-50 border-b border-gray-200">
-                    <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Trip Plan No
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Status
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Trip Billing Status
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Planned Start and End Date Time
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Actual Start and End Date Time
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Departure Point
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Arrival Point
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Customer
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Resources
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {tripData.map((trip, index) => (
-                      <tr key={trip.id} className="hover:bg-gray-50">
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          {customCellRenderer(trip.tripPlanNo, { key: 'tripPlanNo' } as GridColumnConfig)}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          {customCellRenderer(trip.status, { key: 'status' } as GridColumnConfig)}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          {customCellRenderer(trip.tripBillingStatus, { key: 'tripBillingStatus' } as GridColumnConfig)}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          {customCellRenderer(trip.plannedStartDateTime, { key: 'plannedStartDateTime' } as GridColumnConfig)}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          {customCellRenderer(trip.actualStartDateTime, { key: 'actualStartDateTime' } as GridColumnConfig)}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          {customCellRenderer(trip.departurePoint, { key: 'departurePoint' } as GridColumnConfig)}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          {customCellRenderer(trip.arrivalPoint, { key: 'arrivalPoint' } as GridColumnConfig)}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          {customCellRenderer(trip.customer, { key: 'customer' } as GridColumnConfig)}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          {customCellRenderer(trip.resources, { key: 'resources' } as GridColumnConfig)}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
+            {/* SmartGrid with all features */}
+            <SmartGrid
+              columns={columns}
+              data={tripData}
+              editableColumns={true}
+              mandatoryColumns={['tripPlanNo']}
+              onInlineEdit={handleInlineEdit}
+              onBulkUpdate={handleBulkUpdate}
+              onPreferenceSave={handlePreferenceSave}
+              onUpdate={handleUpdate}
+              paginationMode="pagination"
+              nestedRowRenderer={nestedRowRenderer}
+              plugins={[downloadJsonPlugin]}
+            />
 
             {/* Footer */}
             <div className="flex items-center justify-between mt-6">
