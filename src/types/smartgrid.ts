@@ -1,4 +1,3 @@
-
 export interface GridColumnConfig {
   key: string;
   label: string;
@@ -50,6 +49,31 @@ export interface GridPreferences {
   pageSize?: number;
 }
 
+export interface GridAPI {
+  data: any[];
+  filteredData: any[];
+  selectedRows: any[];
+  columns: GridColumnConfig[];
+  preferences: GridPreferences;
+  actions: {
+    exportData: (format: 'csv' | 'excel' | 'json') => void;
+    resetPreferences: () => void;
+    toggleRowSelection: (rowIndex: number) => void;
+    selectAllRows: () => void;
+    clearSelection: () => void;
+  };
+}
+
+export interface GridPlugin {
+  id: string;
+  name: string;
+  toolbar?: (api: GridAPI) => React.ReactNode;
+  rowActions?: (row: any, rowIndex: number, api: GridAPI) => React.ReactNode;
+  footer?: (api: GridAPI) => React.ReactNode;
+  init?: (api: GridAPI) => void;
+  destroy?: () => void;
+}
+
 export interface SmartGridProps {
   columns: GridColumnConfig[];
   data: any[];
@@ -62,6 +86,7 @@ export interface SmartGridProps {
   onUpdate?(row: any): Promise<void>;
   paginationMode?: 'pagination' | 'infinite';
   nestedRowRenderer?(row: any): React.ReactNode;
+  plugins?: GridPlugin[];
 }
 
 // Legacy interface for backward compatibility

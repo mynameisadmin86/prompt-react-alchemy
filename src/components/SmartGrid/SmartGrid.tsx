@@ -4,7 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
 import { ArrowUpDown, ArrowUp, ArrowDown, Download, Upload, Filter, Search, RotateCcw, ChevronRight, ChevronDown } from 'lucide-react';
-import { SmartGridProps, GridColumnConfig, SortConfig, FilterConfig } from '@/types/smartgrid';
+import { SmartGridProps, GridColumnConfig, SortConfig, FilterConfig, GridAPI, GridPlugin } from '@/types/smartgrid';
 import { exportToCSV, exportToExcel, parseCSV } from '@/utils/gridExport';
 import { useToast } from '@/hooks/use-toast';
 import { useGridPreferences } from '@/hooks/useGridPreferences';
@@ -21,7 +21,8 @@ export function SmartGrid({
   onDataFetch,
   onUpdate,
   paginationMode = 'pagination',
-  nestedRowRenderer
+  nestedRowRenderer,
+  plugins = []
 }: SmartGridProps) {
   const [gridData, setGridData] = useState(data);
   const [editingCell, setEditingCell] = useState<{ rowIndex: number; columnKey: string } | null>(null);
@@ -33,6 +34,7 @@ export function SmartGrid({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [expandedRows, setExpandedRows] = useState<Set<number>>(new Set());
+  const [selectedRows, setSelectedRows] = useState<Set<number>>(new Set());
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
@@ -345,6 +347,53 @@ export function SmartGrid({
     }
   }, [columns, savePreferences, toast]);
 
+  // Create Grid API for plugins
+  const gridAPI: GridAPI = useMemo(() => ({
+    data: gridData,
+    filteredData: processedData,
+    selectedRows: Array.from(selectedRows).map(index => processedData[index]).filter(Boolean),
+    columns: orderedColumns,
+    preferences,
+    actions: {
+      exportData: handleExport,
+      resetPreferences: handleResetPreferences,
+      toggleRowSelection: (rowIndex: number) => {
+        setSelectedRows(prev => {
+          const newSet = new Set(prev);
+          if (newSet.has(rowIndex)) {
+            newSet.delete(rowIndex);
+          } else {
+            newSet.add(rowIndex);
+          }
+          return newSet;
+        });
+      },
+      selectAllRows: () => {
+        setSelectedRows(new Set(Array.from({ length: processedData.length }, (_, i) => i)));
+      },
+      clearSelection: () => {
+        setSelectedRows(new Set());
+      }
+    }
+  }), [gridData, processedData, selectedRows, orderedColumns, preferences, handleExport, handleResetPreferences]);
+
+  // Initialize plugins
+  useEffect(() => {
+    plugins.forEach(plugin => {
+      if (plugin.init) {
+        plugin.init(gridAPI);
+      }
+    });
+
+    return () => {
+      plugins.forEach(plugin => {
+        if (plugin.destroy) {
+          plugin.destroy();
+        }
+      });
+    };
+  }, [plugins, gridAPI]);
+
   const renderCell = useCallback((row: any, column: GridColumnConfig, rowIndex: number, columnIndex: number) => {
     const value = row[column.key];
     const isEditing = editingCell?.rowIndex === rowIndex && editingCell?.columnKey === column.key;
@@ -436,6 +485,39 @@ export function SmartGrid({
     }
   }, [data, onDataFetch]);
 
+  // Render plugin toolbar items
+  const renderPluginToolbarItems = useCallback(() => {
+    return plugins
+      .filter(plugin => plugin.toolbar)
+      .map(plugin => (
+        <React.Fragment key={plugin.id}>
+          {plugin.toolbar!(gridAPI)}
+        </React.Fragment>
+      ));
+  }, [plugins, gridAPI]);
+
+  // Render plugin row actions
+  const renderPluginRowActions = useCallback((row: any, rowIndex: number) => {
+    return plugins
+      .filter(plugin => plugin.rowActions)
+      .map(plugin => (
+        <React.Fragment key={plugin.id}>
+          {plugin.rowActions!(row, rowIndex, gridAPI)}
+        </React.Fragment>
+      ));
+  }, [plugins, gridAPI]);
+
+  // Render plugin footer items
+  const renderPluginFooterItems = useCallback(() => {
+    return plugins
+      .filter(plugin => plugin.footer)
+      .map(plugin => (
+        <React.Fragment key={plugin.id}>
+          {plugin.footer!(gridAPI)}
+        </React.Fragment>
+      ));
+  }, [plugins, gridAPI]);
+
   // Error boundary component
   if (error) {
     return (
@@ -501,6 +583,9 @@ export function SmartGrid({
             <Download className="h-4 w-4 mr-2" />
             Excel
           </Button>
+
+          {/* Plugin toolbar items */}
+          {renderPluginToolbarItems()}
         </div>
       </div>
 
@@ -536,12 +621,16 @@ export function SmartGrid({
                     </div>
                   </TableHead>
                 ))}
+                {/* Plugin row actions header */}
+                {plugins.some(plugin => plugin.rowActions) && (
+                  <TableHead>Actions</TableHead>
+                )}
               </TableRow>
             </TableHeader>
             <TableBody>
               {loading ? (
                 <TableRow>
-                  <TableCell colSpan={orderedColumns.length} className="text-center py-8">
+                  <TableCell colSpan={orderedColumns.length + (plugins.some(plugin => plugin.rowActions) ? 1 : 0)} className="text-center py-8">
                     <div className="flex items-center justify-center">
                       <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
                       <span className="ml-2">Loading...</span>
@@ -550,7 +639,7 @@ export function SmartGrid({
                 </TableRow>
               ) : paginatedData.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={orderedColumns.length} className="text-center py-8 text-gray-500">
+                  <TableCell colSpan={orderedColumns.length + (plugins.some(plugin => plugin.rowActions) ? 1 : 0)} className="text-center py-8 text-gray-500">
                     No data available
                   </TableCell>
                 </TableRow>
@@ -563,11 +652,19 @@ export function SmartGrid({
                           {renderCell(row, column, rowIndex, columnIndex)}
                         </TableCell>
                       ))}
+                      {/* Plugin row actions */}
+                      {plugins.some(plugin => plugin.rowActions) && (
+                        <TableCell>
+                          <div className="flex items-center space-x-2">
+                            {renderPluginRowActions(row, rowIndex)}
+                          </div>
+                        </TableCell>
+                      )}
                     </TableRow>
                     {/* Nested row content */}
                     {nestedRowRenderer && expandedRows.has(rowIndex) && (
                       <TableRow>
-                        <TableCell colSpan={orderedColumns.length} className="p-0">
+                        <TableCell colSpan={orderedColumns.length + (plugins.some(plugin => plugin.rowActions) ? 1 : 0)} className="p-0">
                           <div className="bg-gray-50 border-t border-gray-200">
                             <div className="p-4">
                               {nestedRowRenderer(row)}
@@ -629,6 +726,13 @@ export function SmartGrid({
               </PaginationItem>
             </PaginationContent>
           </Pagination>
+        </div>
+      )}
+
+      {/* Plugin footer items */}
+      {plugins.some(plugin => plugin.footer) && (
+        <div className="flex items-center justify-center space-x-4 pt-4 border-t">
+          {renderPluginFooterItems()}
         </div>
       )}
     </div>
