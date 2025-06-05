@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
-import { ArrowUpDown, ArrowUp, ArrowDown, Download, Upload, Filter, Search, RotateCcw, ChevronRight, ChevronDown, Edit2 } from 'lucide-react';
+import { ArrowUpDown, ArrowUp, ArrowDown, Download, Upload, Filter, Search, RotateCcw, ChevronRight, ChevronDown, Edit2, GripVertical } from 'lucide-react';
 import { SmartGridProps, GridColumnConfig, SortConfig, FilterConfig, GridAPI, GridPlugin } from '@/types/smartgrid';
 import { exportToCSV, exportToExcel, parseCSV } from '@/utils/gridExport';
 import { useToast } from '@/hooks/use-toast';
@@ -30,6 +30,8 @@ export function SmartGrid({
   const [gridData, setGridData] = useState(data);
   const [editingCell, setEditingCell] = useState<{ rowIndex: number; columnKey: string } | null>(null);
   const [editingHeader, setEditingHeader] = useState<string | null>(null);
+  const [draggedColumn, setDraggedColumn] = useState<string | null>(null);
+  const [dragOverColumn, setDragOverColumn] = useState<string | null>(null);
   const [sort, setSort] = useState<SortConfig | undefined>();
   const [filters, setFilters] = useState<FilterConfig[]>([]);
   const [globalFilter, setGlobalFilter] = useState('');
@@ -100,6 +102,64 @@ export function SmartGrid({
 
   const handleHeaderClick = useCallback((columnKey: string) => {
     setEditingHeader(columnKey);
+  }, []);
+
+  // Handle drag and drop for column reordering
+  const handleColumnDragStart = useCallback((e: React.DragEvent, columnKey: string) => {
+    e.stopPropagation();
+    setDraggedColumn(columnKey);
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', columnKey);
+  }, []);
+
+  const handleColumnDragOver = useCallback((e: React.DragEvent, targetColumnKey: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (draggedColumn && draggedColumn !== targetColumnKey) {
+      setDragOverColumn(targetColumnKey);
+      e.dataTransfer.dropEffect = 'move';
+    }
+  }, [draggedColumn]);
+
+  const handleColumnDragLeave = useCallback((e: React.DragEvent) => {
+    e.stopPropagation();
+    // Only clear drag over if we're actually leaving the header area
+    if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+      setDragOverColumn(null);
+    }
+  }, []);
+
+  const handleColumnDrop = useCallback((e: React.DragEvent, targetColumnKey: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (!draggedColumn || draggedColumn === targetColumnKey) {
+      setDraggedColumn(null);
+      setDragOverColumn(null);
+      return;
+    }
+
+    const newOrder = [...preferences.columnOrder];
+    const draggedIndex = newOrder.indexOf(draggedColumn);
+    const targetIndex = newOrder.indexOf(targetColumnKey);
+
+    // Remove dragged column and insert at target position
+    newOrder.splice(draggedIndex, 1);
+    newOrder.splice(targetIndex, 0, draggedColumn);
+
+    updateColumnOrder(newOrder);
+    setDraggedColumn(null);
+    setDragOverColumn(null);
+    
+    toast({
+      title: "Success",
+      description: "Column order updated"
+    });
+  }, [draggedColumn, preferences.columnOrder, updateColumnOrder, toast]);
+
+  const handleColumnDragEnd = useCallback(() => {
+    setDraggedColumn(null);
+    setDragOverColumn(null);
   }, []);
 
   // Toggle row expansion
@@ -606,9 +666,20 @@ export function SmartGrid({
                 {orderedColumns.map((column) => (
                   <TableHead 
                     key={column.key} 
-                    className="relative group bg-gray-50/80 backdrop-blur-sm font-semibold text-gray-900 px-6 py-4 border-r border-gray-100 last:border-r-0"
+                    className={cn(
+                      "relative group bg-gray-50/80 backdrop-blur-sm font-semibold text-gray-900 px-6 py-4 border-r border-gray-100 last:border-r-0 cursor-move",
+                      draggedColumn === column.key && "opacity-50",
+                      dragOverColumn === column.key && "bg-blue-100 border-blue-300"
+                    )}
+                    draggable
+                    onDragStart={(e) => handleColumnDragStart(e, column.key)}
+                    onDragOver={(e) => handleColumnDragOver(e, column.key)}
+                    onDragLeave={handleColumnDragLeave}
+                    onDrop={(e) => handleColumnDrop(e, column.key)}
+                    onDragEnd={handleColumnDragEnd}
                   >
                     <div className="flex items-center space-x-2 min-w-0">
+                      <GripVertical className="h-4 w-4 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
                       {editingHeader === column.key ? (
                         <Input
                           defaultValue={column.label}
@@ -623,11 +694,17 @@ export function SmartGrid({
                           className="h-6 px-2 text-sm font-semibold bg-white border-blue-300 focus:border-blue-500"
                           autoFocus
                           onFocus={(e) => e.target.select()}
+                          onClick={(e) => e.stopPropagation()}
+                          onDragStart={(e) => e.preventDefault()}
                         />
                       ) : (
                         <div 
-                          className="flex items-center space-x-1 cursor-pointer hover:bg-gray-100/50 rounded px-1 py-0.5 -mx-1 -my-0.5 transition-colors group/header"
-                          onClick={() => handleHeaderClick(column.key)}
+                          className="flex items-center space-x-1 cursor-pointer hover:bg-gray-100/50 rounded px-1 py-0.5 -mx-1 -my-0.5 transition-colors group/header flex-1"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleHeaderClick(column.key);
+                          }}
+                          onDragStart={(e) => e.preventDefault()}
                         >
                           <span className="select-none truncate">{column.label}</span>
                           <Edit2 className="h-3 w-3 text-gray-400 opacity-0 group-hover/header:opacity-100 transition-opacity" />
@@ -637,9 +714,13 @@ export function SmartGrid({
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => handleSort(column.key)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleSort(column.key);
+                          }}
                           className="h-auto p-0 hover:bg-transparent opacity-60 hover:opacity-100 transition-opacity flex-shrink-0"
                           disabled={loading}
+                          onDragStart={(e) => e.preventDefault()}
                         >
                           {sort?.column === column.key ? (
                             sort.direction === 'asc' ? (
