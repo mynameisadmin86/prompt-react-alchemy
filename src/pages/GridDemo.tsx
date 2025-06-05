@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { SmartGrid } from '@/components/SmartGrid';
 import { downloadJsonPlugin } from '@/plugins/downloadJsonPlugin';
@@ -110,33 +109,33 @@ const tripData = [
   }
 ];
 
-// Status badge component
+// Status badge component with exact styling from image
 const StatusBadge = ({ status, type }: { status: string; type: 'status' | 'billing' }) => {
   const getStatusColor = (status: string, type: string) => {
     if (type === 'status') {
       switch (status) {
-        case 'Released': return 'bg-green-100 text-green-800 border-green-200';
-        case 'Under Execution': return 'bg-purple-100 text-purple-800 border-purple-200';
-        case 'Initiated': return 'bg-blue-100 text-blue-800 border-blue-200';
-        case 'Cancelled': return 'bg-red-100 text-red-800 border-red-200';
-        case 'Deleted': return 'bg-red-100 text-red-800 border-red-200';
-        case 'Confirmed': return 'bg-green-100 text-green-800 border-green-200';
-        default: return 'bg-gray-100 text-gray-800 border-gray-200';
+        case 'Released': return 'bg-green-50 text-green-600 border border-green-200 rounded-md';
+        case 'Under Execution': return 'bg-purple-50 text-purple-600 border border-purple-200 rounded-md';
+        case 'Initiated': return 'bg-blue-50 text-blue-600 border border-blue-200 rounded-md';
+        case 'Cancelled': return 'bg-red-50 text-red-600 border border-red-200 rounded-md';
+        case 'Deleted': return 'bg-red-50 text-red-600 border border-red-200 rounded-md';
+        case 'Confirmed': return 'bg-green-50 text-green-600 border border-green-200 rounded-md';
+        default: return 'bg-gray-50 text-gray-600 border border-gray-200 rounded-md';
       }
     } else {
       switch (status) {
-        case 'Draft Bill Raised': return 'bg-orange-100 text-orange-800 border-orange-200';
-        case 'Not Eligible': return 'bg-red-100 text-red-800 border-red-200';
-        case 'Revenue Leakage': return 'bg-red-100 text-red-800 border-red-200';
-        case 'Invoice Created': return 'bg-blue-100 text-blue-800 border-blue-200';
-        case 'Invoice Approved': return 'bg-green-100 text-green-800 border-green-200';
-        default: return 'bg-gray-100 text-gray-800 border-gray-200';
+        case 'Draft Bill Raised': return 'bg-orange-50 text-orange-600 border border-orange-200 rounded-md';
+        case 'Not Eligible': return 'bg-red-50 text-red-600 border border-red-200 rounded-md';
+        case 'Revenue Leakage': return 'bg-red-50 text-red-600 border border-red-200 rounded-md';
+        case 'Invoice Created': return 'bg-blue-50 text-blue-600 border border-blue-200 rounded-md';
+        case 'Invoice Approved': return 'bg-green-50 text-green-600 border border-green-200 rounded-md';
+        default: return 'bg-gray-50 text-gray-600 border border-gray-200 rounded-md';
       }
     }
   };
 
   return (
-    <span className={`inline-flex items-center px-2 py-1 rounded-md text-xs font-medium border ${getStatusColor(status, type)}`}>
+    <span className={`inline-flex items-center px-2 py-1 text-xs font-medium ${getStatusColor(status, type)}`}>
       {status}
     </span>
   );
@@ -277,7 +276,7 @@ const GridDemo = () => {
     });
   };
 
-  // Custom cell renderer for status badges
+  // Custom cell renderer matching the exact styling from image
   const customCellRenderer = (value: any, column: GridColumnConfig) => {
     if (column.key === 'status') {
       return <StatusBadge status={value} type="status" />;
@@ -292,20 +291,23 @@ const GridDemo = () => {
       const [date, time] = value.split(' ');
       return (
         <div className="text-sm">
-          <div className="text-gray-900">{date}</div>
+          <div className="text-gray-900 font-medium">{date}</div>
           <div className="text-gray-500 text-xs">{time}</div>
         </div>
       );
     }
     if (column.key === 'departurePoint' || column.key === 'arrivalPoint') {
       return (
-        <div className="flex items-center gap-1">
-          <span className="text-gray-900">{value}</span>
-          <div className="w-4 h-4 bg-gray-200 rounded-full flex items-center justify-center">
-            <div className="w-1.5 h-1.5 bg-gray-600 rounded-full"></div>
+        <div className="flex items-center gap-2">
+          <span className="text-gray-900 font-medium">{value}</span>
+          <div className="w-4 h-4 bg-gray-300 rounded-full flex items-center justify-center">
+            <span className="text-xs text-gray-600">i</span>
           </div>
         </div>
       );
+    }
+    if (column.key === 'customer' || column.key === 'resources') {
+      return <span className="text-gray-900 font-medium">{value}</span>;
     }
     return <span className="text-gray-900">{value}</span>;
   };
@@ -418,19 +420,76 @@ const GridDemo = () => {
               </div>
             </div>
 
-            {/* Grid */}
+            {/* Grid with exact styling from image */}
             <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-              <SmartGrid
-                columns={columns}
-                data={tripData}
-                editableColumns={true}
-                mandatoryColumns={['tripPlanNo']}
-                onInlineEdit={handleInlineEdit}
-                onBulkUpdate={handleBulkUpdate}
-                onPreferenceSave={handlePreferenceSave}
-                paginationMode="pagination"
-                plugins={[downloadJsonPlugin]}
-              />
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-gray-50 border-b border-gray-200">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Trip Plan No
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Status
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Trip Billing Status
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Planned Start and End Date Time
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Actual Start and End Date Time
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Departure Point
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Arrival Point
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Customer
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Resources
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {tripData.map((trip, index) => (
+                      <tr key={trip.id} className="hover:bg-gray-50">
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          {customCellRenderer(trip.tripPlanNo, { key: 'tripPlanNo' } as GridColumnConfig)}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          {customCellRenderer(trip.status, { key: 'status' } as GridColumnConfig)}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          {customCellRenderer(trip.tripBillingStatus, { key: 'tripBillingStatus' } as GridColumnConfig)}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          {customCellRenderer(trip.plannedStartDateTime, { key: 'plannedStartDateTime' } as GridColumnConfig)}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          {customCellRenderer(trip.actualStartDateTime, { key: 'actualStartDateTime' } as GridColumnConfig)}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          {customCellRenderer(trip.departurePoint, { key: 'departurePoint' } as GridColumnConfig)}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          {customCellRenderer(trip.arrivalPoint, { key: 'arrivalPoint' } as GridColumnConfig)}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          {customCellRenderer(trip.customer, { key: 'customer' } as GridColumnConfig)}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          {customCellRenderer(trip.resources, { key: 'resources' } as GridColumnConfig)}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
 
             {/* Footer */}
