@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { SmartGrid } from '@/components/SmartGrid';
 import { downloadJsonPlugin } from '@/plugins/downloadJsonPlugin';
@@ -110,140 +109,100 @@ const tripData = [
   }
 ];
 
-// Status badge component with exact styling from image
-const StatusBadge = ({ status, type }: { status: string; type: 'status' | 'billing' }) => {
-  const getStatusColor = (status: string, type: string) => {
-    if (type === 'status') {
-      switch (status) {
-        case 'Released': return 'bg-green-50 text-green-600 border border-green-200 rounded-md';
-        case 'Under Execution': return 'bg-purple-50 text-purple-600 border border-purple-200 rounded-md';
-        case 'Initiated': return 'bg-blue-50 text-blue-600 border border-blue-200 rounded-md';
-        case 'Cancelled': return 'bg-red-50 text-red-600 border border-red-200 rounded-md';
-        case 'Deleted': return 'bg-red-50 text-red-600 border border-red-200 rounded-md';
-        case 'Confirmed': return 'bg-green-50 text-green-600 border border-green-200 rounded-md';
-        default: return 'bg-gray-50 text-gray-600 border border-gray-200 rounded-md';
-      }
-    } else {
-      switch (status) {
-        case 'Draft Bill Raised': return 'bg-orange-50 text-orange-600 border border-orange-200 rounded-md';
-        case 'Not Eligible': return 'bg-red-50 text-red-600 border border-red-200 rounded-md';
-        case 'Revenue Leakage': return 'bg-red-50 text-red-600 border border-red-200 rounded-md';
-        case 'Invoice Created': return 'bg-blue-50 text-blue-600 border border-blue-200 rounded-md';
-        case 'Invoice Approved': return 'bg-green-50 text-green-600 border border-green-200 rounded-md';
-        default: return 'bg-gray-50 text-gray-600 border border-gray-200 rounded-md';
-      }
-    }
-  };
-
-  return (
-    <span className={`inline-flex items-center px-2 py-1 text-xs font-medium ${getStatusColor(status, type)}`}>
-      {status}
-    </span>
-  );
-};
-
-// Column configuration matching the logistics interface
+// Updated column configuration using new GridColumnType system
 const columns: GridColumnConfig[] = [
   {
     key: 'tripPlanNo',
     label: 'Trip Plan No',
+    type: 'Link',
     editable: false,
     mandatory: true,
     sortable: true,
     filterable: true,
-    hidden: false,
-    order: 0,
-    type: 'text'
+    onClick: (rowData) => {
+      console.log('Trip clicked:', rowData);
+      // Navigate to trip details page
+    }
   },
   {
     key: 'status',
     label: 'Status',
+    type: 'Badge',
     editable: false,
-    mandatory: false,
     sortable: true,
     filterable: true,
-    hidden: false,
-    order: 1,
-    type: 'select',
     options: ['Released', 'Under Execution', 'Initiated', 'Cancelled', 'Deleted', 'Confirmed']
   },
   {
     key: 'tripBillingStatus',
     label: 'Trip Billing Status',
+    type: 'Badge',
     editable: false,
-    mandatory: false,
     sortable: true,
     filterable: true,
-    hidden: false,
-    order: 2,
-    type: 'select',
     options: ['Draft Bill Raised', 'Not Eligible', 'Revenue Leakage', 'Invoice Created', 'Invoice Approved']
   },
   {
     key: 'plannedStartDateTime',
     label: 'Planned Start and End Date Time',
+    type: 'DateTimeRange',
     editable: false,
-    mandatory: false,
     sortable: true,
-    filterable: true,
-    hidden: false,
-    order: 3,
-    type: 'text'
+    filterable: true
   },
   {
     key: 'actualStartDateTime',
     label: 'Actual Start and End Date Time',
+    type: 'DateTimeRange',
     editable: false,
-    mandatory: false,
     sortable: true,
-    filterable: true,
-    hidden: false,
-    order: 4,
-    type: 'text'
+    filterable: true
   },
   {
     key: 'departurePoint',
     label: 'Departure Point',
+    type: 'TextWithTooltip',
     editable: true,
-    mandatory: false,
     sortable: true,
     filterable: true,
-    hidden: false,
-    order: 5,
-    type: 'text'
+    infoTextField: 'departurePointDetails'
   },
   {
     key: 'arrivalPoint',
     label: 'Arrival Point',
+    type: 'TextWithTooltip',
     editable: true,
-    mandatory: false,
     sortable: true,
     filterable: true,
-    hidden: false,
-    order: 6,
-    type: 'text'
+    infoTextField: 'arrivalPointDetails'
   },
   {
     key: 'customer',
     label: 'Customer',
+    type: 'ExpandableCount',
     editable: false,
-    mandatory: false,
     sortable: true,
     filterable: true,
-    hidden: false,
-    order: 7,
-    type: 'text'
+    renderExpandedContent: (rowData) => (
+      <div className="p-4">
+        <h4 className="font-semibold mb-2">Customer Details</h4>
+        <p>Expand to show customer list for trip {rowData.tripPlanNo}</p>
+      </div>
+    )
   },
   {
     key: 'resources',
     label: 'Resources',
+    type: 'ExpandableCount',
     editable: false,
-    mandatory: false,
     sortable: true,
     filterable: true,
-    hidden: false,
-    order: 8,
-    type: 'text'
+    renderExpandedContent: (rowData) => (
+      <div className="p-4">
+        <h4 className="font-semibold mb-2">Resource Details</h4>
+        <p>Expand to show resource list for trip {rowData.tripPlanNo}</p>
+      </div>
+    )
   }
 ];
 
@@ -287,42 +246,6 @@ const GridDemo = () => {
         resolve();
       }, 500);
     });
-  };
-
-  // Custom cell renderer matching the exact styling from image
-  const customCellRenderer = (value: any, column: GridColumnConfig) => {
-    if (column.key === 'status') {
-      return <StatusBadge status={value} type="status" />;
-    }
-    if (column.key === 'tripBillingStatus') {
-      return <StatusBadge status={value} type="billing" />;
-    }
-    if (column.key === 'tripPlanNo') {
-      return <span className="text-blue-600 hover:text-blue-800 cursor-pointer font-medium">{value}</span>;
-    }
-    if (column.key === 'plannedStartDateTime' || column.key === 'actualStartDateTime') {
-      const [date, time] = value.split(' ');
-      return (
-        <div className="text-sm">
-          <div className="text-gray-900 font-medium">{date}</div>
-          <div className="text-gray-500 text-xs">{time}</div>
-        </div>
-      );
-    }
-    if (column.key === 'departurePoint' || column.key === 'arrivalPoint') {
-      return (
-        <div className="flex items-center gap-2">
-          <span className="text-gray-900 font-medium">{value}</span>
-          <div className="w-4 h-4 bg-gray-300 rounded-full flex items-center justify-center">
-            <span className="text-xs text-gray-600">i</span>
-          </div>
-        </div>
-      );
-    }
-    if (column.key === 'customer' || column.key === 'resources') {
-      return <span className="text-gray-900 font-medium">{value}</span>;
-    }
-    return <span className="text-gray-900">{value}</span>;
   };
 
   // Nested row renderer for expandable rows
@@ -426,11 +349,11 @@ const GridDemo = () => {
               </div>
             </div>
 
-            {/* SmartGrid with all features */}
+            {/* SmartGrid with new column types */}
             <SmartGrid
               columns={columns}
               data={tripData}
-              editableColumns={true}
+              editableColumns={['departurePoint', 'arrivalPoint']}
               mandatoryColumns={['tripPlanNo']}
               onInlineEdit={handleInlineEdit}
               onBulkUpdate={handleBulkUpdate}

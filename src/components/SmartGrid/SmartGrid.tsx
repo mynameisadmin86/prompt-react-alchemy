@@ -8,6 +8,7 @@ import { SmartGridProps, GridColumnConfig, SortConfig, FilterConfig, GridAPI, Gr
 import { exportToCSV, exportToExcel, parseCSV } from '@/utils/gridExport';
 import { useToast } from '@/hooks/use-toast';
 import { useGridPreferences } from '@/hooks/useGridPreferences';
+import { CellRenderer } from './CellRenderer';
 import { cn } from '@/lib/utils';
 
 export function SmartGrid({
@@ -238,21 +239,21 @@ export function SmartGrid({
     }
   }, [gridData, currentPage, pageSize, onInlineEdit, onUpdate, onDataFetch, toast]);
 
-  const handleKeyDown = useCallback((e: React.KeyboardEvent, rowIndex: number, columnKey: string) => {
-    if (e.key === 'Enter') {
-      const target = e.target as HTMLElement;
-      const value = target.textContent || '';
-      handleCellEdit(rowIndex, columnKey, value);
-    } else if (e.key === 'Escape') {
-      setEditingCell(null);
-    }
-  }, [handleCellEdit]);
+  const handleEditStart = useCallback((rowIndex: number, columnKey: string) => {
+    setEditingCell({ rowIndex, columnKey });
+  }, []);
 
+  const handleEditCancel = useCallback(() => {
+    setEditingCell(null);
+  }, []);
+
+  // Validate CSV headers
   const validateCSVHeaders = useCallback((csvHeaders: string[]): boolean => {
     const requiredKeys = columns.map(col => col.key);
     return requiredKeys.every(key => csvHeaders.includes(key));
   }, [columns]);
 
+  // Handle bulk upload
   const handleBulkUpload = useCallback(async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -308,6 +309,7 @@ export function SmartGrid({
     }
   }, [validateCSVHeaders, onBulkUpdate, onDataFetch, toast]);
 
+  // Handle export
   const handleExport = useCallback((format: 'csv' | 'excel') => {
     const filename = `export-${new Date().toISOString().split('T')[0]}.${format}`;
     
@@ -318,6 +320,7 @@ export function SmartGrid({
     }
   }, [processedData, orderedColumns]);
 
+  // Handle reset preferences
   const handleResetPreferences = useCallback(async () => {
     const defaultPreferences = {
       columnOrder: columns.map(col => col.key),
@@ -417,66 +420,40 @@ export function SmartGrid({
             )}
           </Button>
           <div className="flex-1">
-            {renderCellContent(value, column, rowIndex, columnIndex, isEditing, isEditable)}
+            <CellRenderer
+              value={value}
+              row={row}
+              column={column}
+              rowIndex={rowIndex}
+              columnIndex={columnIndex}
+              isEditing={isEditing}
+              isEditable={isEditable}
+              onEdit={handleCellEdit}
+              onEditStart={handleEditStart}
+              onEditCancel={handleEditCancel}
+              loading={loading}
+            />
           </div>
         </div>
       );
     }
 
-    return renderCellContent(value, column, rowIndex, columnIndex, isEditing, isEditable);
-  }, [editingCell, isColumnEditable, nestedRowRenderer, expandedRows, toggleRowExpansion, handleCellEdit, handleKeyDown, loading]);
-
-  const renderCellContent = useCallback((value: any, column: GridColumnConfig, rowIndex: number, columnIndex: number, isEditing: boolean, isEditable: boolean) => {
-    if (column.type === 'select' && column.options) {
-      if (isEditable) {
-        return (
-          <select
-            value={value || ''}
-            onChange={(e) => handleCellEdit(rowIndex, column.key, e.target.value)}
-            className="w-full px-2 py-1 border rounded"
-            disabled={loading}
-          >
-            <option value="">Select...</option>
-            {column.options.map(option => (
-              <option key={option} value={option}>{option}</option>
-            ))}
-          </select>
-        );
-      }
-      return <span>{value}</span>;
-    }
-
-    if (isEditable) {
-      if (column.type === 'number' || column.type === 'date') {
-        return (
-          <Input
-            type={column.type}
-            value={value || ''}
-            onChange={(e) => handleCellEdit(rowIndex, column.key, e.target.value)}
-            className="w-full"
-            disabled={loading}
-          />
-        );
-      } else {
-        return (
-          <div
-            contentEditable={!loading}
-            suppressContentEditableWarning
-            onBlur={(e) => handleCellEdit(rowIndex, column.key, e.target.textContent)}
-            onKeyDown={(e) => handleKeyDown(e, rowIndex, column.key)}
-            className={cn(
-              "min-h-[20px] p-1 hover:bg-gray-50 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-500 rounded",
-              loading && "opacity-50 cursor-not-allowed"
-            )}
-          >
-            {value}
-          </div>
-        );
-      }
-    }
-
-    return <span>{value}</span>;
-  }, [handleCellEdit, handleKeyDown, loading]);
+    return (
+      <CellRenderer
+        value={value}
+        row={row}
+        column={column}
+        rowIndex={rowIndex}
+        columnIndex={columnIndex}
+        isEditing={isEditing}
+        isEditable={isEditable}
+        onEdit={handleCellEdit}
+        onEditStart={handleEditStart}
+        onEditCancel={handleEditCancel}
+        loading={loading}
+      />
+    );
+  }, [editingCell, isColumnEditable, nestedRowRenderer, expandedRows, toggleRowExpansion, handleCellEdit, handleEditStart, handleEditCancel, loading]);
 
   // Update grid data when prop data changes (only if not using lazy loading)
   useEffect(() => {

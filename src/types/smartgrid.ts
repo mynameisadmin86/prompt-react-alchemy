@@ -1,16 +1,43 @@
+
+import React from 'react';
+
+export type GridColumnType =
+  | 'Link'                 // Clickable cell with optional onClick or URL
+  | 'Badge'                // Color-coded label based on value
+  | 'DateTimeRange'        // Two date-time values in a vertical stack
+  | 'TextWithTooltip'      // Text with an optional info icon showing a tooltip
+  | 'ExpandableCount'      // "+N" style count, expandable to view details
+  | 'Text'                 // Standard text cell
+  | 'Date'                 // Formatted date
+  | 'Dropdown'             // Selectable value from list (for edit or filter)
+  | 'EditableText';        // Inline editable text
+
 export interface GridColumnConfig {
   key: string;
   label: string;
-  editable: boolean;
-  mandatory: boolean;
-  sortable: boolean;
-  filterable: boolean;
-  hidden: boolean;
-  order: number;
-  type: "text" | "number" | "date" | "select";
+  type: GridColumnType;
+  sortable?: boolean;
+  filterable?: boolean;
+  editable?: boolean;
+  mandatory?: boolean;
+  hidden?: boolean;
+  order?: number;
   options?: string[];
+  
+  // Badge specific properties
+  statusMap?: Record<string, string>;
+  
+  // Link specific properties
+  onClick?: (rowData: any) => void;
+  
+  // TextWithTooltip specific properties
+  infoTextField?: string;
+  
+  // ExpandableCount specific properties
+  renderExpandedContent?: (rowData: any) => React.ReactNode;
 }
 
+// Legacy interfaces for backward compatibility
 export interface Column<T = any> {
   id: string;
   header: string;
