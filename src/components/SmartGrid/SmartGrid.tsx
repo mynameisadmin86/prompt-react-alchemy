@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
-import { ArrowUpDown, ArrowUp, ArrowDown, Download, Upload, Filter, Search, RotateCcw, ChevronRight, ChevronDown } from 'lucide-react';
+import { ArrowUpDown, ArrowUp, ArrowDown, Download, Upload, Filter, Search, RotateCcw, ChevronRight, ChevronDown, Edit2 } from 'lucide-react';
 import { SmartGridProps, GridColumnConfig, SortConfig, FilterConfig, GridAPI, GridPlugin } from '@/types/smartgrid';
 import { exportToCSV, exportToExcel, parseCSV } from '@/utils/gridExport';
 import { useToast } from '@/hooks/use-toast';
@@ -29,6 +29,7 @@ export function SmartGrid({
 }: SmartGridProps) {
   const [gridData, setGridData] = useState(data);
   const [editingCell, setEditingCell] = useState<{ rowIndex: number; columnKey: string } | null>(null);
+  const [editingHeader, setEditingHeader] = useState<string | null>(null);
   const [sort, setSort] = useState<SortConfig | undefined>();
   const [filters, setFilters] = useState<FilterConfig[]>([]);
   const [globalFilter, setGlobalFilter] = useState('');
@@ -84,6 +85,22 @@ export function SmartGrid({
         hidden: preferences.hiddenColumns.includes(col.key)
       }));
   }, [columns, preferences]);
+
+  // Handle header editing
+  const handleHeaderEdit = useCallback((columnKey: string, newHeader: string) => {
+    if (newHeader.trim() && newHeader !== preferences.columnHeaders[columnKey]) {
+      updateColumnHeader(columnKey, newHeader.trim());
+      toast({
+        title: "Success",
+        description: "Column header updated"
+      });
+    }
+    setEditingHeader(null);
+  }, [updateColumnHeader, preferences.columnHeaders, toast]);
+
+  const handleHeaderClick = useCallback((columnKey: string) => {
+    setEditingHeader(columnKey);
+  }, []);
 
   // Toggle row expansion
   const toggleRowExpansion = useCallback((rowIndex: number) => {
@@ -592,7 +609,30 @@ export function SmartGrid({
                     className="relative group bg-gray-50/80 backdrop-blur-sm font-semibold text-gray-900 px-6 py-4 border-r border-gray-100 last:border-r-0"
                   >
                     <div className="flex items-center space-x-2 min-w-0">
-                      <span className="select-none truncate">{column.label}</span>
+                      {editingHeader === column.key ? (
+                        <Input
+                          defaultValue={column.label}
+                          onBlur={(e) => handleHeaderEdit(column.key, e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              handleHeaderEdit(column.key, e.currentTarget.value);
+                            } else if (e.key === 'Escape') {
+                              setEditingHeader(null);
+                            }
+                          }}
+                          className="h-6 px-2 text-sm font-semibold bg-white border-blue-300 focus:border-blue-500"
+                          autoFocus
+                          onFocus={(e) => e.target.select()}
+                        />
+                      ) : (
+                        <div 
+                          className="flex items-center space-x-1 cursor-pointer hover:bg-gray-100/50 rounded px-1 py-0.5 -mx-1 -my-0.5 transition-colors group/header"
+                          onClick={() => handleHeaderClick(column.key)}
+                        >
+                          <span className="select-none truncate">{column.label}</span>
+                          <Edit2 className="h-3 w-3 text-gray-400 opacity-0 group-hover/header:opacity-100 transition-opacity" />
+                        </div>
+                      )}
                       {column.sortable && (
                         <Button
                           variant="ghost"
