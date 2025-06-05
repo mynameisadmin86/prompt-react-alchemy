@@ -181,25 +181,25 @@ const GridDemo = () => {
   };
 
   // Handler for bulk updates
-  const handleBulkUpdate = async (rows: any[]) => {
+  const handleBulkUpdate = async (rows: any[]): Promise<void> => {
     console.log('Bulk update:', rows);
     // Simulate API call
     return new Promise((resolve) => {
       setTimeout(() => {
         console.log('Bulk update completed');
-        resolve(rows);
+        resolve();
       }, 1000);
     });
   };
 
   // Handler for preference saving
-  const handlePreferenceSave = async (preferences: any) => {
+  const handlePreferenceSave = async (preferences: any): Promise<void> => {
     console.log('Preferences saved:', preferences);
     // Simulate API call to save preferences
     return new Promise((resolve) => {
       setTimeout(() => {
         console.log('Preferences saved to server');
-        resolve(preferences);
+        resolve();
       }, 500);
     });
   };
