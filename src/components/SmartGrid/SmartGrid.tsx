@@ -1,12 +1,14 @@
-import React, { useState, useMemo, useCallback, useRef } from 'react';
+
+import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
-import { ArrowUpDown, ArrowUp, ArrowDown, Download, Upload, Filter, Search } from 'lucide-react';
+import { ArrowUpDown, ArrowUp, ArrowDown, Download, Upload, Filter, Search, RotateCcw } from 'lucide-react';
 import { SmartGridProps, GridColumnConfig, SortConfig, FilterConfig } from '@/types/smartgrid';
 import { exportToCSV, exportToExcel, parseCSV } from '@/utils/gridExport';
 import { useToast } from '@/hooks/use-toast';
+import { useGridPreferences } from '@/hooks/useGridPreferences';
 import { cn } from '@/lib/utils';
 
 export function SmartGrid({
@@ -32,6 +34,43 @@ export function SmartGrid({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
+  // Convert GridColumnConfig to Column format for useGridPreferences
+  const preferencesColumns = useMemo(() => columns.map(col => ({
+    id: col.key,
+    header: col.label,
+    accessor: col.key,
+    mandatory: col.mandatory
+  })), [columns]);
+
+  // Initialize preferences hook
+  const {
+    preferences,
+    updateColumnOrder,
+    toggleColumnVisibility,
+    updateColumnHeader,
+    savePreferences
+  } = useGridPreferences(
+    preferencesColumns,
+    true, // persistPreferences
+    'smartgrid-preferences',
+    onPreferenceSave
+  );
+
+  // Apply preferences to get ordered and visible columns
+  const orderedColumns = useMemo(() => {
+    const columnMap = new Map(columns.map(col => [col.key, col]));
+    
+    return preferences.columnOrder
+      .map(id => columnMap.get(id))
+      .filter((col): col is GridColumnConfig => col !== undefined)
+      .filter(col => !preferences.hiddenColumns.includes(col.key))
+      .map(col => ({
+        ...col,
+        label: preferences.columnHeaders[col.key] || col.label,
+        hidden: preferences.hiddenColumns.includes(col.key)
+      }));
+  }, [columns, preferences]);
+
   // Determine if a column is editable
   const isColumnEditable = useCallback((column: GridColumnConfig, columnIndex: number) => {
     // First column is not editable by default
@@ -51,7 +90,7 @@ export function SmartGrid({
     // Apply global filter
     if (globalFilter) {
       result = result.filter(row =>
-        columns.some(col => {
+        orderedColumns.some(col => {
           const value = row[col.key];
           return String(value || '').toLowerCase().includes(globalFilter.toLowerCase());
         })
@@ -72,7 +111,7 @@ export function SmartGrid({
     }
 
     return result;
-  }, [gridData, globalFilter, sort, columns]);
+  }, [gridData, globalFilter, sort, orderedColumns]);
 
   // Pagination
   const paginatedData = useMemo(() => {
@@ -84,7 +123,7 @@ export function SmartGrid({
   const totalPages = Math.ceil(processedData.length / pageSize);
 
   const handleSort = useCallback((columnKey: string) => {
-    const column = columns.find(col => col.key === columnKey);
+    const column = orderedColumns.find(col => col.key === columnKey);
     if (!column?.sortable) return;
 
     const newSort: SortConfig = {
@@ -93,7 +132,7 @@ export function SmartGrid({
     };
     
     setSort(newSort);
-  }, [columns, sort]);
+  }, [orderedColumns, sort]);
 
   const handleCellEdit = useCallback((rowIndex: number, columnKey: string, value: any) => {
     const actualRowIndex = (currentPage - 1) * pageSize + rowIndex;
@@ -178,11 +217,31 @@ export function SmartGrid({
     const filename = `export-${new Date().toISOString().split('T')[0]}.${format}`;
     
     if (format === 'csv') {
-      exportToCSV(processedData, columns, filename);
+      exportToCSV(processedData, orderedColumns, filename);
     } else {
-      exportToExcel(processedData, columns, filename);
+      exportToExcel(processedData, orderedColumns, filename);
     }
-  }, [processedData, columns]);
+  }, [processedData, orderedColumns]);
+
+  const handleResetPreferences = useCallback(() => {
+    const defaultPreferences = {
+      columnOrder: columns.map(col => col.key),
+      hiddenColumns: [],
+      columnWidths: {},
+      columnHeaders: {},
+      filters: []
+    };
+    
+    savePreferences(defaultPreferences);
+    setSort(undefined);
+    setFilters([]);
+    setGlobalFilter('');
+    
+    toast({
+      title: "Success",
+      description: "Preferences have been reset to defaults"
+    });
+  }, [columns, savePreferences, toast]);
 
   const renderCell = useCallback((row: any, column: GridColumnConfig, rowIndex: number, columnIndex: number) => {
     const value = row[column.key];
@@ -236,7 +295,7 @@ export function SmartGrid({
   }, [editingCell, isColumnEditable, handleCellEdit, handleKeyDown]);
 
   // Update grid data when prop data changes
-  React.useEffect(() => {
+  useEffect(() => {
     setGridData(data);
   }, [data]);
 
@@ -257,6 +316,11 @@ export function SmartGrid({
         </div>
 
         <div className="flex items-center space-x-2">
+          <Button variant="outline" size="sm" onClick={handleResetPreferences}>
+            <RotateCcw className="h-4 w-4 mr-2" />
+            Reset Preferences
+          </Button>
+          
           {onBulkUpdate && (
             <div className="relative">
               <input
@@ -290,7 +354,7 @@ export function SmartGrid({
           <Table>
             <TableHeader>
               <TableRow>
-                {columns.filter(col => !col.hidden).map((column) => (
+                {orderedColumns.map((column) => (
                   <TableHead key={column.key} className="relative group">
                     <div className="flex items-center space-x-2">
                       <span className="select-none">{column.label}</span>
@@ -320,7 +384,7 @@ export function SmartGrid({
             <TableBody>
               {loading ? (
                 <TableRow>
-                  <TableCell colSpan={columns.length} className="text-center py-8">
+                  <TableCell colSpan={orderedColumns.length} className="text-center py-8">
                     <div className="flex items-center justify-center">
                       <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
                       <span className="ml-2">Loading...</span>
@@ -329,14 +393,14 @@ export function SmartGrid({
                 </TableRow>
               ) : paginatedData.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={columns.length} className="text-center py-8 text-gray-500">
+                  <TableCell colSpan={orderedColumns.length} className="text-center py-8 text-gray-500">
                     No data available
                   </TableCell>
                 </TableRow>
               ) : (
                 paginatedData.map((row, rowIndex) => (
                   <TableRow key={rowIndex} className="hover:bg-gray-50">
-                    {columns.filter(col => !col.hidden).map((column, columnIndex) => (
+                    {orderedColumns.map((column, columnIndex) => (
                       <TableCell key={column.key} className="relative">
                         {renderCell(row, column, rowIndex, columnIndex)}
                         {nestedRowRenderer && columnIndex === 0 && (
