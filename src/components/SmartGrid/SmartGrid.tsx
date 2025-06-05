@@ -21,6 +21,7 @@ export function SmartGrid({
   onPreferenceSave,
   onDataFetch,
   onUpdate,
+  onLinkClick,
   paginationMode = 'pagination',
   nestedRowRenderer,
   plugins = []
@@ -431,6 +432,7 @@ export function SmartGrid({
               onEdit={handleCellEdit}
               onEditStart={handleEditStart}
               onEditCancel={handleEditCancel}
+              onLinkClick={onLinkClick}
               loading={loading}
             />
           </div>
@@ -450,10 +452,11 @@ export function SmartGrid({
         onEdit={handleCellEdit}
         onEditStart={handleEditStart}
         onEditCancel={handleEditCancel}
+        onLinkClick={onLinkClick}
         loading={loading}
       />
     );
-  }, [editingCell, isColumnEditable, nestedRowRenderer, expandedRows, toggleRowExpansion, handleCellEdit, handleEditStart, handleEditCancel, loading]);
+  }, [editingCell, isColumnEditable, nestedRowRenderer, expandedRows, toggleRowExpansion, handleCellEdit, handleEditStart, handleEditCancel, onLinkClick, loading]);
 
   // Update grid data when prop data changes (only if not using lazy loading)
   useEffect(() => {

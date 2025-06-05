@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Info } from 'lucide-react';
 import { GridColumnConfig } from '@/types/smartgrid';
 import { cn } from '@/lib/utils';
@@ -19,6 +20,7 @@ interface CellRendererProps {
   onEdit: (rowIndex: number, columnKey: string, value: any) => void;
   onEditStart: (rowIndex: number, columnKey: string) => void;
   onEditCancel: () => void;
+  onLinkClick?: (rowData: any, columnKey: string) => void;
   loading?: boolean;
 }
 
@@ -33,6 +35,7 @@ export const CellRenderer: React.FC<CellRendererProps> = ({
   onEdit,
   onEditStart,
   onEditCancel,
+  onLinkClick,
   loading = false
 }) => {
   const [tempValue, setTempValue] = useState(value);
@@ -94,9 +97,17 @@ export const CellRenderer: React.FC<CellRendererProps> = ({
 
   // Link renderer
   const renderLink = () => {
+    const handleClick = () => {
+      if (onLinkClick) {
+        onLinkClick(row, column.key);
+      } else if (column.onClick) {
+        column.onClick(row);
+      }
+    };
+
     return (
       <button
-        onClick={() => column.onClick?.(row)}
+        onClick={handleClick}
         className="text-blue-600 hover:text-blue-800 cursor-pointer font-medium hover:underline"
         disabled={loading}
       >
@@ -139,23 +150,31 @@ export const CellRenderer: React.FC<CellRendererProps> = ({
     );
   };
 
-  // ExpandableCount renderer
+  // ExpandableCount renderer with modal
   const renderExpandableCount = () => {
     return (
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={() => {
-          // This would typically open a modal or expand inline content
-          if (column.renderExpandedContent) {
-            console.log('Expanded content:', column.renderExpandedContent(row));
-          }
-        }}
-        className="text-gray-900 font-medium"
-        disabled={loading}
-      >
-        {value}
-      </Button>
+      <Dialog>
+        <DialogTrigger asChild>
+          <Button
+            variant="outline"
+            size="sm"
+            className="text-gray-900 font-medium"
+            disabled={loading}
+          >
+            {value}
+          </Button>
+        </DialogTrigger>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Details</DialogTitle>
+          </DialogHeader>
+          <div className="mt-4">
+            {column.renderExpandedContent ? column.renderExpandedContent(row) : (
+              <div className="text-gray-500">No additional content available</div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     );
   };
 
