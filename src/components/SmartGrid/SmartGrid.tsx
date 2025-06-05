@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo, useCallback, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -6,7 +5,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
 import { ArrowUpDown, ArrowUp, ArrowDown, Download, Upload, Filter, Search } from 'lucide-react';
 import { SmartGridProps, GridColumnConfig, SortConfig, FilterConfig } from '@/types/smartgrid';
-import { exportToCSV, exportToExcel } from '@/utils/gridExport';
+import { exportToCSV, exportToExcel, parseCSV } from '@/utils/gridExport';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 
@@ -119,23 +118,6 @@ export function SmartGrid({
     }
   }, [handleCellEdit]);
 
-  const parseCSV = useCallback((csvText: string): any[] => {
-    const lines = csvText.trim().split('\n');
-    if (lines.length < 2) return [];
-    
-    const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
-    const rows = lines.slice(1);
-    
-    return rows.map(row => {
-      const values = row.split(',').map(v => v.trim().replace(/"/g, ''));
-      const obj: any = {};
-      headers.forEach((header, index) => {
-        obj[header] = values[index] || '';
-      });
-      return obj;
-    });
-  }, []);
-
   const validateCSVHeaders = useCallback((csvHeaders: string[]): boolean => {
     const requiredKeys = columns.map(col => col.key);
     return requiredKeys.every(key => csvHeaders.includes(key));
@@ -190,7 +172,7 @@ export function SmartGrid({
         fileInputRef.current.value = '';
       }
     }
-  }, [parseCSV, validateCSVHeaders, onBulkUpdate, toast]);
+  }, [validateCSVHeaders, onBulkUpdate, toast]);
 
   const handleExport = useCallback((format: 'csv' | 'excel') => {
     const filename = `export-${new Date().toISOString().split('T')[0]}.${format}`;

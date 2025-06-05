@@ -1,21 +1,16 @@
 
-import { Column } from '@/types/smartgrid';
+import { GridColumnConfig } from '@/types/smartgrid';
 
-export function exportToCSV<T>(
-  data: T[],
-  columns: Column<T>[],
+export function exportToCSV(
+  data: any[],
+  columns: GridColumnConfig[],
   filename: string = 'export.csv'
 ) {
-  const headers = columns.map(col => col.header).join(',');
+  const headers = columns.map(col => col.label).join(',');
   
   const rows = data.map(row => {
     return columns.map(col => {
-      let value;
-      if (typeof col.accessor === 'function') {
-        value = col.accessor(row);
-      } else {
-        value = row[col.accessor];
-      }
+      const value = row[col.key];
       
       // Escape CSV values
       if (value == null) return '';
@@ -42,9 +37,9 @@ export function exportToCSV<T>(
   }
 }
 
-export function exportToExcel<T>(
-  data: T[],
-  columns: Column<T>[],
+export function exportToExcel(
+  data: any[],
+  columns: GridColumnConfig[],
   filename: string = 'export.xlsx'
 ) {
   // For now, export as CSV with .xlsx extension
