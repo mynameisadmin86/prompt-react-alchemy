@@ -322,7 +322,7 @@ const GridDemo = () => {
               </div>
               <span className="text-xl font-semibold text-gray-900">Logistics</span>
             </div>
-            <div className="text-gray-400">></div>
+            <div className="text-gray-400">{'>'}</div>
             <span className="text-gray-600">Trip Execution Management</span>
           </div>
           <div className="flex items-center space-x-4">
