@@ -2,6 +2,7 @@
 import { GridPlugin } from '@/types/smartgrid';
 import { Button } from '@/components/ui/button';
 import { Download } from 'lucide-react';
+import React from 'react';
 
 export const downloadJsonPlugin: GridPlugin = {
   id: 'download-json',
@@ -20,11 +21,10 @@ export const downloadJsonPlugin: GridPlugin = {
       URL.revokeObjectURL(url);
     };
 
-    return (
-      <Button variant="outline" size="sm" onClick={handleDownloadJson}>
-        <Download className="h-4 w-4 mr-2" />
-        JSON
-      </Button>
-    );
+    return React.createElement(Button, {
+      variant: "outline",
+      size: "sm",
+      onClick: handleDownloadJson
+    }, React.createElement(Download, { className: "h-4 w-4 mr-2" }), "JSON");
   }
 };
