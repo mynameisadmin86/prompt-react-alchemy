@@ -3,151 +3,157 @@ import React from 'react';
 import { SmartGrid } from '@/components/SmartGrid';
 import { downloadJsonPlugin } from '@/plugins/downloadJsonPlugin';
 import { GridColumnConfig } from '@/types/smartgrid';
+import { Search, Filter, Download, MoreHorizontal, Grid3x3, List, Settings } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
 
-// Sample data for the grid
-const sampleData = [
+// Sample trip data matching the logistics interface
+const tripData = [
   {
     id: 1,
-    name: 'John Doe',
-    email: 'john@example.com',
-    age: 30,
-    department: 'Engineering',
-    salary: 75000,
-    status: 'Active',
-    joinDate: '2023-01-15',
-    skills: ['React', 'TypeScript', 'Node.js'],
-    projects: [
-      { name: 'Project Alpha', role: 'Lead Developer', status: 'In Progress' },
-      { name: 'Project Beta', role: 'Contributor', status: 'Completed' }
-    ]
+    tripPlanNo: 'TRIP00000001',
+    status: 'Released',
+    tripBillingStatus: 'Draft Bill Raised',
+    plannedStartDateTime: '25-Mar-2025 11:22:34 PM',
+    plannedEndDateTime: '27-Mar-2025 11:22:34 PM',
+    actualStartDateTime: '25-Mar-2025 11:22:34 PM',
+    actualEndDateTime: '27-Mar-2025 11:22:34 PM',
+    departurePoint: 'VLA-70',
+    arrivalPoint: 'CUR-25',
+    customer: '+3',
+    resources: '+3'
   },
   {
     id: 2,
-    name: 'Jane Smith',
-    email: 'jane@example.com',
-    age: 28,
-    department: 'Design',
-    salary: 65000,
-    status: 'Active',
-    joinDate: '2023-03-20',
-    skills: ['Figma', 'Photoshop', 'UI/UX'],
-    projects: [
-      { name: 'Design System', role: 'Lead Designer', status: 'In Progress' }
-    ]
+    tripPlanNo: 'TRIP00000002',
+    status: 'Under Execution',
+    tripBillingStatus: 'Not Eligible',
+    plannedStartDateTime: '25-Mar-2025 11:22:34 PM',
+    plannedEndDateTime: '27-Mar-2025 11:22:34 PM',
+    actualStartDateTime: '25-Mar-2025 11:22:34 PM',
+    actualEndDateTime: '27-Mar-2025 11:22:34 PM',
+    departurePoint: 'VLA-70',
+    arrivalPoint: 'CUR-25',
+    customer: '+3',
+    resources: '+3'
   },
   {
     id: 3,
-    name: 'Bob Johnson',
-    email: 'bob@example.com',
-    age: 35,
-    department: 'Engineering',
-    salary: 85000,
-    status: 'Inactive',
-    joinDate: '2022-08-10',
-    skills: ['Python', 'Django', 'PostgreSQL'],
-    projects: [
-      { name: 'API Redesign', role: 'Backend Lead', status: 'Completed' },
-      { name: 'Database Migration', role: 'DBA', status: 'Completed' }
-    ]
+    tripPlanNo: 'TRIP00000003',
+    status: 'Initiated',
+    tripBillingStatus: 'Revenue Leakage',
+    plannedStartDateTime: '25-Mar-2025 11:22:34 PM',
+    plannedEndDateTime: '27-Mar-2025 11:22:34 PM',
+    actualStartDateTime: '25-Mar-2025 11:22:34 PM',
+    actualEndDateTime: '27-Mar-2025 11:22:34 PM',
+    departurePoint: 'VLA-70',
+    arrivalPoint: 'CUR-25',
+    customer: '+3',
+    resources: '+3'
   },
   {
     id: 4,
-    name: 'Alice Brown',
-    email: 'alice@example.com',
-    age: 32,
-    department: 'Marketing',
-    salary: 60000,
-    status: 'Active',
-    joinDate: '2023-06-05',
-    skills: ['Content Marketing', 'SEO', 'Analytics'],
-    projects: [
-      { name: 'Brand Campaign', role: 'Marketing Manager', status: 'In Progress' }
-    ]
+    tripPlanNo: 'TRIP00000004',
+    status: 'Cancelled',
+    tripBillingStatus: 'Invoice Created',
+    plannedStartDateTime: '25-Mar-2025 11:22:34 PM',
+    plannedEndDateTime: '27-Mar-2025 11:22:34 PM',
+    actualStartDateTime: '25-Mar-2025 11:22:34 PM',
+    actualEndDateTime: '27-Mar-2025 11:22:34 PM',
+    departurePoint: 'VLA-70',
+    arrivalPoint: 'CUR-25',
+    customer: '+3',
+    resources: '+3'
   },
   {
     id: 5,
-    name: 'Charlie Wilson',
-    email: 'charlie@example.com',
-    age: 29,
-    department: 'Sales',
-    salary: 55000,
-    status: 'Active',
-    joinDate: '2023-02-14',
-    skills: ['CRM', 'Negotiation', 'Lead Generation'],
-    projects: [
-      { name: 'Q4 Sales Drive', role: 'Sales Rep', status: 'In Progress' }
-    ]
+    tripPlanNo: 'TRIP00000005',
+    status: 'Deleted',
+    tripBillingStatus: 'Invoice Approved',
+    plannedStartDateTime: '25-Mar-2025 11:22:34 PM',
+    plannedEndDateTime: '27-Mar-2025 11:22:34 PM',
+    actualStartDateTime: '25-Mar-2025 11:22:34 PM',
+    actualEndDateTime: '27-Mar-2025 11:22:34 PM',
+    departurePoint: 'VLA-70',
+    arrivalPoint: 'CUR-25',
+    customer: '+3',
+    resources: '+3'
+  },
+  {
+    id: 6,
+    tripPlanNo: 'TRIP00000006',
+    status: 'Confirmed',
+    tripBillingStatus: 'Not Eligible',
+    plannedStartDateTime: '25-Mar-2025 11:22:34 PM',
+    plannedEndDateTime: '27-Mar-2025 11:22:34 PM',
+    actualStartDateTime: '25-Mar-2025 11:22:34 PM',
+    actualEndDateTime: '27-Mar-2025 11:22:34 PM',
+    departurePoint: 'VLA-70',
+    arrivalPoint: 'CUR-25',
+    customer: '+3',
+    resources: '+3'
+  },
+  {
+    id: 7,
+    tripPlanNo: 'TRIP00000007',
+    status: 'Under Execution',
+    tripBillingStatus: 'Revenue Leakage',
+    plannedStartDateTime: '25-Mar-2025 11:22:34 PM',
+    plannedEndDateTime: '27-Mar-2025 11:22:34 PM',
+    actualStartDateTime: '25-Mar-2025 11:22:34 PM',
+    actualEndDateTime: '27-Mar-2025 11:22:34 PM',
+    departurePoint: 'VLA-70',
+    arrivalPoint: 'CUR-25',
+    customer: '+3',
+    resources: '+3'
   }
 ];
 
-// Column configuration
+// Status badge component
+const StatusBadge = ({ status, type }: { status: string; type: 'status' | 'billing' }) => {
+  const getStatusColor = (status: string, type: string) => {
+    if (type === 'status') {
+      switch (status) {
+        case 'Released': return 'bg-green-100 text-green-800';
+        case 'Under Execution': return 'bg-purple-100 text-purple-800';
+        case 'Initiated': return 'bg-blue-100 text-blue-800';
+        case 'Cancelled': return 'bg-red-100 text-red-800';
+        case 'Deleted': return 'bg-red-100 text-red-800';
+        case 'Confirmed': return 'bg-green-100 text-green-800';
+        default: return 'bg-gray-100 text-gray-800';
+      }
+    } else {
+      switch (status) {
+        case 'Draft Bill Raised': return 'bg-orange-100 text-orange-800';
+        case 'Not Eligible': return 'bg-red-100 text-red-800';
+        case 'Revenue Leakage': return 'bg-red-100 text-red-800';
+        case 'Invoice Created': return 'bg-blue-100 text-blue-800';
+        case 'Invoice Approved': return 'bg-green-100 text-green-800';
+        default: return 'bg-gray-100 text-gray-800';
+      }
+    }
+  };
+
+  return (
+    <Badge variant="secondary" className={`${getStatusColor(status, type)} border-0 text-xs`}>
+      {status}
+    </Badge>
+  );
+};
+
+// Column configuration matching the logistics interface
 const columns: GridColumnConfig[] = [
   {
-    key: 'id',
-    label: 'ID',
+    key: 'tripPlanNo',
+    label: 'Trip Plan No',
     editable: false,
     mandatory: true,
     sortable: true,
     filterable: true,
     hidden: false,
     order: 0,
-    type: 'number'
-  },
-  {
-    key: 'name',
-    label: 'Full Name',
-    editable: true,
-    mandatory: true,
-    sortable: true,
-    filterable: true,
-    hidden: false,
-    order: 1,
     type: 'text'
-  },
-  {
-    key: 'email',
-    label: 'Email Address',
-    editable: true,
-    mandatory: true,
-    sortable: true,
-    filterable: true,
-    hidden: false,
-    order: 2,
-    type: 'text'
-  },
-  {
-    key: 'age',
-    label: 'Age',
-    editable: true,
-    mandatory: false,
-    sortable: true,
-    filterable: true,
-    hidden: false,
-    order: 3,
-    type: 'number'
-  },
-  {
-    key: 'department',
-    label: 'Department',
-    editable: true,
-    mandatory: false,
-    sortable: true,
-    filterable: true,
-    hidden: false,
-    order: 4,
-    type: 'select',
-    options: ['Engineering', 'Design', 'Marketing', 'Sales', 'HR', 'Finance']
-  },
-  {
-    key: 'salary',
-    label: 'Salary',
-    editable: true,
-    mandatory: false,
-    sortable: true,
-    filterable: true,
-    hidden: false,
-    order: 5,
-    type: 'number'
   },
   {
     key: 'status',
@@ -157,20 +163,87 @@ const columns: GridColumnConfig[] = [
     sortable: true,
     filterable: true,
     hidden: false,
-    order: 6,
+    order: 1,
     type: 'select',
-    options: ['Active', 'Inactive', 'On Leave']
+    options: ['Released', 'Under Execution', 'Initiated', 'Cancelled', 'Deleted', 'Confirmed']
   },
   {
-    key: 'joinDate',
-    label: 'Join Date',
+    key: 'tripBillingStatus',
+    label: 'Trip Billing Status',
     editable: true,
     mandatory: false,
     sortable: true,
     filterable: true,
     hidden: false,
+    order: 2,
+    type: 'select',
+    options: ['Draft Bill Raised', 'Not Eligible', 'Revenue Leakage', 'Invoice Created', 'Invoice Approved']
+  },
+  {
+    key: 'plannedStartDateTime',
+    label: 'Planned Start and End Date Time',
+    editable: true,
+    mandatory: false,
+    sortable: true,
+    filterable: true,
+    hidden: false,
+    order: 3,
+    type: 'text'
+  },
+  {
+    key: 'actualStartDateTime',
+    label: 'Actual Start and End Date Time',
+    editable: true,
+    mandatory: false,
+    sortable: true,
+    filterable: true,
+    hidden: false,
+    order: 4,
+    type: 'text'
+  },
+  {
+    key: 'departurePoint',
+    label: 'Departure Point',
+    editable: true,
+    mandatory: false,
+    sortable: true,
+    filterable: true,
+    hidden: false,
+    order: 5,
+    type: 'text'
+  },
+  {
+    key: 'arrivalPoint',
+    label: 'Arrival Point',
+    editable: true,
+    mandatory: false,
+    sortable: true,
+    filterable: true,
+    hidden: false,
+    order: 6,
+    type: 'text'
+  },
+  {
+    key: 'customer',
+    label: 'Customer',
+    editable: false,
+    mandatory: false,
+    sortable: true,
+    filterable: true,
+    hidden: false,
     order: 7,
-    type: 'date'
+    type: 'text'
+  },
+  {
+    key: 'resources',
+    label: 'Resources',
+    editable: false,
+    mandatory: false,
+    sortable: true,
+    filterable: true,
+    hidden: false,
+    order: 8,
+    type: 'text'
   }
 ];
 
@@ -204,120 +277,136 @@ const GridDemo = () => {
     });
   };
 
-  // Nested row renderer for expandable rows
-  const nestedRowRenderer = (row: any) => (
-    <div className="bg-gray-50 p-4 space-y-4">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <h4 className="font-semibold text-gray-700 mb-2">Skills</h4>
-          <div className="flex flex-wrap gap-2">
-            {row.skills?.map((skill: string, index: number) => (
-              <span
-                key={index}
-                className="bg-blue-100 text-blue-800 text-sm px-2 py-1 rounded"
-              >
-                {skill}
-              </span>
-            ))}
+  // Custom cell renderer for status badges
+  const customCellRenderer = (value: any, column: GridColumnConfig) => {
+    if (column.key === 'status') {
+      return <StatusBadge status={value} type="status" />;
+    }
+    if (column.key === 'tripBillingStatus') {
+      return <StatusBadge status={value} type="billing" />;
+    }
+    if (column.key === 'tripPlanNo') {
+      return <span className="text-blue-600 hover:text-blue-800 cursor-pointer font-medium">{value}</span>;
+    }
+    if (column.key === 'plannedStartDateTime' || column.key === 'actualStartDateTime') {
+      const [date, time] = value.split(' ');
+      return (
+        <div className="text-sm">
+          <div>{date}</div>
+          <div className="text-gray-500">{time}</div>
+        </div>
+      );
+    }
+    if (column.key === 'departurePoint' || column.key === 'arrivalPoint') {
+      return (
+        <div className="flex items-center gap-1">
+          <span>{value}</span>
+          <div className="w-4 h-4 bg-gray-200 rounded-full flex items-center justify-center">
+            <div className="w-1 h-1 bg-gray-600 rounded-full"></div>
           </div>
         </div>
-        <div>
-          <h4 className="font-semibold text-gray-700 mb-2">Projects</h4>
-          <div className="space-y-2">
-            {row.projects?.map((project: any, index: number) => (
-              <div key={index} className="bg-white p-2 rounded border">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <p className="font-medium text-sm">{project.name}</p>
-                    <p className="text-xs text-gray-600">{project.role}</p>
-                  </div>
-                  <span
-                    className={`text-xs px-2 py-1 rounded ${
-                      project.status === 'Completed'
-                        ? 'bg-green-100 text-green-800'
-                        : 'bg-yellow-100 text-yellow-800'
-                    }`}
-                  >
-                    {project.status}
-                  </span>
-                </div>
+      );
+    }
+    return value;
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <div className="bg-white border-b border-gray-200 px-6 py-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2">
+              <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+                <span className="text-white font-bold text-sm">L</span>
               </div>
-            ))}
+              <span className="text-xl font-semibold text-gray-900">Logistics</span>
+            </div>
+            <div className="text-gray-400">></div>
+            <span className="text-gray-600">Trip Execution Management</span>
+          </div>
+          <div className="flex items-center space-x-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Input
+                placeholder="Search"
+                className="pl-10 w-64 bg-gray-50 border-gray-200"
+              />
+            </div>
+            <Button variant="ghost" size="sm">
+              <div className="w-8 h-8 bg-gray-200 rounded-full"></div>
+            </Button>
           </div>
         </div>
       </div>
-    </div>
-  );
 
-  return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            SmartGrid Demo
-          </h1>
-          <p className="text-gray-600">
-            A comprehensive data grid with editing, sorting, filtering, and plugin support.
-          </p>
-        </div>
-
-        <div className="bg-white rounded-lg shadow">
-          <div className="p-6">
-            <SmartGrid
-              columns={columns}
-              data={sampleData}
-              editableColumns={true}
-              mandatoryColumns={['id', 'name', 'email']}
-              onInlineEdit={handleInlineEdit}
-              onBulkUpdate={handleBulkUpdate}
-              onPreferenceSave={handlePreferenceSave}
-              paginationMode="pagination"
-              nestedRowRenderer={nestedRowRenderer}
-              plugins={[downloadJsonPlugin]}
-            />
+      <div className="px-6 py-6">
+        {/* Trip Plans Header */}
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center space-x-2">
+            <h1 className="text-2xl font-semibold text-gray-900">Trip Plans</h1>
+            <Badge variant="secondary" className="bg-blue-100 text-blue-800 rounded-full">
+              9
+            </Badge>
+          </div>
+          
+          <div className="flex items-center space-x-2">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Input
+                placeholder="Search"
+                className="pl-10 w-80 bg-white border-gray-300"
+              />
+            </div>
+            <Button variant="outline" size="sm">
+              <Settings className="h-4 w-4 mr-2" />
+            </Button>
+            <Button variant="outline" size="sm">
+              <Filter className="h-4 w-4 mr-2" />
+            </Button>
+            <Button variant="outline" size="sm">
+              <Download className="h-4 w-4 mr-2" />
+            </Button>
+            <Button variant="outline" size="sm">
+              <Settings className="h-4 w-4 mr-2" />
+            </Button>
+            <Button variant="outline" size="sm">
+              <Grid3x3 className="h-4 w-4" />
+            </Button>
+            <Button variant="outline" size="sm">
+              <List className="h-4 w-4" />
+            </Button>
           </div>
         </div>
 
-        <div className="mt-8 bg-white rounded-lg shadow p-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Features Demonstrated</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <div className="p-4 bg-blue-50 rounded-lg">
-              <h3 className="font-medium text-blue-900 mb-2">Inline Editing</h3>
-              <p className="text-sm text-blue-700">
-                Click on any editable cell to modify data inline
-              </p>
-            </div>
-            <div className="p-4 bg-green-50 rounded-lg">
-              <h3 className="font-medium text-green-900 mb-2">Sorting & Filtering</h3>
-              <p className="text-sm text-green-700">
-                Click column headers to sort, use search to filter
-              </p>
-            </div>
-            <div className="p-4 bg-purple-50 rounded-lg">
-              <h3 className="font-medium text-purple-900 mb-2">Expandable Rows</h3>
-              <p className="text-sm text-purple-700">
-                Click the arrow in the first column to expand rows
-              </p>
-            </div>
-            <div className="p-4 bg-yellow-50 rounded-lg">
-              <h3 className="font-medium text-yellow-900 mb-2">Plugin Architecture</h3>
-              <p className="text-sm text-yellow-700">
-                Download JSON plugin adds custom functionality
-              </p>
-            </div>
-            <div className="p-4 bg-red-50 rounded-lg">
-              <h3 className="font-medium text-red-900 mb-2">Bulk Operations</h3>
-              <p className="text-sm text-red-700">
-                Upload CSV files for bulk data updates
-              </p>
-            </div>
-            <div className="p-4 bg-indigo-50 rounded-lg">
-              <h3 className="font-medium text-indigo-900 mb-2">Export Options</h3>
-              <p className="text-sm text-indigo-700">
-                Export data to CSV, Excel, or JSON formats
-              </p>
-            </div>
+        {/* Grid */}
+        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+          <SmartGrid
+            columns={columns}
+            data={tripData}
+            editableColumns={true}
+            mandatoryColumns={['tripPlanNo']}
+            onInlineEdit={handleInlineEdit}
+            onBulkUpdate={handleBulkUpdate}
+            onPreferenceSave={handlePreferenceSave}
+            paginationMode="pagination"
+            plugins={[downloadJsonPlugin]}
+          />
+        </div>
+
+        {/* Footer */}
+        <div className="flex items-center justify-between mt-4 text-sm text-gray-500">
+          <div className="flex items-center space-x-4">
+            <Button variant="ghost" size="sm">
+              <MoreHorizontal className="h-4 w-4" />
+            </Button>
+            <Button variant="ghost" size="sm">
+              <MoreHorizontal className="h-4 w-4" />
+            </Button>
           </div>
+          <Button variant="outline" size="sm" className="text-blue-600 border-blue-200">
+            Cancel
+          </Button>
         </div>
       </div>
     </div>
