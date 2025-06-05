@@ -57,7 +57,7 @@ export const CellRenderer: React.FC<CellRendererProps> = ({
   const renderBadge = () => {
     const statusColor = column.statusMap?.[value] || getDefaultStatusColor(value, column.key);
     return (
-      <Badge className={statusColor}>
+      <Badge className={cn("whitespace-nowrap", statusColor)}>
         {value}
       </Badge>
     );
@@ -108,8 +108,9 @@ export const CellRenderer: React.FC<CellRendererProps> = ({
     return (
       <button
         onClick={handleClick}
-        className="text-blue-600 hover:text-blue-800 cursor-pointer font-medium hover:underline"
+        className="text-blue-600 hover:text-blue-800 cursor-pointer font-medium hover:underline transition-colors duration-150 truncate max-w-full"
         disabled={loading}
+        title={String(value)}
       >
         {value}
       </button>
@@ -120,9 +121,9 @@ export const CellRenderer: React.FC<CellRendererProps> = ({
   const renderDateTimeRange = () => {
     const [date, time] = String(value).split(' ');
     return (
-      <div className="text-sm">
-        <div className="text-gray-900 font-medium">{date}</div>
-        <div className="text-gray-500 text-xs">{time}</div>
+      <div className="text-sm min-w-0">
+        <div className="text-gray-900 font-medium truncate">{date}</div>
+        <div className="text-gray-500 text-xs truncate">{time}</div>
       </div>
     );
   };
@@ -132,17 +133,26 @@ export const CellRenderer: React.FC<CellRendererProps> = ({
     const tooltipText = column.infoTextField ? row[column.infoTextField] : `More info about ${value}`;
     
     return (
-      <div className="flex items-center gap-2">
-        <span className="text-gray-900 font-medium">{value}</span>
+      <div className="flex items-center gap-2 min-w-0">
+        <span className="text-gray-900 font-medium truncate flex-1" title={String(value)}>
+          {value}
+        </span>
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
-              <div className="w-4 h-4 bg-gray-300 rounded-full flex items-center justify-center cursor-help">
-                <Info className="h-3 w-3 text-gray-600" />
-              </div>
+              <button
+                type="button"
+                className="w-4 h-4 bg-blue-100 hover:bg-blue-200 rounded-full flex items-center justify-center cursor-help transition-colors duration-150 flex-shrink-0 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                aria-label="More information"
+              >
+                <Info className="h-3 w-3 text-blue-600" />
+              </button>
             </TooltipTrigger>
-            <TooltipContent>
-              <p>{tooltipText}</p>
+            <TooltipContent 
+              className="max-w-xs p-3 text-sm bg-white border border-gray-200 shadow-lg z-50"
+              sideOffset={5}
+            >
+              <p className="break-words">{tooltipText}</p>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
@@ -158,19 +168,24 @@ export const CellRenderer: React.FC<CellRendererProps> = ({
           <Button
             variant="outline"
             size="sm"
-            className="text-gray-900 font-medium"
+            className="text-gray-900 font-medium hover:bg-blue-50 hover:border-blue-300 transition-colors duration-150 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
             disabled={loading}
+            aria-label={`View ${value} details`}
           >
             {value}
           </Button>
         </DialogTrigger>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>Details</DialogTitle>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto bg-white">
+          <DialogHeader className="pb-4 border-b border-gray-200">
+            <DialogTitle className="text-lg font-semibold text-gray-900">
+              Details
+            </DialogTitle>
           </DialogHeader>
-          <div className="mt-4">
+          <div className="mt-4 p-1">
             {column.renderExpandedContent ? column.renderExpandedContent(row) : (
-              <div className="text-gray-500">No additional content available</div>
+              <div className="text-gray-500 text-center py-8">
+                No additional content available
+              </div>
             )}
           </div>
         </DialogContent>
@@ -187,7 +202,7 @@ export const CellRenderer: React.FC<CellRendererProps> = ({
           onChange={(e) => setTempValue(e.target.value)}
           onBlur={handleSave}
           onKeyDown={handleKeyDown}
-          className="w-full"
+          className="w-full min-w-0 focus:ring-2 focus:ring-blue-500"
           autoFocus
           disabled={loading}
         />
@@ -199,16 +214,26 @@ export const CellRenderer: React.FC<CellRendererProps> = ({
         <div
           onClick={() => onEditStart(rowIndex, column.key)}
           className={cn(
-            "min-h-[20px] p-1 hover:bg-gray-50 cursor-pointer rounded",
-            loading && "opacity-50 cursor-not-allowed"
+            "min-h-[20px] p-2 hover:bg-blue-50 cursor-pointer rounded transition-colors duration-150 truncate",
+            loading && "opacity-50 cursor-not-allowed",
+            "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
           )}
+          title={String(value)}
+          tabIndex={0}
+          role="button"
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              onEditStart(rowIndex, column.key);
+            }
+          }}
         >
-          {value}
+          {value || <span className="text-gray-400">Click to edit</span>}
         </div>
       );
     }
 
-    return <span>{value}</span>;
+    return <span className="truncate" title={String(value)}>{value}</span>;
   };
 
   // Dropdown renderer
@@ -218,7 +243,7 @@ export const CellRenderer: React.FC<CellRendererProps> = ({
         <select
           value={value || ''}
           onChange={(e) => onEdit(rowIndex, column.key, e.target.value)}
-          className="w-full px-2 py-1 border rounded"
+          className="w-full px-2 py-1 border rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-150"
           disabled={loading}
         >
           <option value="">Select...</option>
@@ -228,18 +253,19 @@ export const CellRenderer: React.FC<CellRendererProps> = ({
         </select>
       );
     }
-    return <span>{value}</span>;
+    return <span className="truncate" title={String(value)}>{value}</span>;
   };
 
   // Date renderer
   const renderDate = () => {
-    if (!value) return <span>-</span>;
+    if (!value) return <span className="text-gray-400">-</span>;
     
     try {
       const date = new Date(value);
-      return <span>{date.toLocaleDateString()}</span>;
+      const formattedDate = date.toLocaleDateString();
+      return <span className="truncate" title={formattedDate}>{formattedDate}</span>;
     } catch {
-      return <span>{value}</span>;
+      return <span className="truncate" title={String(value)}>{value}</span>;
     }
   };
 
@@ -264,12 +290,12 @@ export const CellRenderer: React.FC<CellRendererProps> = ({
         return renderDate();
       case 'Text':
       default:
-        return <span className="text-gray-900">{value}</span>;
+        return <span className="text-gray-900 truncate" title={String(value)}>{value}</span>;
     }
   };
 
   return (
-    <div className="flex items-center">
+    <div className="flex items-center min-w-0 w-full">
       {renderCellContent()}
     </div>
   );

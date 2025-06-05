@@ -407,12 +407,12 @@ export function SmartGrid({
     if (columnIndex === 0 && nestedRowRenderer) {
       const isExpanded = expandedRows.has(rowIndex);
       return (
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-2 min-w-0">
           <Button
             variant="ghost"
             size="sm"
             onClick={() => toggleRowExpansion(rowIndex)}
-            className="h-6 w-6 p-0 hover:bg-gray-100"
+            className="h-6 w-6 p-0 hover:bg-gray-100 flex-shrink-0"
           >
             {isExpanded ? (
               <ChevronDown className="h-4 w-4" />
@@ -420,7 +420,7 @@ export function SmartGrid({
               <ChevronRight className="h-4 w-4" />
             )}
           </Button>
-          <div className="flex-1">
+          <div className="flex-1 min-w-0 truncate">
             <CellRenderer
               value={value}
               row={row}
@@ -441,20 +441,22 @@ export function SmartGrid({
     }
 
     return (
-      <CellRenderer
-        value={value}
-        row={row}
-        column={column}
-        rowIndex={rowIndex}
-        columnIndex={columnIndex}
-        isEditing={isEditing}
-        isEditable={isEditable}
-        onEdit={handleCellEdit}
-        onEditStart={handleEditStart}
-        onEditCancel={handleEditCancel}
-        onLinkClick={onLinkClick}
-        loading={loading}
-      />
+      <div className="min-w-0 truncate">
+        <CellRenderer
+          value={value}
+          row={row}
+          column={column}
+          rowIndex={rowIndex}
+          columnIndex={columnIndex}
+          isEditing={isEditing}
+          isEditable={isEditable}
+          onEdit={handleCellEdit}
+          onEditStart={handleEditStart}
+          onEditCancel={handleEditCancel}
+          onLinkClick={onLinkClick}
+          loading={loading}
+        />
+      </div>
     );
   }, [editingCell, isColumnEditable, nestedRowRenderer, expandedRows, toggleRowExpansion, handleCellEdit, handleEditStart, handleEditCancel, onLinkClick, loading]);
 
@@ -516,26 +518,26 @@ export function SmartGrid({
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 w-full">
       {/* Toolbar */}
-      <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
-        <div className="flex items-center space-x-2">
-          <div className="relative">
+      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between bg-white p-4 rounded-lg border shadow-sm">
+        <div className="flex items-center space-x-2 w-full sm:w-auto">
+          <div className="relative w-full sm:w-64">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
             <Input
               placeholder="Search..."
               value={globalFilter}
               onChange={(e) => setGlobalFilter(e.target.value)}
-              className="pl-9 w-64"
+              className="pl-9 w-full"
               disabled={loading}
             />
           </div>
         </div>
 
-        <div className="flex items-center space-x-2">
+        <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto justify-end">
           <Button variant="outline" size="sm" onClick={handleResetPreferences} disabled={loading}>
             <RotateCcw className="h-4 w-4 mr-2" />
-            Reset Preferences
+            <span className="hidden sm:inline">Reset Preferences</span>
           </Button>
           
           {onBulkUpdate && (
@@ -550,7 +552,7 @@ export function SmartGrid({
               />
               <Button variant="outline" size="sm" disabled={loading}>
                 <Upload className="h-4 w-4 mr-2" />
-                Upload CSV
+                <span className="hidden sm:inline">Upload CSV</span>
               </Button>
             </div>
           )}
@@ -569,32 +571,35 @@ export function SmartGrid({
         </div>
       </div>
 
-      {/* Table */}
-      <div className="border rounded-lg overflow-hidden">
+      {/* Table Container with responsive scrolling */}
+      <div className="bg-white rounded-lg border shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <Table>
-            <TableHeader>
-              <TableRow>
+            <TableHeader className="sticky top-0 z-20 bg-white shadow-sm border-b-2 border-gray-100">
+              <TableRow className="hover:bg-transparent">
                 {orderedColumns.map((column) => (
-                  <TableHead key={column.key} className="relative group">
-                    <div className="flex items-center space-x-2">
-                      <span className="select-none">{column.label}</span>
+                  <TableHead 
+                    key={column.key} 
+                    className="relative group bg-gray-50/80 backdrop-blur-sm font-semibold text-gray-900 px-6 py-4 border-r border-gray-100 last:border-r-0"
+                  >
+                    <div className="flex items-center space-x-2 min-w-0">
+                      <span className="select-none truncate">{column.label}</span>
                       {column.sortable && (
                         <Button
                           variant="ghost"
                           size="sm"
                           onClick={() => handleSort(column.key)}
-                          className="h-auto p-0 hover:bg-transparent"
+                          className="h-auto p-0 hover:bg-transparent opacity-60 hover:opacity-100 transition-opacity flex-shrink-0"
                           disabled={loading}
                         >
                           {sort?.column === column.key ? (
                             sort.direction === 'asc' ? (
-                              <ArrowUp className="h-4 w-4" />
+                              <ArrowUp className="h-4 w-4 text-blue-600" />
                             ) : (
-                              <ArrowDown className="h-4 w-4" />
+                              <ArrowDown className="h-4 w-4 text-blue-600" />
                             )
                           ) : (
-                            <ArrowUpDown className="h-4 w-4" />
+                            <ArrowUpDown className="h-4 w-4 text-gray-400" />
                           )}
                         </Button>
                       )}
@@ -603,39 +608,53 @@ export function SmartGrid({
                 ))}
                 {/* Plugin row actions header */}
                 {plugins.some(plugin => plugin.rowActions) && (
-                  <TableHead>Actions</TableHead>
+                  <TableHead className="bg-gray-50/80 backdrop-blur-sm font-semibold text-gray-900 px-6 py-4 text-center">
+                    Actions
+                  </TableHead>
                 )}
               </TableRow>
             </TableHeader>
             <TableBody>
               {loading ? (
                 <TableRow>
-                  <TableCell colSpan={orderedColumns.length + (plugins.some(plugin => plugin.rowActions) ? 1 : 0)} className="text-center py-8">
+                  <TableCell 
+                    colSpan={orderedColumns.length + (plugins.some(plugin => plugin.rowActions) ? 1 : 0)} 
+                    className="text-center py-12"
+                  >
                     <div className="flex items-center justify-center">
                       <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
-                      <span className="ml-2">Loading...</span>
+                      <span className="ml-2 text-gray-600">Loading...</span>
                     </div>
                   </TableCell>
                 </TableRow>
               ) : paginatedData.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={orderedColumns.length + (plugins.some(plugin => plugin.rowActions) ? 1 : 0)} className="text-center py-8 text-gray-500">
-                    No data available
+                  <TableCell 
+                    colSpan={orderedColumns.length + (plugins.some(plugin => plugin.rowActions) ? 1 : 0)} 
+                    className="text-center py-12 text-gray-500"
+                  >
+                    <div className="space-y-2">
+                      <div className="text-lg font-medium">No data available</div>
+                      <div className="text-sm">Try adjusting your search or filters</div>
+                    </div>
                   </TableCell>
                 </TableRow>
               ) : (
                 paginatedData.map((row, rowIndex) => (
                   <React.Fragment key={rowIndex}>
-                    <TableRow className="hover:bg-gray-50">
+                    <TableRow className="hover:bg-gray-50/50 transition-colors duration-150 border-b border-gray-100">
                       {orderedColumns.map((column, columnIndex) => (
-                        <TableCell key={column.key} className="relative">
+                        <TableCell 
+                          key={column.key} 
+                          className="relative px-6 py-4 border-r border-gray-50 last:border-r-0 align-top"
+                        >
                           {renderCell(row, column, rowIndex, columnIndex)}
                         </TableCell>
                       ))}
                       {/* Plugin row actions */}
                       {plugins.some(plugin => plugin.rowActions) && (
-                        <TableCell>
-                          <div className="flex items-center space-x-2">
+                        <TableCell className="px-6 py-4 text-center align-top">
+                          <div className="flex items-center justify-center space-x-2">
                             {renderPluginRowActions(row, rowIndex)}
                           </div>
                         </TableCell>
@@ -643,10 +662,13 @@ export function SmartGrid({
                     </TableRow>
                     {/* Nested row content */}
                     {nestedRowRenderer && expandedRows.has(rowIndex) && (
-                      <TableRow>
-                        <TableCell colSpan={orderedColumns.length + (plugins.some(plugin => plugin.rowActions) ? 1 : 0)} className="p-0">
-                          <div className="bg-gray-50 border-t border-gray-200">
-                            <div className="p-4">
+                      <TableRow className="bg-gray-50/30">
+                        <TableCell 
+                          colSpan={orderedColumns.length + (plugins.some(plugin => plugin.rowActions) ? 1 : 0)} 
+                          className="p-0 border-b border-gray-200"
+                        >
+                          <div className="bg-gradient-to-r from-gray-50/50 to-white border-l-4 border-blue-500">
+                            <div className="p-6 pl-12">
                               {nestedRowRenderer(row)}
                             </div>
                           </div>
@@ -663,20 +685,20 @@ export function SmartGrid({
 
       {/* Pagination */}
       {paginationMode === 'pagination' && totalPages > 1 && (
-        <div className="flex items-center justify-between">
-          <div className="text-sm text-gray-600">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-white p-4 rounded-lg border shadow-sm">
+          <div className="text-sm text-gray-600 order-2 sm:order-1">
             Showing {(currentPage - 1) * pageSize + 1} to{' '}
             {Math.min(currentPage * pageSize, processedData.length)} of{' '}
             {processedData.length} entries
           </div>
           
-          <Pagination>
+          <Pagination className="order-1 sm:order-2">
             <PaginationContent>
               <PaginationItem>
                 <PaginationPrevious
                   onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
                   className={cn(
-                    currentPage === 1 || loading ? 'pointer-events-none opacity-50' : 'cursor-pointer'
+                    currentPage === 1 || loading ? 'pointer-events-none opacity-50' : 'cursor-pointer hover:bg-gray-100'
                   )}
                 />
               </PaginationItem>
@@ -688,7 +710,11 @@ export function SmartGrid({
                     <PaginationLink
                       onClick={() => setCurrentPage(pageNum)}
                       isActive={currentPage === pageNum}
-                      className={cn("cursor-pointer", loading && "pointer-events-none opacity-50")}
+                      className={cn(
+                        "cursor-pointer transition-colors duration-150",
+                        loading && "pointer-events-none opacity-50",
+                        currentPage === pageNum && "bg-blue-600 text-white hover:bg-blue-700"
+                      )}
                     >
                       {pageNum}
                     </PaginationLink>
@@ -700,7 +726,7 @@ export function SmartGrid({
                 <PaginationNext
                   onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
                   className={cn(
-                    currentPage === totalPages || loading ? 'pointer-events-none opacity-50' : 'cursor-pointer'
+                    currentPage === totalPages || loading ? 'pointer-events-none opacity-50' : 'cursor-pointer hover:bg-gray-100'
                   )}
                 />
               </PaginationItem>
@@ -711,7 +737,7 @@ export function SmartGrid({
 
       {/* Plugin footer items */}
       {plugins.some(plugin => plugin.footer) && (
-        <div className="flex items-center justify-center space-x-4 pt-4 border-t">
+        <div className="flex items-center justify-center space-x-4 pt-4 border-t bg-white p-4 rounded-lg border shadow-sm">
           {renderPluginFooterItems()}
         </div>
       )}
