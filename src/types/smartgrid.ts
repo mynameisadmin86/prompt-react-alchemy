@@ -49,7 +49,21 @@ export interface GridPreferences {
   pageSize?: number;
 }
 
-export interface SmartGridProps<T = any> {
+export interface SmartGridProps {
+  columns: GridColumnConfig[];
+  data: any[];
+  editableColumns?: string[] | boolean;
+  mandatoryColumns?: string[];
+  onInlineEdit?(rowIndex: number, updatedRow: any): void;
+  onBulkUpdate?(rows: any[]): void;
+  onPreferenceSave?(preferences: any): void;
+  onDataFetch?(page: number, pageSize: number): Promise<any[]>;
+  paginationMode?: 'pagination' | 'infinite';
+  nestedRowRenderer?(row: any): React.ReactNode;
+}
+
+// Legacy interface for backward compatibility
+export interface SmartGridPropsLegacy<T = any> {
   // Data
   data: T[];
   columns: Column<T>[];
