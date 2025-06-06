@@ -776,7 +776,8 @@ export function SmartGrid({
                         "relative group bg-gray-50/80 backdrop-blur-sm font-semibold text-gray-900 px-2 py-3 border-r border-gray-100 last:border-r-0",
                         draggedColumn === column.key && "opacity-50",
                         dragOverColumn === column.key && "bg-blue-100 border-blue-300",
-                        !isResizing && "cursor-move"
+                        !isResizing && "cursor-move",
+                        isResizing && resizingColumn === column.key && "pointer-events-none"
                       )}
                       style={{ width: `${column.width}px`, minWidth: `${Math.max(120, column.width)}px` }}
                       draggable={!resizingColumn && !editingHeader && !isResizing}
@@ -788,7 +789,8 @@ export function SmartGrid({
                     >
                       <div className={cn(
                         "flex items-center justify-between gap-1 min-w-0",
-                        isResizing && "opacity-60 select-none pointer-events-none"
+                        isResizing && "opacity-60 select-none pointer-events-none",
+                        isResizing && resizingColumn === column.key && "invisible" // Hide content when this column is being resized
                       )}>
                         <div className="flex items-center gap-1 min-w-0 flex-1">
                           {!isResizing && (
@@ -870,7 +872,7 @@ export function SmartGrid({
                       
                       {/* Enhanced resize handle with increased width */}
                       <div
-                        className="absolute right-0 top-0 bottom-0 w-12 cursor-col-resize group/resize z-30"
+                        className="absolute right-0 top-0 bottom-0 w-16 cursor-col-resize group/resize z-30"
                         onMouseDown={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
@@ -934,15 +936,18 @@ export function SmartGrid({
                         data-column-key={column.key}
                       >
                         <div className={cn(
-                          "absolute inset-y-0 right-0 w-2 bg-blue-400 transition-opacity",
+                          "absolute inset-y-0 right-0 w-3 bg-blue-400 transition-opacity",
                           isResizing && resizingColumn === column.key ? "opacity-100" : "opacity-0 group-hover/resize:opacity-100"
                         )}></div>
                         <div className={cn(
-                          "absolute right-[-4px] top-1/2 transform -translate-y-1/2 -translate-x-1/2 w-10 h-10 flex items-center justify-center transition-opacity",
+                          "absolute right-[-6px] top-1/2 transform -translate-y-1/2 -translate-x-1/2 w-12 h-12 flex items-center justify-center transition-opacity z-40",
                           isResizing && resizingColumn === column.key ? "opacity-100" : "opacity-0 group-hover/resize:opacity-100"
                         )}>
-                          <GripHorizontal className="h-5 w-6 text-blue-500" />
+                          <GripHorizontal className="h-6 w-7 text-blue-500" />
                         </div>
+                        {isResizing && resizingColumn === column.key && (
+                          <div className="absolute inset-0 bg-blue-50/30 backdrop-blur-[1px]"></div>
+                        )}
                       </div>
                     </TableHead>
                   </React.Fragment>
