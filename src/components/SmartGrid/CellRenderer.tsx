@@ -55,38 +55,62 @@ export const CellRenderer: React.FC<CellRendererProps> = ({
 
   // Badge renderer with status mapping
   const renderBadge = () => {
-    const statusColor = column.statusMap?.[value] || getDefaultStatusColor(value, column.key);
+    // Handle both object format {value, variant} and string format
+    let displayValue: string;
+    let statusColor: string;
+
+    if (typeof value === 'object' && value !== null && 'value' in value) {
+      // Object format: {value: "status", variant: "css-classes"}
+      displayValue = value.value;
+      statusColor = value.variant || getDefaultStatusColor(value.value, column.key);
+    } else {
+      // String format
+      displayValue = String(value || '');
+      statusColor = column.statusMap?.[displayValue] || getDefaultStatusColor(displayValue, column.key);
+    }
+
     return (
       <Badge className={cn("whitespace-nowrap", statusColor)}>
-        {value}
+        {displayValue}
       </Badge>
     );
   };
 
   // Default status color mapping based on common patterns
-  const getDefaultStatusColor = (status: string, columnKey: string) => {
+  const getDefaultStatusColor = (status: any, columnKey: string) => {
+    // Safely convert to string and handle non-string inputs
+    const statusString = String(status || '').toLowerCase();
+    
     if (columnKey.toLowerCase().includes('status')) {
-      switch (status?.toLowerCase()) {
+      switch (statusString) {
         case 'released':
         case 'confirmed':
         case 'approved':
         case 'active':
+        case 'completed':
+        case 'invoice approved':
+        case 'payment processed':
           return 'bg-green-50 text-green-600 border border-green-200';
         case 'under execution':
         case 'in progress':
         case 'pending':
+        case 'pending review':
           return 'bg-purple-50 text-purple-600 border border-purple-200';
         case 'initiated':
         case 'draft':
+        case 'invoice created':
+        case 'ready for dispatch':
           return 'bg-blue-50 text-blue-600 border border-blue-200';
         case 'cancelled':
         case 'deleted':
         case 'rejected':
         case 'not eligible':
         case 'revenue leakage':
+        case 'policy violation':
           return 'bg-red-50 text-red-600 border border-red-200';
-        case 'invoice created':
         case 'bill raised':
+        case 'documentation missing':
+        case 'on hold':
           return 'bg-orange-50 text-orange-600 border border-orange-200';
         default:
           return 'bg-gray-50 text-gray-600 border border-gray-200';
