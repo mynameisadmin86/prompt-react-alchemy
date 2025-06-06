@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -582,14 +583,16 @@ export function SmartGrid({
     <div className="space-y-4 w-full">
       {/* Toolbar */}
       <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between bg-white p-4 rounded-lg border shadow-sm">
-        <div className="flex items-center space-x-2 w-full sm:w-auto justify-end">
+        <div className="flex items-center space-x-2">
           {/* Show active filters count */}
           {filters.length > 0 && (
             <div className="text-sm text-blue-600 bg-blue-50 px-2 py-1 rounded">
               {filters.length} filter{filters.length > 1 ? 's' : ''} active
             </div>
           )}
+        </div>
 
+        <div className="flex items-center space-x-2">
           {/* Common Filter Button */}
           <CommonFilter
             columns={orderedColumns}
@@ -625,7 +628,7 @@ export function SmartGrid({
             <Download className="h-4 w-4" />
           </Button>
 
-          {/* Search box moved to right */}
+          {/* Search box */}
           <div className="relative w-64">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
             <Input
