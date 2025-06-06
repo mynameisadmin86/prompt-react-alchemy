@@ -1,9 +1,24 @@
+
 import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
-import { ArrowUpDown, ArrowUp, ArrowDown, Download, Filter, Search, RotateCcw, ChevronRight, ChevronDown, Edit2, GripVertical } from 'lucide-react';
+import { 
+  ArrowUpDown, 
+  ArrowUp, 
+  ArrowDown, 
+  Download, 
+  Filter, 
+  Search, 
+  RotateCcw, 
+  ChevronRight, 
+  ChevronDown, 
+  Edit2, 
+  GripVertical,
+  CheckSquare, 
+  List,
+} from 'lucide-react';
 import { SmartGridProps, GridColumnConfig, SortConfig, FilterConfig, GridAPI } from '@/types/smartgrid';
 import { exportToCSV } from '@/utils/gridExport';
 import { useToast } from '@/hooks/use-toast';
@@ -12,6 +27,7 @@ import { CellRenderer } from './CellRenderer';
 import { cn } from '@/lib/utils';
 import { ColumnVisibilityManager } from './ColumnVisibilityManager';
 import { CommonFilter } from './CommonFilter';
+import { Grid2x2 } from 'lucide-react';  // Added import for Grid2x2
 
 export function SmartGrid({
   columns,
@@ -621,40 +637,37 @@ export function SmartGrid({
     }
   }, [data, onDataFetch]);
 
-  // Fixed renderPluginToolbarItems function to prevent React Fragment errors
-  const renderPluginToolbarItems = useCallback(() => {
-    return plugins
-      .filter(plugin => plugin.toolbar)
-      .map(plugin => (
-        <React.Fragment key={`toolbar-${plugin.id}`}>
-          {plugin.toolbar!(gridAPI)}
-        </React.Fragment>
-      ));
-  }, [plugins, gridAPI]);
+  // Create Grid API for plugins
+  const gridAPI: GridAPI = useMemo(() => ({
+    data: gridData,
+    filteredData: processedData,
+    selectedRows: Array.from(selectedRows).map(index => processedData[index]).filter(Boolean),
+    columns: orderedColumns,
+    preferences,
+    actions: {
+      exportData: handleExport,
+      resetPreferences: handleResetPreferences,
+      toggleRowSelection: (rowIndex: number) => {
+        setSelectedRows(prev => {
+          const newSet = new Set(prev);
+          if (newSet.has(rowIndex)) {
+            newSet.delete(rowIndex);
+          } else {
+            newSet.add(rowIndex);
+          }
+          return newSet;
+        });
+      },
+      selectAllRows: () => {
+        setSelectedRows(new Set(Array.from({ length: processedData.length }, (_, i) => i)));
+      },
+      clearSelection: () => {
+        setSelectedRows(new Set());
+      }
+    }
+  }), [gridData, processedData, selectedRows, orderedColumns, preferences, handleExport, handleResetPreferences]);
 
-  // Fixed renderPluginRowActions function to prevent React Fragment errors
-  const renderPluginRowActions = useCallback((row: any, rowIndex: number) => {
-    return plugins
-      .filter(plugin => plugin.rowActions)
-      .map(plugin => (
-        <React.Fragment key={`row-action-${plugin.id}-${rowIndex}`}>
-          {plugin.rowActions!(row, rowIndex, gridAPI)}
-        </React.Fragment>
-      ));
-  }, [plugins, gridAPI]);
-
-  // Fixed renderPluginFooterItems function to prevent React Fragment errors
-  const renderPluginFooterItems = useCallback(() => {
-    return plugins
-      .filter(plugin => plugin.footer)
-      .map(plugin => (
-        <React.Fragment key={`footer-${plugin.id}`}>
-          {plugin.footer!(gridAPI)}
-        </React.Fragment>
-      ));
-  }, [plugins, gridAPI]);
-
-  // Handle export
+  // Handle export - now using gridAPI within its definition
   const handleExport = useCallback((format: 'csv') => {
     const filename = `export-${new Date().toISOString().split('T')[0]}.${format}`;
     exportToCSV(processedData, orderedColumns, filename);
@@ -691,35 +704,38 @@ export function SmartGrid({
     }
   }, [columns, savePreferences, toast]);
 
-  // Create Grid API for plugins
-  const gridAPI: GridAPI = useMemo(() => ({
-    data: gridData,
-    filteredData: processedData,
-    selectedRows: Array.from(selectedRows).map(index => processedData[index]).filter(Boolean),
-    columns: orderedColumns,
-    preferences,
-    actions: {
-      exportData: handleExport,
-      resetPreferences: handleResetPreferences,
-      toggleRowSelection: (rowIndex: number) => {
-        setSelectedRows(prev => {
-          const newSet = new Set(prev);
-          if (newSet.has(rowIndex)) {
-            newSet.delete(rowIndex);
-          } else {
-            newSet.add(rowIndex);
-          }
-          return newSet;
-        });
-      },
-      selectAllRows: () => {
-        setSelectedRows(new Set(Array.from({ length: processedData.length }, (_, i) => i)));
-      },
-      clearSelection: () => {
-        setSelectedRows(new Set());
-      }
-    }
-  }), [gridData, processedData, selectedRows, orderedColumns, preferences, handleExport, handleResetPreferences]);
+  // Fixed renderPluginToolbarItems function to prevent React Fragment errors
+  const renderPluginToolbarItems = useCallback(() => {
+    return plugins
+      .filter(plugin => plugin.toolbar)
+      .map(plugin => (
+        <React.Fragment key={`toolbar-${plugin.id}`}>
+          {plugin.toolbar!(gridAPI)}
+        </React.Fragment>
+      ));
+  }, [plugins, gridAPI]);
+
+  // Fixed renderPluginRowActions function to prevent React Fragment errors
+  const renderPluginRowActions = useCallback((row: any, rowIndex: number) => {
+    return plugins
+      .filter(plugin => plugin.rowActions)
+      .map(plugin => (
+        <React.Fragment key={`row-action-${plugin.id}-${rowIndex}`}>
+          {plugin.rowActions!(row, rowIndex, gridAPI)}
+        </React.Fragment>
+      ));
+  }, [plugins, gridAPI]);
+
+  // Fixed renderPluginFooterItems function to prevent React Fragment errors
+  const renderPluginFooterItems = useCallback(() => {
+    return plugins
+      .filter(plugin => plugin.footer)
+      .map(plugin => (
+        <React.Fragment key={`footer-${plugin.id}`}>
+          {plugin.footer!(gridAPI)}
+        </React.Fragment>
+      ));
+  }, [plugins, gridAPI]);
 
   // Initialize plugins
   useEffect(() => {
@@ -1145,3 +1161,4 @@ export function SmartGrid({
     </div>
   );
 }
+
