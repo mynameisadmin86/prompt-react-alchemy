@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -16,7 +15,8 @@ import {
   ChevronDown, 
   Edit2, 
   GripVertical,
-  CheckSquare, 
+  CheckSquare,
+  Grid2x2,
   List,
 } from 'lucide-react';
 import { SmartGridProps, GridColumnConfig, SortConfig, FilterConfig, GridAPI } from '@/types/smartgrid';
@@ -27,7 +27,6 @@ import { CellRenderer } from './CellRenderer';
 import { cn } from '@/lib/utils';
 import { ColumnVisibilityManager } from './ColumnVisibilityManager';
 import { CommonFilter } from './CommonFilter';
-import { Grid2x2 } from 'lucide-react';  // Added import for Grid2x2
 
 export function SmartGrid({
   columns,
@@ -637,43 +636,13 @@ export function SmartGrid({
     }
   }, [data, onDataFetch]);
 
-  // Create Grid API for plugins
-  const gridAPI: GridAPI = useMemo(() => ({
-    data: gridData,
-    filteredData: processedData,
-    selectedRows: Array.from(selectedRows).map(index => processedData[index]).filter(Boolean),
-    columns: orderedColumns,
-    preferences,
-    actions: {
-      exportData: handleExport,
-      resetPreferences: handleResetPreferences,
-      toggleRowSelection: (rowIndex: number) => {
-        setSelectedRows(prev => {
-          const newSet = new Set(prev);
-          if (newSet.has(rowIndex)) {
-            newSet.delete(rowIndex);
-          } else {
-            newSet.add(rowIndex);
-          }
-          return newSet;
-        });
-      },
-      selectAllRows: () => {
-        setSelectedRows(new Set(Array.from({ length: processedData.length }, (_, i) => i)));
-      },
-      clearSelection: () => {
-        setSelectedRows(new Set());
-      }
-    }
-  }), [gridData, processedData, selectedRows, orderedColumns, preferences, handleExport, handleResetPreferences]);
-
-  // Handle export - now using gridAPI within its definition
+  // Define handleExport function before it's used
   const handleExport = useCallback((format: 'csv') => {
     const filename = `export-${new Date().toISOString().split('T')[0]}.${format}`;
     exportToCSV(processedData, orderedColumns, filename);
   }, [processedData, orderedColumns]);
 
-  // Handle reset preferences with column visibility reset
+  // Define handleResetPreferences function before it's used
   const handleResetPreferences = useCallback(async () => {
     const defaultPreferences = {
       columnOrder: columns.map(col => col.key),
@@ -703,6 +672,36 @@ export function SmartGrid({
       });
     }
   }, [columns, savePreferences, toast]);
+
+  // Create Grid API for plugins
+  const gridAPI: GridAPI = useMemo(() => ({
+    data: gridData,
+    filteredData: processedData,
+    selectedRows: Array.from(selectedRows).map(index => processedData[index]).filter(Boolean),
+    columns: orderedColumns,
+    preferences,
+    actions: {
+      exportData: handleExport,
+      resetPreferences: handleResetPreferences,
+      toggleRowSelection: (rowIndex: number) => {
+        setSelectedRows(prev => {
+          const newSet = new Set(prev);
+          if (newSet.has(rowIndex)) {
+            newSet.delete(rowIndex);
+          } else {
+            newSet.add(rowIndex);
+          }
+          return newSet;
+        });
+      },
+      selectAllRows: () => {
+        setSelectedRows(new Set(Array.from({ length: processedData.length }, (_, i) => i)));
+      },
+      clearSelection: () => {
+        setSelectedRows(new Set());
+      }
+    }
+  }), [gridData, processedData, selectedRows, orderedColumns, preferences, handleExport, handleResetPreferences]);
 
   // Fixed renderPluginToolbarItems function to prevent React Fragment errors
   const renderPluginToolbarItems = useCallback(() => {
@@ -1161,4 +1160,3 @@ export function SmartGrid({
     </div>
   );
 }
-
