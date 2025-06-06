@@ -894,10 +894,10 @@ export function SmartGrid({
                             return false;
                           };
                           
-                          const handleMouseUp = () => {
+                          const handleMouseUp = (mouseUpEvent: MouseEvent) => {
                             if (resizingColumn) {
                               // Save the final width to preferences
-                              const diff = event!.clientX - startX;
+                              const diff = mouseUpEvent.clientX - startX;
                               const finalWidth = Math.max(120, Math.min(400, startWidth + diff));
                               handleColumnResize(column.key, finalWidth);
                               
