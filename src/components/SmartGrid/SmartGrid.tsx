@@ -3,16 +3,16 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
-import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
-import { ArrowUpDown, ArrowUp, ArrowDown, Download, Upload, Filter, Search, RotateCcw, ChevronRight, ChevronDown, Edit2, GripVertical } from 'lucide-react';
-import { SmartGridProps, GridColumnConfig, SortConfig, FilterConfig, GridAPI, GridPlugin } from '@/types/smartgrid';
-import { exportToCSV, exportToExcel, parseCSV } from '@/utils/gridExport';
+import { ResizablePanelGroup } from '@/components/ui/resizable';
+import { ArrowUpDown, ArrowUp, ArrowDown, Download, Filter, Search, RotateCcw, ChevronRight, ChevronDown, Edit2, GripVertical } from 'lucide-react';
+import { SmartGridProps, GridColumnConfig, SortConfig, FilterConfig, GridAPI } from '@/types/smartgrid';
+import { exportToCSV } from '@/utils/gridExport';
 import { useToast } from '@/hooks/use-toast';
 import { useGridPreferences } from '@/hooks/useGridPreferences';
 import { CellRenderer } from './CellRenderer';
-import { ColumnFilter } from './ColumnFilter';
 import { cn } from '@/lib/utils';
 import { ColumnVisibilityManager } from './ColumnVisibilityManager';
+import { CommonFilter } from './CommonFilter';
 
 export function SmartGrid({
   columns,
@@ -44,7 +44,6 @@ export function SmartGrid({
   const [error, setError] = useState<string | null>(null);
   const [expandedRows, setExpandedRows] = useState<Set<number>>(new Set());
   const [selectedRows, setSelectedRows] = useState<Set<number>>(new Set());
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
   // Convert GridColumnConfig to Column format for useGridPreferences
@@ -116,17 +115,6 @@ export function SmartGrid({
       setEditingHeader(columnKey);
     }
   }, [resizingColumn]);
-
-  // Add column filter handler
-  const handleColumnFilter = useCallback((columnKey: string, filter: FilterConfig | null) => {
-    setFilters(prev => {
-      const newFilters = prev.filter(f => f.column !== columnKey);
-      if (filter) {
-        newFilters.push(filter);
-      }
-      return newFilters;
-    });
-  }, []);
 
   // Handle drag and drop for column reordering
   const handleColumnDragStart = useCallback((e: React.DragEvent, columnKey: string) => {
@@ -388,77 +376,10 @@ export function SmartGrid({
     setEditingCell(null);
   }, []);
 
-  // Validate CSV headers
-  const validateCSVHeaders = useCallback((csvHeaders: string[]): boolean => {
-    const requiredKeys = columns.map(col => col.key);
-    return requiredKeys.every(key => csvHeaders.includes(key));
-  }, [columns]);
-
-  // Handle bulk upload
-  const handleBulkUpload = useCallback(async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    try {
-      setLoading(true);
-      setError(null);
-      const text = await file.text();
-      const csvData = parseCSV(text);
-      
-      if (csvData.length === 0) {
-        toast({
-          title: "Error",
-          description: "No valid data found in CSV file",
-          variant: "destructive"
-        });
-        return;
-      }
-
-      const headers = Object.keys(csvData[0]);
-      if (!validateCSVHeaders(headers)) {
-        toast({
-          title: "Error", 
-          description: "CSV headers don't match column configuration",
-          variant: "destructive"
-        });
-        return;
-      }
-
-      if (onBulkUpdate) {
-        await onBulkUpdate(csvData);
-        if (!onDataFetch) {
-          setGridData(csvData);
-        }
-        toast({
-          title: "Success",
-          description: `Successfully uploaded ${csvData.length} rows`
-        });
-      }
-    } catch (error) {
-      console.error('Failed to process CSV upload:', error);
-      setError('Failed to process CSV file');
-      toast({
-        title: "Error",
-        description: "Failed to process CSV file",
-        variant: "destructive"
-      });
-    } finally {
-      setLoading(false);
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
-      }
-    }
-  }, [validateCSVHeaders, onBulkUpdate, onDataFetch, toast]);
-
   // Handle export
-  const handleExport = useCallback((format: 'csv' | 'excel') => {
+  const handleExport = useCallback((format: 'csv') => {
     const filename = `export-${new Date().toISOString().split('T')[0]}.${format}`;
-    
-    if (format === 'csv') {
-      exportToCSV(processedData, orderedColumns, filename);
-    } else {
-      exportToExcel(processedData, orderedColumns, filename);
-    }
+    exportToCSV(processedData, orderedColumns, filename);
   }, [processedData, orderedColumns]);
 
   // Handle reset preferences with column visibility reset
@@ -661,26 +582,20 @@ export function SmartGrid({
     <div className="space-y-4 w-full">
       {/* Toolbar */}
       <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between bg-white p-4 rounded-lg border shadow-sm">
-        <div className="flex items-center space-x-2 w-full sm:w-auto">
-          <div className="relative w-full sm:w-64">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-            <Input
-              placeholder="Search..."
-              value={globalFilter}
-              onChange={(e) => setGlobalFilter(e.target.value)}
-              className="pl-9 w-full"
-              disabled={loading}
-            />
-          </div>
-        </div>
-
-        <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto justify-end">
+        <div className="flex items-center space-x-2 w-full sm:w-auto justify-end">
           {/* Show active filters count */}
           {filters.length > 0 && (
             <div className="text-sm text-blue-600 bg-blue-50 px-2 py-1 rounded">
               {filters.length} filter{filters.length > 1 ? 's' : ''} active
             </div>
           )}
+
+          {/* Common Filter Button */}
+          <CommonFilter
+            columns={orderedColumns}
+            filters={filters}
+            onFiltersChange={setFilters}
+          />
 
           {/* Column Visibility Manager */}
           <ColumnVisibilityManager
@@ -690,39 +605,37 @@ export function SmartGrid({
             onResetToDefaults={handleResetPreferences}
           />
 
-          <Button variant="outline" size="sm" onClick={handleResetPreferences} disabled={loading}>
-            <RotateCcw className="h-4 w-4 mr-2" />
-            <span className="hidden sm:inline">Reset All</span>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={handleResetPreferences} 
+            disabled={loading}
+            title="Reset All"
+          >
+            <RotateCcw className="h-4 w-4" />
           </Button>
           
-          {onBulkUpdate && (
-            <div className="relative">
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept=".csv"
-                onChange={handleBulkUpload}
-                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                disabled={loading}
-              />
-              <Button variant="outline" size="sm" disabled={loading}>
-                <Upload className="h-4 w-4 mr-2" />
-                <span className="hidden sm:inline">Upload CSV</span>
-              </Button>
-            </div>
-          )}
-          
-          <Button variant="outline" size="sm" onClick={() => handleExport('csv')} disabled={loading}>
-            <Download className="h-4 w-4 mr-2" />
-            CSV
-          </Button>
-          <Button variant="outline" size="sm" onClick={() => handleExport('excel')} disabled={loading}>
-            <Download className="h-4 w-4 mr-2" />
-            Excel
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => handleExport('csv')} 
+            disabled={loading}
+            title="Download CSV"
+          >
+            <Download className="h-4 w-4" />
           </Button>
 
-          {/* Plugin toolbar items */}
-          {renderPluginToolbarItems()}
+          {/* Search box moved to right */}
+          <div className="relative w-64">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <Input
+              placeholder="Search..."
+              value={globalFilter}
+              onChange={(e) => setGlobalFilter(e.target.value)}
+              className="pl-9 w-full"
+              disabled={loading}
+            />
+          </div>
         </div>
       </div>
 
@@ -785,13 +698,6 @@ export function SmartGrid({
                             )}
                             
                             <div className="flex items-center space-x-1">
-                              {/* Column Filter */}
-                              <ColumnFilter
-                                column={column}
-                                currentFilter={filters.find(f => f.column === column.key)}
-                                onFilterChange={(filter) => handleColumnFilter(column.key, filter)}
-                              />
-                              
                               {column.sortable && (
                                 <Button
                                   variant="ghost"
