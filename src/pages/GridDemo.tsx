@@ -1,9 +1,8 @@
-
 import React, { useState, useMemo } from 'react';
 import { SmartGrid } from '@/components/SmartGrid';
 import { GridColumnConfig } from '@/types/smartgrid';
 import { Button } from '@/components/ui/button';
-import { Printer, MoreHorizontal } from 'lucide-react';
+import { Printer, MoreHorizontal, User, Train, UserCheck, Container } from 'lucide-react';
 import {
   Breadcrumb,
   BreadcrumbList,
@@ -25,6 +24,16 @@ interface SampleData {
   resources: string;
   departurePointDetails?: string;
   arrivalPointDetails?: string;
+  customerDetails?: Array<{
+    name: string;
+    id: string;
+    type: 'customer';
+  }>;
+  resourceDetails?: Array<{
+    name: string;
+    id: string;
+    type: 'train' | 'agent' | 'container';
+  }>;
 }
 
 const GridDemo = () => {
@@ -86,16 +95,56 @@ const GridDemo = () => {
     {
       key: 'customer',
       label: 'Customer',
-      type: 'Text',
+      type: 'ExpandableCount',
       sortable: true,
-      editable: false
+      editable: false,
+      renderExpandedContent: (row: SampleData) => (
+        <div className="space-y-3">
+          <div className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-4">
+            <User className="h-4 w-4" />
+            Customer Details
+          </div>
+          {row.customerDetails?.map((customer, index) => (
+            <div key={index} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+              <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                <User className="h-4 w-4 text-blue-600" />
+              </div>
+              <div>
+                <div className="font-medium text-gray-900">{customer.name}</div>
+                <div className="text-sm text-gray-500">{customer.id}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )
     },
     {
       key: 'resources',
       label: 'Resources',
-      type: 'Text',
+      type: 'ExpandableCount',
       sortable: true,
-      editable: false
+      editable: false,
+      renderExpandedContent: (row: SampleData) => (
+        <div className="space-y-3">
+          <div className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-4">
+            <Container className="h-4 w-4" />
+            Resource Details
+          </div>
+          {row.resourceDetails?.map((resource, index) => (
+            <div key={index} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+              <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                {resource.type === 'train' && <Train className="h-4 w-4 text-green-600" />}
+                {resource.type === 'agent' && <UserCheck className="h-4 w-4 text-green-600" />}
+                {resource.type === 'container' && <Container className="h-4 w-4 text-green-600" />}
+              </div>
+              <div>
+                <div className="font-medium text-gray-900">{resource.name}</div>
+                <div className="text-sm text-gray-500">{resource.id}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )
     }
   ];
 
@@ -111,7 +160,17 @@ const GridDemo = () => {
       customer: '+3',
       resources: '+3',
       departurePointDetails: 'VQL-705\nVolla\n\nAddress\nSardar Patel Rd, Sriram Nagar, Tharamani, Chennai, Tamil Nadu 600113',
-      arrivalPointDetails: 'Currency details for CUR-25'
+      arrivalPointDetails: 'Currency details for CUR-25',
+      customerDetails: [
+        { name: 'DB Cargo', id: 'CUS00000123', type: 'customer' },
+        { name: 'ABC Rail Goods', id: 'CUS00003214', type: 'customer' },
+        { name: 'Wave Cargo', id: 'CUS00012345', type: 'customer' }
+      ],
+      resourceDetails: [
+        { name: 'Train ID', id: 'TR000213', type: 'train' },
+        { name: 'AGN01', id: 'Agent-0000001', type: 'agent' },
+        { name: '20FT CT', id: '20 Feet Container', type: 'container' }
+      ]
     },
     {
       id: 'TRIP00000002',
@@ -124,7 +183,17 @@ const GridDemo = () => {
       customer: '+3',
       resources: '+3',
       departurePointDetails: 'VQL-705\nVolla\n\nAddress\nSardar Patel Rd, Sriram Nagar, Tharamani, Chennai, Tamil Nadu 600113',
-      arrivalPointDetails: 'Currency details for CUR-25'
+      arrivalPointDetails: 'Currency details for CUR-25',
+      customerDetails: [
+        { name: 'DB Cargo', id: 'CUS00000123', type: 'customer' },
+        { name: 'ABC Rail Goods', id: 'CUS00003214', type: 'customer' },
+        { name: 'Wave Cargo', id: 'CUS00012345', type: 'customer' }
+      ],
+      resourceDetails: [
+        { name: 'Train ID', id: 'TR000213', type: 'train' },
+        { name: 'AGN01', id: 'Agent-0000001', type: 'agent' },
+        { name: '20FT CT', id: '20 Feet Container', type: 'container' }
+      ]
     },
     {
       id: 'TRIP00000003',
@@ -137,7 +206,17 @@ const GridDemo = () => {
       customer: '+3',
       resources: '+3',
       departurePointDetails: 'VQL-705\nVolla\n\nAddress\nSardar Patel Rd, Sriram Nagar, Tharamani, Chennai, Tamil Nadu 600113',
-      arrivalPointDetails: 'Currency details for CUR-25'
+      arrivalPointDetails: 'Currency details for CUR-25',
+      customerDetails: [
+        { name: 'DB Cargo', id: 'CUS00000123', type: 'customer' },
+        { name: 'ABC Rail Goods', id: 'CUS00003214', type: 'customer' },
+        { name: 'Wave Cargo', id: 'CUS00012345', type: 'customer' }
+      ],
+      resourceDetails: [
+        { name: 'Train ID', id: 'TR000213', type: 'train' },
+        { name: 'AGN01', id: 'Agent-0000001', type: 'agent' },
+        { name: '20FT CT', id: '20 Feet Container', type: 'container' }
+      ]
     },
     {
       id: 'TRIP00000004',
@@ -150,7 +229,17 @@ const GridDemo = () => {
       customer: '+3',
       resources: '+3',
       departurePointDetails: 'VQL-705\nVolla\n\nAddress\nSardar Patel Rd, Sriram Nagar, Tharamani, Chennai, Tamil Nadu 600113',
-      arrivalPointDetails: 'Currency details for CUR-25'
+      arrivalPointDetails: 'Currency details for CUR-25',
+      customerDetails: [
+        { name: 'DB Cargo', id: 'CUS00000123', type: 'customer' },
+        { name: 'ABC Rail Goods', id: 'CUS00003214', type: 'customer' },
+        { name: 'Wave Cargo', id: 'CUS00012345', type: 'customer' }
+      ],
+      resourceDetails: [
+        { name: 'Train ID', id: 'TR000213', type: 'train' },
+        { name: 'AGN01', id: 'Agent-0000001', type: 'agent' },
+        { name: '20FT CT', id: '20 Feet Container', type: 'container' }
+      ]
     },
     {
       id: 'TRIP00000005',
@@ -163,7 +252,17 @@ const GridDemo = () => {
       customer: '+3',
       resources: '+3',
       departurePointDetails: 'VQL-705\nVolla\n\nAddress\nSardar Patel Rd, Sriram Nagar, Tharamani, Chennai, Tamil Nadu 600113',
-      arrivalPointDetails: 'Currency details for CUR-25'
+      arrivalPointDetails: 'Currency details for CUR-25',
+      customerDetails: [
+        { name: 'DB Cargo', id: 'CUS00000123', type: 'customer' },
+        { name: 'ABC Rail Goods', id: 'CUS00003214', type: 'customer' },
+        { name: 'Wave Cargo', id: 'CUS00012345', type: 'customer' }
+      ],
+      resourceDetails: [
+        { name: 'Train ID', id: 'TR000213', type: 'train' },
+        { name: 'AGN01', id: 'Agent-0000001', type: 'agent' },
+        { name: '20FT CT', id: '20 Feet Container', type: 'container' }
+      ]
     },
     {
       id: 'TRIP00000006',
@@ -176,7 +275,17 @@ const GridDemo = () => {
       customer: '+3',
       resources: '+3',
       departurePointDetails: 'VQL-705\nVolla\n\nAddress\nSardar Patel Rd, Sriram Nagar, Tharamani, Chennai, Tamil Nadu 600113',
-      arrivalPointDetails: 'Currency details for CUR-25'
+      arrivalPointDetails: 'Currency details for CUR-25',
+      customerDetails: [
+        { name: 'DB Cargo', id: 'CUS00000123', type: 'customer' },
+        { name: 'ABC Rail Goods', id: 'CUS00003214', type: 'customer' },
+        { name: 'Wave Cargo', id: 'CUS00012345', type: 'customer' }
+      ],
+      resourceDetails: [
+        { name: 'Train ID', id: 'TR000213', type: 'train' },
+        { name: 'AGN01', id: 'Agent-0000001', type: 'agent' },
+        { name: '20FT CT', id: '20 Feet Container', type: 'container' }
+      ]
     },
     {
       id: 'TRIP00000007',
@@ -189,7 +298,17 @@ const GridDemo = () => {
       customer: '+3',
       resources: '+3',
       departurePointDetails: 'VQL-705\nVolla\n\nAddress\nSardar Patel Rd, Sriram Nagar, Tharamani, Chennai, Tamil Nadu 600113',
-      arrivalPointDetails: 'Currency details for CUR-25'
+      arrivalPointDetails: 'Currency details for CUR-25',
+      customerDetails: [
+        { name: 'DB Cargo', id: 'CUS00000123', type: 'customer' },
+        { name: 'ABC Rail Goods', id: 'CUS00003214', type: 'customer' },
+        { name: 'Wave Cargo', id: 'CUS00012345', type: 'customer' }
+      ],
+      resourceDetails: [
+        { name: 'Train ID', id: 'TR000213', type: 'train' },
+        { name: 'AGN01', id: 'Agent-0000001', type: 'agent' },
+        { name: '20FT CT', id: '20 Feet Container', type: 'container' }
+      ]
     }
   ];
 
