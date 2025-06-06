@@ -46,6 +46,7 @@ export function SmartGrid({
   const [selectedRows, setSelectedRows] = useState<Set<number>>(new Set());
   const [showCheckboxes, setShowCheckboxes] = useState(false);
   const [viewMode, setViewMode] = useState<'table' | 'card'>('table');
+  const [isResizing, setIsResizing] = useState(false); // New state to track active resizing
   const { toast } = useToast();
 
   // Convert GridColumnConfig to Column format for useGridPreferences
@@ -772,22 +773,28 @@ export function SmartGrid({
                   <React.Fragment key={column.key}>
                     <TableHead 
                       className={cn(
-                        "relative group bg-gray-50/80 backdrop-blur-sm font-semibold text-gray-900 px-2 py-3 border-r border-gray-100 last:border-r-0 cursor-move",
+                        "relative group bg-gray-50/80 backdrop-blur-sm font-semibold text-gray-900 px-2 py-3 border-r border-gray-100 last:border-r-0",
                         draggedColumn === column.key && "opacity-50",
-                        dragOverColumn === column.key && "bg-blue-100 border-blue-300"
+                        dragOverColumn === column.key && "bg-blue-100 border-blue-300",
+                        !isResizing && "cursor-move"
                       )}
                       style={{ width: `${column.width}px`, minWidth: `${Math.max(120, column.width)}px` }}
-                      draggable={!resizingColumn && !editingHeader}
+                      draggable={!resizingColumn && !editingHeader && !isResizing}
                       onDragStart={(e) => handleColumnDragStart(e, column.key)}
                       onDragOver={(e) => handleColumnDragOver(e, column.key)}
                       onDragLeave={handleColumnDragLeave}
                       onDrop={(e) => handleColumnDrop(e, column.key)}
                       onDragEnd={handleColumnDragEnd}
                     >
-                      <div className="flex items-center justify-between gap-1 min-w-0">
+                      <div className={cn(
+                        "flex items-center justify-between gap-1 min-w-0",
+                        isResizing && "opacity-60 select-none pointer-events-none"
+                      )}>
                         <div className="flex items-center gap-1 min-w-0 flex-1">
-                          <GripVertical className="h-3 w-3 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
-                          {editingHeader === column.key ? (
+                          {!isResizing && (
+                            <GripVertical className="h-3 w-3 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
+                          )}
+                          {editingHeader === column.key && !isResizing ? (
                             <Input
                               defaultValue={column.label}
                               onBlur={(e) => handleHeaderEdit(column.key, e.target.value)}
@@ -806,10 +813,15 @@ export function SmartGrid({
                             />
                           ) : (
                             <div 
-                              className="flex items-center gap-1 cursor-pointer hover:bg-gray-100/50 rounded px-1 py-0.5 -mx-1 -my-0.5 transition-colors group/header flex-1 min-w-0"
+                              className={cn(
+                                "flex items-center gap-1 rounded px-1 py-0.5 -mx-1 -my-0.5 transition-colors group/header flex-1 min-w-0",
+                                !isResizing && "cursor-pointer hover:bg-gray-100/50"
+                              )}
                               onClick={(e) => {
-                                e.stopPropagation();
-                                handleHeaderClick(column.key);
+                                if (!isResizing) {
+                                  e.stopPropagation();
+                                  handleHeaderClick(column.key);
+                                }
                               }}
                               onDragStart={(e) => e.preventDefault()}
                             >
@@ -824,12 +836,14 @@ export function SmartGrid({
                               >
                                 {column.label}
                               </span>
-                              <Edit2 className="h-3 w-3 text-gray-400 opacity-0 group-hover/header:opacity-100 transition-opacity flex-shrink-0" />
+                              {!isResizing && column.editable && (
+                                <Edit2 className="h-3 w-3 text-gray-400 opacity-0 group-hover/header:opacity-100 transition-opacity flex-shrink-0" />
+                              )}
                             </div>
                           )}
                         </div>
                         
-                        {column.sortable && (
+                        {column.sortable && !isResizing && (
                           <Button
                             variant="ghost"
                             size="sm"
@@ -854,13 +868,14 @@ export function SmartGrid({
                         )}
                       </div>
                       
-                      {/* Enhanced resize handle */}
+                      {/* Enhanced resize handle with increased width */}
                       <div
-                        className="absolute right-0 top-0 bottom-0 w-8 cursor-col-resize group/resize z-30"
+                        className="absolute right-0 top-0 bottom-0 w-12 cursor-col-resize group/resize z-30"
                         onMouseDown={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
                           setResizingColumn(column.key);
+                          setIsResizing(true); // Set resizing state to true
                           
                           const startX = e.clientX;
                           const startWidth = column.width;
@@ -902,6 +917,7 @@ export function SmartGrid({
                               handleColumnResize(column.key, finalWidth);
                               
                               setResizingColumn(null);
+                              setIsResizing(false); // Reset resizing state
                               document.removeEventListener('mousemove', handleMouseMove);
                               document.removeEventListener('mouseup', handleMouseUp);
                               document.body.style.cursor = '';
@@ -917,9 +933,15 @@ export function SmartGrid({
                         }}
                         data-column-key={column.key}
                       >
-                        <div className="absolute inset-y-0 right-0 w-1 bg-blue-400 opacity-0 group-hover/resize:opacity-100 transition-opacity"></div>
-                        <div className="absolute right-[-2px] top-1/2 transform -translate-y-1/2 -translate-x-1/2 w-6 h-8 flex items-center justify-center opacity-0 group-hover/resize:opacity-100">
-                          <GripHorizontal className="h-4 w-5 text-blue-500" />
+                        <div className={cn(
+                          "absolute inset-y-0 right-0 w-2 bg-blue-400 transition-opacity",
+                          isResizing && resizingColumn === column.key ? "opacity-100" : "opacity-0 group-hover/resize:opacity-100"
+                        )}></div>
+                        <div className={cn(
+                          "absolute right-[-4px] top-1/2 transform -translate-y-1/2 -translate-x-1/2 w-10 h-10 flex items-center justify-center transition-opacity",
+                          isResizing && resizingColumn === column.key ? "opacity-100" : "opacity-0 group-hover/resize:opacity-100"
+                        )}>
+                          <GripHorizontal className="h-5 w-6 text-blue-500" />
                         </div>
                       </div>
                     </TableHead>
