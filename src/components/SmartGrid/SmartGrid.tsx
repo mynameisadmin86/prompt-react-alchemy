@@ -4,7 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
 import { ResizablePanelGroup } from '@/components/ui/resizable';
-import { ArrowUpDown, ArrowUp, ArrowDown, Download, Filter, Search, RotateCcw, ChevronRight, ChevronDown, Edit2, GripVertical, CheckSquare, Grid2x2, List, ResizeHorizontal } from 'lucide-react';
+import { ArrowUpDown, ArrowUp, ArrowDown, Download, Filter, Search, RotateCcw, ChevronRight, ChevronDown, Edit2, GripVertical, CheckSquare, Grid2x2, List, GripHorizontal } from 'lucide-react';
 import { SmartGridProps, GridColumnConfig, SortConfig, FilterConfig, GridAPI } from '@/types/smartgrid';
 import { exportToCSV } from '@/utils/gridExport';
 import { useToast } from '@/hooks/use-toast';
@@ -891,7 +891,7 @@ export function SmartGrid({
                       >
                         <div className="absolute inset-y-0 right-0 w-0.5 bg-blue-400 opacity-0 group-hover/resize:opacity-100 transition-opacity"></div>
                         <div className="absolute right-[-2px] top-1/2 transform -translate-y-1/2 -translate-x-1/2 w-5 h-8 flex items-center justify-center opacity-0 group-hover/resize:opacity-100">
-                          <ResizeHorizontal className="h-3 w-3 text-blue-500" />
+                          <GripHorizontal className="h-3 w-3 text-blue-500" />
                         </div>
                       </div>
                     </TableHead>
