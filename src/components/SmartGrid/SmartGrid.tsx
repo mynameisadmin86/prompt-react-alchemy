@@ -3,8 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
-import { ResizablePanelGroup } from '@/components/ui/resizable';
-import { ArrowUpDown, ArrowUp, ArrowDown, Download, Filter, Search, RotateCcw, ChevronRight, ChevronDown, Edit2, GripVertical, CheckSquare, Grid2x2, List, GripHorizontal } from 'lucide-react';
+import { ArrowUpDown, ArrowUp, ArrowDown, Download, Filter, Search, RotateCcw, ChevronRight, ChevronDown, Edit2, GripVertical, CheckSquare, Grid2x2, List } from 'lucide-react';
 import { SmartGridProps, GridColumnConfig, SortConfig, FilterConfig, GridAPI } from '@/types/smartgrid';
 import { exportToCSV } from '@/utils/gridExport';
 import { useToast } from '@/hooks/use-toast';
@@ -34,7 +33,6 @@ export function SmartGrid({
   const [editingHeader, setEditingHeader] = useState<string | null>(null);
   const [draggedColumn, setDraggedColumn] = useState<string | null>(null);
   const [dragOverColumn, setDragOverColumn] = useState<string | null>(null);
-  const [resizingColumn, setResizingColumn] = useState<string | null>(null);
   const [sort, setSort] = useState<SortConfig | undefined>();
   const [filters, setFilters] = useState<FilterConfig[]>([]);
   const [globalFilter, setGlobalFilter] = useState('');
@@ -46,7 +44,6 @@ export function SmartGrid({
   const [selectedRows, setSelectedRows] = useState<Set<number>>(new Set());
   const [showCheckboxes, setShowCheckboxes] = useState(false);
   const [viewMode, setViewMode] = useState<'table' | 'card'>('table');
-  const [isResizing, setIsResizing] = useState(false); // New state to track active resizing
   const { toast } = useToast();
 
   // Convert GridColumnConfig to Column format for useGridPreferences
@@ -63,7 +60,6 @@ export function SmartGrid({
     updateColumnOrder,
     toggleColumnVisibility,
     updateColumnHeader,
-    updateColumnWidth,
     savePreferences
   } = useGridPreferences(
     preferencesColumns,
@@ -158,24 +154,12 @@ export function SmartGrid({
   useEffect(() => {
     const handleResize = () => {
       const calculatedWidths = calculateColumnWidths(orderedColumns);
-      orderedColumns.forEach(col => {
-        if (calculatedWidths[col.key] !== col.width) {
-          updateColumnWidth(col.key, calculatedWidths[col.key]);
-        }
-      });
+      // Column widths are now calculated dynamically without updating preferences
     };
 
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
-  }, [orderedColumns, calculateColumnWidths, updateColumnWidth]);
-
-  // Handle column resizing with better UI
-  const handleColumnResize = useCallback((columnKey: string, size: number) => {
-    const minWidth = 60;
-    const maxWidth = Math.min(400, window.innerWidth * 0.4);
-    const newWidth = Math.max(minWidth, Math.min(maxWidth, size));
-    updateColumnWidth(columnKey, newWidth);
-  }, [updateColumnWidth]);
+  }, [orderedColumns, calculateColumnWidths]);
 
   // Handle header editing
   const handleHeaderEdit = useCallback((columnKey: string, newHeader: string) => {
@@ -190,28 +174,26 @@ export function SmartGrid({
   }, [updateColumnHeader, preferences.columnHeaders, toast]);
 
   const handleHeaderClick = useCallback((columnKey: string) => {
-    if (!resizingColumn) { // Only allow editing if not currently resizing
-      setEditingHeader(columnKey);
-    }
-  }, [resizingColumn]);
+    setEditingHeader(columnKey);
+  }, []);
 
   // Handle drag and drop for column reordering
   const handleColumnDragStart = useCallback((e: React.DragEvent, columnKey: string) => {
-    if (resizingColumn || editingHeader) return; // Prevent drag if resizing or editing
+    if (editingHeader) return; // Prevent drag if editing
     e.stopPropagation();
     setDraggedColumn(columnKey);
     e.dataTransfer.effectAllowed = 'move';
     e.dataTransfer.setData('text/plain', columnKey);
-  }, [resizingColumn, editingHeader]);
+  }, [editingHeader]);
 
   const handleColumnDragOver = useCallback((e: React.DragEvent, targetColumnKey: string) => {
     e.preventDefault();
     e.stopPropagation();
-    if (draggedColumn && draggedColumn !== targetColumnKey && !resizingColumn) {
+    if (draggedColumn && draggedColumn !== targetColumnKey) {
       setDragOverColumn(targetColumnKey);
       e.dataTransfer.dropEffect = 'move';
     }
-  }, [draggedColumn, resizingColumn]);
+  }, [draggedColumn]);
 
   const handleColumnDragLeave = useCallback((e: React.DragEvent) => {
     e.stopPropagation();
@@ -225,7 +207,7 @@ export function SmartGrid({
     e.preventDefault();
     e.stopPropagation();
     
-    if (!draggedColumn || draggedColumn === targetColumnKey || resizingColumn) {
+    if (!draggedColumn || draggedColumn === targetColumnKey) {
       setDraggedColumn(null);
       setDragOverColumn(null);
       return;
@@ -247,7 +229,7 @@ export function SmartGrid({
       title: "Success",
       description: "Column order updated"
     });
-  }, [draggedColumn, preferences.columnOrder, updateColumnOrder, toast, resizingColumn]);
+  }, [draggedColumn, preferences.columnOrder, updateColumnOrder, toast]);
 
   const handleColumnDragEnd = useCallback(() => {
     setDraggedColumn(null);
@@ -770,187 +752,93 @@ export function SmartGrid({
                   </TableHead>
                 )}
                 {orderedColumns.map((column, index) => (
-                  <React.Fragment key={column.key}>
-                    <TableHead 
-                      className={cn(
-                        "relative group bg-gray-50/80 backdrop-blur-sm font-semibold text-gray-900 px-2 py-3 border-r border-gray-100 last:border-r-0",
-                        draggedColumn === column.key && "opacity-50",
-                        dragOverColumn === column.key && "bg-blue-100 border-blue-300",
-                        !isResizing && "cursor-move",
-                        isResizing && resizingColumn === column.key && "pointer-events-none"
-                      )}
-                      style={{ width: `${column.width}px`, minWidth: `${Math.max(120, column.width)}px` }}
-                      draggable={!resizingColumn && !editingHeader && !isResizing}
-                      onDragStart={(e) => handleColumnDragStart(e, column.key)}
-                      onDragOver={(e) => handleColumnDragOver(e, column.key)}
-                      onDragLeave={handleColumnDragLeave}
-                      onDrop={(e) => handleColumnDrop(e, column.key)}
-                      onDragEnd={handleColumnDragEnd}
-                    >
-                      <div className={cn(
-                        "flex items-center justify-between gap-1 min-w-0",
-                        isResizing && "opacity-60 select-none pointer-events-none",
-                        isResizing && resizingColumn === column.key && "invisible" // Hide content when this column is being resized
-                      )}>
-                        <div className="flex items-center gap-1 min-w-0 flex-1">
-                          {!isResizing && (
-                            <GripVertical className="h-3 w-3 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
-                          )}
-                          {editingHeader === column.key && !isResizing ? (
-                            <Input
-                              defaultValue={column.label}
-                              onBlur={(e) => handleHeaderEdit(column.key, e.target.value)}
-                              onKeyDown={(e) => {
-                                if (e.key === 'Enter') {
-                                  handleHeaderEdit(column.key, e.currentTarget.value);
-                                } else if (e.key === 'Escape') {
-                                  setEditingHeader(null);
-                                }
-                              }}
-                              className="h-5 px-1 text-sm font-semibold bg-white border-blue-300 focus:border-blue-500 min-w-0"
-                              autoFocus
-                              onFocus={(e) => e.target.select()}
-                              onClick={(e) => e.stopPropagation()}
-                              onDragStart={(e) => e.preventDefault()}
-                            />
-                          ) : (
-                            <div 
-                              className={cn(
-                                "flex items-center gap-1 rounded px-1 py-0.5 -mx-1 -my-0.5 transition-colors group/header flex-1 min-w-0",
-                                !isResizing && "cursor-pointer hover:bg-gray-100/50"
-                              )}
-                              onClick={(e) => {
-                                if (!isResizing) {
-                                  e.stopPropagation();
-                                  handleHeaderClick(column.key);
-                                }
-                              }}
-                              onDragStart={(e) => e.preventDefault()}
-                            >
-                              <span 
-                                className="select-none text-sm font-semibold flex-1 min-w-0" 
-                                style={{ 
-                                  whiteSpace: 'nowrap',
-                                  overflow: 'visible',
-                                  textOverflow: 'clip'
-                                }}
-                                title={column.label}
-                              >
-                                {column.label}
-                              </span>
-                              {!isResizing && column.editable && (
-                                <Edit2 className="h-3 w-3 text-gray-400 opacity-0 group-hover/header:opacity-100 transition-opacity flex-shrink-0" />
-                              )}
-                            </div>
-                          )}
-                        </div>
-                        
-                        {column.sortable && !isResizing && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
+                  <TableHead 
+                    key={column.key}
+                    className={cn(
+                      "relative group bg-gray-50/80 backdrop-blur-sm font-semibold text-gray-900 px-2 py-3 border-r border-gray-100 last:border-r-0 cursor-move",
+                      draggedColumn === column.key && "opacity-50",
+                      dragOverColumn === column.key && "bg-blue-100 border-blue-300"
+                    )}
+                    style={{ width: `${column.width}px`, minWidth: `${Math.max(120, column.width)}px` }}
+                    draggable={!editingHeader}
+                    onDragStart={(e) => handleColumnDragStart(e, column.key)}
+                    onDragOver={(e) => handleColumnDragOver(e, column.key)}
+                    onDragLeave={handleColumnDragLeave}
+                    onDrop={(e) => handleColumnDrop(e, column.key)}
+                    onDragEnd={handleColumnDragEnd}
+                  >
+                    <div className="flex items-center justify-between gap-1 min-w-0">
+                      <div className="flex items-center gap-1 min-w-0 flex-1">
+                        <GripVertical className="h-3 w-3 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
+                        {editingHeader === column.key ? (
+                          <Input
+                            defaultValue={column.label}
+                            onBlur={(e) => handleHeaderEdit(column.key, e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') {
+                                handleHeaderEdit(column.key, e.currentTarget.value);
+                              } else if (e.key === 'Escape') {
+                                setEditingHeader(null);
+                              }
+                            }}
+                            className="h-5 px-1 text-sm font-semibold bg-white border-blue-300 focus:border-blue-500 min-w-0"
+                            autoFocus
+                            onFocus={(e) => e.target.select()}
+                            onClick={(e) => e.stopPropagation()}
+                            onDragStart={(e) => e.preventDefault()}
+                          />
+                        ) : (
+                          <div 
+                            className="flex items-center gap-1 rounded px-1 py-0.5 -mx-1 -my-0.5 transition-colors group/header flex-1 min-w-0 cursor-pointer hover:bg-gray-100/50"
                             onClick={(e) => {
                               e.stopPropagation();
-                              handleSort(column.key);
+                              handleHeaderClick(column.key);
                             }}
-                            className="h-5 w-5 p-0 hover:bg-transparent transition-opacity flex-shrink-0 ml-1"
-                            disabled={loading}
                             onDragStart={(e) => e.preventDefault()}
                           >
-                            {sort?.column === column.key ? (
-                              sort.direction === 'asc' ? (
-                                <ArrowUp className="h-3 w-3 text-blue-600" />
-                              ) : (
-                                <ArrowDown className="h-3 w-3 text-blue-600" />
-                              )
-                            ) : (
-                              <ArrowUpDown className="h-3 w-3 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+                            <span 
+                              className="select-none text-sm font-semibold flex-1 min-w-0" 
+                              style={{ 
+                                whiteSpace: 'nowrap',
+                                overflow: 'visible',
+                                textOverflow: 'clip'
+                              }}
+                              title={column.label}
+                            >
+                              {column.label}
+                            </span>
+                            {column.editable && (
+                              <Edit2 className="h-3 w-3 text-gray-400 opacity-0 group-hover/header:opacity-100 transition-opacity flex-shrink-0" />
                             )}
-                          </Button>
+                          </div>
                         )}
                       </div>
                       
-                      {/* Enhanced resize handle with increased width */}
-                      <div
-                        className="absolute right-0 top-0 bottom-0 w-16 cursor-col-resize group/resize z-30"
-                        onMouseDown={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          setResizingColumn(column.key);
-                          setIsResizing(true); // Set resizing state to true
-                          
-                          const startX = e.clientX;
-                          const startWidth = column.width;
-                          
-                          const handleMouseMove = (e: MouseEvent) => {
-                            if (resizingColumn) {
-                              const diff = e.clientX - startX;
-                              const newWidth = Math.max(120, Math.min(400, startWidth + diff));
-                              
-                              // Update column width in real time for better UX
-                              const updatedColumns = orderedColumns.map(col => {
-                                if (col.key === column.key) {
-                                  return { ...col, width: newWidth };
-                                }
-                                return col;
-                              });
-                              
-                              // Apply the new width to the DOM element for immediate visual feedback
-                              const headerCell = e.target as HTMLElement;
-                              const headerRow = headerCell.closest('tr');
-                              if (headerRow) {
-                                const cell = headerRow.querySelector(`[data-column-key="${column.key}"]`);
-                                if (cell) {
-                                  (cell as HTMLElement).style.width = `${newWidth}px`;
-                                }
-                              }
-                              
-                              // Prevent text selection during resize
-                              if (e.preventDefault) e.preventDefault();
-                            }
-                            return false;
-                          };
-                          
-                          const handleMouseUp = (mouseUpEvent: MouseEvent) => {
-                            if (resizingColumn) {
-                              // Save the final width to preferences
-                              const diff = mouseUpEvent.clientX - startX;
-                              const finalWidth = Math.max(120, Math.min(400, startWidth + diff));
-                              handleColumnResize(column.key, finalWidth);
-                              
-                              setResizingColumn(null);
-                              setIsResizing(false); // Reset resizing state
-                              document.removeEventListener('mousemove', handleMouseMove);
-                              document.removeEventListener('mouseup', handleMouseUp);
-                              document.body.style.cursor = '';
-                              document.body.style.userSelect = '';
-                            }
-                          };
-                          
-                          // Set cursor for entire body during resize
-                          document.body.style.cursor = 'col-resize';
-                          document.body.style.userSelect = 'none';
-                          document.addEventListener('mousemove', handleMouseMove);
-                          document.addEventListener('mouseup', handleMouseUp);
-                        }}
-                        data-column-key={column.key}
-                      >
-                        <div className={cn(
-                          "absolute inset-y-0 right-0 w-3 bg-blue-400 transition-opacity",
-                          isResizing && resizingColumn === column.key ? "opacity-100" : "opacity-0 group-hover/resize:opacity-100"
-                        )}></div>
-                        <div className={cn(
-                          "absolute right-[-6px] top-1/2 transform -translate-y-1/2 -translate-x-1/2 w-12 h-12 flex items-center justify-center transition-opacity z-40",
-                          isResizing && resizingColumn === column.key ? "opacity-100" : "opacity-0 group-hover/resize:opacity-100"
-                        )}>
-                          <GripHorizontal className="h-6 w-7 text-blue-500" />
-                        </div>
-                        {isResizing && resizingColumn === column.key && (
-                          <div className="absolute inset-0 bg-blue-50/30 backdrop-blur-[1px]"></div>
-                        )}
-                      </div>
-                    </TableHead>
-                  </React.Fragment>
+                      {column.sortable && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleSort(column.key);
+                          }}
+                          className="h-5 w-5 p-0 hover:bg-transparent transition-opacity flex-shrink-0 ml-1"
+                          disabled={loading}
+                          onDragStart={(e) => e.preventDefault()}
+                        >
+                          {sort?.column === column.key ? (
+                            sort.direction === 'asc' ? (
+                              <ArrowUp className="h-3 w-3 text-blue-600" />
+                            ) : (
+                              <ArrowDown className="h-3 w-3 text-blue-600" />
+                            )
+                          ) : (
+                            <ArrowUpDown className="h-3 w-3 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+                          )}
+                        </Button>
+                      )}
+                    </div>
+                  </TableHead>
                 ))}
                 {/* Plugin row actions header */}
                 {plugins.some(plugin => plugin.rowActions) && (
