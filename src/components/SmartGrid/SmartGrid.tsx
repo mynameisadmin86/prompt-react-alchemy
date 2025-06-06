@@ -81,8 +81,8 @@ export function SmartGrid({
   // Calculate responsive column widths based on content type and available space
   const calculateColumnWidths = useCallback((visibleColumns: GridColumnConfig[]) => {
     const containerWidth = window.innerWidth - 64; // Account for padding
-    const checkboxWidth = showCheckboxes ? 60 : 0;
-    const actionsWidth = plugins.some(plugin => plugin.rowActions) ? 120 : 0;
+    const checkboxWidth = showCheckboxes ? 50 : 0;
+    const actionsWidth = plugins.some(plugin => plugin.rowActions) ? 100 : 0;
     const availableWidth = containerWidth - checkboxWidth - actionsWidth;
     
     const totalColumns = visibleColumns.length;
@@ -91,28 +91,28 @@ export function SmartGrid({
     
     // First pass: assign minimum widths based on content type
     visibleColumns.forEach(col => {
-      let minWidth = 120; // default minimum
+      let minWidth = 100; // default minimum
       
       switch (col.type) {
         case 'Badge':
-          minWidth = 100;
+          minWidth = 80;
           break;
         case 'Date':
-          minWidth = 140;
+          minWidth = 120;
           break;
         case 'DateTimeRange':
-          minWidth = 200;
+          minWidth = 180;
           break;
         case 'Link':
-          minWidth = 150;
+          minWidth = 130;
           break;
         case 'ExpandableCount':
-          minWidth = 80;
+          minWidth = 70;
           break;
         case 'Text':
         case 'EditableText':
         default:
-          minWidth = 120;
+          minWidth = 100;
           break;
       }
       
@@ -149,7 +149,7 @@ export function SmartGrid({
       ...col,
       label: preferences.columnHeaders[col.key] || col.label,
       hidden: preferences.hiddenColumns.includes(col.key),
-      width: calculatedWidths[col.key] || 120
+      width: calculatedWidths[col.key] || 100
     }));
   }, [columns, preferences, calculateColumnWidths]);
 
@@ -170,8 +170,8 @@ export function SmartGrid({
 
   // Handle column resizing
   const handleColumnResize = useCallback((columnKey: string, size: number) => {
-    const minWidth = 80;
-    const maxWidth = Math.min(400, window.innerWidth * 0.4); // Max 40% of window width
+    const minWidth = 60;
+    const maxWidth = Math.min(300, window.innerWidth * 0.3);
     const newWidth = Math.max(minWidth, Math.min(maxWidth, size));
     updateColumnWidth(columnKey, newWidth);
   }, [updateColumnWidth]);
@@ -546,17 +546,17 @@ export function SmartGrid({
     if (columnIndex === 0 && nestedRowRenderer) {
       const isExpanded = expandedRows.has(rowIndex);
       return (
-        <div className="flex items-center space-x-2 min-w-0">
+        <div className="flex items-center space-x-1 min-w-0">
           <Button
             variant="ghost"
             size="sm"
             onClick={() => toggleRowExpansion(rowIndex)}
-            className="h-6 w-6 p-0 hover:bg-gray-100 flex-shrink-0"
+            className="h-5 w-5 p-0 hover:bg-gray-100 flex-shrink-0"
           >
             {isExpanded ? (
-              <ChevronDown className="h-4 w-4" />
+              <ChevronDown className="h-3 w-3" />
             ) : (
-              <ChevronRight className="h-4 w-4" />
+              <ChevronRight className="h-3 w-3" />
             )}
           </Button>
           <div className="flex-1 min-w-0 truncate">
@@ -753,7 +753,7 @@ export function SmartGrid({
               <TableRow className="hover:bg-transparent">
                 {/* Checkbox header */}
                 {showCheckboxes && (
-                  <TableHead className="bg-gray-50/80 backdrop-blur-sm font-semibold text-gray-900 px-4 py-4 border-r border-gray-100 w-[60px] flex-shrink-0">
+                  <TableHead className="bg-gray-50/80 backdrop-blur-sm font-semibold text-gray-900 px-3 py-3 border-r border-gray-100 w-[50px] flex-shrink-0">
                     <input 
                       type="checkbox" 
                       className="rounded" 
@@ -772,7 +772,7 @@ export function SmartGrid({
                   <React.Fragment key={column.key}>
                     <TableHead 
                       className={cn(
-                        "relative group bg-gray-50/80 backdrop-blur-sm font-semibold text-gray-900 px-4 py-4 border-r border-gray-100 last:border-r-0 cursor-move overflow-hidden",
+                        "relative group bg-gray-50/80 backdrop-blur-sm font-semibold text-gray-900 px-3 py-3 border-r border-gray-100 last:border-r-0 cursor-move overflow-hidden",
                         draggedColumn === column.key && "opacity-50",
                         dragOverColumn === column.key && "bg-blue-100 border-blue-300"
                       )}
@@ -784,64 +784,64 @@ export function SmartGrid({
                       onDrop={(e) => handleColumnDrop(e, column.key)}
                       onDragEnd={handleColumnDragEnd}
                     >
-                      <div className="flex items-center space-x-2 min-w-0">
-                        <GripVertical className="h-4 w-4 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
-                        {editingHeader === column.key ? (
-                          <Input
-                            defaultValue={column.label}
-                            onBlur={(e) => handleHeaderEdit(column.key, e.target.value)}
-                            onKeyDown={(e) => {
-                              if (e.key === 'Enter') {
-                                handleHeaderEdit(column.key, e.currentTarget.value);
-                              } else if (e.key === 'Escape') {
-                                setEditingHeader(null);
-                              }
-                            }}
-                            className="h-6 px-2 text-sm font-semibold bg-white border-blue-300 focus:border-blue-500"
-                            autoFocus
-                            onFocus={(e) => e.target.select()}
-                            onClick={(e) => e.stopPropagation()}
-                            onDragStart={(e) => e.preventDefault()}
-                          />
-                        ) : (
-                          <div 
-                            className="flex items-center space-x-1 cursor-pointer hover:bg-gray-100/50 rounded px-1 py-0.5 -mx-1 -my-0.5 transition-colors group/header flex-1 min-w-0"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleHeaderClick(column.key);
-                            }}
-                            onDragStart={(e) => e.preventDefault()}
-                          >
-                            <span className="select-none truncate">{column.label}</span>
-                            <Edit2 className="h-3 w-3 text-gray-400 opacity-0 group-hover/header:opacity-100 transition-opacity flex-shrink-0" />
-                          </div>
-                        )}
-                        
-                        <div className="flex items-center space-x-1 flex-shrink-0">
-                          {column.sortable && (
-                            <Button
-                              variant="ghost"
-                              size="sm"
+                      <div className="flex items-center justify-between min-w-0">
+                        <div className="flex items-center space-x-1 min-w-0 flex-1">
+                          <GripVertical className="h-3 w-3 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
+                          {editingHeader === column.key ? (
+                            <Input
+                              defaultValue={column.label}
+                              onBlur={(e) => handleHeaderEdit(column.key, e.target.value)}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                  handleHeaderEdit(column.key, e.currentTarget.value);
+                                } else if (e.key === 'Escape') {
+                                  setEditingHeader(null);
+                                }
+                              }}
+                              className="h-5 px-1 text-sm font-semibold bg-white border-blue-300 focus:border-blue-500"
+                              autoFocus
+                              onFocus={(e) => e.target.select()}
+                              onClick={(e) => e.stopPropagation()}
+                              onDragStart={(e) => e.preventDefault()}
+                            />
+                          ) : (
+                            <div 
+                              className="flex items-center space-x-1 cursor-pointer hover:bg-gray-100/50 rounded px-1 py-0.5 -mx-1 -my-0.5 transition-colors group/header flex-1 min-w-0"
                               onClick={(e) => {
                                 e.stopPropagation();
-                                handleSort(column.key);
+                                handleHeaderClick(column.key);
                               }}
-                              className="h-auto p-0 hover:bg-transparent opacity-60 hover:opacity-100 transition-opacity"
-                              disabled={loading}
                               onDragStart={(e) => e.preventDefault()}
                             >
-                              {sort?.column === column.key ? (
-                                sort.direction === 'asc' ? (
-                                  <ArrowUp className="h-4 w-4 text-blue-600" />
-                                ) : (
-                                  <ArrowDown className="h-4 w-4 text-blue-600" />
-                                )
-                              ) : (
-                                <ArrowUpDown className="h-4 w-4 text-gray-400" />
-                              )}
-                            </Button>
+                              <span className="select-none truncate text-sm">{column.label}</span>
+                              <Edit2 className="h-3 w-3 text-gray-400 opacity-0 group-hover/header:opacity-100 transition-opacity flex-shrink-0" />
+                            </div>
                           )}
                         </div>
+                        
+                        {column.sortable && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleSort(column.key);
+                            }}
+                            className="h-6 w-6 p-0 hover:bg-transparent transition-opacity flex-shrink-0"
+                            disabled={loading}
+                            onDragStart={(e) => e.preventDefault()}
+                          >
+                            {sort?.column === column.key ? (
+                              sort.direction === 'asc' ? (
+                                <ArrowUp className="h-3 w-3 text-blue-600" />
+                              ) : (
+                                <ArrowDown className="h-3 w-3 text-blue-600" />
+                              )
+                            ) : (
+                              <ArrowUpDown className="h-3 w-3 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+                            )}
+                          </Button>
+                        )}
                       </div>
                       
                       {/* Resize handle - only show on last few columns to prevent overcrowding */}
@@ -855,7 +855,7 @@ export function SmartGrid({
                             
                             const handleMouseMove = (e: MouseEvent) => {
                               const diff = e.clientX - startX;
-                              const newWidth = Math.max(80, Math.min(400, startWidth + diff));
+                              const newWidth = Math.max(60, Math.min(300, startWidth + diff));
                               handleColumnResize(column.key, newWidth);
                             };
                             
@@ -875,7 +875,7 @@ export function SmartGrid({
                 ))}
                 {/* Plugin row actions header */}
                 {plugins.some(plugin => plugin.rowActions) && (
-                  <TableHead className="bg-gray-50/80 backdrop-blur-sm font-semibold text-gray-900 px-4 py-4 text-center w-[120px] flex-shrink-0">
+                  <TableHead className="bg-gray-50/80 backdrop-blur-sm font-semibold text-gray-900 px-3 py-3 text-center w-[100px] flex-shrink-0">
                     Actions
                   </TableHead>
                 )}
@@ -912,7 +912,7 @@ export function SmartGrid({
                     <TableRow className="hover:bg-gray-50/50 transition-colors duration-150 border-b border-gray-100">
                       {/* Checkbox cell */}
                       {showCheckboxes && (
-                        <TableCell className="px-4 py-4 border-r border-gray-50 w-[60px]">
+                        <TableCell className="px-3 py-3 border-r border-gray-50 w-[50px]">
                           <input 
                             type="checkbox" 
                             className="rounded" 
@@ -934,7 +934,7 @@ export function SmartGrid({
                       {orderedColumns.map((column, columnIndex) => (
                         <TableCell 
                           key={column.key} 
-                          className="relative px-4 py-4 border-r border-gray-50 last:border-r-0 align-top overflow-hidden"
+                          className="relative px-3 py-3 border-r border-gray-50 last:border-r-0 align-top overflow-hidden"
                           style={{ width: `${column.width}px` }}
                         >
                           {renderCell(row, column, rowIndex, columnIndex)}
@@ -942,8 +942,8 @@ export function SmartGrid({
                       ))}
                       {/* Plugin row actions */}
                       {plugins.some(plugin => plugin.rowActions) && (
-                        <TableCell className="px-4 py-4 text-center align-top w-[120px]">
-                          <div className="flex items-center justify-center space-x-2">
+                        <TableCell className="px-3 py-3 text-center align-top w-[100px]">
+                          <div className="flex items-center justify-center space-x-1">
                             {renderPluginRowActions(row, rowIndex)}
                           </div>
                         </TableCell>
