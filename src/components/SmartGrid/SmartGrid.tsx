@@ -593,6 +593,18 @@ export function SmartGrid({
         </div>
 
         <div className="flex items-center space-x-2">
+          {/* Search box - first */}
+          <div className="relative w-64">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <Input
+              placeholder="Search..."
+              value={globalFilter}
+              onChange={(e) => setGlobalFilter(e.target.value)}
+              className="pl-9 w-full"
+              disabled={loading}
+            />
+          </div>
+
           {/* Common Filter Button */}
           <CommonFilter
             columns={orderedColumns}
@@ -627,18 +639,6 @@ export function SmartGrid({
           >
             <Download className="h-4 w-4" />
           </Button>
-
-          {/* Search box */}
-          <div className="relative w-64">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-            <Input
-              placeholder="Search..."
-              value={globalFilter}
-              onChange={(e) => setGlobalFilter(e.target.value)}
-              className="pl-9 w-full"
-              disabled={loading}
-            />
-          </div>
         </div>
       </div>
 
