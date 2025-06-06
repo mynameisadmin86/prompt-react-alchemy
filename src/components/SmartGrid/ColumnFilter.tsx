@@ -49,16 +49,19 @@ export function ColumnFilter({ column, currentFilter, onFilterChange }: ColumnFi
           variant="ghost"
           size="sm"
           className={cn(
-            "h-7 w-7 p-0 ml-1 rounded-full transition-all duration-200",
+            "h-5 w-5 p-0 rounded hover:bg-gray-200/60 transition-colors",
             hasActiveFilter 
-              ? "text-blue-600 bg-blue-100 hover:bg-blue-200 border border-blue-300 shadow-sm" 
-              : "text-gray-400 hover:text-gray-600 hover:bg-gray-100"
+              ? "text-blue-600 hover:text-blue-700" 
+              : "text-gray-400 hover:text-gray-600"
           )}
         >
           {hasActiveFilter ? (
-            <FilterX className="h-3.5 w-3.5" />
+            <div className="relative">
+              <Filter className="h-3 w-3" />
+              <div className="absolute -top-0.5 -right-0.5 h-1.5 w-1.5 bg-blue-600 rounded-full"></div>
+            </div>
           ) : (
-            <Filter className="h-3.5 w-3.5" />
+            <Filter className="h-3 w-3" />
           )}
         </Button>
       </PopoverTrigger>
