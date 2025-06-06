@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -983,7 +984,7 @@ export function SmartGrid({
                         )}
                       </div>
                       
-                      {/* Resize Handle */}
+                      {/* Resize Handle - Modified to only show on hover */}
                       <div
                         className="absolute top-0 right-0 w-2 h-full cursor-col-resize bg-transparent hover:bg-blue-300/50 transition-colors flex items-center justify-center group/resize z-30"
                         onMouseDown={(e) => handleResizeStart(e, column.key)}
@@ -995,7 +996,7 @@ export function SmartGrid({
                         }}
                         onDragStart={(e) => e.preventDefault()}
                       >
-                        <div className="w-0.5 h-4 bg-gray-300 group-hover/resize:bg-blue-500 transition-colors" />
+                        <div className="w-0.5 h-4 bg-gray-300 opacity-0 group-hover/resize:opacity-100 group-hover:opacity-100 transition-colors" />
                       </div>
                     </TableHead>
                   );
