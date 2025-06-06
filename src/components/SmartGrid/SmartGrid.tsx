@@ -861,25 +861,52 @@ export function SmartGrid({
                           e.preventDefault();
                           e.stopPropagation();
                           setResizingColumn(column.key);
+                          
                           const startX = e.clientX;
                           const startWidth = column.width;
                           
                           const handleMouseMove = (e: MouseEvent) => {
-                            const diff = e.clientX - startX;
-                            const newWidth = Math.max(120, Math.min(400, startWidth + diff));
-                            handleColumnResize(column.key, newWidth);
-                            
-                            // Prevent text selection during resize
-                            if (e.preventDefault) e.preventDefault();
+                            if (resizingColumn) {
+                              const diff = e.clientX - startX;
+                              const newWidth = Math.max(120, Math.min(400, startWidth + diff));
+                              
+                              // Update column width in real time for better UX
+                              const updatedColumns = orderedColumns.map(col => {
+                                if (col.key === column.key) {
+                                  return { ...col, width: newWidth };
+                                }
+                                return col;
+                              });
+                              
+                              // Apply the new width to the DOM element for immediate visual feedback
+                              const headerCell = e.target as HTMLElement;
+                              const headerRow = headerCell.closest('tr');
+                              if (headerRow) {
+                                const cell = headerRow.querySelector(`[data-column-key="${column.key}"]`);
+                                if (cell) {
+                                  (cell as HTMLElement).style.width = `${newWidth}px`;
+                                }
+                              }
+                              
+                              // Prevent text selection during resize
+                              if (e.preventDefault) e.preventDefault();
+                            }
                             return false;
                           };
                           
                           const handleMouseUp = () => {
-                            setResizingColumn(null);
-                            document.removeEventListener('mousemove', handleMouseMove);
-                            document.removeEventListener('mouseup', handleMouseUp);
-                            document.body.style.cursor = '';
-                            document.body.style.userSelect = '';
+                            if (resizingColumn) {
+                              // Save the final width to preferences
+                              const diff = event!.clientX - startX;
+                              const finalWidth = Math.max(120, Math.min(400, startWidth + diff));
+                              handleColumnResize(column.key, finalWidth);
+                              
+                              setResizingColumn(null);
+                              document.removeEventListener('mousemove', handleMouseMove);
+                              document.removeEventListener('mouseup', handleMouseUp);
+                              document.body.style.cursor = '';
+                              document.body.style.userSelect = '';
+                            }
                           };
                           
                           // Set cursor for entire body during resize
@@ -888,6 +915,7 @@ export function SmartGrid({
                           document.addEventListener('mousemove', handleMouseMove);
                           document.addEventListener('mouseup', handleMouseUp);
                         }}
+                        data-column-key={column.key}
                       >
                         <div className="absolute inset-y-0 right-0 w-0.5 bg-blue-400 opacity-0 group-hover/resize:opacity-100 transition-opacity"></div>
                         <div className="absolute right-[-2px] top-1/2 transform -translate-y-1/2 -translate-x-1/2 w-5 h-8 flex items-center justify-center opacity-0 group-hover/resize:opacity-100">
