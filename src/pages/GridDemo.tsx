@@ -69,18 +69,16 @@ const GridDemo = () => {
     {
       key: 'location',
       label: 'Location',
-      type: 'TextWithTooltip',
+      type: 'Text',
       sortable: true,
-      editable: false,
-      infoTextField: 'locationDetails'
+      editable: false
     },
     {
       key: 'currency',
       label: 'Currency',
-      type: 'TextWithTooltip',
+      type: 'Text',
       sortable: true,
-      editable: false,
-      infoTextField: 'currencyDetails'
+      editable: false
     },
     {
       key: 'value1',
