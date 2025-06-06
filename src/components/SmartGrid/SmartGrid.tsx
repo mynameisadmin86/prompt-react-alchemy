@@ -1,11 +1,10 @@
-
 import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
 import { ResizablePanelGroup } from '@/components/ui/resizable';
-import { ArrowUpDown, ArrowUp, ArrowDown, Download, Filter, Search, RotateCcw, ChevronRight, ChevronDown, Edit2, GripVertical } from 'lucide-react';
+import { ArrowUpDown, ArrowUp, ArrowDown, Download, Filter, Search, RotateCcw, ChevronRight, ChevronDown, Edit2, GripVertical, CheckSquare, Grid2x2, List } from 'lucide-react';
 import { SmartGridProps, GridColumnConfig, SortConfig, FilterConfig, GridAPI } from '@/types/smartgrid';
 import { exportToCSV } from '@/utils/gridExport';
 import { useToast } from '@/hooks/use-toast';
@@ -45,6 +44,8 @@ export function SmartGrid({
   const [error, setError] = useState<string | null>(null);
   const [expandedRows, setExpandedRows] = useState<Set<number>>(new Set());
   const [selectedRows, setSelectedRows] = useState<Set<number>>(new Set());
+  const [showCheckboxes, setShowCheckboxes] = useState(false);
+  const [viewMode, setViewMode] = useState<'table' | 'card'>('table');
   const { toast } = useToast();
 
   // Convert GridColumnConfig to Column format for useGridPreferences
@@ -612,6 +613,32 @@ export function SmartGrid({
             onFiltersChange={setFilters}
           />
 
+          {/* Toggle Checkboxes Button */}
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => setShowCheckboxes(!showCheckboxes)}
+            disabled={loading}
+            title="Toggle Checkboxes"
+          >
+            <CheckSquare className="h-4 w-4" />
+          </Button>
+
+          {/* Toggle View Mode Button */}
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => setViewMode(viewMode === 'table' ? 'card' : 'table')}
+            disabled={loading}
+            title={`Switch to ${viewMode === 'table' ? 'Card' : 'Table'} View`}
+          >
+            {viewMode === 'table' ? (
+              <Grid2x2 className="h-4 w-4" />
+            ) : (
+              <List className="h-4 w-4" />
+            )}
+          </Button>
+
           {/* Column Visibility Manager */}
           <ColumnVisibilityManager
             columns={columns}
@@ -651,6 +678,23 @@ export function SmartGrid({
               <Table className="table-fixed w-full">
                 <TableHeader className="sticky top-0 z-20 bg-white shadow-sm border-b-2 border-gray-100">
                   <TableRow className="hover:bg-transparent">
+                    {/* Checkbox header */}
+                    {showCheckboxes && (
+                      <TableHead className="bg-gray-50/80 backdrop-blur-sm font-semibold text-gray-900 px-6 py-4 border-r border-gray-100 w-12">
+                        <input 
+                          type="checkbox" 
+                          className="rounded" 
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setSelectedRows(new Set(Array.from({ length: paginatedData.length }, (_, i) => i)));
+                            } else {
+                              setSelectedRows(new Set());
+                            }
+                          }}
+                          checked={selectedRows.size === paginatedData.length && paginatedData.length > 0}
+                        />
+                      </TableHead>
+                    )}
                     {orderedColumns.map((column, index) => (
                       <React.Fragment key={column.key}>
                         <TableHead 
@@ -768,7 +812,7 @@ export function SmartGrid({
                   {loading ? (
                     <TableRow>
                       <TableCell 
-                        colSpan={orderedColumns.length + (plugins.some(plugin => plugin.rowActions) ? 1 : 0)} 
+                        colSpan={orderedColumns.length + (showCheckboxes ? 1 : 0) + (plugins.some(plugin => plugin.rowActions) ? 1 : 0)} 
                         className="text-center py-12"
                       >
                         <div className="flex items-center justify-center">
@@ -780,7 +824,7 @@ export function SmartGrid({
                   ) : paginatedData.length === 0 ? (
                     <TableRow>
                       <TableCell 
-                        colSpan={orderedColumns.length + (plugins.some(plugin => plugin.rowActions) ? 1 : 0)} 
+                        colSpan={orderedColumns.length + (showCheckboxes ? 1 : 0) + (plugins.some(plugin => plugin.rowActions) ? 1 : 0)} 
                         className="text-center py-12 text-gray-500"
                       >
                         <div className="space-y-2">
@@ -793,6 +837,27 @@ export function SmartGrid({
                     paginatedData.map((row, rowIndex) => (
                       <React.Fragment key={rowIndex}>
                         <TableRow className="hover:bg-gray-50/50 transition-colors duration-150 border-b border-gray-100">
+                          {/* Checkbox cell */}
+                          {showCheckboxes && (
+                            <TableCell className="px-6 py-4 border-r border-gray-50 w-12">
+                              <input 
+                                type="checkbox" 
+                                className="rounded" 
+                                checked={selectedRows.has(rowIndex)}
+                                onChange={() => {
+                                  setSelectedRows(prev => {
+                                    const newSet = new Set(prev);
+                                    if (newSet.has(rowIndex)) {
+                                      newSet.delete(rowIndex);
+                                    } else {
+                                      newSet.add(rowIndex);
+                                    }
+                                    return newSet;
+                                  });
+                                }}
+                              />
+                            </TableCell>
+                          )}
                           {orderedColumns.map((column, columnIndex) => (
                             <TableCell 
                               key={column.key} 
@@ -815,7 +880,7 @@ export function SmartGrid({
                         {nestedRowRenderer && expandedRows.has(rowIndex) && (
                           <TableRow className="bg-gray-50/30">
                             <TableCell 
-                              colSpan={orderedColumns.length + (plugins.some(plugin => plugin.rowActions) ? 1 : 0)} 
+                              colSpan={orderedColumns.length + (showCheckboxes ? 1 : 0) + (plugins.some(plugin => plugin.rowActions) ? 1 : 0)} 
                               className="p-0 border-b border-gray-200"
                             >
                               <div className="bg-gradient-to-r from-gray-50/50 to-white border-l-4 border-blue-500">
