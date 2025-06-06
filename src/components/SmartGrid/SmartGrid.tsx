@@ -856,7 +856,7 @@ export function SmartGrid({
                       
                       {/* Enhanced resize handle */}
                       <div
-                        className="absolute right-0 top-0 bottom-0 w-4 cursor-col-resize group/resize z-30"
+                        className="absolute right-0 top-0 bottom-0 w-8 cursor-col-resize group/resize z-30"
                         onMouseDown={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
@@ -917,9 +917,9 @@ export function SmartGrid({
                         }}
                         data-column-key={column.key}
                       >
-                        <div className="absolute inset-y-0 right-0 w-0.5 bg-blue-400 opacity-0 group-hover/resize:opacity-100 transition-opacity"></div>
-                        <div className="absolute right-[-2px] top-1/2 transform -translate-y-1/2 -translate-x-1/2 w-5 h-8 flex items-center justify-center opacity-0 group-hover/resize:opacity-100">
-                          <GripHorizontal className="h-3 w-3 text-blue-500" />
+                        <div className="absolute inset-y-0 right-0 w-1 bg-blue-400 opacity-0 group-hover/resize:opacity-100 transition-opacity"></div>
+                        <div className="absolute right-[-2px] top-1/2 transform -translate-y-1/2 -translate-x-1/2 w-6 h-8 flex items-center justify-center opacity-0 group-hover/resize:opacity-100">
+                          <GripHorizontal className="h-4 w-5 text-blue-500" />
                         </div>
                       </div>
                     </TableHead>
