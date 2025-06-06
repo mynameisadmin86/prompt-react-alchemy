@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Filter, FilterX } from 'lucide-react';
+import { Filter } from 'lucide-react';
 import { GridColumnConfig, FilterConfig } from '@/types/smartgrid';
 import { cn } from '@/lib/utils';
 
@@ -49,19 +49,15 @@ export function ColumnFilter({ column, currentFilter, onFilterChange }: ColumnFi
           variant="ghost"
           size="sm"
           className={cn(
-            "h-5 w-5 p-0 rounded hover:bg-gray-200/60 transition-colors",
+            "absolute top-1 right-1 h-4 w-4 p-0 rounded transition-all duration-200 z-10",
             hasActiveFilter 
-              ? "text-blue-600 hover:text-blue-700" 
-              : "text-gray-400 hover:text-gray-600"
+              ? "opacity-100 text-blue-600 bg-blue-50 hover:bg-blue-100" 
+              : "opacity-0 group-hover:opacity-100 text-gray-400 hover:text-gray-600 hover:bg-gray-100"
           )}
         >
-          {hasActiveFilter ? (
-            <div className="relative">
-              <Filter className="h-3 w-3" />
-              <div className="absolute -top-0.5 -right-0.5 h-1.5 w-1.5 bg-blue-600 rounded-full"></div>
-            </div>
-          ) : (
-            <Filter className="h-3 w-3" />
+          <Filter className="h-3 w-3" />
+          {hasActiveFilter && (
+            <div className="absolute -top-0.5 -right-0.5 h-1.5 w-1.5 bg-blue-600 rounded-full"></div>
           )}
         </Button>
       </PopoverTrigger>
