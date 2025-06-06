@@ -96,42 +96,6 @@ export function SmartGrid({
     } : undefined
   );
 
-  // Define handleExport and handleResetPreferences before gridAPI
-  const handleExport = useCallback((format: 'csv') => {
-    const filename = `export-${new Date().toISOString().split('T')[0]}.${format}`;
-    exportToCSV(processedData, orderedColumns, filename);
-  }, [processedData, orderedColumns]);
-
-  const handleResetPreferences = useCallback(async () => {
-    const defaultPreferences = {
-      columnOrder: columns.map(col => col.key),
-      hiddenColumns: [],
-      columnWidths: {},
-      columnHeaders: {},
-      filters: []
-    };
-    
-    try {
-      await savePreferences(defaultPreferences);
-      setSort(undefined);
-      setFilters([]);
-      setGlobalFilter('');
-      setColumnWidths({});
-      
-      toast({
-        title: "Success",
-        description: "Column preferences have been reset to defaults"
-      });
-    } catch (error) {
-      setError('Failed to reset preferences');
-      toast({
-        title: "Error",
-        description: "Failed to reset preferences",
-        variant: "destructive"
-      });
-    }
-  }, [columns, savePreferences, toast]);
-
   // Calculate responsive column widths based on content type and available space
   const calculateColumnWidths = useCallback((visibleColumns: GridColumnConfig[]) => {
     const containerWidth = window.innerWidth - 64; // Account for padding
@@ -279,6 +243,90 @@ export function SmartGrid({
 
     return result;
   }, [gridData, globalFilter, filters, sort, orderedColumns, onDataFetch]);
+
+  // Define handleExport and handleResetPreferences after processedData and orderedColumns
+  const handleExport = useCallback((format: 'csv') => {
+    const filename = `export-${new Date().toISOString().split('T')[0]}.${format}`;
+    exportToCSV(processedData, orderedColumns, filename);
+  }, [processedData, orderedColumns]);
+
+  const handleResetPreferences = useCallback(async () => {
+    const defaultPreferences = {
+      columnOrder: columns.map(col => col.key),
+      hiddenColumns: [],
+      columnWidths: {},
+      columnHeaders: {},
+      filters: []
+    };
+    
+    try {
+      await savePreferences(defaultPreferences);
+      setSort(undefined);
+      setFilters([]);
+      setGlobalFilter('');
+      setColumnWidths({});
+      
+      toast({
+        title: "Success",
+        description: "Column preferences have been reset to defaults"
+      });
+    } catch (error) {
+      setError('Failed to reset preferences');
+      toast({
+        title: "Error",
+        description: "Failed to reset preferences",
+        variant: "destructive"
+      });
+    }
+  }, [columns, savePreferences, toast]);
+
+  // Handle sorting
+  const handleSort = useCallback((columnKey: string) => {
+    setSort(prev => {
+      if (prev?.column === columnKey) {
+        return prev.direction === 'asc' 
+          ? { column: columnKey, direction: 'desc' }
+          : undefined;
+      }
+      return { column: columnKey, direction: 'asc' };
+    });
+  }, []);
+
+  // Handle column resizing
+  const handleResizeStart = useCallback((e: React.MouseEvent, columnKey: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    const startX = e.clientX;
+    const currentColumn = orderedColumns.find(col => col.key === columnKey);
+    const startWidth = currentColumn?.width || 100;
+    
+    setResizingColumn(columnKey);
+    resizeStartRef.current = { x: startX, width: startWidth };
+
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!resizeStartRef.current) return;
+      
+      const deltaX = e.clientX - resizeStartRef.current.x;
+      const newWidth = Math.max(80, resizeStartRef.current.width + deltaX);
+      
+      setColumnWidths(prev => ({
+        ...prev,
+        [columnKey]: newWidth
+      }));
+    };
+
+    const handleMouseUp = () => {
+      setResizingColumn(null);
+      setResizeHoverColumn(null);
+      resizeStartRef.current = null;
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+  }, [orderedColumns]);
 
   // Create Grid API for plugins
   const gridAPI: GridAPI = useMemo(() => ({
@@ -847,7 +895,7 @@ export function SmartGrid({
                         }}
                         onDragStart={(e) => e.preventDefault()}
                       >
-                        <div className="w-0.5 h-4 bg-gray-300 opacity-0 group-hover/resize:opacity-100 group-hover:opacity-100 transition-colors" />
+                        <div className="w-0.5 h-4 bg-gray-300 opacity-0 group-hover/resize:opacity-100 transition-opacity" />
                       </div>
                     </TableHead>
                   );
