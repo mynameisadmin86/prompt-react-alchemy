@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
-import { ArrowUpDown, ArrowUp, ArrowDown, Download, Filter, Search, RotateCcw, ChevronRight, ChevronDown, Edit2, GripVertical, CheckSquare, Grid2x2, List } from 'lucide-react';
+import { ArrowUpDown, ArrowUp, ArrowDown, Download, Filter, Search, RotateCcw, ChevronRight, ChevronDown, Edit2, GripVertical } from 'lucide-react';
 import { SmartGridProps, GridColumnConfig, SortConfig, FilterConfig, GridAPI } from '@/types/smartgrid';
 import { exportToCSV } from '@/utils/gridExport';
 import { useToast } from '@/hooks/use-toast';
@@ -45,7 +45,7 @@ export function SmartGrid({
   const [showCheckboxes, setShowCheckboxes] = useState(false);
   const [viewMode, setViewMode] = useState<'table' | 'card'>('table');
   
-  // Resize functionality state
+  // Resize functionality state - fixed and improved
   const [resizingColumn, setResizingColumn] = useState<string | null>(null);
   const [resizeHoverColumn, setResizeHoverColumn] = useState<string | null>(null);
   const [columnWidths, setColumnWidths] = useState<Record<string, number>>({});
@@ -158,7 +158,7 @@ export function SmartGrid({
     }));
   }, [columns, preferences, calculateColumnWidths]);
 
-  // Column resize handlers
+  // Column resize handlers - FIXED
   const handleResizeStart = useCallback((e: React.MouseEvent, columnKey: string) => {
     e.preventDefault();
     e.stopPropagation();
@@ -174,44 +174,79 @@ export function SmartGrid({
     document.body.style.pointerEvents = 'none';
     document.body.style.userSelect = 'none';
     
+    const handleResizeMove = (e: MouseEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      
+      if (!resizeStartRef.current) return;
+      
+      const deltaX = e.clientX - resizeStartRef.current.x;
+      const newWidth = Math.max(80, resizeStartRef.current.width + deltaX);
+      
+      setColumnWidths(prev => ({
+        ...prev,
+        [columnKey]: newWidth
+      }));
+    };
+
+    const handleResizeEnd = (e?: MouseEvent) => {
+      if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+      
+      // Re-enable pointer events
+      document.body.style.pointerEvents = '';
+      document.body.style.userSelect = '';
+      
+      document.removeEventListener('mousemove', handleResizeMove);
+      document.removeEventListener('mouseup', handleResizeEnd);
+      
+      setTimeout(() => {
+        setResizingColumn(null);
+        resizeStartRef.current = null;
+      }, 0);
+    };
+    
     document.addEventListener('mousemove', handleResizeMove);
     document.addEventListener('mouseup', handleResizeEnd);
   }, [orderedColumns]);
 
-  const handleResizeMove = useCallback((e: MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    
-    if (!resizingColumn || !resizeStartRef.current) return;
-    
-    const deltaX = e.clientX - resizeStartRef.current.x;
-    const newWidth = Math.max(80, resizeStartRef.current.width + deltaX);
-    
-    setColumnWidths(prev => ({
-      ...prev,
-      [resizingColumn]: newWidth
-    }));
-  }, [resizingColumn]);
-
-  const handleResizeEnd = useCallback((e?: MouseEvent) => {
-    if (e) {
-      e.preventDefault();
-      e.stopPropagation();
-    }
-    
-    setResizingColumn(null);
-    resizeStartRef.current = null;
-    
-    // Re-enable pointer events
-    document.body.style.pointerEvents = '';
-    document.body.style.userSelect = '';
-    
-    document.removeEventListener('mousemove', handleResizeMove);
-    document.removeEventListener('mouseup', handleResizeEnd);
-  }, [handleResizeMove]);
-
   // Cleanup resize listeners on unmount
   useEffect(() => {
+    const handleResizeMove = (e: MouseEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      
+      if (!resizingColumn || !resizeStartRef.current) return;
+      
+      const deltaX = e.clientX - resizeStartRef.current.x;
+      const newWidth = Math.max(80, resizeStartRef.current.width + deltaX);
+      
+      setColumnWidths(prev => ({
+        ...prev,
+        [resizingColumn]: newWidth
+      }));
+    };
+
+    const handleResizeEnd = (e?: MouseEvent) => {
+      if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+      
+      setResizingColumn(null);
+      resizeStartRef.current = null;
+      
+      // Re-enable pointer events
+      document.body.style.pointerEvents = '';
+      document.body.style.userSelect = '';
+      
+      document.removeEventListener('mousemove', handleResizeMove);
+      document.removeEventListener('mouseup', handleResizeEnd);
+    };
+
+    // Cleanup function
     return () => {
       document.removeEventListener('mousemove', handleResizeMove);
       document.removeEventListener('mouseup', handleResizeEnd);
@@ -219,7 +254,7 @@ export function SmartGrid({
       document.body.style.pointerEvents = '';
       document.body.style.userSelect = '';
     };
-  }, [handleResizeMove, handleResizeEnd]);
+  }, [resizingColumn]);
 
   // Recalculate column widths on window resize
   useEffect(() => {
@@ -346,27 +381,6 @@ export function SmartGrid({
     });
   }, []);
 
-  // Lazy loading effect
-  useEffect(() => {
-    if (onDataFetch) {
-      const fetchData = async () => {
-        setLoading(true);
-        setError(null);
-        try {
-          const newData = await onDataFetch(currentPage, pageSize);
-          setGridData(newData);
-        } catch (err) {
-          setError('Failed to fetch data');
-          console.error('Data fetch error:', err);
-        } finally {
-          setLoading(false);
-        }
-      };
-      
-      fetchData();
-    }
-  }, [onDataFetch, currentPage, pageSize]);
-
   // Determine if a column is editable
   const isColumnEditable = useCallback((column: GridColumnConfig, columnIndex: number) => {
     // First column is not editable by default
@@ -490,6 +504,7 @@ export function SmartGrid({
     }
   }, [orderedColumns, sort, onDataFetch, currentPage, pageSize, resizingColumn]);
 
+  // Cell editing functions
   const handleCellEdit = useCallback(async (rowIndex: number, columnKey: string, value: any) => {
     const actualRowIndex = onDataFetch ? rowIndex : (currentPage - 1) * pageSize + rowIndex;
     const updatedData = [...gridData];
@@ -536,6 +551,108 @@ export function SmartGrid({
   const handleEditCancel = useCallback(() => {
     setEditingCell(null);
   }, []);
+
+  const renderCell = useCallback((row: any, column: GridColumnConfig, rowIndex: number, columnIndex: number) => {
+    const value = row[column.key];
+    const isEditing = editingCell?.rowIndex === rowIndex && editingCell?.columnKey === column.key;
+    const isEditable = isColumnEditable(column, columnIndex);
+
+    // Add expand/collapse toggle for first column if nestedRowRenderer exists
+    if (columnIndex === 0 && nestedRowRenderer) {
+      const isExpanded = expandedRows.has(rowIndex);
+      return (
+        <div className="flex items-center space-x-1 min-w-0">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => toggleRowExpansion(rowIndex)}
+            className="h-5 w-5 p-0 hover:bg-gray-100 flex-shrink-0"
+          >
+            {isExpanded ? (
+              <ChevronDown className="h-3 w-3" />
+            ) : (
+              <ChevronRight className="h-3 w-3" />
+            )}
+          </Button>
+          <div className="flex-1 min-w-0 truncate">
+            <CellRenderer
+              value={value}
+              row={row}
+              column={column}
+              rowIndex={rowIndex}
+              columnIndex={columnIndex}
+              isEditing={isEditing}
+              isEditable={isEditable}
+              onEdit={handleCellEdit}
+              onEditStart={handleEditStart}
+              onEditCancel={handleEditCancel}
+              onLinkClick={onLinkClick}
+              loading={loading}
+            />
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div className="min-w-0 truncate">
+        <CellRenderer
+          value={value}
+          row={row}
+          column={column}
+          rowIndex={rowIndex}
+          columnIndex={columnIndex}
+          isEditing={isEditing}
+          isEditable={isEditable}
+          onEdit={handleCellEdit}
+          onEditStart={handleEditStart}
+          onEditCancel={handleEditCancel}
+          onLinkClick={onLinkClick}
+          loading={loading}
+        />
+      </div>
+    );
+  }, [editingCell, isColumnEditable, nestedRowRenderer, expandedRows, toggleRowExpansion, handleCellEdit, handleEditStart, handleEditCancel, onLinkClick, loading]);
+
+  // Update grid data when prop data changes (only if not using lazy loading)
+  useEffect(() => {
+    if (!onDataFetch) {
+      setGridData(data);
+    }
+  }, [data, onDataFetch]);
+
+  // Fixed renderPluginToolbarItems function to prevent React Fragment errors
+  const renderPluginToolbarItems = useCallback(() => {
+    return plugins
+      .filter(plugin => plugin.toolbar)
+      .map(plugin => (
+        <React.Fragment key={`toolbar-${plugin.id}`}>
+          {plugin.toolbar!(gridAPI)}
+        </React.Fragment>
+      ));
+  }, [plugins, gridAPI]);
+
+  // Fixed renderPluginRowActions function to prevent React Fragment errors
+  const renderPluginRowActions = useCallback((row: any, rowIndex: number) => {
+    return plugins
+      .filter(plugin => plugin.rowActions)
+      .map(plugin => (
+        <React.Fragment key={`row-action-${plugin.id}-${rowIndex}`}>
+          {plugin.rowActions!(row, rowIndex, gridAPI)}
+        </React.Fragment>
+      ));
+  }, [plugins, gridAPI]);
+
+  // Fixed renderPluginFooterItems function to prevent React Fragment errors
+  const renderPluginFooterItems = useCallback(() => {
+    return plugins
+      .filter(plugin => plugin.footer)
+      .map(plugin => (
+        <React.Fragment key={`footer-${plugin.id}`}>
+          {plugin.footer!(gridAPI)}
+        </React.Fragment>
+      ));
+  }, [plugins, gridAPI]);
 
   // Handle export
   const handleExport = useCallback((format: 'csv') => {
@@ -619,108 +736,6 @@ export function SmartGrid({
         }
       });
     };
-  }, [plugins, gridAPI]);
-
-  const renderCell = useCallback((row: any, column: GridColumnConfig, rowIndex: number, columnIndex: number) => {
-    const value = row[column.key];
-    const isEditing = editingCell?.rowIndex === rowIndex && editingCell?.columnKey === column.key;
-    const isEditable = isColumnEditable(column, columnIndex);
-
-    // Add expand/collapse toggle for first column if nestedRowRenderer exists
-    if (columnIndex === 0 && nestedRowRenderer) {
-      const isExpanded = expandedRows.has(rowIndex);
-      return (
-        <div className="flex items-center space-x-1 min-w-0">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => toggleRowExpansion(rowIndex)}
-            className="h-5 w-5 p-0 hover:bg-gray-100 flex-shrink-0"
-          >
-            {isExpanded ? (
-              <ChevronDown className="h-3 w-3" />
-            ) : (
-              <ChevronRight className="h-3 w-3" />
-            )}
-          </Button>
-          <div className="flex-1 min-w-0 truncate">
-            <CellRenderer
-              value={value}
-              row={row}
-              column={column}
-              rowIndex={rowIndex}
-              columnIndex={columnIndex}
-              isEditing={isEditing}
-              isEditable={isEditable}
-              onEdit={handleCellEdit}
-              onEditStart={handleEditStart}
-              onEditCancel={handleEditCancel}
-              onLinkClick={onLinkClick}
-              loading={loading}
-            />
-          </div>
-        </div>
-      );
-    }
-
-    return (
-      <div className="min-w-0 truncate">
-        <CellRenderer
-          value={value}
-          row={row}
-          column={column}
-          rowIndex={rowIndex}
-          columnIndex={columnIndex}
-          isEditing={isEditing}
-          isEditable={isEditable}
-          onEdit={handleCellEdit}
-          onEditStart={handleEditStart}
-          onEditCancel={handleEditCancel}
-          onLinkClick={onLinkClick}
-          loading={loading}
-        />
-      </div>
-    );
-  }, [editingCell, isColumnEditable, nestedRowRenderer, expandedRows, toggleRowExpansion, handleCellEdit, handleEditStart, handleEditCancel, onLinkClick, loading]);
-
-  // Update grid data when prop data changes (only if not using lazy loading)
-  useEffect(() => {
-    if (!onDataFetch) {
-      setGridData(data);
-    }
-  }, [data, onDataFetch]);
-
-  // Render plugin toolbar items
-  const renderPluginToolbarItems = useCallback(() => {
-    return plugins
-      .filter(plugin => plugin.toolbar)
-      .map(plugin => (
-        <React.Fragment key={plugin.id}>
-          {plugin.toolbar!(gridAPI)}
-        </React.Fragment>
-      ));
-  }, [plugins, gridAPI]);
-
-  // Render plugin row actions
-  const renderPluginRowActions = useCallback((row: any, rowIndex: number) => {
-    return plugins
-      .filter(plugin => plugin.rowActions)
-      .map(plugin => (
-        <React.Fragment key={plugin.id}>
-          {plugin.rowActions!(row, rowIndex, gridAPI)}
-        </React.Fragment>
-      ));
-  }, [plugins, gridAPI]);
-
-  // Render plugin footer items
-  const renderPluginFooterItems = useCallback(() => {
-    return plugins
-      .filter(plugin => plugin.footer)
-      .map(plugin => (
-        <React.Fragment key={plugin.id}>
-          {plugin.footer!(gridAPI)}
-        </React.Fragment>
-      ));
   }, [plugins, gridAPI]);
 
   // Error boundary component
