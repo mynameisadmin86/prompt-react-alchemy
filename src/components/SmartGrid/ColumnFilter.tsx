@@ -27,19 +27,25 @@ const filterOperators = [
 
 export function ColumnFilter({ column, currentFilter, onFilterChange }: ColumnFilterProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [operator, setOperator] = useState(currentFilter?.operator || 'contains');
+  const [operator, setOperator] = useState<'contains' | 'equals' | 'startsWith' | 'endsWith' | 'gt' | 'lt' | 'gte' | 'lte'>(
+    currentFilter?.operator || 'contains'
+  );
   const [value, setValue] = useState(currentFilter?.value || '');
 
   if (!column.filterable) {
     return null;
   }
 
+  const handleOperatorChange = (newOperator: string) => {
+    setOperator(newOperator as typeof operator);
+  };
+
   const handleApplyFilter = () => {
     if (value.trim()) {
       onFilterChange({
         column: column.key,
         value: value.trim(),
-        operator: operator as any
+        operator: operator
       });
     } else {
       onFilterChange(null);
@@ -79,7 +85,7 @@ export function ColumnFilter({ column, currentFilter, onFilterChange }: ColumnFi
           
           <div className="space-y-2">
             <label className="text-xs text-gray-600">Operator</label>
-            <Select value={operator} onValueChange={setOperator}>
+            <Select value={operator} onValueChange={handleOperatorChange}>
               <SelectTrigger className="h-8">
                 <SelectValue />
               </SelectTrigger>
