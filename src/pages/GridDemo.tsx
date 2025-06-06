@@ -1,384 +1,278 @@
-import React from 'react';
+
+import React, { useState, useMemo } from 'react';
 import { SmartGrid } from '@/components/SmartGrid';
-import { downloadJsonPlugin } from '@/plugins/downloadJsonPlugin';
 import { GridColumnConfig } from '@/types/smartgrid';
-import { Search, Filter, Download, MoreHorizontal, Grid3x3, List, Settings, Home, Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
+import { Printer, MoreHorizontal } from 'lucide-react';
 
-// Sample trip data matching the logistics interface
-const tripData = [
-  {
-    id: 1,
-    tripPlanNo: 'TRIP00000001',
-    status: 'Released',
-    tripBillingStatus: 'Draft Bill Raised',
-    plannedStartDateTime: '25-Mar-2025 11:22:34 PM',
-    plannedEndDateTime: '27-Mar-2025 11:22:34 PM',
-    actualStartDateTime: '25-Mar-2025 11:22:34 PM',
-    actualEndDateTime: '27-Mar-2025 11:22:34 PM',
-    departurePoint: 'VLA-70',
-    arrivalPoint: 'CUR-25',
-    customer: '+3',
-    resources: '+3'
-  },
-  {
-    id: 2,
-    tripPlanNo: 'TRIP00000002',
-    status: 'Under Execution',
-    tripBillingStatus: 'Not Eligible',
-    plannedStartDateTime: '25-Mar-2025 11:22:34 PM',
-    plannedEndDateTime: '27-Mar-2025 11:22:34 PM',
-    actualStartDateTime: '25-Mar-2025 11:22:34 PM',
-    actualEndDateTime: '27-Mar-2025 11:22:34 PM',
-    departurePoint: 'VLA-70',
-    arrivalPoint: 'CUR-25',
-    customer: '+3',
-    resources: '+3'
-  },
-  {
-    id: 3,
-    tripPlanNo: 'TRIP00000003',
-    status: 'Initiated',
-    tripBillingStatus: 'Revenue Leakage',
-    plannedStartDateTime: '25-Mar-2025 11:22:34 PM',
-    plannedEndDateTime: '27-Mar-2025 11:22:34 PM',
-    actualStartDateTime: '25-Mar-2025 11:22:34 PM',
-    actualEndDateTime: '27-Mar-2025 11:22:34 PM',
-    departurePoint: 'VLA-70',
-    arrivalPoint: 'CUR-25',
-    customer: '+3',
-    resources: '+3'
-  },
-  {
-    id: 4,
-    tripPlanNo: 'TRIP00000004',
-    status: 'Cancelled',
-    tripBillingStatus: 'Invoice Created',
-    plannedStartDateTime: '25-Mar-2025 11:22:34 PM',
-    plannedEndDateTime: '27-Mar-2025 11:22:34 PM',
-    actualStartDateTime: '25-Mar-2025 11:22:34 PM',
-    actualEndDateTime: '27-Mar-2025 11:22:34 PM',
-    departurePoint: 'VLA-70',
-    arrivalPoint: 'CUR-25',
-    customer: '+3',
-    resources: '+3'
-  },
-  {
-    id: 5,
-    tripPlanNo: 'TRIP00000005',
-    status: 'Deleted',
-    tripBillingStatus: 'Invoice Approved',
-    plannedStartDateTime: '25-Mar-2025 11:22:34 PM',
-    plannedEndDateTime: '27-Mar-2025 11:22:34 PM',
-    actualStartDateTime: '25-Mar-2025 11:22:34 PM',
-    actualEndDateTime: '27-Mar-2025 11:22:34 PM',
-    departurePoint: 'VLA-70',
-    arrivalPoint: 'CUR-25',
-    customer: '+3',
-    resources: '+3'
-  },
-  {
-    id: 6,
-    tripPlanNo: 'TRIP00000006',
-    status: 'Confirmed',
-    tripBillingStatus: 'Not Eligible',
-    plannedStartDateTime: '25-Mar-2025 11:22:34 PM',
-    plannedEndDateTime: '27-Mar-2025 11:22:34 PM',
-    actualStartDateTime: '25-Mar-2025 11:22:34 PM',
-    actualEndDateTime: '27-Mar-2025 11:22:34 PM',
-    departurePoint: 'VLA-70',
-    arrivalPoint: 'CUR-25',
-    customer: '+3',
-    resources: '+3'
-  },
-  {
-    id: 7,
-    tripPlanNo: 'TRIP00000007',
-    status: 'Under Execution',
-    tripBillingStatus: 'Revenue Leakage',
-    plannedStartDateTime: '25-Mar-2025 11:22:34 PM',
-    plannedEndDateTime: '27-Mar-2025 11:22:34 PM',
-    actualStartDateTime: '25-Mar-2025 11:22:34 PM',
-    actualEndDateTime: '27-Mar-2025 11:22:34 PM',
-    departurePoint: 'VLA-70',
-    arrivalPoint: 'CUR-25',
-    customer: '+3',
-    resources: '+3'
-  }
-];
-
-// Updated column configuration using new GridColumnType system
-const columns: GridColumnConfig[] = [
-  {
-    key: 'tripPlanNo',
-    label: 'Trip Plan No',
-    type: 'Link',
-    editable: false,
-    mandatory: true,
-    sortable: true,
-    filterable: true,
-    onClick: (rowData) => {
-      console.log('Trip clicked:', rowData);
-      // Navigate to trip details page
-    }
-  },
-  {
-    key: 'status',
-    label: 'Status',
-    type: 'Badge',
-    editable: false,
-    sortable: true,
-    filterable: true,
-    options: ['Released', 'Under Execution', 'Initiated', 'Cancelled', 'Deleted', 'Confirmed']
-  },
-  {
-    key: 'tripBillingStatus',
-    label: 'Trip Billing Status',
-    type: 'Badge',
-    editable: false,
-    sortable: true,
-    filterable: true,
-    options: ['Draft Bill Raised', 'Not Eligible', 'Revenue Leakage', 'Invoice Created', 'Invoice Approved']
-  },
-  {
-    key: 'plannedStartDateTime',
-    label: 'Planned Start and End Date Time',
-    type: 'DateTimeRange',
-    editable: false,
-    sortable: true,
-    filterable: true
-  },
-  {
-    key: 'actualStartDateTime',
-    label: 'Actual Start and End Date Time',
-    type: 'DateTimeRange',
-    editable: false,
-    sortable: true,
-    filterable: true
-  },
-  {
-    key: 'departurePoint',
-    label: 'Departure Point',
-    type: 'TextWithTooltip',
-    editable: true,
-    sortable: true,
-    filterable: true,
-    infoTextField: 'departurePointDetails'
-  },
-  {
-    key: 'arrivalPoint',
-    label: 'Arrival Point',
-    type: 'TextWithTooltip',
-    editable: true,
-    sortable: true,
-    filterable: true,
-    infoTextField: 'arrivalPointDetails'
-  },
-  {
-    key: 'customer',
-    label: 'Customer',
-    type: 'ExpandableCount',
-    editable: false,
-    sortable: true,
-    filterable: true,
-    renderExpandedContent: (rowData) => (
-      <div className="p-4">
-        <h4 className="font-semibold mb-2">Customer Details</h4>
-        <p>Expand to show customer list for trip {rowData.tripPlanNo}</p>
-      </div>
-    )
-  },
-  {
-    key: 'resources',
-    label: 'Resources',
-    type: 'ExpandableCount',
-    editable: false,
-    sortable: true,
-    filterable: true,
-    renderExpandedContent: (rowData) => (
-      <div className="p-4">
-        <h4 className="font-semibold mb-2">Resource Details</h4>
-        <p>Expand to show resource list for trip {rowData.tripPlanNo}</p>
-      </div>
-    )
-  }
-];
+interface SampleData {
+  id: string;
+  status1: string;
+  status2: string;
+  startDate: string;
+  endDate: string;
+  location: string;
+  currency: string;
+  value1: string;
+  value2: string;
+}
 
 const GridDemo = () => {
-  // Handler for inline editing
-  const handleInlineEdit = (rowIndex: number, updatedRow: any) => {
-    console.log('Row edited:', { rowIndex, updatedRow });
+  const [selectedRows, setSelectedRows] = useState<Set<number>>(new Set());
+
+  const columns: GridColumnConfig[] = [
+    {
+      key: 'id',
+      label: 'Trip ID',
+      type: 'Link',
+      sortable: true,
+      editable: false,
+      mandatory: true
+    },
+    {
+      key: 'status1',
+      label: 'Status 1',
+      type: 'Badge',
+      sortable: true,
+      editable: false
+    },
+    {
+      key: 'status2',
+      label: 'Status 2',
+      type: 'Badge',
+      sortable: true,
+      editable: false
+    },
+    {
+      key: 'startDate',
+      label: 'Start Date',
+      type: 'DateTimeRange',
+      sortable: true,
+      editable: false
+    },
+    {
+      key: 'endDate',
+      label: 'End Date',
+      type: 'DateTimeRange',
+      sortable: true,
+      editable: false
+    },
+    {
+      key: 'location',
+      label: 'Location',
+      type: 'Text',
+      sortable: true,
+      editable: false
+    },
+    {
+      key: 'currency',
+      label: 'Currency',
+      type: 'Text',
+      sortable: true,
+      editable: false
+    },
+    {
+      key: 'value1',
+      label: 'Value 1',
+      type: 'Text',
+      sortable: true,
+      editable: false
+    },
+    {
+      key: 'value2',
+      label: 'Value 2',
+      type: 'Text',
+      sortable: true,
+      editable: false
+    }
+  ];
+
+  const sampleData: SampleData[] = [
+    {
+      id: 'TRIP00000006',
+      status1: 'Confirmed',
+      status2: 'Not Eligible',
+      startDate: '25-Mar-2025 11:22:34 PM',
+      endDate: '25-Mar-2025 11:22:34 PM',
+      location: 'VLA-70',
+      currency: 'CUR-25',
+      value1: '+3',
+      value2: '+3'
+    },
+    {
+      id: 'TRIP00000007',
+      status1: 'Under Execution',
+      status2: 'Revenue Leakage',
+      startDate: '25-Mar-2025 11:22:34 PM',
+      endDate: '25-Mar-2025 11:22:34 PM',
+      location: 'VLA-70',
+      currency: 'CUR-25',
+      value1: '+3',
+      value2: '+3'
+    },
+    {
+      id: 'TRIP00000008',
+      status1: 'Released',
+      status2: 'Invoice Created',
+      startDate: '25-Mar-2025 11:22:34 PM',
+      endDate: '25-Mar-2025 11:22:34 PM',
+      location: 'VLA-70',
+      currency: 'CUR-25',
+      value1: '+3',
+      value2: '+3'
+    },
+    {
+      id: 'TRIP00000009',
+      status1: 'Cancelled',
+      status2: 'Invoice Approved',
+      startDate: '25-Mar-2025 11:22:34 PM',
+      endDate: '25-Mar-2025 11:22:34 PM',
+      location: 'VLA-70',
+      currency: 'CUR-25',
+      value1: '+3',
+      value2: '+3'
+    },
+    {
+      id: 'TRIP00000010',
+      status1: 'In Progress',
+      status2: 'Pending Review',
+      startDate: '26-Mar-2025 09:15:22 AM',
+      endDate: '26-Mar-2025 09:15:22 AM',
+      location: 'NYC-45',
+      currency: 'USD-50',
+      value1: '+5',
+      value2: '+5'
+    },
+    {
+      id: 'TRIP00000011',
+      status1: 'Completed',
+      status2: 'Payment Processed',
+      startDate: '26-Mar-2025 02:30:18 PM',
+      endDate: '26-Mar-2025 02:30:18 PM',
+      location: 'LON-88',
+      currency: 'GBP-75',
+      value1: '+7',
+      value2: '+7'
+    },
+    {
+      id: 'TRIP00000012',
+      status1: 'On Hold',
+      status2: 'Documentation Missing',
+      startDate: '27-Mar-2025 08:45:10 AM',
+      endDate: '27-Mar-2025 08:45:10 AM',
+      location: 'TKY-12',
+      currency: 'JPY-100',
+      value1: '+2',
+      value2: '+2'
+    },
+    {
+      id: 'TRIP00000013',
+      status1: 'Approved',
+      status2: 'Ready for Dispatch',
+      startDate: '27-Mar-2025 04:20:33 PM',
+      endDate: '27-Mar-2025 04:20:33 PM',
+      location: 'SYD-66',
+      currency: 'AUD-35',
+      value1: '+4',
+      value2: '+4'
+    },
+    {
+      id: 'TRIP00000014',
+      status1: 'Rejected',
+      status2: 'Policy Violation',
+      startDate: '28-Mar-2025 11:55:47 AM',
+      endDate: '28-Mar-2025 11:55:47 AM',
+      location: 'PAR-23',
+      currency: 'EUR-90',
+      value1: '+6',
+      value2: '+6'
+    }
+  ];
+
+  const getStatusColor = (status: string) => {
+    const statusColors: Record<string, string> = {
+      'Confirmed': 'bg-green-100 text-green-800',
+      'Under Execution': 'bg-purple-100 text-purple-800',
+      'Released': 'bg-yellow-100 text-yellow-800',
+      'Cancelled': 'bg-red-100 text-red-800',
+      'In Progress': 'bg-blue-100 text-blue-800',
+      'Completed': 'bg-green-100 text-green-800',
+      'On Hold': 'bg-orange-100 text-orange-800',
+      'Approved': 'bg-green-100 text-green-800',
+      'Rejected': 'bg-red-100 text-red-800',
+      'Not Eligible': 'bg-red-100 text-red-800',
+      'Revenue Leakage': 'bg-red-100 text-red-800',
+      'Invoice Created': 'bg-blue-100 text-blue-800',
+      'Invoice Approved': 'bg-green-100 text-green-800',
+      'Pending Review': 'bg-yellow-100 text-yellow-800',
+      'Payment Processed': 'bg-green-100 text-green-800',
+      'Documentation Missing': 'bg-orange-100 text-orange-800',
+      'Ready for Dispatch': 'bg-blue-100 text-blue-800',
+      'Policy Violation': 'bg-red-100 text-red-800'
+    };
+    return statusColors[status] || 'bg-gray-100 text-gray-800';
   };
 
-  // Handler for bulk updates
-  const handleBulkUpdate = async (rows: any[]): Promise<void> => {
-    console.log('Bulk update:', rows);
-    // Simulate API call
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        console.log('Bulk update completed');
-        resolve();
-      }, 1000);
-    });
-  };
+  const processedData = useMemo(() => {
+    return sampleData.map(row => ({
+      ...row,
+      status1: {
+        value: row.status1,
+        variant: getStatusColor(row.status1)
+      },
+      status2: {
+        value: row.status2,
+        variant: getStatusColor(row.status2)
+      },
+      startDate: `${row.startDate.split(' ')[0]}\n${row.startDate.split(' ')[1]} ${row.startDate.split(' ')[2]}`,
+      endDate: `${row.endDate.split(' ')[0]}\n${row.endDate.split(' ')[1]} ${row.endDate.split(' ')[2]}`
+    }));
+  }, []);
 
-  // Handler for preference saving
-  const handlePreferenceSave = async (preferences: any): Promise<void> => {
-    console.log('Preferences saved:', preferences);
-    // Simulate API call to save preferences
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        console.log('Preferences saved to server');
-        resolve();
-      }, 500);
-    });
+  const handleLinkClick = (value: any, row: any) => {
+    console.log('Link clicked:', value, row);
   };
-
-  // Handler for single row updates
-  const handleUpdate = async (row: any): Promise<void> => {
-    console.log('Single row update:', row);
-    // Simulate API call
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        console.log('Row update completed');
-        resolve();
-      }, 500);
-    });
-  };
-
-  // Nested row renderer for expandable rows
-  const nestedRowRenderer = (row: any) => (
-    <div className="p-4 bg-gray-50">
-      <h4 className="font-semibold mb-2">Trip Details</h4>
-      <div className="grid grid-cols-2 gap-4 text-sm">
-        <div>
-          <span className="font-medium">Planned Start:</span> {row.plannedStartDateTime}
-        </div>
-        <div>
-          <span className="font-medium">Planned End:</span> {row.plannedEndDateTime}
-        </div>
-        <div>
-          <span className="font-medium">Actual Start:</span> {row.actualStartDateTime}
-        </div>
-        <div>
-          <span className="font-medium">Actual End:</span> {row.actualEndDateTime}
-        </div>
-      </div>
-    </div>
-  );
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Top Header */}
-      <div className="bg-white border-b border-gray-200">
-        <div className="flex items-center justify-between px-6 py-3">
-          <div className="flex items-center space-x-4">
-            <Button variant="ghost" size="sm" className="p-1">
-              <Menu className="h-5 w-5 text-gray-600" />
+    <div className="container mx-auto p-6 space-y-6">
+      <div className="bg-white rounded-lg shadow-sm">
+        <SmartGrid
+          columns={columns}
+          data={processedData}
+          editableColumns={false}
+          paginationMode="pagination"
+          onLinkClick={handleLinkClick}
+        />
+        
+        {/* Footer with action buttons matching the screenshot style */}
+        <div className="flex items-center justify-between p-4 border-t bg-gray-50/50">
+          <div className="flex items-center space-x-3">
+            <Button 
+              variant="outline" 
+              size="sm"
+              className="h-8 px-3 text-gray-700 border-gray-300 hover:bg-gray-100"
+            >
+              <Printer className="h-4 w-4 mr-2" />
+              Print
             </Button>
-            <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">L</span>
-              </div>
-              <span className="text-xl font-semibold text-gray-900">Logistics</span>
-            </div>
+            
+            <Button 
+              variant="outline" 
+              size="sm"
+              className="h-8 px-3 text-gray-700 border-gray-300 hover:bg-gray-100"
+            >
+              <MoreHorizontal className="h-4 w-4 mr-2" />
+              More
+            </Button>
           </div>
           
-          <div className="flex items-center space-x-4">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-              <Input
-                placeholder="Search"
-                className="pl-10 w-64 bg-gray-50 border-gray-200 h-9"
-              />
-            </div>
-            <Button variant="ghost" size="sm" className="p-1">
-              <Settings className="h-5 w-5 text-gray-600" />
-            </Button>
-            <Button variant="ghost" size="sm" className="p-1">
-              <div className="w-8 h-8 bg-gray-200 rounded-full"></div>
-            </Button>
-          </div>
-        </div>
-      </div>
-
-      {/* Sidebar and Main Content */}
-      <div className="flex min-h-screen">
-        {/* Left Sidebar */}
-        <div className="w-16 bg-white border-r border-gray-200 flex flex-col items-center py-4 space-y-4">
-          <Button variant="ghost" size="sm" className="w-10 h-10 p-0">
-            <Home className="h-5 w-5 text-blue-600" />
+          <Button 
+            variant="outline" 
+            size="sm"
+            className="h-8 px-4 text-red-600 border-red-300 hover:bg-red-50 hover:border-red-400"
+          >
+            Cancel
           </Button>
-          <Button variant="ghost" size="sm" className="w-10 h-10 p-0">
-            <div className="w-5 h-5 bg-gray-300 rounded"></div>
-          </Button>
-          <Button variant="ghost" size="sm" className="w-10 h-10 p-0">
-            <div className="w-5 h-5 bg-gray-300 rounded"></div>
-          </Button>
-          <Button variant="ghost" size="sm" className="w-10 h-10 p-0">
-            <div className="w-5 h-5 bg-gray-300 rounded"></div>
-          </Button>
-          <div className="flex-1"></div>
-          <Button variant="ghost" size="sm" className="w-10 h-10 p-0">
-            <Settings className="h-5 w-5 text-gray-400" />
-          </Button>
-        </div>
-
-        {/* Main Content */}
-        <div className="flex-1 bg-gray-50">
-          {/* Breadcrumb */}
-          <div className="bg-white border-b border-gray-200 px-6 py-2">
-            <div className="flex items-center space-x-2 text-sm">
-              <Home className="h-4 w-4 text-blue-600" />
-              <span className="text-blue-600">Home</span>
-              <span className="text-gray-400">{'>'}</span>
-              <span className="text-gray-600">Trip Execution Management</span>
-            </div>
-          </div>
-
-          <div className="p-6">
-            {/* Trip Plans Header */}
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center space-x-3">
-                <h1 className="text-xl font-semibold text-gray-900">Trip Plans</h1>
-                <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-blue-100 text-blue-800 border border-blue-200">
-                  {tripData.length}
-                </span>
-              </div>
-            </div>
-
-            {/* SmartGrid with new column types */}
-            <SmartGrid
-              columns={columns}
-              data={tripData}
-              editableColumns={['departurePoint', 'arrivalPoint']}
-              mandatoryColumns={['tripPlanNo']}
-              onInlineEdit={handleInlineEdit}
-              onBulkUpdate={handleBulkUpdate}
-              onPreferenceSave={handlePreferenceSave}
-              onUpdate={handleUpdate}
-              paginationMode="pagination"
-              nestedRowRenderer={nestedRowRenderer}
-              plugins={[downloadJsonPlugin]}
-            />
-
-            {/* Footer */}
-            <div className="flex items-center justify-between mt-6">
-              <div className="flex items-center space-x-2">
-                <Button variant="ghost" size="sm" className="h-8 px-2">
-                  <MoreHorizontal className="h-4 w-4" />
-                </Button>
-                <Button variant="ghost" size="sm" className="h-8 px-2">
-                  <MoreHorizontal className="h-4 w-4" />
-                </Button>
-              </div>
-              <Button variant="outline" size="sm" className="text-blue-600 border-blue-200 hover:bg-blue-50">
-                Cancel
-              </Button>
-            </div>
-          </div>
         </div>
       </div>
     </div>
