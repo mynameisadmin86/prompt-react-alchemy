@@ -10,6 +10,7 @@ import { exportToCSV, exportToExcel, parseCSV } from '@/utils/gridExport';
 import { useToast } from '@/hooks/use-toast';
 import { useGridPreferences } from '@/hooks/useGridPreferences';
 import { CellRenderer } from './CellRenderer';
+import { ColumnFilter } from './ColumnFilter';
 import { cn } from '@/lib/utils';
 import { ColumnVisibilityManager } from './ColumnVisibilityManager';
 
@@ -115,6 +116,17 @@ export function SmartGrid({
       setEditingHeader(columnKey);
     }
   }, [resizingColumn]);
+
+  // Add column filter handler
+  const handleColumnFilter = useCallback((columnKey: string, filter: FilterConfig | null) => {
+    setFilters(prev => {
+      const newFilters = prev.filter(f => f.column !== columnKey);
+      if (filter) {
+        newFilters.push(filter);
+      }
+      return newFilters;
+    });
+  }, []);
 
   // Handle drag and drop for column reordering
   const handleColumnDragStart = useCallback((e: React.DragEvent, columnKey: string) => {
@@ -240,6 +252,43 @@ export function SmartGrid({
       );
     }
 
+    // Apply column filters
+    if (filters.length > 0) {
+      result = result.filter(row => {
+        return filters.every(filter => {
+          const value = row[filter.column];
+          const filterValue = filter.value;
+          const operator = filter.operator || 'contains';
+
+          if (value == null) return false;
+
+          const stringValue = String(value).toLowerCase();
+          const stringFilter = String(filterValue).toLowerCase();
+
+          switch (operator) {
+            case 'equals':
+              return stringValue === stringFilter;
+            case 'contains':
+              return stringValue.includes(stringFilter);
+            case 'startsWith':
+              return stringValue.startsWith(stringFilter);
+            case 'endsWith':
+              return stringValue.endsWith(stringFilter);
+            case 'gt':
+              return Number(value) > Number(filterValue);
+            case 'lt':
+              return Number(value) < Number(filterValue);
+            case 'gte':
+              return Number(value) >= Number(filterValue);
+            case 'lte':
+              return Number(value) <= Number(filterValue);
+            default:
+              return true;
+          }
+        });
+      });
+    }
+
     // Apply sorting
     if (sort) {
       result.sort((a, b) => {
@@ -254,7 +303,7 @@ export function SmartGrid({
     }
 
     return result;
-  }, [gridData, globalFilter, sort, orderedColumns, onDataFetch]);
+  }, [gridData, globalFilter, filters, sort, orderedColumns, onDataFetch]);
 
   // Pagination
   const paginatedData = useMemo(() => {
@@ -626,6 +675,13 @@ export function SmartGrid({
         </div>
 
         <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto justify-end">
+          {/* Show active filters count */}
+          {filters.length > 0 && (
+            <div className="text-sm text-blue-600 bg-blue-50 px-2 py-1 rounded">
+              {filters.length} filter{filters.length > 1 ? 's' : ''} active
+            </div>
+          )}
+
           {/* Column Visibility Manager */}
           <ColumnVisibilityManager
             columns={columns}
@@ -727,29 +783,39 @@ export function SmartGrid({
                                 <Edit2 className="h-3 w-3 text-gray-400 opacity-0 group-hover/header:opacity-100 transition-opacity" />
                               </div>
                             )}
-                            {column.sortable && (
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleSort(column.key);
-                                }}
-                                className="h-auto p-0 hover:bg-transparent opacity-60 hover:opacity-100 transition-opacity flex-shrink-0"
-                                disabled={loading}
-                                onDragStart={(e) => e.preventDefault()}
-                              >
-                                {sort?.column === column.key ? (
-                                  sort.direction === 'asc' ? (
-                                    <ArrowUp className="h-4 w-4 text-blue-600" />
+                            
+                            <div className="flex items-center space-x-1">
+                              {/* Column Filter */}
+                              <ColumnFilter
+                                column={column}
+                                currentFilter={filters.find(f => f.column === column.key)}
+                                onFilterChange={(filter) => handleColumnFilter(column.key, filter)}
+                              />
+                              
+                              {column.sortable && (
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleSort(column.key);
+                                  }}
+                                  className="h-auto p-0 hover:bg-transparent opacity-60 hover:opacity-100 transition-opacity flex-shrink-0"
+                                  disabled={loading}
+                                  onDragStart={(e) => e.preventDefault()}
+                                >
+                                  {sort?.column === column.key ? (
+                                    sort.direction === 'asc' ? (
+                                      <ArrowUp className="h-4 w-4 text-blue-600" />
+                                    ) : (
+                                      <ArrowDown className="h-4 w-4 text-blue-600" />
+                                    )
                                   ) : (
-                                    <ArrowDown className="h-4 w-4 text-blue-600" />
-                                  )
-                                ) : (
-                                  <ArrowUpDown className="h-4 w-4 text-gray-400" />
-                                )}
-                              </Button>
-                            )}
+                                    <ArrowUpDown className="h-4 w-4 text-gray-400" />
+                                  )}
+                                </Button>
+                              )}
+                            </div>
                           </div>
                           
                           {/* Resize handle */}
