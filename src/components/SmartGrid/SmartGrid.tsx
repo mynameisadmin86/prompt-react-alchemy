@@ -89,30 +89,30 @@ export function SmartGrid({
     let remainingWidth = availableWidth;
     const columnWidths: Record<string, number> = {};
     
-    // First pass: assign minimum widths based on content type
+    // First pass: assign minimum widths based on content type with extra space for headers
     visibleColumns.forEach(col => {
-      let minWidth = 100; // default minimum
+      let minWidth = 120; // Increased minimum width for header content
       
       switch (col.type) {
         case 'Badge':
-          minWidth = 80;
+          minWidth = 100;
           break;
         case 'Date':
-          minWidth = 120;
+          minWidth = 140;
           break;
         case 'DateTimeRange':
-          minWidth = 180;
+          minWidth = 200;
           break;
         case 'Link':
-          minWidth = 130;
+          minWidth = 150;
           break;
         case 'ExpandableCount':
-          minWidth = 70;
+          minWidth = 90;
           break;
         case 'Text':
         case 'EditableText':
         default:
-          minWidth = 100;
+          minWidth = 120;
           break;
       }
       
@@ -772,11 +772,11 @@ export function SmartGrid({
                   <React.Fragment key={column.key}>
                     <TableHead 
                       className={cn(
-                        "relative group bg-gray-50/80 backdrop-blur-sm font-semibold text-gray-900 px-3 py-3 border-r border-gray-100 last:border-r-0 cursor-move overflow-hidden",
+                        "relative group bg-gray-50/80 backdrop-blur-sm font-semibold text-gray-900 px-2 py-3 border-r border-gray-100 last:border-r-0 cursor-move",
                         draggedColumn === column.key && "opacity-50",
                         dragOverColumn === column.key && "bg-blue-100 border-blue-300"
                       )}
-                      style={{ width: `${column.width}px` }}
+                      style={{ width: `${column.width}px`, minWidth: `${Math.max(120, column.width)}px` }}
                       draggable={!resizingColumn && !editingHeader}
                       onDragStart={(e) => handleColumnDragStart(e, column.key)}
                       onDragOver={(e) => handleColumnDragOver(e, column.key)}
@@ -784,8 +784,8 @@ export function SmartGrid({
                       onDrop={(e) => handleColumnDrop(e, column.key)}
                       onDragEnd={handleColumnDragEnd}
                     >
-                      <div className="flex items-center justify-between min-w-0">
-                        <div className="flex items-center space-x-1 min-w-0 flex-1">
+                      <div className="flex items-center justify-between gap-1 min-w-0">
+                        <div className="flex items-center gap-1 min-w-0 flex-1">
                           <GripVertical className="h-3 w-3 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
                           {editingHeader === column.key ? (
                             <Input
@@ -798,7 +798,7 @@ export function SmartGrid({
                                   setEditingHeader(null);
                                 }
                               }}
-                              className="h-5 px-1 text-sm font-semibold bg-white border-blue-300 focus:border-blue-500"
+                              className="h-5 px-1 text-sm font-semibold bg-white border-blue-300 focus:border-blue-500 min-w-0"
                               autoFocus
                               onFocus={(e) => e.target.select()}
                               onClick={(e) => e.stopPropagation()}
@@ -806,14 +806,24 @@ export function SmartGrid({
                             />
                           ) : (
                             <div 
-                              className="flex items-center space-x-1 cursor-pointer hover:bg-gray-100/50 rounded px-1 py-0.5 -mx-1 -my-0.5 transition-colors group/header flex-1 min-w-0"
+                              className="flex items-center gap-1 cursor-pointer hover:bg-gray-100/50 rounded px-1 py-0.5 -mx-1 -my-0.5 transition-colors group/header flex-1 min-w-0"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 handleHeaderClick(column.key);
                               }}
                               onDragStart={(e) => e.preventDefault()}
                             >
-                              <span className="select-none truncate text-sm">{column.label}</span>
+                              <span 
+                                className="select-none text-sm font-semibold flex-1 min-w-0" 
+                                style={{ 
+                                  whiteSpace: 'nowrap',
+                                  overflow: 'visible',
+                                  textOverflow: 'clip'
+                                }}
+                                title={column.label}
+                              >
+                                {column.label}
+                              </span>
                               <Edit2 className="h-3 w-3 text-gray-400 opacity-0 group-hover/header:opacity-100 transition-opacity flex-shrink-0" />
                             </div>
                           )}
@@ -827,7 +837,7 @@ export function SmartGrid({
                               e.stopPropagation();
                               handleSort(column.key);
                             }}
-                            className="h-6 w-6 p-0 hover:bg-transparent transition-opacity flex-shrink-0"
+                            className="h-5 w-5 p-0 hover:bg-transparent transition-opacity flex-shrink-0 ml-1"
                             disabled={loading}
                             onDragStart={(e) => e.preventDefault()}
                           >
@@ -855,7 +865,7 @@ export function SmartGrid({
                             
                             const handleMouseMove = (e: MouseEvent) => {
                               const diff = e.clientX - startX;
-                              const newWidth = Math.max(60, Math.min(300, startWidth + diff));
+                              const newWidth = Math.max(120, Math.min(400, startWidth + diff));
                               handleColumnResize(column.key, newWidth);
                             };
                             
