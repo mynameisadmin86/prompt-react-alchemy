@@ -170,11 +170,18 @@ export function SmartGrid({
       width: currentWidth
     };
     
+    // Disable pointer events on other elements during resize
+    document.body.style.pointerEvents = 'none';
+    document.body.style.userSelect = 'none';
+    
     document.addEventListener('mousemove', handleResizeMove);
     document.addEventListener('mouseup', handleResizeEnd);
   }, [orderedColumns]);
 
   const handleResizeMove = useCallback((e: MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
     if (!resizingColumn || !resizeStartRef.current) return;
     
     const deltaX = e.clientX - resizeStartRef.current.x;
@@ -186,9 +193,18 @@ export function SmartGrid({
     }));
   }, [resizingColumn]);
 
-  const handleResizeEnd = useCallback(() => {
+  const handleResizeEnd = useCallback((e?: MouseEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    
     setResizingColumn(null);
     resizeStartRef.current = null;
+    
+    // Re-enable pointer events
+    document.body.style.pointerEvents = '';
+    document.body.style.userSelect = '';
     
     document.removeEventListener('mousemove', handleResizeMove);
     document.removeEventListener('mouseup', handleResizeEnd);
@@ -199,6 +215,9 @@ export function SmartGrid({
     return () => {
       document.removeEventListener('mousemove', handleResizeMove);
       document.removeEventListener('mouseup', handleResizeEnd);
+      // Clean up body styles
+      document.body.style.pointerEvents = '';
+      document.body.style.userSelect = '';
     };
   }, [handleResizeMove, handleResizeEnd]);
 
@@ -215,6 +234,9 @@ export function SmartGrid({
 
   // Handle header editing
   const handleHeaderEdit = useCallback((columnKey: string, newHeader: string) => {
+    // Prevent header edit during resize
+    if (resizingColumn) return;
+    
     if (newHeader.trim() && newHeader !== preferences.columnHeaders[columnKey]) {
       updateColumnHeader(columnKey, newHeader.trim());
       toast({
@@ -223,39 +245,60 @@ export function SmartGrid({
       });
     }
     setEditingHeader(null);
-  }, [updateColumnHeader, preferences.columnHeaders, toast]);
+  }, [updateColumnHeader, preferences.columnHeaders, toast, resizingColumn]);
 
   const handleHeaderClick = useCallback((columnKey: string) => {
+    // Prevent header edit during resize
+    if (resizingColumn) return;
     setEditingHeader(columnKey);
-  }, []);
+  }, [resizingColumn]);
 
   // Handle drag and drop for column reordering
   const handleColumnDragStart = useCallback((e: React.DragEvent, columnKey: string) => {
-    if (editingHeader) return; // Prevent drag if editing
+    // Prevent drag if editing or resizing
+    if (editingHeader || resizingColumn) {
+      e.preventDefault();
+      return;
+    }
     e.stopPropagation();
     setDraggedColumn(columnKey);
     e.dataTransfer.effectAllowed = 'move';
     e.dataTransfer.setData('text/plain', columnKey);
-  }, [editingHeader]);
+  }, [editingHeader, resizingColumn]);
 
   const handleColumnDragOver = useCallback((e: React.DragEvent, targetColumnKey: string) => {
+    // Prevent drag over during resize
+    if (resizingColumn) {
+      e.preventDefault();
+      return;
+    }
+    
     e.preventDefault();
     e.stopPropagation();
     if (draggedColumn && draggedColumn !== targetColumnKey) {
       setDragOverColumn(targetColumnKey);
       e.dataTransfer.dropEffect = 'move';
     }
-  }, [draggedColumn]);
+  }, [draggedColumn, resizingColumn]);
 
   const handleColumnDragLeave = useCallback((e: React.DragEvent) => {
+    // Prevent drag leave during resize
+    if (resizingColumn) return;
+    
     e.stopPropagation();
     // Only clear drag over if we're actually leaving the header area
     if (!e.currentTarget.contains(e.relatedTarget as Node)) {
       setDragOverColumn(null);
     }
-  }, []);
+  }, [resizingColumn]);
 
   const handleColumnDrop = useCallback((e: React.DragEvent, targetColumnKey: string) => {
+    // Prevent drop during resize
+    if (resizingColumn) {
+      e.preventDefault();
+      return;
+    }
+    
     e.preventDefault();
     e.stopPropagation();
     
@@ -281,12 +324,14 @@ export function SmartGrid({
       title: "Success",
       description: "Column order updated"
     });
-  }, [draggedColumn, preferences.columnOrder, updateColumnOrder, toast]);
+  }, [draggedColumn, preferences.columnOrder, updateColumnOrder, toast, resizingColumn]);
 
   const handleColumnDragEnd = useCallback(() => {
+    // Prevent drag end during resize
+    if (resizingColumn) return;
     setDraggedColumn(null);
     setDragOverColumn(null);
-  }, []);
+  }, [resizingColumn]);
 
   // Toggle row expansion
   const toggleRowExpansion = useCallback((rowIndex: number) => {
@@ -416,6 +461,9 @@ export function SmartGrid({
   const totalPages = Math.ceil(processedData.length / pageSize);
 
   const handleSort = useCallback(async (columnKey: string) => {
+    // Prevent sorting during resize
+    if (resizingColumn) return;
+    
     const column = orderedColumns.find(col => col.key === columnKey);
     if (!column?.sortable) return;
 
@@ -440,7 +488,7 @@ export function SmartGrid({
         setLoading(false);
       }
     }
-  }, [orderedColumns, sort, onDataFetch, currentPage, pageSize]);
+  }, [orderedColumns, sort, onDataFetch, currentPage, pageSize, resizingColumn]);
 
   const handleCellEdit = useCallback(async (rowIndex: number, columnKey: string, value: any) => {
     const actualRowIndex = onDataFetch ? rowIndex : (currentPage - 1) * pageSize + rowIndex;
@@ -810,10 +858,12 @@ export function SmartGrid({
                     <TableHead 
                       key={column.key}
                       className={cn(
-                        "relative group bg-gray-50/80 backdrop-blur-sm font-semibold text-gray-900 px-2 py-3 border-r border-gray-100 last:border-r-0 cursor-move",
+                        "relative group bg-gray-50/80 backdrop-blur-sm font-semibold text-gray-900 px-2 py-3 border-r border-gray-100 last:border-r-0",
                         draggedColumn === column.key && "opacity-50",
                         dragOverColumn === column.key && "bg-blue-100 border-blue-300",
-                        resizingColumn === column.key && "bg-blue-50"
+                        resizingColumn === column.key && "bg-blue-50",
+                        // Disable cursor-move during resize
+                        !resizingColumn && "cursor-move"
                       )}
                       style={{ width: `${column.width}px`, minWidth: `${Math.max(120, column.width)}px` }}
                       draggable={!editingHeader && !resizingColumn}
@@ -847,8 +897,13 @@ export function SmartGrid({
                             />
                           ) : (
                             <div 
-                              className="flex items-center gap-1 rounded px-1 py-0.5 -mx-1 -my-0.5 transition-colors group/header flex-1 min-w-0 cursor-pointer hover:bg-gray-100/50"
+                              className={cn(
+                                "flex items-center gap-1 rounded px-1 py-0.5 -mx-1 -my-0.5 transition-colors group/header flex-1 min-w-0",
+                                // Disable hover and click during resize
+                                !resizingColumn && "cursor-pointer hover:bg-gray-100/50"
+                              )}
                               onClick={(e) => {
+                                if (resizingColumn) return;
                                 e.stopPropagation();
                                 handleHeaderClick(column.key);
                               }}
@@ -877,11 +932,12 @@ export function SmartGrid({
                             variant="ghost"
                             size="sm"
                             onClick={(e) => {
+                              if (resizingColumn) return;
                               e.stopPropagation();
                               handleSort(column.key);
                             }}
                             className="h-5 w-5 p-0 hover:bg-transparent transition-opacity flex-shrink-0 ml-1"
-                            disabled={loading}
+                            disabled={loading || !!resizingColumn}
                             onDragStart={(e) => e.preventDefault()}
                           >
                             {sort?.column === column.key ? (
@@ -899,10 +955,15 @@ export function SmartGrid({
                       
                       {/* Resize Handle */}
                       <div
-                        className="absolute top-0 right-0 w-2 h-full cursor-col-resize bg-transparent hover:bg-blue-300/50 transition-colors flex items-center justify-center group/resize"
+                        className="absolute top-0 right-0 w-2 h-full cursor-col-resize bg-transparent hover:bg-blue-300/50 transition-colors flex items-center justify-center group/resize z-30"
                         onMouseDown={(e) => handleResizeStart(e, column.key)}
                         onMouseEnter={() => setResizeHoverColumn(column.key)}
                         onMouseLeave={() => setResizeHoverColumn(null)}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                        }}
+                        onDragStart={(e) => e.preventDefault()}
                       >
                         <div className="w-0.5 h-4 bg-gray-300 group-hover/resize:bg-blue-500 transition-colors" />
                       </div>
