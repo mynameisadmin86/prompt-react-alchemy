@@ -22,6 +22,8 @@ interface SampleData {
   currency: string;
   value1: string;
   value2: string;
+  locationDetails?: string;
+  currencyDetails?: string;
 }
 
 const GridDemo = () => {
@@ -67,16 +69,18 @@ const GridDemo = () => {
     {
       key: 'location',
       label: 'Location',
-      type: 'Text',
+      type: 'TextWithTooltip',
       sortable: true,
-      editable: false
+      editable: false,
+      infoTextField: 'locationDetails'
     },
     {
       key: 'currency',
       label: 'Currency',
-      type: 'Text',
+      type: 'TextWithTooltip',
       sortable: true,
-      editable: false
+      editable: false,
+      infoTextField: 'currencyDetails'
     },
     {
       key: 'value1',
@@ -104,7 +108,9 @@ const GridDemo = () => {
       location: 'VLA-70',
       currency: 'CUR-25',
       value1: '+3',
-      value2: '+3'
+      value2: '+3',
+      locationDetails: 'VQL-705\nVolla\n\nAddress\nSardar Patel Rd, Sriram Nagar, Tharamani, Chennai, Tamil Nadu 600113',
+      currencyDetails: 'Currency details for CUR-25'
     },
     {
       id: 'TRIP00000007',
@@ -115,7 +121,9 @@ const GridDemo = () => {
       location: 'VLA-70',
       currency: 'CUR-25',
       value1: '+3',
-      value2: '+3'
+      value2: '+3',
+      locationDetails: 'VQL-705\nVolla\n\nAddress\nSardar Patel Rd, Sriram Nagar, Tharamani, Chennai, Tamil Nadu 600113',
+      currencyDetails: 'Currency details for CUR-25'
     },
     {
       id: 'TRIP00000008',
@@ -126,7 +134,9 @@ const GridDemo = () => {
       location: 'VLA-70',
       currency: 'CUR-25',
       value1: '+3',
-      value2: '+3'
+      value2: '+3',
+      locationDetails: 'VQL-705\nVolla\n\nAddress\nSardar Patel Rd, Sriram Nagar, Tharamani, Chennai, Tamil Nadu 600113',
+      currencyDetails: 'Currency details for CUR-25'
     },
     {
       id: 'TRIP00000009',
@@ -137,7 +147,9 @@ const GridDemo = () => {
       location: 'VLA-70',
       currency: 'CUR-25',
       value1: '+3',
-      value2: '+3'
+      value2: '+3',
+      locationDetails: 'VQL-705\nVolla\n\nAddress\nSardar Patel Rd, Sriram Nagar, Tharamani, Chennai, Tamil Nadu 600113',
+      currencyDetails: 'Currency details for CUR-25'
     },
     {
       id: 'TRIP00000010',
@@ -148,7 +160,9 @@ const GridDemo = () => {
       location: 'NYC-45',
       currency: 'USD-50',
       value1: '+5',
-      value2: '+5'
+      value2: '+5',
+      locationDetails: 'NYC-450\nNew York Central\n\nAddress\n42nd Street, Manhattan, New York, NY 10017',
+      currencyDetails: 'Currency details for USD-50'
     },
     {
       id: 'TRIP00000011',
@@ -159,7 +173,9 @@ const GridDemo = () => {
       location: 'LON-88',
       currency: 'GBP-75',
       value1: '+7',
-      value2: '+7'
+      value2: '+7',
+      locationDetails: 'LON-880\nLondon Central\n\nAddress\nKing\'s Cross Station, Euston Rd, London N1 9AL',
+      currencyDetails: 'Currency details for GBP-75'
     },
     {
       id: 'TRIP00000012',
@@ -170,7 +186,9 @@ const GridDemo = () => {
       location: 'TKY-12',
       currency: 'JPY-100',
       value1: '+2',
-      value2: '+2'
+      value2: '+2',
+      locationDetails: 'TKY-120\nTokyo Station\n\nAddress\n1 Chome Marunouchi, Chiyoda City, Tokyo 100-0005',
+      currencyDetails: 'Currency details for JPY-100'
     },
     {
       id: 'TRIP00000013',
@@ -181,7 +199,9 @@ const GridDemo = () => {
       location: 'SYD-66',
       currency: 'AUD-35',
       value1: '+4',
-      value2: '+4'
+      value2: '+4',
+      locationDetails: 'SYD-660\nSydney Central\n\nAddress\nCentral Station, Eddy Ave, Sydney NSW 2000',
+      currencyDetails: 'Currency details for AUD-35'
     },
     {
       id: 'TRIP00000014',
@@ -192,7 +212,9 @@ const GridDemo = () => {
       location: 'PAR-23',
       currency: 'EUR-90',
       value1: '+6',
-      value2: '+6'
+      value2: '+6',
+      locationDetails: 'PAR-230\nParis Gare du Nord\n\nAddress\n18 Rue de Dunkerque, 75010 Paris',
+      currencyDetails: 'Currency details for EUR-90'
     },
     {
       id: 'TRIP00000015',
@@ -203,7 +225,9 @@ const GridDemo = () => {
       location: 'BER-34',
       currency: 'EUR-85',
       value1: '+8',
-      value2: '+8'
+      value2: '+8',
+      locationDetails: 'BER-340\nBerlin Hauptbahnhof\n\nAddress\nEuropaplatz 1, 10557 Berlin',
+      currencyDetails: 'Currency details for EUR-85'
     },
     {
       id: 'TRIP00000016',
@@ -214,7 +238,9 @@ const GridDemo = () => {
       location: 'ROM-56',
       currency: 'EUR-75',
       value1: '+3',
-      value2: '+3'
+      value2: '+3',
+      locationDetails: 'ROM-560\nRoma Termini\n\nAddress\nPiazza dei Cinquecento, 00185 Roma RM',
+      currencyDetails: 'Currency details for EUR-75'
     },
     {
       id: 'TRIP00000017',
@@ -225,7 +251,9 @@ const GridDemo = () => {
       location: 'MAD-89',
       currency: 'EUR-95',
       value1: '+6',
-      value2: '+6'
+      value2: '+6',
+      locationDetails: 'MAD-890\nMadrid Atocha\n\nAddress\nGlorieta del Emperador Carlos V, 28045 Madrid',
+      currencyDetails: 'Currency details for EUR-95'
     },
     {
       id: 'TRIP00000018',
@@ -236,7 +264,9 @@ const GridDemo = () => {
       location: 'AMS-67',
       currency: 'EUR-80',
       value1: '+4',
-      value2: '+4'
+      value2: '+4',
+      locationDetails: 'AMS-670\nAmsterdam Centraal\n\nAddress\nStationsplein, 1012 AB Amsterdam',
+      currencyDetails: 'Currency details for EUR-80'
     },
     {
       id: 'TRIP00000019',
@@ -247,7 +277,9 @@ const GridDemo = () => {
       location: 'BRU-45',
       currency: 'EUR-70',
       value1: '+5',
-      value2: '+5'
+      value2: '+5',
+      locationDetails: 'BRU-450\nBruxelles-Central\n\nAddress\nCarrefour de l\'Europe 2, 1000 Bruxelles',
+      currencyDetails: 'Currency details for EUR-70'
     }
   ];
 
