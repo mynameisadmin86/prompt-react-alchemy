@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -61,7 +60,6 @@ export function SmartGrid({
   const [showCheckboxes, setShowCheckboxes] = useState(false);
   const [viewMode, setViewMode] = useState<'table' | 'card'>('table');
   
-  // Resize functionality state - fixed and improved
   const [resizingColumn, setResizingColumn] = useState<string | null>(null);
   const [resizeHoverColumn, setResizeHoverColumn] = useState<string | null>(null);
   const [columnWidths, setColumnWidths] = useState<Record<string, number>>({});
@@ -97,6 +95,42 @@ export function SmartGrid({
       }
     } : undefined
   );
+
+  // Define handleExport and handleResetPreferences before gridAPI
+  const handleExport = useCallback((format: 'csv') => {
+    const filename = `export-${new Date().toISOString().split('T')[0]}.${format}`;
+    exportToCSV(processedData, orderedColumns, filename);
+  }, [processedData, orderedColumns]);
+
+  const handleResetPreferences = useCallback(async () => {
+    const defaultPreferences = {
+      columnOrder: columns.map(col => col.key),
+      hiddenColumns: [],
+      columnWidths: {},
+      columnHeaders: {},
+      filters: []
+    };
+    
+    try {
+      await savePreferences(defaultPreferences);
+      setSort(undefined);
+      setFilters([]);
+      setGlobalFilter('');
+      setColumnWidths({});
+      
+      toast({
+        title: "Success",
+        description: "Column preferences have been reset to defaults"
+      });
+    } catch (error) {
+      setError('Failed to reset preferences');
+      toast({
+        title: "Error",
+        description: "Failed to reset preferences",
+        variant: "destructive"
+      });
+    }
+  }, [columns, savePreferences, toast]);
 
   // Calculate responsive column widths based on content type and available space
   const calculateColumnWidths = useCallback((visibleColumns: GridColumnConfig[]) => {
@@ -174,241 +208,6 @@ export function SmartGrid({
     }));
   }, [columns, preferences, calculateColumnWidths]);
 
-  // Column resize handlers - FIXED
-  const handleResizeStart = useCallback((e: React.MouseEvent, columnKey: string) => {
-    e.preventDefault();
-    e.stopPropagation();
-    
-    const currentWidth = orderedColumns.find(col => col.key === columnKey)?.width || 100;
-    setResizingColumn(columnKey);
-    resizeStartRef.current = {
-      x: e.clientX,
-      width: currentWidth
-    };
-    
-    // Disable pointer events on other elements during resize
-    document.body.style.pointerEvents = 'none';
-    document.body.style.userSelect = 'none';
-    
-    const handleResizeMove = (e: MouseEvent) => {
-      e.preventDefault();
-      e.stopPropagation();
-      
-      if (!resizeStartRef.current) return;
-      
-      const deltaX = e.clientX - resizeStartRef.current.x;
-      const newWidth = Math.max(80, resizeStartRef.current.width + deltaX);
-      
-      setColumnWidths(prev => ({
-        ...prev,
-        [columnKey]: newWidth
-      }));
-    };
-
-    const handleResizeEnd = (e?: MouseEvent) => {
-      if (e) {
-        e.preventDefault();
-        e.stopPropagation();
-      }
-      
-      // Re-enable pointer events
-      document.body.style.pointerEvents = '';
-      document.body.style.userSelect = '';
-      
-      document.removeEventListener('mousemove', handleResizeMove);
-      document.removeEventListener('mouseup', handleResizeEnd);
-      
-      setTimeout(() => {
-        setResizingColumn(null);
-        resizeStartRef.current = null;
-      }, 0);
-    };
-    
-    document.addEventListener('mousemove', handleResizeMove);
-    document.addEventListener('mouseup', handleResizeEnd);
-  }, [orderedColumns]);
-
-  // Cleanup resize listeners on unmount
-  useEffect(() => {
-    const handleResizeMove = (e: MouseEvent) => {
-      e.preventDefault();
-      e.stopPropagation();
-      
-      if (!resizingColumn || !resizeStartRef.current) return;
-      
-      const deltaX = e.clientX - resizeStartRef.current.x;
-      const newWidth = Math.max(80, resizeStartRef.current.width + deltaX);
-      
-      setColumnWidths(prev => ({
-        ...prev,
-        [resizingColumn]: newWidth
-      }));
-    };
-
-    const handleResizeEnd = (e?: MouseEvent) => {
-      if (e) {
-        e.preventDefault();
-        e.stopPropagation();
-      }
-      
-      setResizingColumn(null);
-      resizeStartRef.current = null;
-      
-      // Re-enable pointer events
-      document.body.style.pointerEvents = '';
-      document.body.style.userSelect = '';
-      
-      document.removeEventListener('mousemove', handleResizeMove);
-      document.removeEventListener('mouseup', handleResizeEnd);
-    };
-
-    // Cleanup function
-    return () => {
-      document.removeEventListener('mousemove', handleResizeMove);
-      document.removeEventListener('mouseup', handleResizeEnd);
-      // Clean up body styles
-      document.body.style.pointerEvents = '';
-      document.body.style.userSelect = '';
-    };
-  }, [resizingColumn]);
-
-  // Recalculate column widths on window resize
-  useEffect(() => {
-    const handleResize = () => {
-      const calculatedWidths = calculateColumnWidths(orderedColumns);
-      // Column widths are now calculated dynamically without updating preferences
-    };
-
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, [orderedColumns, calculateColumnWidths]);
-
-  // Handle header editing
-  const handleHeaderEdit = useCallback((columnKey: string, newHeader: string) => {
-    // Prevent header edit during resize
-    if (resizingColumn) return;
-    
-    if (newHeader.trim() && newHeader !== preferences.columnHeaders[columnKey]) {
-      updateColumnHeader(columnKey, newHeader.trim());
-      toast({
-        title: "Success",
-        description: "Column header updated"
-      });
-    }
-    setEditingHeader(null);
-  }, [updateColumnHeader, preferences.columnHeaders, toast, resizingColumn]);
-
-  const handleHeaderClick = useCallback((columnKey: string) => {
-    // Prevent header edit during resize
-    if (resizingColumn) return;
-    setEditingHeader(columnKey);
-  }, [resizingColumn]);
-
-  // Handle drag and drop for column reordering
-  const handleColumnDragStart = useCallback((e: React.DragEvent, columnKey: string) => {
-    // Prevent drag if editing or resizing
-    if (editingHeader || resizingColumn) {
-      e.preventDefault();
-      return;
-    }
-    e.stopPropagation();
-    setDraggedColumn(columnKey);
-    e.dataTransfer.effectAllowed = 'move';
-    e.dataTransfer.setData('text/plain', columnKey);
-  }, [editingHeader, resizingColumn]);
-
-  const handleColumnDragOver = useCallback((e: React.DragEvent, targetColumnKey: string) => {
-    // Prevent drag over during resize
-    if (resizingColumn) {
-      e.preventDefault();
-      return;
-    }
-    
-    e.preventDefault();
-    e.stopPropagation();
-    if (draggedColumn && draggedColumn !== targetColumnKey) {
-      setDragOverColumn(targetColumnKey);
-      e.dataTransfer.dropEffect = 'move';
-    }
-  }, [draggedColumn, resizingColumn]);
-
-  const handleColumnDragLeave = useCallback((e: React.DragEvent) => {
-    // Prevent drag leave during resize
-    if (resizingColumn) return;
-    
-    e.stopPropagation();
-    // Only clear drag over if we're actually leaving the header area
-    if (!e.currentTarget.contains(e.relatedTarget as Node)) {
-      setDragOverColumn(null);
-    }
-  }, [resizingColumn]);
-
-  const handleColumnDrop = useCallback((e: React.DragEvent, targetColumnKey: string) => {
-    // Prevent drop during resize
-    if (resizingColumn) {
-      e.preventDefault();
-      return;
-    }
-    
-    e.preventDefault();
-    e.stopPropagation();
-    
-    if (!draggedColumn || draggedColumn === targetColumnKey) {
-      setDraggedColumn(null);
-      setDragOverColumn(null);
-      return;
-    }
-
-    const newOrder = [...preferences.columnOrder];
-    const draggedIndex = newOrder.indexOf(draggedColumn);
-    const targetIndex = newOrder.indexOf(targetColumnKey);
-
-    // Remove dragged column and insert at target position
-    newOrder.splice(draggedIndex, 1);
-    newOrder.splice(targetIndex, 0, draggedColumn);
-
-    updateColumnOrder(newOrder);
-    setDraggedColumn(null);
-    setDragOverColumn(null);
-    
-    toast({
-      title: "Success",
-      description: "Column order updated"
-    });
-  }, [draggedColumn, preferences.columnOrder, updateColumnOrder, toast, resizingColumn]);
-
-  const handleColumnDragEnd = useCallback(() => {
-    // Prevent drag end during resize
-    if (resizingColumn) return;
-    setDraggedColumn(null);
-    setDragOverColumn(null);
-  }, [resizingColumn]);
-
-  // Toggle row expansion
-  const toggleRowExpansion = useCallback((rowIndex: number) => {
-    setExpandedRows(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(rowIndex)) {
-        newSet.delete(rowIndex);
-      } else {
-        newSet.add(rowIndex);
-      }
-      return newSet;
-    });
-  }, []);
-
-  // Determine if a column is editable
-  const isColumnEditable = useCallback((column: GridColumnConfig, columnIndex: number) => {
-    // First column is not editable by default
-    if (columnIndex === 0) return false;
-    
-    if (Array.isArray(editableColumns)) {
-      return editableColumns.includes(column.key);
-    }
-    
-    return editableColumns && column.editable;
-  }, [editableColumns]);
-
   // Process data with sorting and filtering (only if not using lazy loading)
   const processedData = useMemo(() => {
     if (onDataFetch) {
@@ -481,6 +280,36 @@ export function SmartGrid({
     return result;
   }, [gridData, globalFilter, filters, sort, orderedColumns, onDataFetch]);
 
+  // Create Grid API for plugins
+  const gridAPI: GridAPI = useMemo(() => ({
+    data: gridData,
+    filteredData: processedData,
+    selectedRows: Array.from(selectedRows).map(index => processedData[index]).filter(Boolean),
+    columns: orderedColumns,
+    preferences,
+    actions: {
+      exportData: handleExport,
+      resetPreferences: handleResetPreferences,
+      toggleRowSelection: (rowIndex: number) => {
+        setSelectedRows(prev => {
+          const newSet = new Set(prev);
+          if (newSet.has(rowIndex)) {
+            newSet.delete(rowIndex);
+          } else {
+            newSet.add(rowIndex);
+          }
+          return newSet;
+        });
+      },
+      selectAllRows: () => {
+        setSelectedRows(new Set(Array.from({ length: processedData.length }, (_, i) => i)));
+      },
+      clearSelection: () => {
+        setSelectedRows(new Set());
+      }
+    }
+  }), [gridData, processedData, selectedRows, orderedColumns, preferences, handleExport, handleResetPreferences]);
+
   // Pagination
   const paginatedData = useMemo(() => {
     if (paginationMode !== 'pagination' || onDataFetch) return processedData;
@@ -490,35 +319,121 @@ export function SmartGrid({
 
   const totalPages = Math.ceil(processedData.length / pageSize);
 
-  const handleSort = useCallback(async (columnKey: string) => {
-    // Prevent sorting during resize
+  // Handle header editing
+  const handleHeaderEdit = useCallback((columnKey: string, newHeader: string) => {
     if (resizingColumn) return;
     
-    const column = orderedColumns.find(col => col.key === columnKey);
-    if (!column?.sortable) return;
-
-    const newSort: SortConfig = {
-      column: columnKey,
-      direction: sort?.column === columnKey && sort.direction === 'asc' ? 'desc' : 'asc'
-    };
-    
-    setSort(newSort);
-
-    // If using lazy loading, fetch new data with sort
-    if (onDataFetch) {
-      setLoading(true);
-      setError(null);
-      try {
-        const newData = await onDataFetch(currentPage, pageSize);
-        setGridData(newData);
-      } catch (err) {
-        setError('Failed to sort data');
-        console.error('Sort error:', err);
-      } finally {
-        setLoading(false);
-      }
+    if (newHeader.trim() && newHeader !== preferences.columnHeaders[columnKey]) {
+      updateColumnHeader(columnKey, newHeader.trim());
+      toast({
+        title: "Success",
+        description: "Column header updated"
+      });
     }
-  }, [orderedColumns, sort, onDataFetch, currentPage, pageSize, resizingColumn]);
+    setEditingHeader(null);
+  }, [updateColumnHeader, preferences.columnHeaders, toast, resizingColumn]);
+
+  const handleHeaderClick = useCallback((columnKey: string) => {
+    if (resizingColumn) return;
+    setEditingHeader(columnKey);
+  }, [resizingColumn]);
+
+  // Handle drag and drop for column reordering
+  const handleColumnDragStart = useCallback((e: React.DragEvent, columnKey: string) => {
+    if (editingHeader || resizingColumn) {
+      e.preventDefault();
+      return;
+    }
+    e.stopPropagation();
+    setDraggedColumn(columnKey);
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', columnKey);
+  }, [editingHeader, resizingColumn]);
+
+  const handleColumnDragOver = useCallback((e: React.DragEvent, targetColumnKey: string) => {
+    if (resizingColumn) {
+      e.preventDefault();
+      return;
+    }
+    
+    e.preventDefault();
+    e.stopPropagation();
+    if (draggedColumn && draggedColumn !== targetColumnKey) {
+      setDragOverColumn(targetColumnKey);
+      e.dataTransfer.dropEffect = 'move';
+    }
+  }, [draggedColumn, resizingColumn]);
+
+  const handleColumnDragLeave = useCallback((e: React.DragEvent) => {
+    if (resizingColumn) return;
+    
+    e.stopPropagation();
+    if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+      setDragOverColumn(null);
+    }
+  }, [resizingColumn]);
+
+  const handleColumnDrop = useCallback((e: React.DragEvent, targetColumnKey: string) => {
+    if (resizingColumn) {
+      e.preventDefault();
+      return;
+    }
+    
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (!draggedColumn || draggedColumn === targetColumnKey) {
+      setDraggedColumn(null);
+      setDragOverColumn(null);
+      return;
+    }
+
+    const newOrder = [...preferences.columnOrder];
+    const draggedIndex = newOrder.indexOf(draggedColumn);
+    const targetIndex = newOrder.indexOf(targetColumnKey);
+
+    newOrder.splice(draggedIndex, 1);
+    newOrder.splice(targetIndex, 0, draggedColumn);
+
+    updateColumnOrder(newOrder);
+    setDraggedColumn(null);
+    setDragOverColumn(null);
+    
+    toast({
+      title: "Success",
+      description: "Column order updated"
+    });
+  }, [draggedColumn, preferences.columnOrder, updateColumnOrder, toast, resizingColumn]);
+
+  const handleColumnDragEnd = useCallback(() => {
+    if (resizingColumn) return;
+    setDraggedColumn(null);
+    setDragOverColumn(null);
+  }, [resizingColumn]);
+
+  // Toggle row expansion
+  const toggleRowExpansion = useCallback((rowIndex: number) => {
+    setExpandedRows(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(rowIndex)) {
+        newSet.delete(rowIndex);
+      } else {
+        newSet.add(rowIndex);
+      }
+      return newSet;
+    });
+  }, []);
+
+  // Determine if a column is editable
+  const isColumnEditable = useCallback((column: GridColumnConfig, columnIndex: number) => {
+    if (columnIndex === 0) return false;
+    
+    if (Array.isArray(editableColumns)) {
+      return editableColumns.includes(column.key);
+    }
+    
+    return editableColumns && column.editable;
+  }, [editableColumns]);
 
   // Cell editing functions
   const handleCellEdit = useCallback(async (rowIndex: number, columnKey: string, value: any) => {
@@ -531,7 +446,6 @@ export function SmartGrid({
     setGridData(updatedData);
     setEditingCell(null);
     
-    // Handle single row update
     if (onUpdate) {
       setLoading(true);
       setError(null);
@@ -542,7 +456,6 @@ export function SmartGrid({
           description: "Row updated successfully"
         });
       } catch (err) {
-        // Revert the change on error
         updatedData[actualRowIndex] = originalRow;
         setGridData(updatedData);
         setError('Failed to update row');
@@ -573,7 +486,6 @@ export function SmartGrid({
     const isEditing = editingCell?.rowIndex === rowIndex && editingCell?.columnKey === column.key;
     const isEditable = isColumnEditable(column, columnIndex);
 
-    // Add expand/collapse toggle for first column if nestedRowRenderer exists
     if (columnIndex === 0 && nestedRowRenderer) {
       const isExpanded = expandedRows.has(rowIndex);
       return (
@@ -636,73 +548,6 @@ export function SmartGrid({
       setGridData(data);
     }
   }, [data, onDataFetch]);
-
-  // Define handleExport function before it's used
-  const handleExport = useCallback((format: 'csv') => {
-    const filename = `export-${new Date().toISOString().split('T')[0]}.${format}`;
-    exportToCSV(processedData, orderedColumns, filename);
-  }, [processedData, orderedColumns]);
-
-  // Define handleResetPreferences function before it's used
-  const handleResetPreferences = useCallback(async () => {
-    const defaultPreferences = {
-      columnOrder: columns.map(col => col.key),
-      hiddenColumns: [],
-      columnWidths: {},
-      columnHeaders: {},
-      filters: []
-    };
-    
-    try {
-      await savePreferences(defaultPreferences);
-      setSort(undefined);
-      setFilters([]);
-      setGlobalFilter('');
-      setColumnWidths({});
-      
-      toast({
-        title: "Success",
-        description: "Column preferences have been reset to defaults"
-      });
-    } catch (error) {
-      setError('Failed to reset preferences');
-      toast({
-        title: "Error",
-        description: "Failed to reset preferences",
-        variant: "destructive"
-      });
-    }
-  }, [columns, savePreferences, toast]);
-
-  // Create Grid API for plugins
-  const gridAPI: GridAPI = useMemo(() => ({
-    data: gridData,
-    filteredData: processedData,
-    selectedRows: Array.from(selectedRows).map(index => processedData[index]).filter(Boolean),
-    columns: orderedColumns,
-    preferences,
-    actions: {
-      exportData: handleExport,
-      resetPreferences: handleResetPreferences,
-      toggleRowSelection: (rowIndex: number) => {
-        setSelectedRows(prev => {
-          const newSet = new Set(prev);
-          if (newSet.has(rowIndex)) {
-            newSet.delete(rowIndex);
-          } else {
-            newSet.add(rowIndex);
-          }
-          return newSet;
-        });
-      },
-      selectAllRows: () => {
-        setSelectedRows(new Set(Array.from({ length: processedData.length }, (_, i) => i)));
-      },
-      clearSelection: () => {
-        setSelectedRows(new Set());
-      }
-    }
-  }), [gridData, processedData, selectedRows, orderedColumns, preferences, handleExport, handleResetPreferences]);
 
   // Fixed renderPluginToolbarItems function to prevent React Fragment errors
   const renderPluginToolbarItems = useCallback(() => {
@@ -804,24 +649,32 @@ export function SmartGrid({
             onFiltersChange={setFilters}
           />
 
-          {/* Toggle Checkboxes Button */}
+          {/* Toggle Checkboxes Button - Updated with blue selection state */}
           <Button 
-            variant="outline" 
+            variant={showCheckboxes ? "default" : "outline"}
             size="sm" 
             onClick={() => setShowCheckboxes(!showCheckboxes)}
             disabled={loading}
             title="Toggle Checkboxes"
+            className={cn(
+              "transition-colors",
+              showCheckboxes && "bg-blue-600 hover:bg-blue-700 text-white border-blue-600"
+            )}
           >
             <CheckSquare className="h-4 w-4" />
           </Button>
 
-          {/* Toggle View Mode Button */}
+          {/* Toggle View Mode Button - Updated with better visual states */}
           <Button 
-            variant="outline" 
+            variant="outline"
             size="sm" 
             onClick={() => setViewMode(viewMode === 'table' ? 'card' : 'table')}
             disabled={loading}
             title={`Switch to ${viewMode === 'table' ? 'Card' : 'Table'} View`}
+            className={cn(
+              "transition-colors",
+              viewMode === 'card' && "bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100"
+            )}
           >
             {viewMode === 'table' ? (
               <Grid2x2 className="h-4 w-4" />
@@ -893,7 +746,6 @@ export function SmartGrid({
                         draggedColumn === column.key && "opacity-50",
                         dragOverColumn === column.key && "bg-blue-100 border-blue-300",
                         resizingColumn === column.key && "bg-blue-50",
-                        // Disable cursor-move during resize
                         !resizingColumn && "cursor-move"
                       )}
                       style={{ width: `${column.width}px`, minWidth: `${Math.max(120, column.width)}px` }}
@@ -930,7 +782,6 @@ export function SmartGrid({
                             <div 
                               className={cn(
                                 "flex items-center gap-1 rounded px-1 py-0.5 -mx-1 -my-0.5 transition-colors group/header flex-1 min-w-0",
-                                // Disable hover and click during resize
                                 !resizingColumn && "cursor-pointer hover:bg-gray-100/50"
                               )}
                               onClick={(e) => {
