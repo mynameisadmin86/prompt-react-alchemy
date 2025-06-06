@@ -44,6 +44,13 @@ export function SmartGrid({
   const [selectedRows, setSelectedRows] = useState<Set<number>>(new Set());
   const [showCheckboxes, setShowCheckboxes] = useState(false);
   const [viewMode, setViewMode] = useState<'table' | 'card'>('table');
+  
+  // Resize functionality state
+  const [resizingColumn, setResizingColumn] = useState<string | null>(null);
+  const [resizeHoverColumn, setResizeHoverColumn] = useState<string | null>(null);
+  const [columnWidths, setColumnWidths] = useState<Record<string, number>>({});
+  const resizeStartRef = useRef<{ x: number; width: number } | null>(null);
+  
   const { toast } = useToast();
 
   // Convert GridColumnConfig to Column format for useGridPreferences
@@ -84,7 +91,7 @@ export function SmartGrid({
     
     const totalColumns = visibleColumns.length;
     let remainingWidth = availableWidth;
-    const columnWidths: Record<string, number> = {};
+    const calculatedWidths: Record<string, number> = {};
     
     // First pass: assign minimum widths based on content type with extra space for headers
     visibleColumns.forEach(col => {
@@ -113,23 +120,24 @@ export function SmartGrid({
           break;
       }
       
-      // Use stored preference or calculated minimum
+      // Use stored preference, custom width, or calculated minimum
+      const customWidth = columnWidths[col.key];
       const preferredWidth = preferences.columnWidths[col.key];
-      columnWidths[col.key] = preferredWidth ? Math.max(minWidth, preferredWidth) : minWidth;
-      remainingWidth -= columnWidths[col.key];
+      calculatedWidths[col.key] = customWidth || (preferredWidth ? Math.max(minWidth, preferredWidth) : minWidth);
+      remainingWidth -= calculatedWidths[col.key];
     });
     
     // Second pass: distribute remaining width proportionally
     if (remainingWidth > 0) {
-      const totalCurrentWidth = Object.values(columnWidths).reduce((sum, width) => sum + width, 0);
+      const totalCurrentWidth = Object.values(calculatedWidths).reduce((sum, width) => sum + width, 0);
       visibleColumns.forEach(col => {
-        const proportion = columnWidths[col.key] / totalCurrentWidth;
-        columnWidths[col.key] += remainingWidth * proportion;
+        const proportion = calculatedWidths[col.key] / totalCurrentWidth;
+        calculatedWidths[col.key] += remainingWidth * proportion;
       });
     }
     
-    return columnWidths;
-  }, [preferences.columnWidths, showCheckboxes, plugins]);
+    return calculatedWidths;
+  }, [preferences.columnWidths, showCheckboxes, plugins, columnWidths]);
 
   // Apply preferences to get ordered and visible columns with responsive widths
   const orderedColumns = useMemo(() => {
@@ -149,6 +157,50 @@ export function SmartGrid({
       width: calculatedWidths[col.key] || 100
     }));
   }, [columns, preferences, calculateColumnWidths]);
+
+  // Column resize handlers
+  const handleResizeStart = useCallback((e: React.MouseEvent, columnKey: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    const currentWidth = orderedColumns.find(col => col.key === columnKey)?.width || 100;
+    setResizingColumn(columnKey);
+    resizeStartRef.current = {
+      x: e.clientX,
+      width: currentWidth
+    };
+    
+    document.addEventListener('mousemove', handleResizeMove);
+    document.addEventListener('mouseup', handleResizeEnd);
+  }, [orderedColumns]);
+
+  const handleResizeMove = useCallback((e: MouseEvent) => {
+    if (!resizingColumn || !resizeStartRef.current) return;
+    
+    const deltaX = e.clientX - resizeStartRef.current.x;
+    const newWidth = Math.max(80, resizeStartRef.current.width + deltaX);
+    
+    setColumnWidths(prev => ({
+      ...prev,
+      [resizingColumn]: newWidth
+    }));
+  }, [resizingColumn]);
+
+  const handleResizeEnd = useCallback(() => {
+    setResizingColumn(null);
+    resizeStartRef.current = null;
+    
+    document.removeEventListener('mousemove', handleResizeMove);
+    document.removeEventListener('mouseup', handleResizeEnd);
+  }, [handleResizeMove]);
+
+  // Cleanup resize listeners on unmount
+  useEffect(() => {
+    return () => {
+      document.removeEventListener('mousemove', handleResizeMove);
+      document.removeEventListener('mouseup', handleResizeEnd);
+    };
+  }, [handleResizeMove, handleResizeEnd]);
 
   // Recalculate column widths on window resize
   useEffect(() => {
@@ -458,6 +510,7 @@ export function SmartGrid({
       setSort(undefined);
       setFilters([]);
       setGlobalFilter('');
+      setColumnWidths({});
       
       toast({
         title: "Success",
@@ -751,95 +804,111 @@ export function SmartGrid({
                     />
                   </TableHead>
                 )}
-                {orderedColumns.map((column, index) => (
-                  <TableHead 
-                    key={column.key}
-                    className={cn(
-                      "relative group bg-gray-50/80 backdrop-blur-sm font-semibold text-gray-900 px-2 py-3 border-r border-gray-100 last:border-r-0 cursor-move",
-                      draggedColumn === column.key && "opacity-50",
-                      dragOverColumn === column.key && "bg-blue-100 border-blue-300"
-                    )}
-                    style={{ width: `${column.width}px`, minWidth: `${Math.max(120, column.width)}px` }}
-                    draggable={!editingHeader}
-                    onDragStart={(e) => handleColumnDragStart(e, column.key)}
-                    onDragOver={(e) => handleColumnDragOver(e, column.key)}
-                    onDragLeave={handleColumnDragLeave}
-                    onDrop={(e) => handleColumnDrop(e, column.key)}
-                    onDragEnd={handleColumnDragEnd}
-                  >
-                    <div className="flex items-center justify-between gap-1 min-w-0">
-                      <div className="flex items-center gap-1 min-w-0 flex-1">
-                        <GripVertical className="h-3 w-3 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
-                        {editingHeader === column.key ? (
-                          <Input
-                            defaultValue={column.label}
-                            onBlur={(e) => handleHeaderEdit(column.key, e.target.value)}
-                            onKeyDown={(e) => {
-                              if (e.key === 'Enter') {
-                                handleHeaderEdit(column.key, e.currentTarget.value);
-                              } else if (e.key === 'Escape') {
-                                setEditingHeader(null);
-                              }
-                            }}
-                            className="h-5 px-1 text-sm font-semibold bg-white border-blue-300 focus:border-blue-500 min-w-0"
-                            autoFocus
-                            onFocus={(e) => e.target.select()}
-                            onClick={(e) => e.stopPropagation()}
-                            onDragStart={(e) => e.preventDefault()}
-                          />
-                        ) : (
-                          <div 
-                            className="flex items-center gap-1 rounded px-1 py-0.5 -mx-1 -my-0.5 transition-colors group/header flex-1 min-w-0 cursor-pointer hover:bg-gray-100/50"
+                {orderedColumns.map((column, index) => {
+                  const shouldHideIcons = resizeHoverColumn === column.key || resizingColumn === column.key;
+                  return (
+                    <TableHead 
+                      key={column.key}
+                      className={cn(
+                        "relative group bg-gray-50/80 backdrop-blur-sm font-semibold text-gray-900 px-2 py-3 border-r border-gray-100 last:border-r-0 cursor-move",
+                        draggedColumn === column.key && "opacity-50",
+                        dragOverColumn === column.key && "bg-blue-100 border-blue-300",
+                        resizingColumn === column.key && "bg-blue-50"
+                      )}
+                      style={{ width: `${column.width}px`, minWidth: `${Math.max(120, column.width)}px` }}
+                      draggable={!editingHeader && !resizingColumn}
+                      onDragStart={(e) => handleColumnDragStart(e, column.key)}
+                      onDragOver={(e) => handleColumnDragOver(e, column.key)}
+                      onDragLeave={handleColumnDragLeave}
+                      onDrop={(e) => handleColumnDrop(e, column.key)}
+                      onDragEnd={handleColumnDragEnd}
+                    >
+                      <div className="flex items-center justify-between gap-1 min-w-0">
+                        <div className="flex items-center gap-1 min-w-0 flex-1">
+                          {!shouldHideIcons && (
+                            <GripVertical className="h-3 w-3 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
+                          )}
+                          {editingHeader === column.key ? (
+                            <Input
+                              defaultValue={column.label}
+                              onBlur={(e) => handleHeaderEdit(column.key, e.target.value)}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                  handleHeaderEdit(column.key, e.currentTarget.value);
+                                } else if (e.key === 'Escape') {
+                                  setEditingHeader(null);
+                                }
+                              }}
+                              className="h-5 px-1 text-sm font-semibold bg-white border-blue-300 focus:border-blue-500 min-w-0"
+                              autoFocus
+                              onFocus={(e) => e.target.select()}
+                              onClick={(e) => e.stopPropagation()}
+                              onDragStart={(e) => e.preventDefault()}
+                            />
+                          ) : (
+                            <div 
+                              className="flex items-center gap-1 rounded px-1 py-0.5 -mx-1 -my-0.5 transition-colors group/header flex-1 min-w-0 cursor-pointer hover:bg-gray-100/50"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleHeaderClick(column.key);
+                              }}
+                              onDragStart={(e) => e.preventDefault()}
+                            >
+                              <span 
+                                className="select-none text-sm font-semibold flex-1 min-w-0" 
+                                style={{ 
+                                  whiteSpace: 'nowrap',
+                                  overflow: 'visible',
+                                  textOverflow: 'clip'
+                                }}
+                                title={column.label}
+                              >
+                                {column.label}
+                              </span>
+                              {column.editable && !shouldHideIcons && (
+                                <Edit2 className="h-3 w-3 text-gray-400 opacity-0 group-hover/header:opacity-100 transition-opacity flex-shrink-0" />
+                              )}
+                            </div>
+                          )}
+                        </div>
+                        
+                        {column.sortable && !shouldHideIcons && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
                             onClick={(e) => {
                               e.stopPropagation();
-                              handleHeaderClick(column.key);
+                              handleSort(column.key);
                             }}
+                            className="h-5 w-5 p-0 hover:bg-transparent transition-opacity flex-shrink-0 ml-1"
+                            disabled={loading}
                             onDragStart={(e) => e.preventDefault()}
                           >
-                            <span 
-                              className="select-none text-sm font-semibold flex-1 min-w-0" 
-                              style={{ 
-                                whiteSpace: 'nowrap',
-                                overflow: 'visible',
-                                textOverflow: 'clip'
-                              }}
-                              title={column.label}
-                            >
-                              {column.label}
-                            </span>
-                            {column.editable && (
-                              <Edit2 className="h-3 w-3 text-gray-400 opacity-0 group-hover/header:opacity-100 transition-opacity flex-shrink-0" />
+                            {sort?.column === column.key ? (
+                              sort.direction === 'asc' ? (
+                                <ArrowUp className="h-3 w-3 text-blue-600" />
+                              ) : (
+                                <ArrowDown className="h-3 w-3 text-blue-600" />
+                              )
+                            ) : (
+                              <ArrowUpDown className="h-3 w-3 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" />
                             )}
-                          </div>
+                          </Button>
                         )}
                       </div>
                       
-                      {column.sortable && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleSort(column.key);
-                          }}
-                          className="h-5 w-5 p-0 hover:bg-transparent transition-opacity flex-shrink-0 ml-1"
-                          disabled={loading}
-                          onDragStart={(e) => e.preventDefault()}
-                        >
-                          {sort?.column === column.key ? (
-                            sort.direction === 'asc' ? (
-                              <ArrowUp className="h-3 w-3 text-blue-600" />
-                            ) : (
-                              <ArrowDown className="h-3 w-3 text-blue-600" />
-                            )
-                          ) : (
-                            <ArrowUpDown className="h-3 w-3 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" />
-                          )}
-                        </Button>
-                      )}
-                    </div>
-                  </TableHead>
-                ))}
+                      {/* Resize Handle */}
+                      <div
+                        className="absolute top-0 right-0 w-2 h-full cursor-col-resize bg-transparent hover:bg-blue-300/50 transition-colors flex items-center justify-center group/resize"
+                        onMouseDown={(e) => handleResizeStart(e, column.key)}
+                        onMouseEnter={() => setResizeHoverColumn(column.key)}
+                        onMouseLeave={() => setResizeHoverColumn(null)}
+                      >
+                        <div className="w-0.5 h-4 bg-gray-300 group-hover/resize:bg-blue-500 transition-colors" />
+                      </div>
+                    </TableHead>
+                  );
+                })}
                 {/* Plugin row actions header */}
                 {plugins.some(plugin => plugin.rowActions) && (
                   <TableHead className="bg-gray-50/80 backdrop-blur-sm font-semibold text-gray-900 px-3 py-3 text-center w-[100px] flex-shrink-0">
