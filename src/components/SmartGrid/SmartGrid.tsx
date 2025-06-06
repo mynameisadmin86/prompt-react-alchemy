@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
+import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
 import { ArrowUpDown, ArrowUp, ArrowDown, Download, Upload, Filter, Search, RotateCcw, ChevronRight, ChevronDown, Edit2, GripVertical } from 'lucide-react';
 import { SmartGridProps, GridColumnConfig, SortConfig, FilterConfig, GridAPI, GridPlugin } from '@/types/smartgrid';
 import { exportToCSV, exportToExcel, parseCSV } from '@/utils/gridExport';
@@ -32,6 +33,7 @@ export function SmartGrid({
   const [editingHeader, setEditingHeader] = useState<string | null>(null);
   const [draggedColumn, setDraggedColumn] = useState<string | null>(null);
   const [dragOverColumn, setDragOverColumn] = useState<string | null>(null);
+  const [resizingColumn, setResizingColumn] = useState<string | null>(null);
   const [sort, setSort] = useState<SortConfig | undefined>();
   const [filters, setFilters] = useState<FilterConfig[]>([]);
   const [globalFilter, setGlobalFilter] = useState('');
@@ -58,6 +60,7 @@ export function SmartGrid({
     updateColumnOrder,
     toggleColumnVisibility,
     updateColumnHeader,
+    updateColumnWidth,
     savePreferences
   } = useGridPreferences(
     preferencesColumns,
@@ -84,9 +87,16 @@ export function SmartGrid({
       .map(col => ({
         ...col,
         label: preferences.columnHeaders[col.key] || col.label,
-        hidden: preferences.hiddenColumns.includes(col.key)
+        hidden: preferences.hiddenColumns.includes(col.key),
+        width: preferences.columnWidths[col.key] || 200
       }));
   }, [columns, preferences]);
+
+  // Handle column resizing
+  const handleColumnResize = useCallback((columnKey: string, size: number) => {
+    const newWidth = Math.max(100, Math.min(500, size)); // Min 100px, max 500px
+    updateColumnWidth(columnKey, newWidth);
+  }, [updateColumnWidth]);
 
   // Handle header editing
   const handleHeaderEdit = useCallback((columnKey: string, newHeader: string) => {
@@ -101,25 +111,28 @@ export function SmartGrid({
   }, [updateColumnHeader, preferences.columnHeaders, toast]);
 
   const handleHeaderClick = useCallback((columnKey: string) => {
-    setEditingHeader(columnKey);
-  }, []);
+    if (!resizingColumn) { // Only allow editing if not currently resizing
+      setEditingHeader(columnKey);
+    }
+  }, [resizingColumn]);
 
   // Handle drag and drop for column reordering
   const handleColumnDragStart = useCallback((e: React.DragEvent, columnKey: string) => {
+    if (resizingColumn || editingHeader) return; // Prevent drag if resizing or editing
     e.stopPropagation();
     setDraggedColumn(columnKey);
     e.dataTransfer.effectAllowed = 'move';
     e.dataTransfer.setData('text/plain', columnKey);
-  }, []);
+  }, [resizingColumn, editingHeader]);
 
   const handleColumnDragOver = useCallback((e: React.DragEvent, targetColumnKey: string) => {
     e.preventDefault();
     e.stopPropagation();
-    if (draggedColumn && draggedColumn !== targetColumnKey) {
+    if (draggedColumn && draggedColumn !== targetColumnKey && !resizingColumn) {
       setDragOverColumn(targetColumnKey);
       e.dataTransfer.dropEffect = 'move';
     }
-  }, [draggedColumn]);
+  }, [draggedColumn, resizingColumn]);
 
   const handleColumnDragLeave = useCallback((e: React.DragEvent) => {
     e.stopPropagation();
@@ -133,7 +146,7 @@ export function SmartGrid({
     e.preventDefault();
     e.stopPropagation();
     
-    if (!draggedColumn || draggedColumn === targetColumnKey) {
+    if (!draggedColumn || draggedColumn === targetColumnKey || resizingColumn) {
       setDraggedColumn(null);
       setDragOverColumn(null);
       return;
@@ -155,7 +168,7 @@ export function SmartGrid({
       title: "Success",
       description: "Column order updated"
     });
-  }, [draggedColumn, preferences.columnOrder, updateColumnOrder, toast]);
+  }, [draggedColumn, preferences.columnOrder, updateColumnOrder, toast, resizingColumn]);
 
   const handleColumnDragEnd = useCallback(() => {
     setDraggedColumn(null);
@@ -657,159 +670,194 @@ export function SmartGrid({
         </div>
       </div>
 
-      {/* Table Container with responsive scrolling */}
+      {/* Table Container with responsive scrolling and resizable columns */}
       <div className="bg-white rounded-lg border shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
-          <Table>
-            <TableHeader className="sticky top-0 z-20 bg-white shadow-sm border-b-2 border-gray-100">
-              <TableRow className="hover:bg-transparent">
-                {orderedColumns.map((column) => (
-                  <TableHead 
-                    key={column.key} 
-                    className={cn(
-                      "relative group bg-gray-50/80 backdrop-blur-sm font-semibold text-gray-900 px-6 py-4 border-r border-gray-100 last:border-r-0 cursor-move",
-                      draggedColumn === column.key && "opacity-50",
-                      dragOverColumn === column.key && "bg-blue-100 border-blue-300"
-                    )}
-                    draggable
-                    onDragStart={(e) => handleColumnDragStart(e, column.key)}
-                    onDragOver={(e) => handleColumnDragOver(e, column.key)}
-                    onDragLeave={handleColumnDragLeave}
-                    onDrop={(e) => handleColumnDrop(e, column.key)}
-                    onDragEnd={handleColumnDragEnd}
-                  >
-                    <div className="flex items-center space-x-2 min-w-0">
-                      <GripVertical className="h-4 w-4 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
-                      {editingHeader === column.key ? (
-                        <Input
-                          defaultValue={column.label}
-                          onBlur={(e) => handleHeaderEdit(column.key, e.target.value)}
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter') {
-                              handleHeaderEdit(column.key, e.currentTarget.value);
-                            } else if (e.key === 'Escape') {
-                              setEditingHeader(null);
-                            }
-                          }}
-                          className="h-6 px-2 text-sm font-semibold bg-white border-blue-300 focus:border-blue-500"
-                          autoFocus
-                          onFocus={(e) => e.target.select()}
-                          onClick={(e) => e.stopPropagation()}
-                          onDragStart={(e) => e.preventDefault()}
-                        />
-                      ) : (
-                        <div 
-                          className="flex items-center space-x-1 cursor-pointer hover:bg-gray-100/50 rounded px-1 py-0.5 -mx-1 -my-0.5 transition-colors group/header flex-1"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleHeaderClick(column.key);
-                          }}
-                          onDragStart={(e) => e.preventDefault()}
-                        >
-                          <span className="select-none truncate">{column.label}</span>
-                          <Edit2 className="h-3 w-3 text-gray-400 opacity-0 group-hover/header:opacity-100 transition-opacity" />
-                        </div>
-                      )}
-                      {column.sortable && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleSort(column.key);
-                          }}
-                          className="h-auto p-0 hover:bg-transparent opacity-60 hover:opacity-100 transition-opacity flex-shrink-0"
-                          disabled={loading}
-                          onDragStart={(e) => e.preventDefault()}
-                        >
-                          {sort?.column === column.key ? (
-                            sort.direction === 'asc' ? (
-                              <ArrowUp className="h-4 w-4 text-blue-600" />
-                            ) : (
-                              <ArrowDown className="h-4 w-4 text-blue-600" />
-                            )
-                          ) : (
-                            <ArrowUpDown className="h-4 w-4 text-gray-400" />
+          <ResizablePanelGroup direction="horizontal" className="min-w-full">
+            <div className="flex">
+              {/* Table structure with resizable columns */}
+              <Table className="table-fixed w-full">
+                <TableHeader className="sticky top-0 z-20 bg-white shadow-sm border-b-2 border-gray-100">
+                  <TableRow className="hover:bg-transparent">
+                    {orderedColumns.map((column, index) => (
+                      <React.Fragment key={column.key}>
+                        <TableHead 
+                          className={cn(
+                            "relative group bg-gray-50/80 backdrop-blur-sm font-semibold text-gray-900 px-6 py-4 border-r border-gray-100 last:border-r-0 cursor-move overflow-hidden",
+                            draggedColumn === column.key && "opacity-50",
+                            dragOverColumn === column.key && "bg-blue-100 border-blue-300"
                           )}
-                        </Button>
-                      )}
-                    </div>
-                  </TableHead>
-                ))}
-                {/* Plugin row actions header */}
-                {plugins.some(plugin => plugin.rowActions) && (
-                  <TableHead className="bg-gray-50/80 backdrop-blur-sm font-semibold text-gray-900 px-6 py-4 text-center">
-                    Actions
-                  </TableHead>
-                )}
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {loading ? (
-                <TableRow>
-                  <TableCell 
-                    colSpan={orderedColumns.length + (plugins.some(plugin => plugin.rowActions) ? 1 : 0)} 
-                    className="text-center py-12"
-                  >
-                    <div className="flex items-center justify-center">
-                      <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
-                      <span className="ml-2 text-gray-600">Loading...</span>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ) : paginatedData.length === 0 ? (
-                <TableRow>
-                  <TableCell 
-                    colSpan={orderedColumns.length + (plugins.some(plugin => plugin.rowActions) ? 1 : 0)} 
-                    className="text-center py-12 text-gray-500"
-                  >
-                    <div className="space-y-2">
-                      <div className="text-lg font-medium">No data available</div>
-                      <div className="text-sm">Try adjusting your search or filters</div>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ) : (
-                paginatedData.map((row, rowIndex) => (
-                  <React.Fragment key={rowIndex}>
-                    <TableRow className="hover:bg-gray-50/50 transition-colors duration-150 border-b border-gray-100">
-                      {orderedColumns.map((column, columnIndex) => (
-                        <TableCell 
-                          key={column.key} 
-                          className="relative px-6 py-4 border-r border-gray-50 last:border-r-0 align-top"
+                          style={{ width: `${column.width}px`, minWidth: '100px', maxWidth: '500px' }}
+                          draggable={!resizingColumn && !editingHeader}
+                          onDragStart={(e) => handleColumnDragStart(e, column.key)}
+                          onDragOver={(e) => handleColumnDragOver(e, column.key)}
+                          onDragLeave={handleColumnDragLeave}
+                          onDrop={(e) => handleColumnDrop(e, column.key)}
+                          onDragEnd={handleColumnDragEnd}
                         >
-                          {renderCell(row, column, rowIndex, columnIndex)}
-                        </TableCell>
-                      ))}
-                      {/* Plugin row actions */}
-                      {plugins.some(plugin => plugin.rowActions) && (
-                        <TableCell className="px-6 py-4 text-center align-top">
-                          <div className="flex items-center justify-center space-x-2">
-                            {renderPluginRowActions(row, rowIndex)}
+                          <div className="flex items-center space-x-2 min-w-0">
+                            <GripVertical className="h-4 w-4 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
+                            {editingHeader === column.key ? (
+                              <Input
+                                defaultValue={column.label}
+                                onBlur={(e) => handleHeaderEdit(column.key, e.target.value)}
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter') {
+                                    handleHeaderEdit(column.key, e.currentTarget.value);
+                                  } else if (e.key === 'Escape') {
+                                    setEditingHeader(null);
+                                  }
+                                }}
+                                className="h-6 px-2 text-sm font-semibold bg-white border-blue-300 focus:border-blue-500"
+                                autoFocus
+                                onFocus={(e) => e.target.select()}
+                                onClick={(e) => e.stopPropagation()}
+                                onDragStart={(e) => e.preventDefault()}
+                              />
+                            ) : (
+                              <div 
+                                className="flex items-center space-x-1 cursor-pointer hover:bg-gray-100/50 rounded px-1 py-0.5 -mx-1 -my-0.5 transition-colors group/header flex-1"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleHeaderClick(column.key);
+                                }}
+                                onDragStart={(e) => e.preventDefault()}
+                              >
+                                <span className="select-none truncate">{column.label}</span>
+                                <Edit2 className="h-3 w-3 text-gray-400 opacity-0 group-hover/header:opacity-100 transition-opacity" />
+                              </div>
+                            )}
+                            {column.sortable && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleSort(column.key);
+                                }}
+                                className="h-auto p-0 hover:bg-transparent opacity-60 hover:opacity-100 transition-opacity flex-shrink-0"
+                                disabled={loading}
+                                onDragStart={(e) => e.preventDefault()}
+                              >
+                                {sort?.column === column.key ? (
+                                  sort.direction === 'asc' ? (
+                                    <ArrowUp className="h-4 w-4 text-blue-600" />
+                                  ) : (
+                                    <ArrowDown className="h-4 w-4 text-blue-600" />
+                                  )
+                                ) : (
+                                  <ArrowUpDown className="h-4 w-4 text-gray-400" />
+                                )}
+                              </Button>
+                            )}
                           </div>
-                        </TableCell>
-                      )}
-                    </TableRow>
-                    {/* Nested row content */}
-                    {nestedRowRenderer && expandedRows.has(rowIndex) && (
-                      <TableRow className="bg-gray-50/30">
-                        <TableCell 
-                          colSpan={orderedColumns.length + (plugins.some(plugin => plugin.rowActions) ? 1 : 0)} 
-                          className="p-0 border-b border-gray-200"
-                        >
-                          <div className="bg-gradient-to-r from-gray-50/50 to-white border-l-4 border-blue-500">
-                            <div className="p-6 pl-12">
-                              {nestedRowRenderer(row)}
-                            </div>
-                          </div>
-                        </TableCell>
-                      </TableRow>
+                          
+                          {/* Resize handle */}
+                          {index < orderedColumns.length - 1 && (
+                            <div
+                              className="absolute right-0 top-0 bottom-0 w-2 cursor-col-resize hover:bg-blue-300 transition-colors z-30 opacity-0 group-hover:opacity-100"
+                              onMouseDown={(e) => {
+                                setResizingColumn(column.key);
+                                const startX = e.clientX;
+                                const startWidth = column.width;
+                                
+                                const handleMouseMove = (e: MouseEvent) => {
+                                  const diff = e.clientX - startX;
+                                  const newWidth = Math.max(100, Math.min(500, startWidth + diff));
+                                  handleColumnResize(column.key, newWidth);
+                                };
+                                
+                                const handleMouseUp = () => {
+                                  setResizingColumn(null);
+                                  document.removeEventListener('mousemove', handleMouseMove);
+                                  document.removeEventListener('mouseup', handleMouseUp);
+                                };
+                                
+                                document.addEventListener('mousemove', handleMouseMove);
+                                document.addEventListener('mouseup', handleMouseUp);
+                              }}
+                            />
+                          )}
+                        </TableHead>
+                      </React.Fragment>
+                    ))}
+                    {/* Plugin row actions header */}
+                    {plugins.some(plugin => plugin.rowActions) && (
+                      <TableHead className="bg-gray-50/80 backdrop-blur-sm font-semibold text-gray-900 px-6 py-4 text-center">
+                        Actions
+                      </TableHead>
                     )}
-                  </React.Fragment>
-                ))
-              )}
-            </TableBody>
-          </Table>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {loading ? (
+                    <TableRow>
+                      <TableCell 
+                        colSpan={orderedColumns.length + (plugins.some(plugin => plugin.rowActions) ? 1 : 0)} 
+                        className="text-center py-12"
+                      >
+                        <div className="flex items-center justify-center">
+                          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+                          <span className="ml-2 text-gray-600">Loading...</span>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ) : paginatedData.length === 0 ? (
+                    <TableRow>
+                      <TableCell 
+                        colSpan={orderedColumns.length + (plugins.some(plugin => plugin.rowActions) ? 1 : 0)} 
+                        className="text-center py-12 text-gray-500"
+                      >
+                        <div className="space-y-2">
+                          <div className="text-lg font-medium">No data available</div>
+                          <div className="text-sm">Try adjusting your search or filters</div>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    paginatedData.map((row, rowIndex) => (
+                      <React.Fragment key={rowIndex}>
+                        <TableRow className="hover:bg-gray-50/50 transition-colors duration-150 border-b border-gray-100">
+                          {orderedColumns.map((column, columnIndex) => (
+                            <TableCell 
+                              key={column.key} 
+                              className="relative px-6 py-4 border-r border-gray-50 last:border-r-0 align-top overflow-hidden"
+                              style={{ width: `${column.width}px` }}
+                            >
+                              {renderCell(row, column, rowIndex, columnIndex)}
+                            </TableCell>
+                          ))}
+                          {/* Plugin row actions */}
+                          {plugins.some(plugin => plugin.rowActions) && (
+                            <TableCell className="px-6 py-4 text-center align-top">
+                              <div className="flex items-center justify-center space-x-2">
+                                {renderPluginRowActions(row, rowIndex)}
+                              </div>
+                            </TableCell>
+                          )}
+                        </TableRow>
+                        {/* Nested row content */}
+                        {nestedRowRenderer && expandedRows.has(rowIndex) && (
+                          <TableRow className="bg-gray-50/30">
+                            <TableCell 
+                              colSpan={orderedColumns.length + (plugins.some(plugin => plugin.rowActions) ? 1 : 0)} 
+                              className="p-0 border-b border-gray-200"
+                            >
+                              <div className="bg-gradient-to-r from-gray-50/50 to-white border-l-4 border-blue-500">
+                                <div className="p-6 pl-12">
+                                  {nestedRowRenderer(row)}
+                                </div>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        )}
+                      </React.Fragment>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+          </ResizablePanelGroup>
         </div>
       </div>
 
