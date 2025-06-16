@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent } from '@/components/ui/card';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { GripVertical, Save, RotateCcw } from 'lucide-react';
 import { PanelConfig, FieldVisibilityConfig } from '@/types/dynamicPanel';
 
@@ -14,7 +15,8 @@ interface EnhancedFieldVisibilityModalProps {
   onClose: () => void;
   panelConfig: PanelConfig;
   panelTitle: string;
-  onSave: (updatedConfig: PanelConfig, newTitle?: string) => void;
+  panelWidth: 'full' | 'half' | 'third' | 1 | 2 | 3 | 4 | 5 | 6;
+  onSave: (updatedConfig: PanelConfig, newTitle?: string, newWidth?: 'full' | 'half' | 'third' | 1 | 2 | 3 | 4 | 5 | 6) => void;
 }
 
 export const EnhancedFieldVisibilityModal: React.FC<EnhancedFieldVisibilityModalProps> = ({
@@ -22,14 +24,17 @@ export const EnhancedFieldVisibilityModal: React.FC<EnhancedFieldVisibilityModal
   onClose,
   panelConfig,
   panelTitle,
+  panelWidth,
   onSave
 }) => {
   const [localTitle, setLocalTitle] = useState(panelTitle);
+  const [localWidth, setLocalWidth] = useState<'full' | 'half' | 'third' | 1 | 2 | 3 | 4 | 5 | 6>(panelWidth);
   const [localConfig, setLocalConfig] = useState<FieldVisibilityConfig[]>([]);
   const [draggedItem, setDraggedItem] = useState<string | null>(null);
 
   useEffect(() => {
     setLocalTitle(panelTitle);
+    setLocalWidth(panelWidth);
     const configArray = Object.entries(panelConfig).map(([fieldId, config]) => ({
       fieldId,
       visible: config.visible,
@@ -38,7 +43,7 @@ export const EnhancedFieldVisibilityModal: React.FC<EnhancedFieldVisibilityModal
     }));
     configArray.sort((a, b) => a.order - b.order);
     setLocalConfig(configArray);
-  }, [panelConfig, panelTitle, open]);
+  }, [panelConfig, panelTitle, panelWidth, open]);
 
   const handleVisibilityChange = (fieldId: string, visible: boolean) => {
     setLocalConfig(prev => 
@@ -103,12 +108,13 @@ export const EnhancedFieldVisibilityModal: React.FC<EnhancedFieldVisibilityModal
       }
     });
 
-    onSave(updatedPanelConfig, localTitle);
+    onSave(updatedPanelConfig, localTitle, localWidth);
     onClose();
   };
 
   const handleReset = () => {
     setLocalTitle(panelTitle);
+    setLocalWidth(panelWidth);
     const configArray = Object.entries(panelConfig).map(([fieldId, config]) => ({
       fieldId,
       visible: config.visible,
@@ -119,7 +125,50 @@ export const EnhancedFieldVisibilityModal: React.FC<EnhancedFieldVisibilityModal
     setLocalConfig(configArray);
   };
 
+  const handleWidthChange = (value: string) => {
+    if (value === 'full' || value === 'half' || value === 'third') {
+      setLocalWidth(value);
+    } else {
+      const numValue = parseInt(value);
+      if (numValue >= 1 && numValue <= 6) {
+        setLocalWidth(numValue as 1 | 2 | 3 | 4 | 5 | 6);
+      }
+    }
+  };
+
   const isMandatory = (fieldId: string) => panelConfig[fieldId]?.mandatory || false;
+
+  const getWidthDisplayValue = () => {
+    if (typeof localWidth === 'number') {
+      return localWidth.toString();
+    }
+    return localWidth;
+  };
+
+  const getWidthLabel = (value: string) => {
+    switch (value) {
+      case 'full':
+        return 'Full Width (6 columns)';
+      case 'half':
+        return 'Half Width (3 columns)';
+      case 'third':
+        return 'Third Width (2 columns)';
+      case '1':
+        return '1 Column';
+      case '2':
+        return '2 Columns';
+      case '3':
+        return '3 Columns';
+      case '4':
+        return '4 Columns';
+      case '5':
+        return '5 Columns';
+      case '6':
+        return '6 Columns';
+      default:
+        return value;
+    }
+  };
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
@@ -138,6 +187,27 @@ export const EnhancedFieldVisibilityModal: React.FC<EnhancedFieldVisibilityModal
               onChange={(e) => setLocalTitle(e.target.value)}
               placeholder="Enter panel title"
             />
+          </div>
+
+          {/* Panel Width Configuration */}
+          <div className="space-y-2">
+            <Label htmlFor="panel-width">Panel Width</Label>
+            <Select value={getWidthDisplayValue()} onValueChange={handleWidthChange}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select panel width" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="full">{getWidthLabel('full')}</SelectItem>
+                <SelectItem value="half">{getWidthLabel('half')}</SelectItem>
+                <SelectItem value="third">{getWidthLabel('third')}</SelectItem>
+                <SelectItem value="1">{getWidthLabel('1')}</SelectItem>
+                <SelectItem value="2">{getWidthLabel('2')}</SelectItem>
+                <SelectItem value="3">{getWidthLabel('3')}</SelectItem>
+                <SelectItem value="4">{getWidthLabel('4')}</SelectItem>
+                <SelectItem value="5">{getWidthLabel('5')}</SelectItem>
+                <SelectItem value="6">{getWidthLabel('6')}</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           {/* Field Configuration */}

@@ -18,6 +18,7 @@ export interface PanelConfig {
 
 export interface PanelSettings {
   title: string;
+  width?: 'full' | 'half' | 'third' | 1 | 2 | 3 | 4 | 5 | 6;
   fields: PanelConfig;
 }
 
@@ -28,6 +29,7 @@ export interface DynamicPanelProps {
   initialData?: Record<string, any>;
   onDataChange?: (updatedData: Record<string, any>) => void;
   onTitleChange?: (newTitle: string) => void;
+  onWidthChange?: (newWidth: 'full' | 'half' | 'third' | 1 | 2 | 3 | 4 | 5 | 6) => void;
   getUserPanelConfig?: (userId: string, panelId: string) => Promise<PanelSettings> | PanelSettings;
   saveUserPanelConfig?: (userId: string, panelId: string, settings: PanelSettings) => Promise<void> | void;
   userId?: string;

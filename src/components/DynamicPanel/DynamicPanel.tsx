@@ -14,6 +14,7 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
   initialData = {},
   onDataChange,
   onTitleChange,
+  onWidthChange,
   getUserPanelConfig,
   saveUserPanelConfig,
   userId = 'default-user',
@@ -22,6 +23,7 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
 }) => {
   const [panelConfig, setPanelConfig] = useState<PanelConfig>(initialPanelConfig);
   const [panelTitle, setPanelTitle] = useState(initialPanelTitle);
+  const [currentPanelWidth, setCurrentPanelWidth] = useState<'full' | 'half' | 'third' | 1 | 2 | 3 | 4 | 5 | 6>(panelWidth);
   const [formData, setFormData] = useState(initialData);
   const [isConfigModalOpen, setIsConfigModalOpen] = useState(false);
 
@@ -35,6 +37,9 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
             setPanelConfig(userSettings.fields);
             if (userSettings.title) {
               setPanelTitle(userSettings.title);
+            }
+            if (userSettings.width) {
+              setCurrentPanelWidth(userSettings.width);
             }
           }
         } catch (error) {
@@ -57,18 +62,24 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
     onDataChange?.(updatedData);
   };
 
-  const handleConfigSave = async (updatedConfig: PanelConfig, newTitle?: string) => {
+  const handleConfigSave = async (updatedConfig: PanelConfig, newTitle?: string, newWidth?: 'full' | 'half' | 'third' | 1 | 2 | 3 | 4 | 5 | 6) => {
     setPanelConfig(updatedConfig);
     
     if (newTitle !== undefined) {
       setPanelTitle(newTitle);
       onTitleChange?.(newTitle);
     }
+
+    if (newWidth !== undefined) {
+      setCurrentPanelWidth(newWidth);
+      onWidthChange?.(newWidth);
+    }
     
     if (saveUserPanelConfig) {
       try {
         const settings: PanelSettings = {
           title: newTitle || panelTitle,
+          width: newWidth || currentPanelWidth,
           fields: updatedConfig
         };
         await saveUserPanelConfig(userId, panelId, settings);
@@ -80,12 +91,12 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
 
   // Determine panel width class based on 6-column grid system
   const getWidthClass = () => {
-    if (typeof panelWidth === 'number') {
-      const colSpan = Math.min(Math.max(panelWidth, 1), 6); // Clamp between 1-6
+    if (typeof currentPanelWidth === 'number') {
+      const colSpan = Math.min(Math.max(currentPanelWidth, 1), 6); // Clamp between 1-6
       return `col-span-${colSpan}`;
     }
     
-    switch (panelWidth) {
+    switch (currentPanelWidth) {
       case 'half':
         return 'col-span-3'; // 3/6 = 50%
       case 'third':
@@ -150,6 +161,7 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
           onClose={() => setIsConfigModalOpen(false)}
           panelConfig={panelConfig}
           panelTitle={panelTitle}
+          panelWidth={currentPanelWidth}
           onSave={handleConfigSave}
         />
       )}

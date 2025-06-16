@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { DynamicPanel } from '@/components/DynamicPanel';
 import { DynamicPanelPreview } from '@/components/DynamicPanel/DynamicPanelPreview';
@@ -24,6 +23,11 @@ const DynamicPanelDemo = () => {
   const [basicDetailsTitle, setBasicDetailsTitle] = useState('Basic Details');
   const [operationalDetailsTitle, setOperationalDetailsTitle] = useState('Operational Details');
   const [billingDetailsTitle, setBillingDetailsTitle] = useState('Billing Details');
+
+  // Panel widths state
+  const [basicDetailsWidth, setBasicDetailsWidth] = useState<'full' | 'half' | 'third' | 1 | 2 | 3 | 4 | 5 | 6>(6);
+  const [operationalDetailsWidth, setOperationalDetailsWidth] = useState<'full' | 'half' | 'third' | 1 | 2 | 3 | 4 | 5 | 6>(3);
+  const [billingDetailsWidth, setBillingDetailsWidth] = useState<'full' | 'half' | 'third' | 1 | 2 | 3 | 4 | 5 | 6>(3);
 
   // Basic Details Panel Configuration
   const basicDetailsConfig: PanelConfig = {
@@ -336,10 +340,11 @@ const DynamicPanelDemo = () => {
                 initialData={basicDetailsData}
                 onDataChange={setBasicDetailsData}
                 onTitleChange={setBasicDetailsTitle}
+                onWidthChange={setBasicDetailsWidth}
                 getUserPanelConfig={getUserPanelConfig}
                 saveUserPanelConfig={saveUserPanelConfig}
                 userId="current-user"
-                panelWidth={6}
+                panelWidth={basicDetailsWidth}
               />
 
               <DynamicPanel
@@ -349,10 +354,11 @@ const DynamicPanelDemo = () => {
                 initialData={operationalDetailsData}
                 onDataChange={setOperationalDetailsData}
                 onTitleChange={setOperationalDetailsTitle}
+                onWidthChange={setOperationalDetailsWidth}
                 getUserPanelConfig={getUserPanelConfig}
                 saveUserPanelConfig={saveUserPanelConfig}
                 userId="current-user"
-                panelWidth={3}
+                panelWidth={operationalDetailsWidth}
               />
 
               <DynamicPanel
@@ -362,10 +368,11 @@ const DynamicPanelDemo = () => {
                 initialData={billingDetailsData}
                 onDataChange={setBillingDetailsData}
                 onTitleChange={setBillingDetailsTitle}
+                onWidthChange={setBillingDetailsWidth}
                 getUserPanelConfig={getUserPanelConfig}
                 saveUserPanelConfig={saveUserPanelConfig}
                 userId="current-user"
-                panelWidth={3}
+                panelWidth={billingDetailsWidth}
               />
             </div>
 
