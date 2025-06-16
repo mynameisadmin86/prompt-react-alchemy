@@ -18,7 +18,7 @@ export interface PanelConfig {
 
 export interface PanelSettings {
   title: string;
-  width?: 'full' | 'half' | 'third' | 1 | 2 | 3 | 4 | 5 | 6;
+  width?: 'full' | 'half' | 'third' | 'quarter' | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12;
   collapsible?: boolean;
   fields: PanelConfig;
 }
@@ -30,12 +30,12 @@ export interface DynamicPanelProps {
   initialData?: Record<string, any>;
   onDataChange?: (updatedData: Record<string, any>) => void;
   onTitleChange?: (newTitle: string) => void;
-  onWidthChange?: (newWidth: 'full' | 'half' | 'third' | 1 | 2 | 3 | 4 | 5 | 6) => void;
+  onWidthChange?: (newWidth: 'full' | 'half' | 'third' | 'quarter' | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12) => void;
   onCollapsibleChange?: (collapsible: boolean) => void;
   getUserPanelConfig?: (userId: string, panelId: string) => Promise<PanelSettings> | PanelSettings;
   saveUserPanelConfig?: (userId: string, panelId: string, settings: PanelSettings) => Promise<void> | void;
   userId?: string;
-  panelWidth?: 'full' | 'half' | 'third' | 1 | 2 | 3 | 4 | 5 | 6;
+  panelWidth?: 'full' | 'half' | 'third' | 'quarter' | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12;
   collapsible?: boolean;
   showPreview?: boolean;
 }

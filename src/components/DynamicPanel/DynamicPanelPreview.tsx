@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { DynamicPanel } from './DynamicPanel';
 import { PanelConfig } from '@/types/dynamicPanel';
@@ -253,26 +254,26 @@ export const DynamicPanelPreview: React.FC = () => {
   };
 
   return (
-    <div className="grid grid-cols-6 gap-4">
+    <div className="grid grid-cols-12 gap-4">
       <DynamicPanel
         panelId="basic-details-preview"
         panelTitle="Basic Details"
         panelConfig={basicDetailsConfig}
-        panelWidth={2}
+        panelWidth={4}
         showPreview={true}
       />
       <DynamicPanel
         panelId="operational-details-preview"
         panelTitle="Operational Details"
         panelConfig={operationalDetailsConfig}
-        panelWidth={2}
+        panelWidth={4}
         showPreview={true}
       />
       <DynamicPanel
         panelId="billing-details-preview"
         panelTitle="Billing Details"
         panelConfig={billingDetailsConfig}
-        panelWidth={2}
+        panelWidth={4}
         showPreview={true}
       />
     </div>

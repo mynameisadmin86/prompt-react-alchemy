@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -14,12 +15,12 @@ interface EnhancedFieldVisibilityModalProps {
   onClose: () => void;
   panelConfig: PanelConfig;
   panelTitle: string;
-  panelWidth: 'full' | 'half' | 'third' | 1 | 2 | 3 | 4 | 5 | 6;
+  panelWidth: 'full' | 'half' | 'third' | 'quarter' | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12;
   collapsible?: boolean;
   onSave: (
     updatedConfig: PanelConfig, 
     newTitle?: string, 
-    newWidth?: 'full' | 'half' | 'third' | 1 | 2 | 3 | 4 | 5 | 6,
+    newWidth?: 'full' | 'half' | 'third' | 'quarter' | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12,
     newCollapsible?: boolean
   ) => void;
 }
@@ -35,7 +36,7 @@ export const EnhancedFieldVisibilityModal: React.FC<EnhancedFieldVisibilityModal
 }) => {
   const [fieldConfigs, setFieldConfigs] = useState<FieldVisibilityConfig[]>([]);
   const [currentTitle, setCurrentTitle] = useState(panelTitle);
-  const [currentWidth, setCurrentWidth] = useState<'full' | 'half' | 'third' | 1 | 2 | 3 | 4 | 5 | 6>(panelWidth);
+  const [currentWidth, setCurrentWidth] = useState<'full' | 'half' | 'third' | 'quarter' | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12>(panelWidth);
   const [currentCollapsible, setCurrentCollapsible] = useState(collapsible);
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
 
@@ -132,17 +133,17 @@ export const EnhancedFieldVisibilityModal: React.FC<EnhancedFieldVisibilityModal
     setCurrentCollapsible(false);
   };
 
-  const formatWidthValue = (value: 'full' | 'half' | 'third' | 1 | 2 | 3 | 4 | 5 | 6) => {
+  const formatWidthValue = (value: 'full' | 'half' | 'third' | 'quarter' | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12) => {
     if (typeof value === 'number') return value.toString();
     return value;
   };
 
-  const parseWidthValue = (value: string): 'full' | 'half' | 'third' | 1 | 2 | 3 | 4 | 5 | 6 => {
-    if (['full', 'half', 'third'].includes(value)) {
-      return value as 'full' | 'half' | 'third';
+  const parseWidthValue = (value: string): 'full' | 'half' | 'third' | 'quarter' | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 => {
+    if (['full', 'half', 'third', 'quarter'].includes(value)) {
+      return value as 'full' | 'half' | 'third' | 'quarter';
     }
     const numValue = parseInt(value);
-    return (numValue >= 1 && numValue <= 6) ? numValue as 1 | 2 | 3 | 4 | 5 | 6 : 'full';
+    return (numValue >= 1 && numValue <= 12) ? numValue as 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 : 'full';
   };
 
   return (
@@ -173,15 +174,22 @@ export const EnhancedFieldVisibilityModal: React.FC<EnhancedFieldVisibilityModal
                     <SelectValue placeholder="Select width" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="full">Full (6 columns)</SelectItem>
-                    <SelectItem value="half">Half (3 columns)</SelectItem>
-                    <SelectItem value="third">Third (2 columns)</SelectItem>
+                    <SelectItem value="full">Full (12 columns)</SelectItem>
+                    <SelectItem value="half">Half (6 columns)</SelectItem>
+                    <SelectItem value="third">Third (4 columns)</SelectItem>
+                    <SelectItem value="quarter">Quarter (3 columns)</SelectItem>
                     <SelectItem value="1">1 Column</SelectItem>
                     <SelectItem value="2">2 Columns</SelectItem>
                     <SelectItem value="3">3 Columns</SelectItem>
                     <SelectItem value="4">4 Columns</SelectItem>
                     <SelectItem value="5">5 Columns</SelectItem>
                     <SelectItem value="6">6 Columns</SelectItem>
+                    <SelectItem value="7">7 Columns</SelectItem>
+                    <SelectItem value="8">8 Columns</SelectItem>
+                    <SelectItem value="9">9 Columns</SelectItem>
+                    <SelectItem value="10">10 Columns</SelectItem>
+                    <SelectItem value="11">11 Columns</SelectItem>
+                    <SelectItem value="12">12 Columns</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -209,16 +217,37 @@ export const EnhancedFieldVisibilityModal: React.FC<EnhancedFieldVisibilityModal
                       key={fieldConfig.fieldId}
                       className="flex items-center space-x-3 p-3 border rounded-lg bg-gray-50"
                       draggable
-                      onDragStart={() => handleDragStart(index)}
-                      onDragOver={(e) => handleDragOver(e, index)}
-                      onDragEnd={handleDragEnd}
+                      onDragStart={() => setDraggedIndex(index)}
+                      onDragOver={(e) => {
+                        e.preventDefault();
+                        if (draggedIndex === null) return;
+
+                        const newConfigs = [...fieldConfigs];
+                        const draggedItem = newConfigs[draggedIndex];
+                        newConfigs.splice(draggedIndex, 1);
+                        newConfigs.splice(index, 0, draggedItem);
+                        
+                        // Update order
+                        const updatedConfigs = newConfigs.map((config, idx) => ({
+                          ...config,
+                          order: idx
+                        }));
+                        
+                        setFieldConfigs(updatedConfigs);
+                        setDraggedIndex(index);
+                      }}
+                      onDragEnd={() => setDraggedIndex(null)}
                     >
                       <GripVertical className="h-4 w-4 text-gray-400 cursor-grab" />
                       
                       <Checkbox
                         checked={fieldConfig.visible}
                         onCheckedChange={(checked) => 
-                          handleVisibilityChange(fieldConfig.fieldId, checked as boolean)
+                          setFieldConfigs(prev => 
+                            prev.map(config => 
+                              config.fieldId === fieldConfig.fieldId ? { ...config, visible: checked as boolean } : config
+                            )
+                          )
                         }
                         disabled={isMandatory}
                       />
@@ -226,7 +255,11 @@ export const EnhancedFieldVisibilityModal: React.FC<EnhancedFieldVisibilityModal
                       <div className="flex-1">
                         <Input
                           value={fieldConfig.label}
-                          onChange={(e) => handleLabelChange(fieldConfig.fieldId, e.target.value)}
+                          onChange={(e) => setFieldConfigs(prev => 
+                            prev.map(config => 
+                              config.fieldId === fieldConfig.fieldId ? { ...config, label: e.target.value } : config
+                            )
+                          )}
                           className="text-sm"
                           placeholder="Field label"
                         />

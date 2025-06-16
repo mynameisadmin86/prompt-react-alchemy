@@ -26,7 +26,7 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
 }) => {
   const [panelConfig, setPanelConfig] = useState<PanelConfig>(initialPanelConfig);
   const [panelTitle, setPanelTitle] = useState(initialPanelTitle);
-  const [currentPanelWidth, setCurrentPanelWidth] = useState<'full' | 'half' | 'third' | 1 | 2 | 3 | 4 | 5 | 6>(panelWidth);
+  const [currentPanelWidth, setCurrentPanelWidth] = useState<'full' | 'half' | 'third' | 'quarter' | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12>(panelWidth);
   const [isCollapsible, setIsCollapsible] = useState(collapsible);
   const [isOpen, setIsOpen] = useState(true);
   const [formData, setFormData] = useState(initialData);
@@ -73,7 +73,7 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
   const handleConfigSave = async (
     updatedConfig: PanelConfig, 
     newTitle?: string, 
-    newWidth?: 'full' | 'half' | 'third' | 1 | 2 | 3 | 4 | 5 | 6,
+    newWidth?: 'full' | 'half' | 'third' | 'quarter' | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12,
     newCollapsible?: boolean
   ) => {
     setPanelConfig(updatedConfig);
@@ -108,21 +108,23 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
     }
   };
 
-  // Determine panel width class based on 6-column grid system
+  // Determine panel width class based on 12-column grid system
   const getWidthClass = () => {
     if (typeof currentPanelWidth === 'number') {
-      const colSpan = Math.min(Math.max(currentPanelWidth, 1), 6); // Clamp between 1-6
+      const colSpan = Math.min(Math.max(currentPanelWidth, 1), 12); // Clamp between 1-12
       return `col-span-${colSpan}`;
     }
     
     switch (currentPanelWidth) {
       case 'half':
-        return 'col-span-3'; // 3/6 = 50%
+        return 'col-span-6'; // 6/12 = 50%
       case 'third':
-        return 'col-span-2'; // 2/6 = 33.33%
+        return 'col-span-4'; // 4/12 = 33.33%
+      case 'quarter':
+        return 'col-span-3'; // 3/12 = 25%
       case 'full':
       default:
-        return 'col-span-6'; // Full width
+        return 'col-span-12'; // Full width
     }
   };
 

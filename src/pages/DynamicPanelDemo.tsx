@@ -24,10 +24,10 @@ const DynamicPanelDemo = () => {
   const [operationalDetailsTitle, setOperationalDetailsTitle] = useState('Operational Details');
   const [billingDetailsTitle, setBillingDetailsTitle] = useState('Billing Details');
 
-  // Panel widths state
-  const [basicDetailsWidth, setBasicDetailsWidth] = useState<'full' | 'half' | 'third' | 1 | 2 | 3 | 4 | 5 | 6>(6);
-  const [operationalDetailsWidth, setOperationalDetailsWidth] = useState<'full' | 'half' | 'third' | 1 | 2 | 3 | 4 | 5 | 6>(3);
-  const [billingDetailsWidth, setBillingDetailsWidth] = useState<'full' | 'half' | 'third' | 1 | 2 | 3 | 4 | 5 | 6>(3);
+  // Panel widths state - updated for 12-column system
+  const [basicDetailsWidth, setBasicDetailsWidth] = useState<'full' | 'half' | 'third' | 'quarter' | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12>(12);
+  const [operationalDetailsWidth, setOperationalDetailsWidth] = useState<'full' | 'half' | 'third' | 'quarter' | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12>(6);
+  const [billingDetailsWidth, setBillingDetailsWidth] = useState<'full' | 'half' | 'third' | 'quarter' | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12>(6);
 
   // Basic Details Panel Configuration
   const basicDetailsConfig: PanelConfig = {
@@ -326,13 +326,13 @@ const DynamicPanelDemo = () => {
         {/* Preview or Configuration Mode */}
         {showPreview ? (
           <div className="bg-white p-6 rounded-lg shadow-sm">
-            <h3 className="text-lg font-semibold mb-4">Panel Preview - 6 Column Grid Layout</h3>
+            <h3 className="text-lg font-semibold mb-4">Panel Preview - 12 Column Grid Layout</h3>
             <DynamicPanelPreview />
           </div>
         ) : (
           <>
-            {/* Dynamic Panels in 6-column grid */}
-            <div className="grid grid-cols-6 gap-6">
+            {/* Dynamic Panels in 12-column grid */}
+            <div className="grid grid-cols-12 gap-6">
               <DynamicPanel
                 panelId="basic-details"
                 panelTitle={basicDetailsTitle}
