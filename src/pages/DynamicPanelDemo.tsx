@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { DynamicPanel } from '@/components/DynamicPanel';
 import { DynamicPanelPreview } from '@/components/DynamicPanel/DynamicPanelPreview';
@@ -321,13 +322,13 @@ const DynamicPanelDemo = () => {
         {/* Preview or Configuration Mode */}
         {showPreview ? (
           <div className="bg-white p-6 rounded-lg shadow-sm">
-            <h3 className="text-lg font-semibold mb-4">Panel Preview</h3>
+            <h3 className="text-lg font-semibold mb-4">Panel Preview - 6 Column Grid Layout</h3>
             <DynamicPanelPreview />
           </div>
         ) : (
           <>
-            {/* Dynamic Panels */}
-            <div className="space-y-6">
+            {/* Dynamic Panels in 6-column grid */}
+            <div className="grid grid-cols-6 gap-6">
               <DynamicPanel
                 panelId="basic-details"
                 panelTitle={basicDetailsTitle}
@@ -338,6 +339,7 @@ const DynamicPanelDemo = () => {
                 getUserPanelConfig={getUserPanelConfig}
                 saveUserPanelConfig={saveUserPanelConfig}
                 userId="current-user"
+                panelWidth={6}
               />
 
               <DynamicPanel
@@ -350,6 +352,7 @@ const DynamicPanelDemo = () => {
                 getUserPanelConfig={getUserPanelConfig}
                 saveUserPanelConfig={saveUserPanelConfig}
                 userId="current-user"
+                panelWidth={3}
               />
 
               <DynamicPanel
@@ -362,6 +365,7 @@ const DynamicPanelDemo = () => {
                 getUserPanelConfig={getUserPanelConfig}
                 saveUserPanelConfig={saveUserPanelConfig}
                 userId="current-user"
+                panelWidth={3}
               />
             </div>
 

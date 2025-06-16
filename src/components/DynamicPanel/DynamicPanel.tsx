@@ -78,11 +78,26 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
     }
   };
 
-  // Determine panel width class
-  const widthClass = panelWidth === 'half' ? 'w-1/2' : panelWidth === 'third' ? 'w-1/3' : 'w-full';
+  // Determine panel width class based on 6-column grid system
+  const getWidthClass = () => {
+    if (typeof panelWidth === 'number') {
+      const colSpan = Math.min(Math.max(panelWidth, 1), 6); // Clamp between 1-6
+      return `col-span-${colSpan}`;
+    }
+    
+    switch (panelWidth) {
+      case 'half':
+        return 'col-span-3'; // 3/6 = 50%
+      case 'third':
+        return 'col-span-2'; // 2/6 = 33.33%
+      case 'full':
+      default:
+        return 'col-span-6'; // Full width
+    }
+  };
 
   return (
-    <Card className={`${widthClass} border border-gray-200 shadow-sm`}>
+    <Card className={`${getWidthClass()} border border-gray-200 shadow-sm`}>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3 px-4 pt-4">
         <div className="flex items-center gap-2">
           <div className="w-5 h-5 border-2 border-purple-500 rounded"></div>

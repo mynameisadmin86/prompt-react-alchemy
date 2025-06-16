@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { DynamicPanel } from './DynamicPanel';
 import { PanelConfig } from '@/types/dynamicPanel';
@@ -254,30 +253,28 @@ export const DynamicPanelPreview: React.FC = () => {
   };
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-wrap gap-4">
-        <DynamicPanel
-          panelId="basic-details-preview"
-          panelTitle="Basic Details"
-          panelConfig={basicDetailsConfig}
-          panelWidth="third"
-          showPreview={true}
-        />
-        <DynamicPanel
-          panelId="operational-details-preview"
-          panelTitle="Operational Details"
-          panelConfig={operationalDetailsConfig}
-          panelWidth="third"
-          showPreview={true}
-        />
-        <DynamicPanel
-          panelId="billing-details-preview"
-          panelTitle="Billing Details"
-          panelConfig={billingDetailsConfig}
-          panelWidth="third"
-          showPreview={true}
-        />
-      </div>
+    <div className="grid grid-cols-6 gap-4">
+      <DynamicPanel
+        panelId="basic-details-preview"
+        panelTitle="Basic Details"
+        panelConfig={basicDetailsConfig}
+        panelWidth={2}
+        showPreview={true}
+      />
+      <DynamicPanel
+        panelId="operational-details-preview"
+        panelTitle="Operational Details"
+        panelConfig={operationalDetailsConfig}
+        panelWidth={2}
+        showPreview={true}
+      />
+      <DynamicPanel
+        panelId="billing-details-preview"
+        panelTitle="Billing Details"
+        panelConfig={billingDetailsConfig}
+        panelWidth={2}
+        showPreview={true}
+      />
     </div>
   );
 };

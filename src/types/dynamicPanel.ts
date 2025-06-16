@@ -31,7 +31,7 @@ export interface DynamicPanelProps {
   getUserPanelConfig?: (userId: string, panelId: string) => Promise<PanelSettings> | PanelSettings;
   saveUserPanelConfig?: (userId: string, panelId: string, settings: PanelSettings) => Promise<void> | void;
   userId?: string;
-  panelWidth?: 'full' | 'half' | 'third';
+  panelWidth?: 'full' | 'half' | 'third' | 1 | 2 | 3 | 4 | 5 | 6;
   showPreview?: boolean;
 }
 
