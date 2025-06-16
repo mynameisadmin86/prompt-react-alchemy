@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { DynamicPanel } from '@/components/DynamicPanel';
 import { DynamicPanelPreview } from '@/components/DynamicPanel/DynamicPanelPreview';
-import { PanelConfig } from '@/types/dynamicPanel';
+import { PanelConfig, PanelSettings } from '@/types/dynamicPanel';
 import { Button } from '@/components/ui/button';
 import { Eye, EyeOff } from 'lucide-react';
 import {
@@ -18,6 +18,11 @@ const DynamicPanelDemo = () => {
   const [operationalDetailsData, setOperationalDetailsData] = useState({});
   const [billingDetailsData, setBillingDetailsData] = useState({});
   const [showPreview, setShowPreview] = useState(false);
+
+  // Panel titles state
+  const [basicDetailsTitle, setBasicDetailsTitle] = useState('Basic Details');
+  const [operationalDetailsTitle, setOperationalDetailsTitle] = useState('Operational Details');
+  const [billingDetailsTitle, setBillingDetailsTitle] = useState('Billing Details');
 
   // Basic Details Panel Configuration
   const basicDetailsConfig: PanelConfig = {
@@ -256,14 +261,14 @@ const DynamicPanelDemo = () => {
   };
 
   // Mock functions for user config management
-  const getUserPanelConfig = (userId: string, panelId: string): PanelConfig | null => {
+  const getUserPanelConfig = (userId: string, panelId: string): PanelSettings | null => {
     const stored = localStorage.getItem(`panel-config-${userId}-${panelId}`);
     return stored ? JSON.parse(stored) : null;
   };
 
-  const saveUserPanelConfig = (userId: string, panelId: string, config: PanelConfig): void => {
-    localStorage.setItem(`panel-config-${userId}-${panelId}`, JSON.stringify(config));
-    console.log(`Saved config for panel ${panelId}:`, config);
+  const saveUserPanelConfig = (userId: string, panelId: string, settings: PanelSettings): void => {
+    localStorage.setItem(`panel-config-${userId}-${panelId}`, JSON.stringify(settings));
+    console.log(`Saved config for panel ${panelId}:`, settings);
   };
 
   return (
@@ -325,10 +330,11 @@ const DynamicPanelDemo = () => {
             <div className="space-y-6">
               <DynamicPanel
                 panelId="basic-details"
-                panelTitle="Basic Details"
+                panelTitle={basicDetailsTitle}
                 panelConfig={basicDetailsConfig}
                 initialData={basicDetailsData}
                 onDataChange={setBasicDetailsData}
+                onTitleChange={setBasicDetailsTitle}
                 getUserPanelConfig={getUserPanelConfig}
                 saveUserPanelConfig={saveUserPanelConfig}
                 userId="current-user"
@@ -336,10 +342,11 @@ const DynamicPanelDemo = () => {
 
               <DynamicPanel
                 panelId="operational-details"
-                panelTitle="Operational Details"
+                panelTitle={operationalDetailsTitle}
                 panelConfig={operationalDetailsConfig}
                 initialData={operationalDetailsData}
                 onDataChange={setOperationalDetailsData}
+                onTitleChange={setOperationalDetailsTitle}
                 getUserPanelConfig={getUserPanelConfig}
                 saveUserPanelConfig={saveUserPanelConfig}
                 userId="current-user"
@@ -347,10 +354,11 @@ const DynamicPanelDemo = () => {
 
               <DynamicPanel
                 panelId="billing-details"
-                panelTitle="Billing Details"
+                panelTitle={billingDetailsTitle}
                 panelConfig={billingDetailsConfig}
                 initialData={billingDetailsData}
                 onDataChange={setBillingDetailsData}
+                onTitleChange={setBillingDetailsTitle}
                 getUserPanelConfig={getUserPanelConfig}
                 saveUserPanelConfig={saveUserPanelConfig}
                 userId="current-user"
@@ -362,19 +370,19 @@ const DynamicPanelDemo = () => {
               <h3 className="text-lg font-semibold mb-4">Current Form Data</h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <h4 className="font-medium text-gray-700 mb-2">Basic Details</h4>
+                  <h4 className="font-medium text-gray-700 mb-2">{basicDetailsTitle}</h4>
                   <pre className="text-xs bg-gray-100 p-3 rounded overflow-auto">
                     {JSON.stringify(basicDetailsData, null, 2)}
                   </pre>
                 </div>
                 <div>
-                  <h4 className="font-medium text-gray-700 mb-2">Operational Details</h4>
+                  <h4 className="font-medium text-gray-700 mb-2">{operationalDetailsTitle}</h4>
                   <pre className="text-xs bg-gray-100 p-3 rounded overflow-auto">
                     {JSON.stringify(operationalDetailsData, null, 2)}
                   </pre>
                 </div>
                 <div>
-                  <h4 className="font-medium text-gray-700 mb-2">Billing Details</h4>
+                  <h4 className="font-medium text-gray-700 mb-2">{billingDetailsTitle}</h4>
                   <pre className="text-xs bg-gray-100 p-3 rounded overflow-auto">
                     {JSON.stringify(billingDetailsData, null, 2)}
                   </pre>

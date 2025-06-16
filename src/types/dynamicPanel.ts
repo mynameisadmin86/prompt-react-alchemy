@@ -16,14 +16,20 @@ export interface PanelConfig {
   [fieldId: string]: FieldConfig;
 }
 
+export interface PanelSettings {
+  title: string;
+  fields: PanelConfig;
+}
+
 export interface DynamicPanelProps {
   panelId: string;
   panelTitle: string;
   panelConfig: PanelConfig;
   initialData?: Record<string, any>;
   onDataChange?: (updatedData: Record<string, any>) => void;
-  getUserPanelConfig?: (userId: string, panelId: string) => Promise<PanelConfig> | PanelConfig;
-  saveUserPanelConfig?: (userId: string, panelId: string, config: PanelConfig) => Promise<void> | void;
+  onTitleChange?: (newTitle: string) => void;
+  getUserPanelConfig?: (userId: string, panelId: string) => Promise<PanelSettings> | PanelSettings;
+  saveUserPanelConfig?: (userId: string, panelId: string, settings: PanelSettings) => Promise<void> | void;
   userId?: string;
   panelWidth?: 'full' | 'half' | 'third';
   showPreview?: boolean;

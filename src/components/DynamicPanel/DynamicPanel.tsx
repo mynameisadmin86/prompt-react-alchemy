@@ -4,15 +4,16 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Settings } from 'lucide-react';
 import { FieldRenderer } from './FieldRenderer';
-import { FieldVisibilityModal } from './FieldVisibilityModal';
-import { DynamicPanelProps, PanelConfig } from '@/types/dynamicPanel';
+import { EnhancedFieldVisibilityModal } from './EnhancedFieldVisibilityModal';
+import { DynamicPanelProps, PanelConfig, PanelSettings } from '@/types/dynamicPanel';
 
 export const DynamicPanel: React.FC<DynamicPanelProps> = ({
   panelId,
-  panelTitle,
+  panelTitle: initialPanelTitle,
   panelConfig: initialPanelConfig,
   initialData = {},
   onDataChange,
+  onTitleChange,
   getUserPanelConfig,
   saveUserPanelConfig,
   userId = 'default-user',
@@ -20,6 +21,7 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
   showPreview = false
 }) => {
   const [panelConfig, setPanelConfig] = useState<PanelConfig>(initialPanelConfig);
+  const [panelTitle, setPanelTitle] = useState(initialPanelTitle);
   const [formData, setFormData] = useState(initialData);
   const [isConfigModalOpen, setIsConfigModalOpen] = useState(false);
 
@@ -28,9 +30,12 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
     const loadUserConfig = async () => {
       if (getUserPanelConfig) {
         try {
-          const userConfig = await getUserPanelConfig(userId, panelId);
-          if (userConfig && Object.keys(userConfig).length > 0) {
-            setPanelConfig(userConfig);
+          const userSettings = await getUserPanelConfig(userId, panelId);
+          if (userSettings && Object.keys(userSettings.fields).length > 0) {
+            setPanelConfig(userSettings.fields);
+            if (userSettings.title) {
+              setPanelTitle(userSettings.title);
+            }
           }
         } catch (error) {
           console.error('Failed to load user panel config:', error);
@@ -52,12 +57,21 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
     onDataChange?.(updatedData);
   };
 
-  const handleConfigSave = async (updatedConfig: PanelConfig) => {
+  const handleConfigSave = async (updatedConfig: PanelConfig, newTitle?: string) => {
     setPanelConfig(updatedConfig);
+    
+    if (newTitle !== undefined) {
+      setPanelTitle(newTitle);
+      onTitleChange?.(newTitle);
+    }
     
     if (saveUserPanelConfig) {
       try {
-        await saveUserPanelConfig(userId, panelId, updatedConfig);
+        const settings: PanelSettings = {
+          title: newTitle || panelTitle,
+          fields: updatedConfig
+        };
+        await saveUserPanelConfig(userId, panelId, settings);
       } catch (error) {
         console.error('Failed to save user panel config:', error);
       }
@@ -116,10 +130,11 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
       </CardContent>
 
       {!showPreview && (
-        <FieldVisibilityModal
+        <EnhancedFieldVisibilityModal
           open={isConfigModalOpen}
           onClose={() => setIsConfigModalOpen(false)}
           panelConfig={panelConfig}
+          panelTitle={panelTitle}
           onSave={handleConfigSave}
         />
       )}
