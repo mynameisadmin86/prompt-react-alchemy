@@ -1,7 +1,9 @@
-
 import React, { useState } from 'react';
 import { DynamicPanel } from '@/components/DynamicPanel';
+import { DynamicPanelPreview } from '@/components/DynamicPanel/DynamicPanelPreview';
 import { PanelConfig } from '@/types/dynamicPanel';
+import { Button } from '@/components/ui/button';
+import { Eye, EyeOff } from 'lucide-react';
 import {
   Breadcrumb,
   BreadcrumbList,
@@ -15,6 +17,7 @@ const DynamicPanelDemo = () => {
   const [basicDetailsData, setBasicDetailsData] = useState({});
   const [operationalDetailsData, setOperationalDetailsData] = useState({});
   const [billingDetailsData, setBillingDetailsData] = useState({});
+  const [showPreview, setShowPreview] = useState(false);
 
   // Basic Details Panel Configuration
   const basicDetailsConfig: PanelConfig = {
@@ -283,74 +286,103 @@ const DynamicPanelDemo = () => {
           </BreadcrumbList>
         </Breadcrumb>
 
-        {/* Title */}
-        <div>
-          <h1 className="text-2xl font-semibold text-gray-900">Dynamic Panel Configuration</h1>
-          <p className="text-gray-600 mt-1">
-            Configure field visibility, ordering, and labels for each panel
-          </p>
-        </div>
-
-        {/* Dynamic Panels */}
-        <div className="space-y-6">
-          <DynamicPanel
-            panelId="basic-details"
-            panelTitle="Basic Details"
-            panelConfig={basicDetailsConfig}
-            initialData={basicDetailsData}
-            onDataChange={setBasicDetailsData}
-            getUserPanelConfig={getUserPanelConfig}
-            saveUserPanelConfig={saveUserPanelConfig}
-            userId="current-user"
-          />
-
-          <DynamicPanel
-            panelId="operational-details"
-            panelTitle="Operational Details"
-            panelConfig={operationalDetailsConfig}
-            initialData={operationalDetailsData}
-            onDataChange={setOperationalDetailsData}
-            getUserPanelConfig={getUserPanelConfig}
-            saveUserPanelConfig={saveUserPanelConfig}
-            userId="current-user"
-          />
-
-          <DynamicPanel
-            panelId="billing-details"
-            panelTitle="Billing Details"
-            panelConfig={billingDetailsConfig}
-            initialData={billingDetailsData}
-            onDataChange={setBillingDetailsData}
-            getUserPanelConfig={getUserPanelConfig}
-            saveUserPanelConfig={saveUserPanelConfig}
-            userId="current-user"
-          />
-        </div>
-
-        {/* Debug Data Display */}
-        <div className="bg-white p-6 rounded-lg shadow-sm">
-          <h3 className="text-lg font-semibold mb-4">Current Form Data</h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <h4 className="font-medium text-gray-700 mb-2">Basic Details</h4>
-              <pre className="text-xs bg-gray-100 p-3 rounded overflow-auto">
-                {JSON.stringify(basicDetailsData, null, 2)}
-              </pre>
-            </div>
-            <div>
-              <h4 className="font-medium text-gray-700 mb-2">Operational Details</h4>
-              <pre className="text-xs bg-gray-100 p-3 rounded overflow-auto">
-                {JSON.stringify(operationalDetailsData, null, 2)}
-              </pre>
-            </div>
-            <div>
-              <h4 className="font-medium text-gray-700 mb-2">Billing Details</h4>
-              <pre className="text-xs bg-gray-100 p-3 rounded overflow-auto">
-                {JSON.stringify(billingDetailsData, null, 2)}
-              </pre>
-            </div>
+        {/* Title and Preview Toggle */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-semibold text-gray-900">Dynamic Panel Configuration</h1>
+            <p className="text-gray-600 mt-1">
+              Configure field visibility, ordering, and labels for each panel
+            </p>
           </div>
+          <Button
+            onClick={() => setShowPreview(!showPreview)}
+            variant="outline"
+            className="flex items-center gap-2"
+          >
+            {showPreview ? (
+              <>
+                <EyeOff className="h-4 w-4" />
+                Hide Preview
+              </>
+            ) : (
+              <>
+                <Eye className="h-4 w-4" />
+                Show Preview
+              </>
+            )}
+          </Button>
         </div>
+
+        {/* Preview or Configuration Mode */}
+        {showPreview ? (
+          <div className="bg-white p-6 rounded-lg shadow-sm">
+            <h3 className="text-lg font-semibold mb-4">Panel Preview</h3>
+            <DynamicPanelPreview />
+          </div>
+        ) : (
+          <>
+            {/* Dynamic Panels */}
+            <div className="space-y-6">
+              <DynamicPanel
+                panelId="basic-details"
+                panelTitle="Basic Details"
+                panelConfig={basicDetailsConfig}
+                initialData={basicDetailsData}
+                onDataChange={setBasicDetailsData}
+                getUserPanelConfig={getUserPanelConfig}
+                saveUserPanelConfig={saveUserPanelConfig}
+                userId="current-user"
+              />
+
+              <DynamicPanel
+                panelId="operational-details"
+                panelTitle="Operational Details"
+                panelConfig={operationalDetailsConfig}
+                initialData={operationalDetailsData}
+                onDataChange={setOperationalDetailsData}
+                getUserPanelConfig={getUserPanelConfig}
+                saveUserPanelConfig={saveUserPanelConfig}
+                userId="current-user"
+              />
+
+              <DynamicPanel
+                panelId="billing-details"
+                panelTitle="Billing Details"
+                panelConfig={billingDetailsConfig}
+                initialData={billingDetailsData}
+                onDataChange={setBillingDetailsData}
+                getUserPanelConfig={getUserPanelConfig}
+                saveUserPanelConfig={saveUserPanelConfig}
+                userId="current-user"
+              />
+            </div>
+
+            {/* Debug Data Display */}
+            <div className="bg-white p-6 rounded-lg shadow-sm">
+              <h3 className="text-lg font-semibold mb-4">Current Form Data</h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <h4 className="font-medium text-gray-700 mb-2">Basic Details</h4>
+                  <pre className="text-xs bg-gray-100 p-3 rounded overflow-auto">
+                    {JSON.stringify(basicDetailsData, null, 2)}
+                  </pre>
+                </div>
+                <div>
+                  <h4 className="font-medium text-gray-700 mb-2">Operational Details</h4>
+                  <pre className="text-xs bg-gray-100 p-3 rounded overflow-auto">
+                    {JSON.stringify(operationalDetailsData, null, 2)}
+                  </pre>
+                </div>
+                <div>
+                  <h4 className="font-medium text-gray-700 mb-2">Billing Details</h4>
+                  <pre className="text-xs bg-gray-100 p-3 rounded overflow-auto">
+                    {JSON.stringify(billingDetailsData, null, 2)}
+                  </pre>
+                </div>
+              </div>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

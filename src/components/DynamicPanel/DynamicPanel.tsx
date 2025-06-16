@@ -15,7 +15,9 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
   onDataChange,
   getUserPanelConfig,
   saveUserPanelConfig,
-  userId = 'default-user'
+  userId = 'default-user',
+  panelWidth = 'full',
+  showPreview = false
 }) => {
   const [panelConfig, setPanelConfig] = useState<PanelConfig>(initialPanelConfig);
   const [formData, setFormData] = useState(initialData);
@@ -62,25 +64,36 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
     }
   };
 
+  // Determine panel width class
+  const widthClass = panelWidth === 'half' ? 'w-1/2' : panelWidth === 'third' ? 'w-1/3' : 'w-full';
+
   return (
-    <Card className="w-full">
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-        <CardTitle className="text-lg font-semibold">{panelTitle}</CardTitle>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => setIsConfigModalOpen(true)}
-          className="h-8 w-8 text-gray-500 hover:text-gray-700"
-        >
-          <Settings className="h-4 w-4" />
-        </Button>
+    <Card className={`${widthClass} border border-gray-200 shadow-sm`}>
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3 px-4 pt-4">
+        <div className="flex items-center gap-2">
+          <div className="w-5 h-5 border-2 border-purple-500 rounded"></div>
+          <CardTitle className="text-sm font-medium text-gray-700">{panelTitle}</CardTitle>
+          {showPreview && (
+            <span className="text-xs text-blue-600 font-medium">DB000023/42</span>
+          )}
+        </div>
+        {!showPreview && (
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setIsConfigModalOpen(true)}
+            className="h-6 w-6 text-gray-400 hover:text-gray-600"
+          >
+            <Settings className="h-3 w-3" />
+          </Button>
+        )}
       </CardHeader>
       
-      <CardContent>
+      <CardContent className="px-4 pb-4">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {visibleFields.map(([fieldId, fieldConfig]) => (
-            <div key={fieldId} className="space-y-2">
-              <label className="text-sm font-medium text-gray-700 flex items-center">
+            <div key={fieldId} className="space-y-1">
+              <label className="text-xs font-medium text-gray-600 block">
                 {fieldConfig.label}
                 {fieldConfig.mandatory && (
                   <span className="text-red-500 ml-1">*</span>
@@ -95,19 +108,21 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
           ))}
         </div>
         
-        {visibleFields.length === 0 && (
-          <div className="text-center text-gray-500 py-8">
+        {visibleFields.length === 0 && !showPreview && (
+          <div className="text-center text-gray-500 py-8 text-sm">
             No visible fields configured. Click the settings icon to configure fields.
           </div>
         )}
       </CardContent>
 
-      <FieldVisibilityModal
-        open={isConfigModalOpen}
-        onClose={() => setIsConfigModalOpen(false)}
-        panelConfig={panelConfig}
-        onSave={handleConfigSave}
-      />
+      {!showPreview && (
+        <FieldVisibilityModal
+          open={isConfigModalOpen}
+          onClose={() => setIsConfigModalOpen(false)}
+          panelConfig={panelConfig}
+          onSave={handleConfigSave}
+        />
+      )}
     </Card>
   );
 };

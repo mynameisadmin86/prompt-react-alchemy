@@ -25,6 +25,8 @@ export interface DynamicPanelProps {
   getUserPanelConfig?: (userId: string, panelId: string) => Promise<PanelConfig> | PanelConfig;
   saveUserPanelConfig?: (userId: string, panelId: string, config: PanelConfig) => Promise<void> | void;
   userId?: string;
+  panelWidth?: 'full' | 'half' | 'third';
+  showPreview?: boolean;
 }
 
 export interface FieldVisibilityConfig {
