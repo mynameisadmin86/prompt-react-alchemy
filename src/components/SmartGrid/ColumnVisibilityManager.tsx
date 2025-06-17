@@ -1,9 +1,9 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Settings2, Eye, EyeOff, Search, RotateCcw, ChevronDown } from 'lucide-react';
 import { GridColumnConfig, GridPreferences } from '@/types/smartgrid';
@@ -54,7 +54,7 @@ export function ColumnVisibilityManager({
     }
   };
 
-  const handleSubRowToggle = (columnId: string, value: string) => {
+  const handleSubRowToggle = (columnId: string) => {
     if (onSubRowToggle) {
       onSubRowToggle(columnId);
     }
@@ -178,24 +178,17 @@ export function ColumnVisibilityManager({
                   {/* Sub-row Configuration */}
                   {isVisible && !isMandatory && (
                     <div className="border-t pt-3">
-                      <div className="text-xs font-medium text-gray-700 mb-2">Display Location:</div>
-                      <RadioGroup
-                        value={isCollapsibleChild ? "sub-row" : "main-row"}
-                        onValueChange={(value) => handleSubRowToggle(column.key, value)}
-                        className="flex space-x-4"
-                      >
-                        <div className="flex items-center space-x-2">
-                          <RadioGroupItem value="main-row" id={`${column.key}-main`} />
-                          <Label htmlFor={`${column.key}-main`} className="text-xs">Main Row</Label>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <RadioGroupItem value="sub-row" id={`${column.key}-sub`} />
-                          <Label htmlFor={`${column.key}-sub`} className="text-xs flex items-center gap-1">
-                            <ChevronDown className="h-3 w-3" />
-                            Sub-row
-                          </Label>
-                        </div>
-                      </RadioGroup>
+                      <div className="flex items-center space-x-2">
+                        <Checkbox
+                          checked={isCollapsibleChild}
+                          onCheckedChange={() => handleSubRowToggle(column.key)}
+                          id={`${column.key}-sub-row`}
+                        />
+                        <Label htmlFor={`${column.key}-sub-row`} className="text-xs flex items-center gap-1">
+                          <ChevronDown className="h-3 w-3" />
+                          Show in Sub-row
+                        </Label>
+                      </div>
                     </div>
                   )}
                 </div>
