@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Switch } from '@/components/ui/switch';
 import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { TooltipProvider } from '@/components/ui/tooltip';
 import { Settings2, Eye, EyeOff, Search, RotateCcw, ChevronDown, Check, X } from 'lucide-react';
 import { GridColumnConfig, GridPreferences } from '@/types/smartgrid';
 import { cn } from '@/lib/utils';
@@ -39,6 +39,7 @@ export function ColumnVisibilityManager({
   const visibleCount = columns.filter(col => !preferences.hiddenColumns.includes(col.key)).length;
   const totalCount = columns.length;
   const subRowCount = preferences.subRowColumns?.length || 0;
+  const subRowColumns = preferences.subRowColumns || [];
 
   const handleToggleAll = () => {
     const allVisible = preferences.hiddenColumns.length === 0;
@@ -77,6 +78,12 @@ export function ColumnVisibilityManager({
     setEditingValue('');
   };
 
+  const handleSubRowToggle = (columnKey: string) => {
+    if (onSubRowToggle) {
+      onSubRowToggle(columnKey);
+    }
+  };
+
   return (
     <TooltipProvider>
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -87,7 +94,7 @@ export function ColumnVisibilityManager({
           </Button>
         </DialogTrigger>
         
-        <DialogContent className="max-w-2xl max-h-[80vh] flex flex-col">
+        <DialogContent className="max-w-4xl max-h-[85vh] flex flex-col">
           <DialogHeader className="pb-4 border-b">
             <DialogTitle className="flex items-center justify-between">
               <span>Configure Columns</span>
@@ -115,6 +122,41 @@ export function ColumnVisibilityManager({
               />
             </div>
 
+            {/* Sub-row Columns Badges */}
+            {subRowColumns.length > 0 && (
+              <div className="p-4 bg-purple-50 rounded-lg border border-purple-200">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center space-x-2">
+                    <ChevronDown className="h-4 w-4 text-purple-600" />
+                    <span className="text-sm font-medium text-purple-800">Sub-row Columns</span>
+                  </div>
+                  <span className="text-xs text-purple-600">{subRowColumns.length} column{subRowColumns.length !== 1 ? 's' : ''}</span>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {subRowColumns.map((columnKey) => {
+                    const column = columns.find(col => col.key === columnKey);
+                    const displayLabel = preferences.columnHeaders[columnKey] || column?.label || columnKey;
+                    
+                    return (
+                      <Badge
+                        key={columnKey}
+                        variant="secondary"
+                        className="cursor-pointer bg-purple-100 text-purple-800 hover:bg-purple-200 border border-purple-300 transition-colors"
+                        onClick={() => handleSubRowToggle(columnKey)}
+                        title="Click to move back to main row"
+                      >
+                        {displayLabel}
+                        <X className="h-3 w-3 ml-1" />
+                      </Badge>
+                    );
+                  })}
+                </div>
+                <div className="text-xs text-purple-600 mt-2">
+                  Click any badge to move the column back to the main row
+                </div>
+              </div>
+            )}
+
             {/* Toggle All */}
             <div className="flex items-center justify-between py-2 border-b">
               <span className="text-sm font-medium">Toggle All</span>
@@ -129,7 +171,7 @@ export function ColumnVisibilityManager({
             </div>
 
             {/* Column List */}
-            <div className="flex-1 overflow-y-auto space-y-2">
+            <div className="flex-1 overflow-y-auto space-y-3">
               {filteredColumns.map((column) => {
                 const isVisible = !preferences.hiddenColumns.includes(column.key);
                 const isMandatory = column.mandatory;
@@ -141,11 +183,12 @@ export function ColumnVisibilityManager({
                   <div
                     key={column.key}
                     className={cn(
-                      "flex flex-col p-3 rounded-lg border transition-colors space-y-3",
+                      "p-4 rounded-lg border transition-colors",
                       isVisible ? "bg-white border-gray-200" : "bg-gray-50 border-gray-100"
                     )}
                   >
-                    <div className="flex items-center justify-between">
+                    {/* Main Column Configuration */}
+                    <div className="flex items-center justify-between mb-4">
                       <div className="flex items-center space-x-3 flex-1 min-w-0">
                         <Checkbox
                           checked={isVisible}
@@ -233,18 +276,24 @@ export function ColumnVisibilityManager({
                       </div>
                     </div>
 
-                    {/* Sub-row setting - always available at column level */}
+                    {/* Sub-row Configuration Section */}
                     {onSubRowToggle && (
-                      <div className="flex items-center justify-between pl-6 pt-2 border-t border-gray-100">
-                        <div className="flex items-center space-x-2">
-                          <ChevronDown className="h-3 w-3 text-purple-600" />
-                          <span className="text-xs text-gray-600">Show in sub-row</span>
+                      <div className="pt-3 border-t border-gray-100">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-3">
+                            <ChevronDown className="h-4 w-4 text-purple-600" />
+                            <div>
+                              <span className="text-sm text-gray-700 font-medium">Show in sub-row</span>
+                              <div className="text-xs text-gray-500">Displays additional details below main row</div>
+                            </div>
+                          </div>
+                          
+                          <Checkbox
+                            checked={isSubRow}
+                            onCheckedChange={() => handleSubRowToggle(column.key)}
+                            className="flex-shrink-0"
+                          />
                         </div>
-                        <Switch
-                          checked={isSubRow}
-                          onCheckedChange={() => onSubRowToggle(column.key)}
-                          className="h-4 w-7 data-[state=checked]:bg-purple-600"
-                        />
                       </div>
                     )}
                   </div>
