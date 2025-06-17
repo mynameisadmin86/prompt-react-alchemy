@@ -371,7 +371,7 @@ export function SmartGrid({
       exportData: handleExport,
       resetPreferences: handleResetPreferences,
       toggleRowSelection: (rowIndex: number) => {
-        handleSelectionChange(prev => {
+        handleSelectionChange((prev: Set<number>) => {
           const newSet = new Set(prev);
           if (newSet.has(rowIndex)) {
             newSet.delete(rowIndex);
@@ -904,15 +904,6 @@ export function SmartGrid({
                         </div>
                         
                         <div className="flex items-center gap-1">
-                          {/* Column Filter - Show when column filters are enabled */}
-                          {showColumnFilters && column.filterable && (
-                            <ColumnFilter
-                              column={column}
-                              currentFilter={currentFilter}
-                              onFilterChange={handleColumnFilterChange}
-                            />
-                          )}
-
                           {column.sortable && !shouldHideIcons && (
                             <Button
                               variant="ghost"
@@ -964,6 +955,42 @@ export function SmartGrid({
                   </TableHead>
                 )}
               </TableRow>
+              
+              {/* Column Filter Row - Only show when filters are enabled */}
+              {showColumnFilters && (
+                <TableRow className="hover:bg-transparent border-b border-gray-200">
+                  {/* Checkbox column space */}
+                  {showCheckboxes && (
+                    <TableHead className="bg-gray-25 px-3 py-2 border-r border-gray-100 w-[50px]">
+                      {/* Empty space for checkbox column */}
+                    </TableHead>
+                  )}
+                  {orderedColumns.map((column) => {
+                    const currentFilter = filters.find(f => f.column === column.key);
+                    return (
+                      <TableHead 
+                        key={`filter-${column.key}`}
+                        className="bg-gray-25 px-2 py-2 border-r border-gray-100 last:border-r-0"
+                        style={{ width: `${column.width}px` }}
+                      >
+                        {column.filterable && (
+                          <ColumnFilter
+                            column={column}
+                            currentFilter={currentFilter}
+                            onFilterChange={handleColumnFilterChange}
+                          />
+                        )}
+                      </TableHead>
+                    );
+                  })}
+                  {/* Plugin row actions column space */}
+                  {plugins.some(plugin => plugin.rowActions) && (
+                    <TableHead className="bg-gray-25 px-3 py-2 text-center w-[100px]">
+                      {/* Empty space for actions column */}
+                    </TableHead>
+                  )}
+                </TableRow>
+              )}
             </TableHeader>
             <TableBody>
               {loading ? (
@@ -1007,7 +1034,7 @@ export function SmartGrid({
                             className="rounded" 
                             checked={currentSelectedRows.has(rowIndex)}
                             onChange={() => {
-                              handleSelectionChange(prev => {
+                              handleSelectionChange((prev: Set<number>) => {
                                 const newSet = new Set(prev);
                                 if (newSet.has(rowIndex)) {
                                   newSet.delete(rowIndex);
