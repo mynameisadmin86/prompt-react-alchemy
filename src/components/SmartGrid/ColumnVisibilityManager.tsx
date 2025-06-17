@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -95,7 +96,7 @@ export function ColumnVisibilityManager({
           </Button>
         </DialogTrigger>
         
-        <DialogContent className="max-w-3xl max-h-[85vh] flex flex-col">
+        <DialogContent className="max-w-4xl max-h-[85vh] flex flex-col">
           <DialogHeader className="pb-4 border-b">
             <DialogTitle className="flex items-center justify-between">
               <span>Configure Columns</span>
@@ -244,22 +245,24 @@ export function ColumnVisibilityManager({
 
                     {/* Sub-row Configuration Section */}
                     {onSubRowToggle && (
-                      <div className="pt-3 border-t border-gray-100 bg-gray-50/50 rounded-lg p-3">
+                      <div className="pt-3 border-t border-gray-100">
                         <div className="flex items-center justify-between">
-                          <div className="flex items-center space-x-2">
+                          <div className="flex items-center space-x-3">
                             <ChevronDown className="h-4 w-4 text-purple-600" />
-                            <span className="text-sm text-gray-700 font-medium">Show in sub-row</span>
-                            <span className="text-xs text-gray-500">(displays additional details below main row)</span>
+                            <div>
+                              <span className="text-sm text-gray-700 font-medium">Show in sub-row</span>
+                              <div className="text-xs text-gray-500">Displays additional details below main row</div>
+                            </div>
                           </div>
                           
-                          <div className="flex items-center space-x-4 bg-white rounded-lg border border-gray-200 p-2">
+                          <div className="flex items-center space-x-4">
                             <label className="flex items-center space-x-2 cursor-pointer">
                               <input
                                 type="radio"
                                 name={`subrow-${column.key}`}
                                 checked={!isSubRow}
                                 onChange={() => handleSubRowToggle(column.key, false)}
-                                className="h-4 w-4 text-gray-600 border-gray-300 focus:ring-gray-500 focus:ring-2"
+                                className="w-4 h-4 text-gray-600 bg-white border-gray-300 focus:ring-gray-500 focus:ring-2"
                               />
                               <span className="text-sm text-gray-700">No</span>
                             </label>
@@ -270,7 +273,7 @@ export function ColumnVisibilityManager({
                                 name={`subrow-${column.key}`}
                                 checked={isSubRow}
                                 onChange={() => handleSubRowToggle(column.key, true)}
-                                className="h-4 w-4 text-purple-600 border-purple-300 focus:ring-purple-500 focus:ring-2"
+                                className="w-4 h-4 text-purple-600 bg-white border-purple-300 focus:ring-purple-500 focus:ring-2"
                               />
                               <span className="text-sm text-purple-700 font-medium">Yes</span>
                             </label>
