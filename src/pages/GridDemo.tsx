@@ -364,8 +364,13 @@ const GridDemo = () => {
   };
 
   const handleRowSelection = (selectedRowIndices: Set<number>) => {
+    console.log('Selected rows changed:', selectedRowIndices);
     setSelectedRows(selectedRowIndices);
-    console.log('Selected rows:', selectedRowIndices);
+  };
+
+  const getRowClassName = (row: any, index: number) => {
+    console.log(`Row ${index} selected:`, selectedRows.has(index));
+    return selectedRows.has(index) ? 'bg-blue-50 border-l-4 border-blue-500' : '';
   };
 
   return (
@@ -398,6 +403,11 @@ const GridDemo = () => {
           </div>
         </div>
 
+        {/* Debug info */}
+        <div className="text-sm text-gray-600">
+          Selected rows: {Array.from(selectedRows).join(', ') || 'None'}
+        </div>
+
         {/* Grid Container */}
         <div className="bg-white rounded-lg shadow-sm">
           <SmartGrid
@@ -409,9 +419,7 @@ const GridDemo = () => {
             onUpdate={handleUpdate}
             selectedRows={selectedRows}
             onSelectionChange={handleRowSelection}
-            rowClassName={(row: any, index: number) => 
-              selectedRows.has(index) ? 'bg-blue-50 border-l-4 border-blue-500' : ''
-            }
+            rowClassName={getRowClassName}
           />
           
           {/* Footer with action buttons matching the screenshot style */}
