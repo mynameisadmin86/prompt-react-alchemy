@@ -194,7 +194,7 @@ export function ColumnVisibilityManager({
                           ) : (
                             <div
                               className="group/label cursor-pointer"
-                              onMouseEnter={() => onColumnHeaderChange && handleEditStart(column.key, displayLabel)}
+                              onClick={() => onColumnHeaderChange && handleEditStart(column.key, displayLabel)}
                             >
                               <div className="font-medium text-sm truncate">
                                 {displayLabel}
