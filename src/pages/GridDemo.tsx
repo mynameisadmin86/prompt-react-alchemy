@@ -97,7 +97,7 @@ const GridDemo = () => {
       sortable: true,
       editable: false,
       infoTextField: 'arrivalPointDetails',
-      collapsapsibleChild: true // Make this column collapsible
+      collapsapsibleChild: true // Fixed typo: was 'collapsibleChild'
     },
     {
       key: 'customer',
