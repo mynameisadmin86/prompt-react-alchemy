@@ -9,6 +9,13 @@ import {
   usePagination,
   useRowSelect,
   useColumnOrder,
+  TableInstance,
+  UsePaginationInstanceProps,
+  UseRowSelectInstanceProps,
+  UseSortByInstanceProps,
+  UseFiltersInstanceProps,
+  UseGlobalFiltersInstanceProps,
+  Column
 } from 'react-table';
 import {
   ColumnVisibilityManager,
@@ -41,6 +48,14 @@ import { useToast } from '@/hooks/use-toast';
 import { CellEditor } from './CellEditor';
 import { ColumnManager } from './ColumnManager';
 import { cn } from '@/lib/utils';
+
+// Define the table instance type with all the plugins
+type TableInstanceWithPlugins<T extends object> = TableInstance<T> &
+  UsePaginationInstanceProps<T> &
+  UseRowSelectInstanceProps<T> &
+  UseSortByInstanceProps<T> &
+  UseFiltersInstanceProps<T> &
+  UseGlobalFiltersInstanceProps<T>;
 
 export function SmartGrid({
   columns: initialColumns,
@@ -77,6 +92,7 @@ export function SmartGrid({
 
   // Preferences hook
   const {
+    preferences: hookPreferences,
     loadPreferences,
     savePreferences,
     resetPreferences,
@@ -189,13 +205,13 @@ export function SmartGrid({
   };
 
   const memoizedColumns = useMemo(
-    () =>
+    (): Column<any>[] =>
       columns.map(column => ({
         Header: column.label,
         accessor: column.key,
         sortable: column.sortable,
         filterable: column.filterable,
-        Cell: ({ value, row }) => {
+        Cell: ({ value, row }: any) => {
           switch (column.type) {
             case 'Link':
               return (
@@ -271,10 +287,31 @@ export function SmartGrid({
         },
         Filter: ColumnFilter,
         disableFilters: !column.filterable,
-        hidden: column.hidden,
+        show: !column.hidden,
       })),
     [columns, editableColumns, onLinkClick, onInlineEdit, onUpdate]
   );
+
+  const tableInstance = useTable(
+    {
+      columns: memoizedColumns,
+      data: data,
+      initialState: {
+        sortBy: sortConfig ? [{
+          id: sortConfig.column,
+          desc: sortConfig.direction === 'desc',
+        }] : [],
+        pageIndex: 0,
+        pageSize: 10,
+      },
+    },
+    useSortBy,
+    useFilters,
+    useGlobalFilter,
+    usePagination,
+    useRowSelect,
+    useColumnOrder,
+  ) as TableInstanceWithPlugins<any>;
 
   const {
     getTableProps,
@@ -294,29 +331,9 @@ export function SmartGrid({
     previousPage,
     setPageSize,
     selectedRowIds,
-    toggleRow,
+    toggleRowSelected,
     toggleAllRowsSelected,
-    getToggleRowSelectedProps,
-  } = useTable(
-    {
-      columns: memoizedColumns,
-      data: data,
-      initialState: {
-        sortBy: sortConfig ? [{
-          id: sortConfig.column,
-          desc: sortConfig.direction === 'desc',
-        }] : [],
-        pageIndex: 0,
-        pageSize: 10,
-      },
-    },
-    useSortBy,
-    useFilters,
-    useGlobalFilter,
-    usePagination,
-    useRowSelect,
-    useColumnOrder,
-  );
+  } = tableInstance;
 
   const { pageIndex, pageSize } = state;
 
@@ -329,7 +346,7 @@ export function SmartGrid({
   }, [globalFilter, handleGlobalFilterChange]);
 
   const toggleRowSelection = (rowIndex: number) => {
-    toggleRow(rowIndex);
+    toggleRowSelected(rowIndex);
     const newSelectedRows = new Set(selectedRowIds ? Object.keys(selectedRowIds).map(Number) : []);
     if (newSelectedRows.has(rowIndex)) {
       newSelectedRows.delete(rowIndex);
@@ -385,7 +402,6 @@ export function SmartGrid({
       <div className="flex items-center justify-between p-4 border-b bg-gray-50/50">
         <div className="flex items-center space-x-2">
           <CommonFilter
-            value={globalFilter}
             onChange={setGlobalFilter}
             placeholder="Search all columns..."
           />
@@ -413,14 +429,14 @@ export function SmartGrid({
               <tr {...headerGroup.getHeaderGroupProps()}>
                 {headerGroup.headers.map(column => (
                   <th
-                    {...column.getHeaderProps(column.sortable ? column.getSortByToggleProps() : {})}
+                    {...column.getHeaderProps((column as any).getSortByToggleProps ? (column as any).getSortByToggleProps() : {})}
                     className="px-4 py-2 border-b font-medium text-left text-sm text-gray-500 uppercase tracking-wider"
                   >
                     {column.render('Header')}
-                    {column.sortable ? (
+                    {(column as any).sortable ? (
                       <span>
-                        {column.isSorted ? (
-                          column.isSortedDesc ? (
+                        {(column as any).isSorted ? (
+                          (column as any).isSortedDesc ? (
                             <ArrowDown className="inline-block w-4 h-4 ml-1" />
                           ) : (
                             <ArrowUp className="inline-block w-4 h-4 ml-1" />
