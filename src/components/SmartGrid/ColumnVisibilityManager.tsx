@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Settings2, Eye, EyeOff, Search, RotateCcw, GripVertical } from 'lucide-react';
+import { Settings2, Eye, EyeOff, Search, RotateCcw } from 'lucide-react';
 import { GridColumnConfig, GridPreferences } from '@/types/smartgrid';
 import { cn } from '@/lib/utils';
 
@@ -13,33 +13,18 @@ interface ColumnVisibilityManagerProps {
   preferences: GridPreferences;
   onColumnVisibilityToggle: (columnId: string) => void;
   onResetToDefaults: () => void;
-  onColumnReorder?: (newOrder: string[]) => void;
 }
 
 export function ColumnVisibilityManager({
   columns,
   preferences,
   onColumnVisibilityToggle,
-  onResetToDefaults,
-  onColumnReorder
+  onResetToDefaults
 }: ColumnVisibilityManagerProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
 
-  // Order columns based on preferences
-  const orderedColumns = React.useMemo(() => {
-    const columnMap = new Map(columns.map(col => [col.key, col]));
-    const ordered = preferences.columnOrder
-      .map(key => columnMap.get(key))
-      .filter(Boolean) as GridColumnConfig[];
-    
-    // Add any new columns not in the order
-    const remainingColumns = columns.filter(col => !preferences.columnOrder.includes(col.key));
-    return [...ordered, ...remainingColumns];
-  }, [columns, preferences.columnOrder]);
-
-  const filteredColumns = orderedColumns.filter(column =>
+  const filteredColumns = columns.filter(column =>
     column.label.toLowerCase().includes(searchTerm.toLowerCase()) ||
     column.key.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -64,37 +49,6 @@ export function ColumnVisibilityManager({
         onColumnVisibilityToggle(columnId);
       });
     }
-  };
-
-  const handleDragStart = (e: React.DragEvent, index: number) => {
-    setDraggedIndex(index);
-    e.dataTransfer.effectAllowed = 'move';
-  };
-
-  const handleDragOver = (e: React.DragEvent, index: number) => {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = 'move';
-    
-    if (draggedIndex === null || draggedIndex === index) return;
-
-    // Create new order
-    const newColumns = [...filteredColumns];
-    const draggedItem = newColumns[draggedIndex];
-    newColumns.splice(draggedIndex, 1);
-    newColumns.splice(index, 0, draggedItem);
-    
-    // Update the drag index
-    setDraggedIndex(index);
-    
-    // Call the reorder function if provided
-    if (onColumnReorder) {
-      const newOrder = newColumns.map(col => col.key);
-      onColumnReorder(newOrder);
-    }
-  };
-
-  const handleDragEnd = () => {
-    setDraggedIndex(null);
   };
 
   return (
@@ -149,46 +103,40 @@ export function ColumnVisibilityManager({
 
           {/* Column List */}
           <div className="flex-1 overflow-y-auto space-y-2">
-            {filteredColumns.map((column, index) => {
+            {filteredColumns.map((column) => {
               const isVisible = !preferences.hiddenColumns.includes(column.key);
               const isMandatory = column.mandatory;
-              const isDragging = draggedIndex === index;
 
               return (
                 <div
                   key={column.key}
                   className={cn(
-                    "flex items-center space-x-3 p-3 rounded-lg border transition-colors cursor-move",
-                    isVisible ? "bg-white border-gray-200" : "bg-gray-50 border-gray-100",
-                    isDragging && "opacity-50"
+                    "flex items-center justify-between p-3 rounded-lg border transition-colors",
+                    isVisible ? "bg-white border-gray-200" : "bg-gray-50 border-gray-100"
                   )}
-                  draggable
-                  onDragStart={(e) => handleDragStart(e, index)}
-                  onDragOver={(e) => handleDragOver(e, index)}
-                  onDragEnd={handleDragEnd}
                 >
-                  <GripVertical className="h-4 w-4 text-gray-400 flex-shrink-0" />
-
-                  <Checkbox
-                    checked={isVisible}
-                    onCheckedChange={() => !isMandatory && onColumnVisibilityToggle(column.key)}
-                    disabled={isMandatory}
-                    className="flex-shrink-0"
-                  />
-                  
-                  <div className="flex items-center space-x-2 min-w-0">
-                    {isVisible ? (
-                      <Eye className="h-4 w-4 text-green-600 flex-shrink-0" />
-                    ) : (
-                      <EyeOff className="h-4 w-4 text-gray-400 flex-shrink-0" />
-                    )}
+                  <div className="flex items-center space-x-3 flex-1 min-w-0">
+                    <Checkbox
+                      checked={isVisible}
+                      onCheckedChange={() => !isMandatory && onColumnVisibilityToggle(column.key)}
+                      disabled={isMandatory}
+                      className="flex-shrink-0"
+                    />
                     
-                    <div className="min-w-0">
-                      <div className="font-medium text-sm truncate">
-                        {column.label}
-                      </div>
-                      <div className="text-xs text-gray-500 truncate">
-                        {column.key}
+                    <div className="flex items-center space-x-2 min-w-0">
+                      {isVisible ? (
+                        <Eye className="h-4 w-4 text-green-600 flex-shrink-0" />
+                      ) : (
+                        <EyeOff className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                      )}
+                      
+                      <div className="min-w-0">
+                        <div className="font-medium text-sm truncate">
+                          {column.label}
+                        </div>
+                        <div className="text-xs text-gray-500 truncate">
+                          {column.key}
+                        </div>
                       </div>
                     </div>
                   </div>
