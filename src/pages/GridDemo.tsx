@@ -39,9 +39,7 @@ interface SampleData {
 
 const GridDemo = () => {
   const [selectedRows, setSelectedRows] = useState<Set<number>>(new Set());
-  const { toast } = useToast();
-
-  const columns: GridColumnConfig[] = [
+  const [columns, setColumns] = useState<GridColumnConfig[]>([
     {
       key: 'id',
       label: 'Trip Plan No',
@@ -151,7 +149,8 @@ const GridDemo = () => {
         </div>
       )
     }
-  ];
+  ]);
+  const { toast } = useToast();
 
   const sampleData: SampleData[] = [
     {
@@ -371,6 +370,16 @@ const GridDemo = () => {
     setSelectedRows(selectedRowIndices);
   };
 
+  const handleSubRowToggle = (columnId: string) => {
+    setColumns(prevColumns => 
+      prevColumns.map(col =>
+        col.key === columnId
+          ? { ...col, collapsibleChild: !col.collapsibleChild }
+          : col
+      )
+    );
+  };
+
   const getRowClassName = (row: any, index: number) => {
     console.log(`Row ${index} selected:`, selectedRows.has(index));
     return selectedRows.has(index) ? '!bg-blue-50 !border-l-4 !border-blue-500 !border-l-blue-500' : '';
@@ -434,6 +443,7 @@ const GridDemo = () => {
             rowClassName={(row: any, index: number) => 
               selectedRows.has(index) ? 'smart-grid-row-selected' : ''
             }
+            onSubRowToggle={handleSubRowToggle}
           />
           
           {/* Footer with action buttons matching the screenshot style */}

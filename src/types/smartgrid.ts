@@ -1,4 +1,3 @@
-
 import React from 'react';
 
 export type GridColumnType =
@@ -119,6 +118,7 @@ export interface SmartGridProps {
   selectedRows?: Set<number>;
   onSelectionChange?(selectedRows: Set<number>): void;
   rowClassName?: (row: any, index: number) => string;
+  onSubRowToggle?(columnId: string): void;
 }
 
 // Legacy interface for backward compatibility
