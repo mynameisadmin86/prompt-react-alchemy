@@ -88,7 +88,7 @@ export function ColumnVisibilityManager({
           </Button>
         </DialogTrigger>
         
-        <DialogContent className="max-w-2xl max-h-[80vh] flex flex-col">
+        <DialogContent className="max-w-3xl max-h-[80vh] flex flex-col">
           <DialogHeader className="pb-4 border-b">
             <DialogTitle className="flex items-center justify-between">
               <span>Configure Columns</span>
@@ -142,7 +142,7 @@ export function ColumnVisibilityManager({
                   <div
                     key={column.key}
                     className={cn(
-                      "flex flex-col p-3 rounded-lg border transition-colors space-y-3",
+                      "flex flex-col p-4 rounded-lg border transition-colors space-y-3",
                       isVisible ? "bg-white border-gray-200" : "bg-gray-50 border-gray-100"
                     )}
                   >
@@ -236,33 +236,47 @@ export function ColumnVisibilityManager({
 
                     {/* Sub-row setting with radio buttons */}
                     {onSubRowToggle && (
-                      <div className="flex items-center justify-between pl-6 pt-2 border-t border-gray-100">
+                      <div className="flex items-center justify-between pl-6 pt-3 border-t border-gray-100">
                         <div className="flex items-center space-x-2">
-                          <ChevronDown className="h-3 w-3 text-purple-600" />
-                          <span className="text-xs text-gray-600">Show in sub-row</span>
+                          <ChevronDown className="h-4 w-4 text-purple-600" />
+                          <span className="text-sm text-gray-700 font-medium">Show in sub-row</span>
                         </div>
-                        <RadioGroup
-                          value={isSubRow ? "enabled" : "disabled"}
-                          onValueChange={(value) => {
-                            if ((value === "enabled") !== isSubRow) {
-                              onSubRowToggle(column.key);
-                            }
-                          }}
-                          className="flex items-center space-x-4"
-                        >
-                          <div className="flex items-center space-x-1">
-                            <RadioGroupItem value="disabled" id={`${column.key}-disabled`} className="h-3 w-3" />
-                            <label htmlFor={`${column.key}-disabled`} className="text-xs text-gray-600 cursor-pointer">
+                        <div className="flex items-center space-x-6">
+                          <div className="flex items-center space-x-2">
+                            <input
+                              type="radio"
+                              id={`${column.key}-disabled`}
+                              name={`subrow-${column.key}`}
+                              checked={!isSubRow}
+                              onChange={() => {
+                                if (isSubRow) {
+                                  onSubRowToggle(column.key);
+                                }
+                              }}
+                              className="h-4 w-4 text-gray-600 border-gray-300 focus:ring-gray-500"
+                            />
+                            <label htmlFor={`${column.key}-disabled`} className="text-sm text-gray-700 cursor-pointer">
                               No
                             </label>
                           </div>
-                          <div className="flex items-center space-x-1">
-                            <RadioGroupItem value="enabled" id={`${column.key}-enabled`} className="h-3 w-3" />
-                            <label htmlFor={`${column.key}-enabled`} className="text-xs text-purple-600 cursor-pointer">
+                          <div className="flex items-center space-x-2">
+                            <input
+                              type="radio"
+                              id={`${column.key}-enabled`}
+                              name={`subrow-${column.key}`}
+                              checked={isSubRow}
+                              onChange={() => {
+                                if (!isSubRow) {
+                                  onSubRowToggle(column.key);
+                                }
+                              }}
+                              className="h-4 w-4 text-purple-600 border-purple-300 focus:ring-purple-500"
+                            />
+                            <label htmlFor={`${column.key}-enabled`} className="text-sm text-purple-700 cursor-pointer font-medium">
                               Yes
                             </label>
                           </div>
-                        </RadioGroup>
+                        </div>
                       </div>
                     )}
                   </div>
