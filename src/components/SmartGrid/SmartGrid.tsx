@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -75,7 +74,20 @@ export function SmartGrid({
 
   // Use external selectedRows if provided, otherwise use internal state
   const currentSelectedRows = selectedRows || internalSelectedRows;
-  const handleSelectionChange = onSelectionChange || setInternalSelectedRows;
+
+  // Create a unified selection change handler that works with both external and internal state
+  const handleSelectionChangeUnified = useCallback((newSelection: Set<number> | ((prev: Set<number>) => Set<number>)) => {
+    if (onSelectionChange) {
+      // External selection control - resolve the new selection and pass it directly
+      const resolvedSelection = typeof newSelection === 'function' 
+        ? newSelection(currentSelectedRows) 
+        : newSelection;
+      onSelectionChange(resolvedSelection);
+    } else {
+      // Internal selection control - pass through to React state setter
+      setInternalSelectedRows(newSelection);
+    }
+  }, [onSelectionChange, currentSelectedRows]);
 
   // Convert GridColumnConfig to Column format for useGridPreferences
   const preferencesColumns = useMemo(() => columns.map(col => ({
@@ -371,7 +383,7 @@ export function SmartGrid({
       exportData: handleExport,
       resetPreferences: handleResetPreferences,
       toggleRowSelection: (rowIndex: number) => {
-        handleSelectionChange((prev: Set<number>) => {
+        handleSelectionChangeUnified(prev => {
           const newSet = new Set(prev);
           if (newSet.has(rowIndex)) {
             newSet.delete(rowIndex);
@@ -382,13 +394,13 @@ export function SmartGrid({
         });
       },
       selectAllRows: () => {
-        handleSelectionChange(new Set(Array.from({ length: processedData.length }, (_, i) => i)));
+        handleSelectionChangeUnified(new Set(Array.from({ length: processedData.length }, (_, i) => i)));
       },
       clearSelection: () => {
-        handleSelectionChange(new Set());
+        handleSelectionChangeUnified(new Set());
       }
     }
-  }), [gridData, processedData, currentSelectedRows, orderedColumns, preferences, handleExport, handleResetPreferences, handleSelectionChange]);
+  }), [gridData, processedData, currentSelectedRows, orderedColumns, preferences, handleExport, handleResetPreferences, handleSelectionChangeUnified]);
 
   // Pagination
   const paginatedData = useMemo(() => {
@@ -820,9 +832,9 @@ export function SmartGrid({
                       className="rounded" 
                       onChange={(e) => {
                         if (e.target.checked) {
-                          handleSelectionChange(new Set(Array.from({ length: paginatedData.length }, (_, i) => i)));
+                          handleSelectionChangeUnified(new Set(Array.from({ length: paginatedData.length }, (_, i) => i)));
                         } else {
-                          handleSelectionChange(new Set());
+                          handleSelectionChangeUnified(new Set());
                         }
                       }}
                       checked={currentSelectedRows.size === paginatedData.length && paginatedData.length > 0}
@@ -1034,7 +1046,7 @@ export function SmartGrid({
                             className="rounded" 
                             checked={currentSelectedRows.has(rowIndex)}
                             onChange={() => {
-                              handleSelectionChange((prev: Set<number>) => {
+                              handleSelectionChangeUnified(prev => {
                                 const newSet = new Set(prev);
                                 if (newSet.has(rowIndex)) {
                                   newSet.delete(rowIndex);
