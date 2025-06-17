@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -545,6 +544,18 @@ export function SmartGrid({
                           ? editableColumns.includes(column.key)
                           : editableColumns && column.editable;
                         
+                        // Convert GridColumnConfig to legacy Column format for CellEditor
+                        const legacyColumn = {
+                          id: column.key,
+                          header: column.label,
+                          accessor: column.key as any,
+                          sortable: column.sortable,
+                          filterable: column.filterable,
+                          editable: column.editable,
+                          mandatory: column.mandatory,
+                          type: 'text' as const
+                        };
+                        
                         return (
                           <td
                             key={column.key}
@@ -553,7 +564,7 @@ export function SmartGrid({
                             {isEditing ? (
                               <CellEditor
                                 value={row[column.key]}
-                                column={column}
+                                column={legacyColumn}
                                 onSave={(value) => handleInlineEdit(rowIndex, column.key, value)}
                                 onCancel={() => setEditingCell(null)}
                               />
@@ -664,13 +675,23 @@ export function SmartGrid({
       </div>
 
       {/* Column Manager Dialog */}
-      <ColumnManager
-        isOpen={isColumnManagerOpen}
-        onClose={() => setIsColumnManagerOpen(false)}
-        columns={legacyColumns}
-        preferences={preferences}
-        onPreferencesChange={updatePreferences}
-      />
+      {isColumnManagerOpen && (
+        <ColumnManager
+          columns={legacyColumns}
+          preferences={preferences}
+          onColumnOrderChange={handleColumnOrderChange}
+          onColumnVisibilityToggle={(columnId: string) => {
+            const isCurrentlyHidden = hiddenColumns.includes(columnId);
+            handleColumnVisibilityChange(columnId, isCurrentlyHidden);
+          }}
+          onColumnHeaderChange={(columnId: string, header: string) => {
+            updatePreferences({
+              ...preferences,
+              columnHeaders: { ...preferences.columnHeaders, [columnId]: header }
+            });
+          }}
+        />
+      )}
 
       {/* Plugin footer items */}
       {plugins.map(plugin => plugin.footer?.(gridAPI)).filter(Boolean)}
