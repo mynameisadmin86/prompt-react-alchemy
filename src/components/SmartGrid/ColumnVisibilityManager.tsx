@@ -233,15 +233,15 @@ export function ColumnVisibilityManager({
                     </div>
                   </div>
 
-                  {/* Sub-row setting */}
-                  {isVisible && !isMandatory && onSubRowToggle && (
+                  {/* Sub-row setting - Show for all columns when onSubRowToggle is available */}
+                  {onSubRowToggle && (
                     <div className="flex items-center justify-between pl-6 pt-2 border-t border-gray-100">
                       <div className="flex items-center space-x-2">
                         <ChevronDown className="h-3 w-3 text-purple-600" />
                         <span className="text-xs text-gray-600">Show in sub-row</span>
                       </div>
                       <Checkbox
-                        checked={isCollapsibleChild}
+                        checked={isCollapsibleChild || false}
                         onCheckedChange={() => onSubRowToggle(column.key)}
                         className="h-4 w-4"
                       />
