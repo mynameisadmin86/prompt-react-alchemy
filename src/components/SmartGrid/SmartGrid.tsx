@@ -12,6 +12,7 @@ import {
   SortingState,
   VisibilityState,
   ColumnFiltersState,
+  RowSelectionState,
   Table,
 } from '@tanstack/react-table';
 import {
@@ -68,7 +69,7 @@ export function SmartGrid({
   onSelectionChange,
   rowClassName
 }: SmartGridProps) {
-  const [rowSelection, setRowSelection] = useState(selectedRows);
+  const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -107,10 +108,9 @@ export function SmartGrid({
         id: column.key,
         header: column.label,
         accessorKey: column.key,
-        sortingFn: fuzzyFilter,
         filterFn: fuzzyFilter,
         cell: info => {
-          const value = info.getValue();
+          const value = info.getValue() as any;
           const row = info.row.original;
 
           if (column.type === 'Link') {
@@ -127,15 +127,15 @@ export function SmartGrid({
                   }
                 }}
               >
-                {value}
+                {String(value)}
               </a>
             );
           }
 
           if (column.type === 'Badge') {
             const statusMap = column.statusMap || {};
-            const badgeClass = statusMap[value] || 'bg-gray-100 text-gray-800';
-            return <span className={`px-2 py-1 rounded ${badgeClass}`}>{value}</span>;
+            const badgeClass = statusMap[String(value)] || 'bg-gray-100 text-gray-800';
+            return <span className={`px-2 py-1 rounded ${badgeClass}`}>{String(value)}</span>;
           }
 
           if (column.type === 'DateTimeRange') {
@@ -152,7 +152,7 @@ export function SmartGrid({
             const infoText = row[column.infoTextField || ''] || '';
             return (
               <div className="relative group">
-                {value}
+                {String(value)}
                 {infoText && (
                   <div className="absolute z-10 hidden group-hover:block bg-gray-100 border border-gray-300 rounded p-2 text-sm w-64">
                     {infoText}
@@ -178,7 +178,7 @@ export function SmartGrid({
             );
           }
 
-          return value;
+          return String(value);
         },
         enableSorting: column.sortable,
         enableHiding: !column.mandatory,
@@ -224,14 +224,26 @@ export function SmartGrid({
   }, [data]);
 
   useEffect(() => {
+    // Convert Set<number> to RowSelectionState format
     if (selectedRows) {
-      setRowSelection(selectedRows);
+      const selectionState: RowSelectionState = {};
+      selectedRows.forEach(index => {
+        selectionState[index.toString()] = true;
+      });
+      setRowSelection(selectionState);
     }
   }, [selectedRows]);
 
   useEffect(() => {
     if (onSelectionChange) {
-      onSelectionChange(rowSelection);
+      // Convert RowSelectionState back to Set<number>
+      const selectedIndices = new Set<number>();
+      Object.keys(rowSelection).forEach(key => {
+        if (rowSelection[key]) {
+          selectedIndices.add(parseInt(key));
+        }
+      });
+      onSelectionChange(selectedIndices);
     }
   }, [rowSelection, onSelectionChange]);
 
