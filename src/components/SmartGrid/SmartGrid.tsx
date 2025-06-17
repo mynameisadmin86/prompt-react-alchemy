@@ -45,8 +45,9 @@ export function SmartGrid({
   plugins = [],
   selectedRows,
   onSelectionChange,
-  rowClassName
-}: SmartGridProps) {
+  rowClassName,
+  enableCollapsibleRows = false // Add new prop to control collapsible functionality
+}: SmartGridProps & { enableCollapsibleRows?: boolean }) {
   const [gridData, setGridData] = useState(data);
   const [editingCell, setEditingCell] = useState<{ rowIndex: number; columnKey: string } | null>(null);
   const [editingHeader, setEditingHeader] = useState<string | null>(null);
@@ -182,10 +183,10 @@ export function SmartGrid({
     }));
   }, [columns, preferences, calculateColumnWidths]);
 
-  // Check if any column has collapsibleChild set to true
+  // Check if any column has collapsibleChild set to true AND if collapsible rows are enabled
   const hasCollapsibleColumns = useMemo(() => {
-    return columns.some(col => col.collapsibleChild === true);
-  }, [columns]);
+    return enableCollapsibleRows && columns.some(col => col.collapsibleChild === true);
+  }, [columns, enableCollapsibleRows]);
 
   // Get collapsible columns
   const collapsibleColumns = useMemo(() => {
