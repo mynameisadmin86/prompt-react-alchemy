@@ -1,3 +1,4 @@
+
 import React from 'react';
 
 export type GridColumnType =
@@ -22,6 +23,7 @@ export interface GridColumnConfig {
   hidden?: boolean;
   order?: number;
   options?: string[];
+  collapsibleChild?: boolean; // New property for collapsible row content
   
   // Badge specific properties
   statusMap?: Record<string, string>;

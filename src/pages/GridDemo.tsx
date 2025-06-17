@@ -76,7 +76,8 @@ const GridDemo = () => {
       label: 'Actual Start and End Date Time',
       type: 'DateTimeRange',
       sortable: true,
-      editable: false
+      editable: false,
+      collapsibleChild: true // Make this column collapsible
     },
     {
       key: 'departurePoint',
@@ -84,7 +85,8 @@ const GridDemo = () => {
       type: 'TextWithTooltip',
       sortable: true,
       editable: false,
-      infoTextField: 'departurePointDetails'
+      infoTextField: 'departurePointDetails',
+      collapsibleChild: true // Make this column collapsible
     },
     {
       key: 'arrivalPoint',
@@ -92,7 +94,8 @@ const GridDemo = () => {
       type: 'TextWithTooltip',
       sortable: true,
       editable: false,
-      infoTextField: 'arrivalPointDetails'
+      infoTextField: 'arrivalPointDetails',
+      collapsibleChild: true // Make this column collapsible
     },
     {
       key: 'customer',

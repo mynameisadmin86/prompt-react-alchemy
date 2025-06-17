@@ -182,6 +182,100 @@ export function SmartGrid({
     }));
   }, [columns, preferences, calculateColumnWidths]);
 
+  // Check if any column has collapsibleChild set to true
+  const hasCollapsibleColumns = useMemo(() => {
+    return columns.some(col => col.collapsibleChild === true);
+  }, [columns]);
+
+  // Get collapsible columns
+  const collapsibleColumns = useMemo(() => {
+    return columns.filter(col => col.collapsibleChild === true);
+  }, [columns]);
+
+  // Custom nested row renderer for collapsible content
+  const renderCollapsibleContent = useCallback((row: any) => {
+    if (!hasCollapsibleColumns || collapsibleColumns.length === 0) {
+      return null;
+    }
+
+    return (
+      <div className="space-y-4">
+        <div className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-4">
+          <ChevronDown className="h-4 w-4" />
+          Additional Details
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {collapsibleColumns.map((column) => {
+            const value = row[column.key];
+            return (
+              <div key={column.key} className="p-3 bg-gray-50 rounded-lg">
+                <div className="text-xs text-gray-500 uppercase tracking-wide mb-1">
+                  {column.label}
+                </div>
+                <div className="text-sm text-gray-900 font-medium">
+                  {renderCollapsibleCellValue(value, column)}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  }, [hasCollapsibleColumns, collapsibleColumns]);
+
+  // Helper function to render collapsible cell values
+  const renderCollapsibleCellValue = useCallback((value: any, column: GridColumnConfig) => {
+    if (value === null || value === undefined) {
+      return <span className="text-gray-400">-</span>;
+    }
+
+    switch (column.type) {
+      case 'Badge':
+        // Handle both object format {value, variant} and string format
+        let displayValue: string;
+        let statusColor: string;
+
+        if (typeof value === 'object' && value !== null && 'value' in value) {
+          displayValue = value.value;
+          statusColor = value.variant || 'bg-gray-50 text-gray-600 border border-gray-200';
+        } else {
+          displayValue = String(value || '');
+          statusColor = 'bg-gray-50 text-gray-600 border border-gray-200';
+        }
+
+        return (
+          <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${statusColor}`}>
+            {displayValue}
+          </span>
+        );
+      case 'DateTimeRange':
+        const [date, time] = String(value).split(' ');
+        return (
+          <div>
+            <div className="font-medium">{date}</div>
+            <div className="text-xs text-gray-500">{time}</div>
+          </div>
+        );
+      case 'Date':
+        try {
+          const date = new Date(value);
+          return date.toLocaleDateString();
+        } catch {
+          return String(value);
+        }
+      default:
+        return String(value);
+    }
+  }, []);
+
+  // Filter out collapsible columns from the main table display
+  const visibleColumns = useMemo(() => {
+    return orderedColumns.filter(col => !col.collapsibleChild);
+  }, [orderedColumns]);
+
+  // Use custom renderer if we have collapsible columns, otherwise use the provided one
+  const effectiveNestedRowRenderer = hasCollapsibleColumns ? renderCollapsibleContent : nestedRowRenderer;
+
   // Handle column-specific filter changes
   const handleColumnFilterChange = useCallback((filter: FilterConfig | null) => {
     if (!filter) {
@@ -589,7 +683,7 @@ export function SmartGrid({
     const isEditing = editingCell?.rowIndex === rowIndex && editingCell?.columnKey === column.key;
     const isEditable = isColumnEditable(column, columnIndex);
 
-    if (columnIndex === 0 && nestedRowRenderer) {
+    if (columnIndex === 0 && (effectiveNestedRowRenderer || hasCollapsibleColumns)) {
       const isExpanded = expandedRows.has(rowIndex);
       return (
         <div className="flex items-center space-x-1 min-w-0">
@@ -643,7 +737,7 @@ export function SmartGrid({
         />
       </div>
     );
-  }, [editingCell, isColumnEditable, nestedRowRenderer, expandedRows, toggleRowExpansion, handleCellEdit, handleEditStart, handleEditCancel, onLinkClick, loading]);
+  }, [editingCell, isColumnEditable, effectiveNestedRowRenderer, hasCollapsibleColumns, expandedRows, toggleRowExpansion, handleCellEdit, handleEditStart, handleEditCancel, onLinkClick, loading]);
 
   // Update grid data when prop data changes (only if not using lazy loading)
   useEffect(() => {
@@ -853,7 +947,7 @@ export function SmartGrid({
                     />
                   </TableHead>
                 )}
-                {orderedColumns.map((column, index) => {
+                {visibleColumns.map((column, index) => {
                   const shouldHideIcons = resizeHoverColumn === column.key || resizingColumn === column.key;
                   const currentFilter = filters.find(f => f.column === column.key);
                   return (
@@ -980,7 +1074,7 @@ export function SmartGrid({
                 )}
               </TableRow>
               
-              {/* Column Filter Row - Fixed implementation */}
+              {/* Column Filter Row */}
               {showColumnFilters && (
                 <TableRow className="hover:bg-transparent border-b border-gray-200">
                   {/* Checkbox column space */}
@@ -989,7 +1083,7 @@ export function SmartGrid({
                       {/* Empty space for checkbox column */}
                     </TableHead>
                   )}
-                  {orderedColumns.map((column) => {
+                  {visibleColumns.map((column) => {
                     const currentFilter = filters.find(f => f.column === column.key);
                     return (
                       <TableHead 
@@ -1026,7 +1120,7 @@ export function SmartGrid({
               {loading ? (
                 <TableRow>
                   <TableCell 
-                    colSpan={orderedColumns.length + (showCheckboxes ? 1 : 0) + (plugins.some(plugin => plugin.rowActions) ? 1 : 0)} 
+                    colSpan={visibleColumns.length + (showCheckboxes ? 1 : 0) + (plugins.some(plugin => plugin.rowActions) ? 1 : 0)} 
                     className="text-center py-12"
                   >
                     <div className="flex items-center justify-center">
@@ -1038,7 +1132,7 @@ export function SmartGrid({
               ) : paginatedData.length === 0 ? (
                 <TableRow>
                   <TableCell 
-                    colSpan={orderedColumns.length + (showCheckboxes ? 1 : 0) + (plugins.some(plugin => plugin.rowActions) ? 1 : 0)} 
+                    colSpan={visibleColumns.length + (showCheckboxes ? 1 : 0) + (plugins.some(plugin => plugin.rowActions) ? 1 : 0)} 
                     className="text-center py-12 text-gray-500"
                   >
                     <div className="space-y-2">
@@ -1075,7 +1169,7 @@ export function SmartGrid({
                           />
                         </TableCell>
                       )}
-                      {orderedColumns.map((column, columnIndex) => (
+                      {visibleColumns.map((column, columnIndex) => (
                         <TableCell 
                           key={column.key} 
                           className="relative px-3 py-3 border-r border-gray-50 last:border-r-0 align-top overflow-hidden"
@@ -1094,15 +1188,15 @@ export function SmartGrid({
                       )}
                     </TableRow>
                     {/* Nested row content */}
-                    {nestedRowRenderer && expandedRows.has(rowIndex) && (
+                    {effectiveNestedRowRenderer && expandedRows.has(rowIndex) && (
                       <TableRow className="bg-gray-50/30">
                         <TableCell 
-                          colSpan={orderedColumns.length + (showCheckboxes ? 1 : 0) + (plugins.some(plugin => plugin.rowActions) ? 1 : 0)} 
+                          colSpan={visibleColumns.length + (showCheckboxes ? 1 : 0) + (plugins.some(plugin => plugin.rowActions) ? 1 : 0)} 
                           className="p-0 border-b border-gray-200"
                         >
                           <div className="bg-gradient-to-r from-gray-50/50 to-white border-l-4 border-blue-500">
                             <div className="p-6 pl-12">
-                              {nestedRowRenderer(row)}
+                              {effectiveNestedRowRenderer(row)}
                             </div>
                           </div>
                         </TableCell>
