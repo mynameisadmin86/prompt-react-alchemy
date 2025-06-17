@@ -2,10 +2,9 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { TooltipProvider } from '@/components/ui/tooltip';
 import { Settings2, Eye, EyeOff, Search, RotateCcw, ChevronDown, Check, X } from 'lucide-react';
 import { GridColumnConfig, GridPreferences } from '@/types/smartgrid';
 import { cn } from '@/lib/utils';
@@ -88,7 +87,7 @@ export function ColumnVisibilityManager({
           </Button>
         </DialogTrigger>
         
-        <DialogContent className="max-w-3xl max-h-[80vh] flex flex-col">
+        <DialogContent className="max-w-4xl max-h-[85vh] flex flex-col">
           <DialogHeader className="pb-4 border-b">
             <DialogTitle className="flex items-center justify-between">
               <span>Configure Columns</span>
@@ -130,7 +129,7 @@ export function ColumnVisibilityManager({
             </div>
 
             {/* Column List */}
-            <div className="flex-1 overflow-y-auto space-y-2">
+            <div className="flex-1 overflow-y-auto space-y-3">
               {filteredColumns.map((column) => {
                 const isVisible = !preferences.hiddenColumns.includes(column.key);
                 const isMandatory = column.mandatory;
@@ -142,11 +141,12 @@ export function ColumnVisibilityManager({
                   <div
                     key={column.key}
                     className={cn(
-                      "flex flex-col p-4 rounded-lg border transition-colors space-y-3",
+                      "p-4 rounded-lg border transition-colors",
                       isVisible ? "bg-white border-gray-200" : "bg-gray-50 border-gray-100"
                     )}
                   >
-                    <div className="flex items-center justify-between">
+                    {/* Main Column Configuration */}
+                    <div className="flex items-center justify-between mb-4">
                       <div className="flex items-center space-x-3 flex-1 min-w-0">
                         <Checkbox
                           checked={isVisible}
@@ -234,51 +234,48 @@ export function ColumnVisibilityManager({
                       </div>
                     </div>
 
-                    {/* Sub-row setting with radio buttons */}
-                    {onSubRowToggle && (
-                      <div className="flex items-center justify-between pl-6 pt-3 border-t border-gray-100">
+                    {/* Sub-row Configuration Section - Always visible when onSubRowToggle is provided */}
+                    <div className="pt-3 border-t border-gray-100 bg-gray-25">
+                      <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-2">
                           <ChevronDown className="h-4 w-4 text-purple-600" />
                           <span className="text-sm text-gray-700 font-medium">Show in sub-row</span>
+                          <span className="text-xs text-gray-500">(displays additional details below main row)</span>
                         </div>
-                        <div className="flex items-center space-x-6">
-                          <div className="flex items-center space-x-2">
+                        
+                        <div className="flex items-center space-x-8 bg-white rounded-lg border border-gray-200 p-2">
+                          <label className="flex items-center space-x-2 cursor-pointer">
                             <input
                               type="radio"
-                              id={`${column.key}-disabled`}
                               name={`subrow-${column.key}`}
                               checked={!isSubRow}
                               onChange={() => {
-                                if (isSubRow) {
+                                if (isSubRow && onSubRowToggle) {
                                   onSubRowToggle(column.key);
                                 }
                               }}
                               className="h-4 w-4 text-gray-600 border-gray-300 focus:ring-gray-500"
                             />
-                            <label htmlFor={`${column.key}-disabled`} className="text-sm text-gray-700 cursor-pointer">
-                              No
-                            </label>
-                          </div>
-                          <div className="flex items-center space-x-2">
+                            <span className="text-sm text-gray-700">No</span>
+                          </label>
+                          
+                          <label className="flex items-center space-x-2 cursor-pointer">
                             <input
                               type="radio"
-                              id={`${column.key}-enabled`}
                               name={`subrow-${column.key}`}
                               checked={isSubRow}
                               onChange={() => {
-                                if (!isSubRow) {
+                                if (!isSubRow && onSubRowToggle) {
                                   onSubRowToggle(column.key);
                                 }
                               }}
                               className="h-4 w-4 text-purple-600 border-purple-300 focus:ring-purple-500"
                             />
-                            <label htmlFor={`${column.key}-enabled`} className="text-sm text-purple-700 cursor-pointer font-medium">
-                              Yes
-                            </label>
-                          </div>
+                            <span className="text-sm text-purple-700 font-medium">Yes</span>
+                          </label>
                         </div>
                       </div>
-                    )}
+                    </div>
                   </div>
                 );
               })}
