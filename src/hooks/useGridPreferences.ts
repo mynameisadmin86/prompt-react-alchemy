@@ -61,27 +61,12 @@ export function useGridPreferences<T>(
           ]
         };
         setPreferences(mergedPreferences);
-        return mergedPreferences;
       }
-      return defaultPreferences;
     } catch (error) {
       console.error('Failed to load preferences:', error);
       setPreferences(defaultPreferences);
-      return defaultPreferences;
     }
   }, [onPreferenceLoad, persistPreferences, preferencesKey, columns, defaultPreferences]);
-
-  const resetPreferences = useCallback(async () => {
-    setPreferences(defaultPreferences);
-    
-    if (persistPreferences && preferencesKey) {
-      try {
-        localStorage.removeItem(preferencesKey);
-      } catch (error) {
-        console.error('Failed to reset preferences in localStorage:', error);
-      }
-    }
-  }, [defaultPreferences, persistPreferences, preferencesKey]);
 
   useEffect(() => {
     loadPreferences();
@@ -122,12 +107,10 @@ export function useGridPreferences<T>(
 
   return {
     preferences,
-    loadPreferences,
-    savePreferences,
-    resetPreferences,
     updateColumnOrder,
     toggleColumnVisibility,
     updateColumnWidth,
-    updateColumnHeader
+    updateColumnHeader,
+    savePreferences
   };
 }
