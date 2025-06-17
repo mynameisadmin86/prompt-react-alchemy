@@ -1,4 +1,3 @@
-
 import React from 'react';
 
 export type GridColumnType =
@@ -115,6 +114,9 @@ export interface SmartGridProps {
   paginationMode?: 'pagination' | 'infinite';
   nestedRowRenderer?(row: any): React.ReactNode;
   plugins?: GridPlugin[];
+  selectedRows?: Set<number>;
+  onSelectionChange?(selectedRows: Set<number>): void;
+  rowClassName?: (row: any, index: number) => string;
 }
 
 // Legacy interface for backward compatibility
