@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { SmartGrid } from '@/components/SmartGrid';
 import { GridColumnConfig } from '@/types/smartgrid';
@@ -364,6 +363,11 @@ const GridDemo = () => {
     });
   };
 
+  const handleRowSelection = (selectedRowIndices: Set<number>) => {
+    setSelectedRows(selectedRowIndices);
+    console.log('Selected rows:', selectedRowIndices);
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto p-6 space-y-6">
@@ -403,6 +407,11 @@ const GridDemo = () => {
             paginationMode="pagination"
             onLinkClick={handleLinkClick}
             onUpdate={handleUpdate}
+            selectedRows={selectedRows}
+            onSelectionChange={handleRowSelection}
+            rowClassName={(row: any, index: number) => 
+              selectedRows.has(index) ? 'bg-blue-50 border-l-4 border-blue-500' : ''
+            }
           />
           
           {/* Footer with action buttons matching the screenshot style */}
