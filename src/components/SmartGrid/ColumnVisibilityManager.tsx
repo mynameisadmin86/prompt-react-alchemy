@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Settings2, Eye, EyeOff, Search, RotateCcw, Filter, ArrowUpDown, Edit, Flag } from 'lucide-react';
+import { Settings2, Eye, EyeOff, Search, RotateCcw, Filter, ArrowUpDown, Edit, Flag, ChevronDown } from 'lucide-react';
 import { GridColumnConfig, GridPreferences } from '@/types/smartgrid';
 import { cn } from '@/lib/utils';
 
@@ -65,6 +65,9 @@ export function ColumnVisibilityManager({
     }
     if (column.editable) {
       flags.push({ icon: Edit, label: 'Editable', className: 'text-purple-600', bgClassName: 'bg-purple-100' });
+    }
+    if (column.childRow) {
+      flags.push({ icon: ChevronDown, label: 'Sub-row', className: 'text-orange-600', bgClassName: 'bg-orange-100' });
     }
     
     return flags;
