@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -225,7 +226,7 @@ export const EnhancedFieldVisibilityModal: React.FC<EnhancedFieldVisibilityModal
                         const newConfigs = [...fieldConfigs];
                         const draggedItem = newConfigs[draggedIndex];
                         newConfigs.splice(draggedIndex, 1);
-                        newConfigs.splice(index, 0, draggedgedItem);
+                        newConfigs.splice(index, 0, draggedItem);
                         
                         // Update order
                         const updatedConfigs = newConfigs.map((config, idx) => ({
