@@ -89,3 +89,28 @@ function parseCSVLine(line: string): string[] {
   result.push(current);
   return result;
 }
+
+// Add the missing export functions that SmartGrid expects
+export function downloadCSV(data: any[], columns: GridColumnConfig[]) {
+  exportToCSV(data, columns);
+}
+
+export function downloadExcel(data: any[], columns: GridColumnConfig[]) {
+  exportToExcel(data, columns);
+}
+
+export function downloadJSON(data: any[]) {
+  const jsonString = JSON.stringify(data, null, 2);
+  const blob = new Blob([jsonString], { type: 'application/json' });
+  const link = document.createElement('a');
+  
+  if (link.download !== undefined) {
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', 'export.json');
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+}

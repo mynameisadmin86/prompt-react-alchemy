@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import {
   useTable,
@@ -78,15 +79,22 @@ export function SmartGrid({
   const {
     loadPreferences,
     savePreferences,
-    resetPreferences: resetStoredPreferences,
-  } = useGridPreferences();
+    resetPreferences,
+  } = useGridPreferences(
+    columns.map(col => ({ id: col.key, header: col.label, accessor: col.key })),
+    true,
+    'smartgrid-preferences'
+  );
 
   useEffect(() => {
     // Load preferences on component mount
-    const storedPreferences = loadPreferences();
-    if (storedPreferences) {
-      setPreferences(storedPreferences);
-    }
+    const loadStoredPreferences = async () => {
+      const storedPreferences = await loadPreferences();
+      if (storedPreferences) {
+        setPreferences(storedPreferences);
+      }
+    };
+    loadStoredPreferences();
   }, [loadPreferences]);
 
   useEffect(() => {
@@ -153,8 +161,8 @@ export function SmartGrid({
     }
   };
 
-  const resetPreferences = async () => {
-    resetStoredPreferences();
+  const resetGridPreferences = async () => {
+    await resetPreferences();
     setPreferences({
       columnOrder: initialColumns.map(col => col.key),
       hiddenColumns: [],
@@ -238,6 +246,12 @@ export function SmartGrid({
               return isEditable ? (
                 <CellEditor
                   value={value}
+                  column={{
+                    id: column.key,
+                    header: column.label,
+                    accessor: column.key,
+                    type: 'text'
+                  }}
                   onSave={newValue => {
                     if (onInlineEdit) {
                       onInlineEdit(row.index, { [column.key]: newValue });
@@ -246,6 +260,7 @@ export function SmartGrid({
                       onUpdate({ ...row.original, [column.key]: newValue });
                     }
                   }}
+                  onCancel={() => {}}
                 />
               ) : (
                 <span>{value}</span>
@@ -357,12 +372,12 @@ export function SmartGrid({
             console.warn(`Unsupported export format: ${format}`);
         }
       },
-      resetPreferences: resetPreferences,
+      resetPreferences: resetGridPreferences,
       toggleRowSelection: toggleRowSelection,
       selectAllRows: selectAllRows,
       clearSelection: clearSelection,
     },
-  }), [data, selectedRowIds, columns, preferences, resetPreferences, toggleRowSelection, selectAllRows, clearSelection]);
+  }), [data, selectedRowIds, columns, preferences, resetGridPreferences, toggleRowSelection, selectAllRows, clearSelection]);
 
   return (
     <div className="w-full">
@@ -381,7 +396,7 @@ export function SmartGrid({
             columns={columns}
             preferences={preferences}
             onColumnVisibilityToggle={toggleColumnVisibility}
-            onResetToDefaults={resetPreferences}
+            onResetToDefaults={resetGridPreferences}
             onColumnConfigChange={handleColumnConfigChange}
           />
           

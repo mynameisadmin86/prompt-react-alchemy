@@ -4,17 +4,27 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Filter, X } from 'lucide-react';
+import { Filter, X, Search } from 'lucide-react';
 import { GridColumnConfig, FilterConfig } from '@/types/smartgrid';
 import { cn } from '@/lib/utils';
 
 interface CommonFilterProps {
-  columns: GridColumnConfig[];
-  filters: FilterConfig[];
-  onFiltersChange: (filters: FilterConfig[]) => void;
+  value?: string;
+  onChange?: (value: string) => void;
+  placeholder?: string;
+  columns?: GridColumnConfig[];
+  filters?: FilterConfig[];
+  onFiltersChange?: (filters: FilterConfig[]) => void;
 }
 
-export function CommonFilter({ columns, filters, onFiltersChange }: CommonFilterProps) {
+export function CommonFilter({ 
+  value = '',
+  onChange,
+  placeholder = 'Search...',
+  columns = [],
+  filters = [],
+  onFiltersChange
+}: CommonFilterProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [activeFilters, setActiveFilters] = useState<Record<string, string>>(() => {
     const initial: Record<string, string> = {};
@@ -24,6 +34,22 @@ export function CommonFilter({ columns, filters, onFiltersChange }: CommonFilter
     return initial;
   });
 
+  // If this is just a simple search input (no columns provided)
+  if (!columns.length || !onFiltersChange) {
+    return (
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+        <Input
+          value={value}
+          onChange={(e) => onChange?.(e.target.value)}
+          placeholder={placeholder}
+          className="pl-9"
+        />
+      </div>
+    );
+  }
+
+  // Advanced filter with columns
   const filterableColumns = columns.filter(col => col.filterable);
   const hasActiveFilters = filters.length > 0;
 
