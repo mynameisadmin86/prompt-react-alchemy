@@ -1,11 +1,10 @@
-
 import React from 'react';
 
 export type GridColumnType =
   | 'Link'                 // Clickable cell with optional onClick or URL
   | 'Badge'                // Color-coded label based on value
   | 'DateTimeRange'        // Two date-time values in a vertical stack
-  | 'TextWithTooltip'      // Text with an optional info icon showing a tooltip
+  | 'TextWithTooltip'      // Text with an info icon showing a tooltip
   | 'ExpandableCount'      // "+N" style count, expandable to view details
   | 'Text'                 // Standard text cell
   | 'Date'                 // Formatted date
@@ -119,6 +118,8 @@ export interface SmartGridProps {
   selectedRows?: Set<number>;
   onSelectionChange?(selectedRows: Set<number>): void;
   rowClassName?: (row: any, index: number) => string;
+  additionalDetailsColumns?: string[];
+  onAdditionalDetailsToggle?(columnId: string): void;
 }
 
 // Legacy interface for backward compatibility
