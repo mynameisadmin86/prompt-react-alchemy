@@ -4,7 +4,6 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Label } from '@/components/ui/label';
 import { Settings2, Eye, EyeOff, Search, RotateCcw, ChevronDown } from 'lucide-react';
 import { GridColumnConfig, GridPreferences } from '@/types/smartgrid';
 import { cn } from '@/lib/utils';
@@ -14,15 +13,13 @@ interface ColumnVisibilityManagerProps {
   preferences: GridPreferences;
   onColumnVisibilityToggle: (columnId: string) => void;
   onResetToDefaults: () => void;
-  onSubRowToggle?: (columnId: string) => void;
 }
 
 export function ColumnVisibilityManager({
   columns,
   preferences,
   onColumnVisibilityToggle,
-  onResetToDefaults,
-  onSubRowToggle
+  onResetToDefaults
 }: ColumnVisibilityManagerProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -51,12 +48,6 @@ export function ColumnVisibilityManager({
       preferences.hiddenColumns.forEach(columnId => {
         onColumnVisibilityToggle(columnId);
       });
-    }
-  };
-
-  const handleSubRowToggle = (columnId: string) => {
-    if (onSubRowToggle) {
-      onSubRowToggle(columnId);
     }
   };
 
@@ -121,76 +112,56 @@ export function ColumnVisibilityManager({
                 <div
                   key={column.key}
                   className={cn(
-                    "p-3 rounded-lg border transition-colors",
+                    "flex items-center justify-between p-3 rounded-lg border transition-colors",
                     isVisible ? "bg-white border-gray-200" : "bg-gray-50 border-gray-100"
                   )}
                 >
-                  {/* Column Header */}
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center space-x-3 flex-1 min-w-0">
-                      <Checkbox
-                        checked={isVisible}
-                        onCheckedChange={() => !isMandatory && onColumnVisibilityToggle(column.key)}
-                        disabled={isMandatory}
-                        className="flex-shrink-0"
-                      />
+                  <div className="flex items-center space-x-3 flex-1 min-w-0">
+                    <Checkbox
+                      checked={isVisible}
+                      onCheckedChange={() => !isMandatory && onColumnVisibilityToggle(column.key)}
+                      disabled={isMandatory}
+                      className="flex-shrink-0"
+                    />
+                    
+                    <div className="flex items-center space-x-2 min-w-0">
+                      {isVisible ? (
+                        <Eye className="h-4 w-4 text-green-600 flex-shrink-0" />
+                      ) : (
+                        <EyeOff className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                      )}
                       
-                      <div className="flex items-center space-x-2 min-w-0">
-                        {isVisible ? (
-                          <Eye className="h-4 w-4 text-green-600 flex-shrink-0" />
-                        ) : (
-                          <EyeOff className="h-4 w-4 text-gray-400 flex-shrink-0" />
-                        )}
-                        
-                        <div className="min-w-0">
-                          <div className="font-medium text-sm truncate">
-                            {column.label}
-                          </div>
-                          <div className="text-xs text-gray-500 truncate">
-                            {column.key}
-                          </div>
+                      <div className="min-w-0">
+                        <div className="font-medium text-sm truncate">
+                          {column.label}
+                        </div>
+                        <div className="text-xs text-gray-500 truncate">
+                          {column.key}
                         </div>
                       </div>
                     </div>
-
-                    <div className="flex items-center space-x-2 flex-shrink-0">
-                      {isMandatory && (
-                        <span className="text-xs bg-orange-100 text-orange-700 px-2 py-1 rounded font-medium">
-                          Required
-                        </span>
-                      )}
-                      
-                      {isCollapsibleChild && (
-                        <span className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded font-medium flex items-center gap-1">
-                          <ChevronDown className="h-3 w-3" />
-                          Sub-row
-                        </span>
-                      )}
-                      
-                      {column.type && (
-                        <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded">
-                          {column.type}
-                        </span>
-                      )}
-                    </div>
                   </div>
 
-                  {/* Sub-row Configuration */}
-                  {isVisible && !isMandatory && (
-                    <div className="border-t pt-3">
-                      <div className="flex items-center space-x-2">
-                        <Checkbox
-                          checked={isCollapsibleChild}
-                          onCheckedChange={() => handleSubRowToggle(column.key)}
-                          id={`${column.key}-sub-row`}
-                        />
-                        <Label htmlFor={`${column.key}-sub-row`} className="text-xs flex items-center gap-1">
-                          <ChevronDown className="h-3 w-3" />
-                          Show in Sub-row
-                        </Label>
-                      </div>
-                    </div>
-                  )}
+                  <div className="flex items-center space-x-2 flex-shrink-0">
+                    {isMandatory && (
+                      <span className="text-xs bg-orange-100 text-orange-700 px-2 py-1 rounded font-medium">
+                        Required
+                      </span>
+                    )}
+                    
+                    {isCollapsibleChild && (
+                      <span className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded font-medium flex items-center gap-1">
+                        <ChevronDown className="h-3 w-3" />
+                        Sub-row
+                      </span>
+                    )}
+                    
+                    {column.type && (
+                      <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded">
+                        {column.type}
+                      </span>
+                    )}
+                  </div>
                 </div>
               );
             })}
