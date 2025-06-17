@@ -1,8 +1,10 @@
+
 import React, { useState, useMemo } from 'react';
 import { SmartGrid } from '@/components/SmartGrid';
 import { GridColumnConfig } from '@/types/smartgrid';
 import { Button } from '@/components/ui/button';
 import { Printer, MoreHorizontal, User, Train, UserCheck, Container } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 import {
   Breadcrumb,
   BreadcrumbList,
@@ -38,6 +40,7 @@ interface SampleData {
 
 const GridDemo = () => {
   const [selectedRows, setSelectedRows] = useState<Set<number>>(new Set());
+  const { toast } = useToast();
 
   const columns: GridColumnConfig[] = [
     {
@@ -65,9 +68,9 @@ const GridDemo = () => {
     {
       key: 'plannedStartEndDateTime',
       label: 'Planned Start and End Date Time',
-      type: 'DateTimeRange',
+      type: 'EditableText',
       sortable: true,
-      editable: false
+      editable: true
     },
     {
       key: 'actualStartEndDateTime',
@@ -350,6 +353,17 @@ const GridDemo = () => {
     console.log('Link clicked:', value, row);
   };
 
+  const handleUpdate = async (updatedRow: any) => {
+    console.log('Updating row:', updatedRow);
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    toast({
+      title: "Success",
+      description: "Trip plan updated successfully"
+    });
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto p-6 space-y-6">
@@ -385,9 +399,10 @@ const GridDemo = () => {
           <SmartGrid
             columns={columns}
             data={processedData}
-            editableColumns={false}
+            editableColumns={['plannedStartEndDateTime']}
             paginationMode="pagination"
             onLinkClick={handleLinkClick}
+            onUpdate={handleUpdate}
           />
           
           {/* Footer with action buttons matching the screenshot style */}
