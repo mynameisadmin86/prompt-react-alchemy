@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Settings2, Eye, EyeOff, Search, RotateCcw } from 'lucide-react';
 import { GridColumnConfig, GridPreferences } from '@/types/smartgrid';
 import { cn } from '@/lib/utils';
@@ -13,13 +14,17 @@ interface ColumnVisibilityManagerProps {
   preferences: GridPreferences;
   onColumnVisibilityToggle: (columnId: string) => void;
   onResetToDefaults: () => void;
+  additionalDetailsColumns?: string[];
+  onAdditionalDetailsToggle?: (columnId: string) => void;
 }
 
 export function ColumnVisibilityManager({
   columns,
   preferences,
   onColumnVisibilityToggle,
-  onResetToDefaults
+  onResetToDefaults,
+  additionalDetailsColumns = [],
+  onAdditionalDetailsToggle
 }: ColumnVisibilityManagerProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -60,7 +65,7 @@ export function ColumnVisibilityManager({
         </Button>
       </DialogTrigger>
       
-      <DialogContent className="max-w-md max-h-[80vh] flex flex-col">
+      <DialogContent className="max-w-lg max-h-[80vh] flex flex-col">
         <DialogHeader className="pb-4 border-b">
           <DialogTitle className="flex items-center justify-between">
             <span>Configure Columns</span>
@@ -102,58 +107,93 @@ export function ColumnVisibilityManager({
           </div>
 
           {/* Column List */}
-          <div className="flex-1 overflow-y-auto space-y-2">
+          <div className="flex-1 overflow-y-auto space-y-3">
             {filteredColumns.map((column) => {
               const isVisible = !preferences.hiddenColumns.includes(column.key);
               const isMandatory = column.mandatory;
+              const isInAdditionalDetails = additionalDetailsColumns.includes(column.key);
 
               return (
                 <div
                   key={column.key}
                   className={cn(
-                    "flex items-center justify-between p-3 rounded-lg border transition-colors",
+                    "p-4 rounded-lg border transition-colors",
                     isVisible ? "bg-white border-gray-200" : "bg-gray-50 border-gray-100"
                   )}
                 >
-                  <div className="flex items-center space-x-3 flex-1 min-w-0">
-                    <Checkbox
-                      checked={isVisible}
-                      onCheckedChange={() => !isMandatory && onColumnVisibilityToggle(column.key)}
-                      disabled={isMandatory}
-                      className="flex-shrink-0"
-                    />
-                    
-                    <div className="flex items-center space-x-2 min-w-0">
-                      {isVisible ? (
-                        <Eye className="h-4 w-4 text-green-600 flex-shrink-0" />
-                      ) : (
-                        <EyeOff className="h-4 w-4 text-gray-400 flex-shrink-0" />
-                      )}
+                  {/* Column Header */}
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center space-x-3 flex-1 min-w-0">
+                      <Checkbox
+                        checked={isVisible}
+                        onCheckedChange={() => !isMandatory && onColumnVisibilityToggle(column.key)}
+                        disabled={isMandatory}
+                        className="flex-shrink-0"
+                      />
                       
-                      <div className="min-w-0">
-                        <div className="font-medium text-sm truncate">
-                          {column.label}
-                        </div>
-                        <div className="text-xs text-gray-500 truncate">
-                          {column.key}
+                      <div className="flex items-center space-x-2 min-w-0">
+                        {isVisible ? (
+                          <Eye className="h-4 w-4 text-green-600 flex-shrink-0" />
+                        ) : (
+                          <EyeOff className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                        )}
+                        
+                        <div className="min-w-0">
+                          <div className="font-medium text-sm truncate">
+                            {column.label}
+                          </div>
+                          <div className="text-xs text-gray-500 truncate">
+                            {column.key}
+                          </div>
                         </div>
                       </div>
                     </div>
+
+                    <div className="flex items-center space-x-2 flex-shrink-0">
+                      {isMandatory && (
+                        <span className="text-xs bg-orange-100 text-orange-700 px-2 py-1 rounded font-medium">
+                          Required
+                        </span>
+                      )}
+                      
+                      {column.type && (
+                        <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded">
+                          {column.type}
+                        </span>
+                      )}
+                    </div>
                   </div>
 
-                  <div className="flex items-center space-x-2 flex-shrink-0">
-                    {isMandatory && (
-                      <span className="text-xs bg-orange-100 text-orange-700 px-2 py-1 rounded font-medium">
-                        Required
-                      </span>
-                    )}
-                    
-                    {column.type && (
-                      <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded">
-                        {column.type}
-                      </span>
-                    )}
-                  </div>
+                  {/* Additional Details Radio Option */}
+                  {onAdditionalDetailsToggle && (
+                    <div className="pl-9 pt-2 border-t border-gray-100">
+                      <div className="text-xs text-gray-600 mb-2">Show in Additional Details:</div>
+                      <RadioGroup
+                        value={isInAdditionalDetails ? "yes" : "no"}
+                        onValueChange={(value) => {
+                          if (value === "yes" && !isInAdditionalDetails) {
+                            onAdditionalDetailsToggle(column.key);
+                          } else if (value === "no" && isInAdditionalDetails) {
+                            onAdditionalDetailsToggle(column.key);
+                          }
+                        }}
+                        className="flex space-x-4"
+                      >
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="yes" id={`${column.key}-yes`} />
+                          <label htmlFor={`${column.key}-yes`} className="text-xs text-gray-700">
+                            Yes
+                          </label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="no" id={`${column.key}-no`} />
+                          <label htmlFor={`${column.key}-no`} className="text-xs text-gray-700">
+                            No
+                          </label>
+                        </div>
+                      </RadioGroup>
+                    </div>
+                  )}
                 </div>
               );
             })}
@@ -177,6 +217,12 @@ export function ColumnVisibilityManager({
                 <span>Hidden columns:</span>
                 <span className="font-medium">{totalCount - visibleCount}</span>
               </div>
+              {onAdditionalDetailsToggle && (
+                <div className="flex justify-between mt-1">
+                  <span>In additional details:</span>
+                  <span className="font-medium">{additionalDetailsColumns.length}</span>
+                </div>
+              )}
             </div>
           </div>
         </div>
