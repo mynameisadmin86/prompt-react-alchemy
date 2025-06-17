@@ -892,6 +892,7 @@ export function SmartGrid({
             columns={columns}
             preferences={preferences}
             onColumnVisibilityToggle={toggleColumnVisibility}
+            onColumnHeaderChange={updateColumnHeader}
             onResetToDefaults={handleResetPreferences}
           />
 

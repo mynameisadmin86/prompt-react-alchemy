@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Settings2, Eye, EyeOff, Search, RotateCcw, ChevronDown } from 'lucide-react';
+import { Settings2, Eye, EyeOff, Search, RotateCcw, ChevronDown, Edit2, Check, X } from 'lucide-react';
 import { GridColumnConfig, GridPreferences } from '@/types/smartgrid';
 import { cn } from '@/lib/utils';
 
@@ -12,6 +12,7 @@ interface ColumnVisibilityManagerProps {
   columns: GridColumnConfig[];
   preferences: GridPreferences;
   onColumnVisibilityToggle: (columnId: string) => void;
+  onColumnHeaderChange?: (columnId: string, newHeader: string) => void;
   onSubRowToggle?: (columnId: string) => void;
   onResetToDefaults: () => void;
 }
@@ -20,11 +21,14 @@ export function ColumnVisibilityManager({
   columns,
   preferences,
   onColumnVisibilityToggle,
+  onColumnHeaderChange,
   onSubRowToggle,
   onResetToDefaults
 }: ColumnVisibilityManagerProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [editingColumn, setEditingColumn] = useState<string | null>(null);
+  const [editingValue, setEditingValue] = useState('');
 
   const filteredColumns = columns.filter(column =>
     column.label.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -51,6 +55,24 @@ export function ColumnVisibilityManager({
         onColumnVisibilityToggle(columnId);
       });
     }
+  };
+
+  const handleEditStart = (columnKey: string, currentLabel: string) => {
+    setEditingColumn(columnKey);
+    setEditingValue(currentLabel);
+  };
+
+  const handleEditSave = (columnKey: string) => {
+    if (onColumnHeaderChange && editingValue.trim()) {
+      onColumnHeaderChange(columnKey, editingValue.trim());
+    }
+    setEditingColumn(null);
+    setEditingValue('');
+  };
+
+  const handleEditCancel = () => {
+    setEditingColumn(null);
+    setEditingValue('');
   };
 
   return (
@@ -109,6 +131,8 @@ export function ColumnVisibilityManager({
               const isVisible = !preferences.hiddenColumns.includes(column.key);
               const isMandatory = column.mandatory;
               const isCollapsibleChild = column.collapsibleChild;
+              const isEditing = editingColumn === column.key;
+              const displayLabel = preferences.columnHeaders[column.key] || column.label;
 
               return (
                 <div
@@ -134,13 +158,62 @@ export function ColumnVisibilityManager({
                           <EyeOff className="h-4 w-4 text-gray-400 flex-shrink-0" />
                         )}
                         
-                        <div className="min-w-0">
-                          <div className="font-medium text-sm truncate">
-                            {column.label}
-                          </div>
-                          <div className="text-xs text-gray-500 truncate">
-                            {column.key}
-                          </div>
+                        <div className="min-w-0 flex-1">
+                          {isEditing ? (
+                            <div className="flex items-center space-x-2">
+                              <Input
+                                value={editingValue}
+                                onChange={(e) => setEditingValue(e.target.value)}
+                                className="h-6 text-sm font-medium"
+                                autoFocus
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter') {
+                                    handleEditSave(column.key);
+                                  } else if (e.key === 'Escape') {
+                                    handleEditCancel();
+                                  }
+                                }}
+                              />
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleEditSave(column.key)}
+                                className="h-6 w-6 p-0 text-green-600 hover:text-green-700"
+                              >
+                                <Check className="h-3 w-3" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={handleEditCancel}
+                                className="h-6 w-6 p-0 text-red-600 hover:text-red-700"
+                              >
+                                <X className="h-3 w-3" />
+                              </Button>
+                            </div>
+                          ) : (
+                            <div className="group/label flex items-center space-x-2">
+                              <div>
+                                <div className="font-medium text-sm truncate">
+                                  {displayLabel}
+                                </div>
+                                <div className="text-xs text-gray-500 truncate">
+                                  {column.key}
+                                </div>
+                              </div>
+                              {onColumnHeaderChange && (
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleEditStart(column.key, displayLabel)}
+                                  className="h-5 w-5 p-0 opacity-0 group-hover/label:opacity-100 transition-opacity"
+                                  title="Edit column name"
+                                >
+                                  <Edit2 className="h-3 w-3" />
+                                </Button>
+                              )}
+                            </div>
+                          )}
                         </div>
                       </div>
                     </div>
