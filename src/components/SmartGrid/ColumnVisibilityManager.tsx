@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Settings2, Eye, EyeOff, Search, RotateCcw } from 'lucide-react';
+import { Settings2, Eye, EyeOff, Search, RotateCcw, ChevronDown } from 'lucide-react';
 import { GridColumnConfig, GridPreferences } from '@/types/smartgrid';
 import { cn } from '@/lib/utils';
 
@@ -106,6 +106,7 @@ export function ColumnVisibilityManager({
             {filteredColumns.map((column) => {
               const isVisible = !preferences.hiddenColumns.includes(column.key);
               const isMandatory = column.mandatory;
+              const isCollapsibleChild = column.collapsibleChild;
 
               return (
                 <div
@@ -148,6 +149,13 @@ export function ColumnVisibilityManager({
                       </span>
                     )}
                     
+                    {isCollapsibleChild && (
+                      <span className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded font-medium flex items-center gap-1">
+                        <ChevronDown className="h-3 w-3" />
+                        Sub-row
+                      </span>
+                    )}
+                    
                     {column.type && (
                       <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded">
                         {column.type}
@@ -176,6 +184,10 @@ export function ColumnVisibilityManager({
               <div className="flex justify-between mt-1">
                 <span>Hidden columns:</span>
                 <span className="font-medium">{totalCount - visibleCount}</span>
+              </div>
+              <div className="flex justify-between mt-1">
+                <span>Sub-row columns:</span>
+                <span className="font-medium">{columns.filter(col => col.collapsibleChild).length}</span>
               </div>
             </div>
           </div>
