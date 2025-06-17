@@ -221,7 +221,13 @@ export function SmartGrid({
     if (globalFilter) {
       result = result.filter(row =>
         columns.some(col => {
-          const value = row[col.key];
+          let value = row[col.key];
+          
+          // Handle status fields that are objects with value property
+          if (value && typeof value === 'object' && 'value' in value) {
+            value = value.value;
+          }
+          
           return String(value || '').toLowerCase().includes(globalFilter.toLowerCase());
         })
       );
@@ -231,7 +237,13 @@ export function SmartGrid({
     if (filters.length > 0) {
       result = result.filter(row => {
         return filters.every(filter => {
-          const value = row[filter.column];
+          let value = row[filter.column];
+          
+          // Handle status fields that are objects with value property
+          if (value && typeof value === 'object' && 'value' in value) {
+            value = value.value;
+          }
+          
           const filterValue = filter.value;
           const operator = filter.operator || 'contains';
 
@@ -267,8 +279,16 @@ export function SmartGrid({
     // Apply sorting
     if (sort) {
       result.sort((a, b) => {
-        const aValue = a[sort.column];
-        const bValue = b[sort.column];
+        let aValue = a[sort.column];
+        let bValue = b[sort.column];
+        
+        // Handle status fields that are objects with value property
+        if (aValue && typeof aValue === 'object' && 'value' in aValue) {
+          aValue = aValue.value;
+        }
+        if (bValue && typeof bValue === 'object' && 'value' in bValue) {
+          bValue = bValue.value;
+        }
         
         if (aValue === bValue) return 0;
         
