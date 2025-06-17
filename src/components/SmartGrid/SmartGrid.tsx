@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -400,6 +401,7 @@ export function SmartGrid({
       hiddenColumns: [],
       columnWidths: {},
       columnHeaders: {},
+      subRowColumns: [], // Add missing subRowColumns property
       filters: []
     };
     
