@@ -74,6 +74,7 @@ export interface GridPreferences {
   columnWidths: Record<string, number>;
   columnHeaders: Record<string, string>;
   subRowColumns: string[]; // New property for tracking sub-row columns
+  enableSubRowConfig?: boolean; // New property for enabling/disabling sub-row configuration
   sort?: SortConfig;
   filters: FilterConfig[];
   pageSize?: number;

@@ -4,7 +4,8 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Switch } from '@/components/ui/switch';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Settings2, Eye, EyeOff, Search, RotateCcw, ChevronDown, Check, X } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Settings2, Eye, EyeOff, Search, RotateCcw, ChevronDown, Check, X, Info } from 'lucide-react';
 import { GridColumnConfig, GridPreferences } from '@/types/smartgrid';
 import { cn } from '@/lib/utils';
 
@@ -14,6 +15,7 @@ interface ColumnVisibilityManagerProps {
   onColumnVisibilityToggle: (columnId: string) => void;
   onColumnHeaderChange?: (columnId: string, newHeader: string) => void;
   onSubRowToggle?: (columnId: string) => void;
+  onSubRowConfigToggle?: (enabled: boolean) => void;
   onResetToDefaults: () => void;
 }
 
@@ -23,6 +25,7 @@ export function ColumnVisibilityManager({
   onColumnVisibilityToggle,
   onColumnHeaderChange,
   onSubRowToggle,
+  onSubRowConfigToggle,
   onResetToDefaults
 }: ColumnVisibilityManagerProps) {
   const [isOpen, setIsOpen] = useState(false);
@@ -38,6 +41,8 @@ export function ColumnVisibilityManager({
   const visibleCount = columns.filter(col => !preferences.hiddenColumns.includes(col.key)).length;
   const totalCount = columns.length;
   const subRowCount = preferences.subRowColumns?.length || 0;
+
+  const isSubRowConfigEnabled = preferences.enableSubRowConfig || false;
 
   const handleToggleAll = () => {
     const allVisible = preferences.hiddenColumns.length === 0;
@@ -77,205 +82,232 @@ export function ColumnVisibilityManager({
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger asChild>
-        <Button variant="outline" size="sm" className="flex items-center space-x-2">
-          <Settings2 className="h-4 w-4" />
-          <span>Columns ({visibleCount}/{totalCount})</span>
-        </Button>
-      </DialogTrigger>
-      
-      <DialogContent className="max-w-md max-h-[80vh] flex flex-col">
-        <DialogHeader className="pb-4 border-b">
-          <DialogTitle className="flex items-center justify-between">
-            <span>Configure Columns</span>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={onResetToDefaults}
-              className="text-gray-600 hover:text-gray-900"
-              title="Reset to defaults"
-            >
-              <RotateCcw className="h-4 w-4" />
-            </Button>
-          </DialogTitle>
-        </DialogHeader>
+    <TooltipProvider>
+      <Dialog open={isOpen} onOpenChange={setIsOpen}>
+        <DialogTrigger asChild>
+          <Button variant="outline" size="sm" className="flex items-center space-x-2">
+            <Settings2 className="h-4 w-4" />
+            <span>Columns ({visibleCount}/{totalCount})</span>
+          </Button>
+        </DialogTrigger>
+        
+        <DialogContent className="max-w-md max-h-[80vh] flex flex-col">
+          <DialogHeader className="pb-4 border-b">
+            <DialogTitle className="flex items-center justify-between">
+              <span>Configure Columns</span>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={onResetToDefaults}
+                className="text-gray-600 hover:text-gray-900"
+                title="Reset to defaults"
+              >
+                <RotateCcw className="h-4 w-4" />
+              </Button>
+            </DialogTitle>
+          </DialogHeader>
 
-        <div className="flex flex-col space-y-4 flex-1 min-h-0">
-          {/* Search */}
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-            <Input
-              placeholder="Search columns..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-9"
-            />
-          </div>
+          <div className="flex flex-col space-y-4 flex-1 min-h-0">
+            {/* Search */}
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Input
+                placeholder="Search columns..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-9"
+              />
+            </div>
 
-          {/* Toggle All */}
-          <div className="flex items-center justify-between py-2 border-b">
-            <span className="text-sm font-medium">Toggle All</span>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleToggleAll}
-              className="text-xs"
-            >
-              {preferences.hiddenColumns.length === 0 ? 'Hide All' : 'Show All'}
-            </Button>
-          </div>
+            {/* Sub-row Configuration Toggle */}
+            <div className="flex items-center justify-between py-3 px-4 bg-purple-50 rounded-lg border border-purple-200">
+              <div className="flex items-center space-x-2">
+                <ChevronDown className="h-4 w-4 text-purple-600" />
+                <span className="text-sm font-medium text-purple-900">Enable Sub-row Configuration</span>
+                {!isSubRowConfigEnabled && (
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <Info className="h-3 w-3 text-purple-500" />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Sub-row feature is turned off</p>
+                    </TooltipContent>
+                  </Tooltip>
+                )}
+              </div>
+              <Switch
+                checked={isSubRowConfigEnabled}
+                onCheckedChange={onSubRowConfigToggle}
+                className="data-[state=checked]:bg-purple-600"
+              />
+            </div>
 
-          {/* Column List */}
-          <div className="flex-1 overflow-y-auto space-y-2">
-            {filteredColumns.map((column) => {
-              const isVisible = !preferences.hiddenColumns.includes(column.key);
-              const isMandatory = column.mandatory;
-              const isSubRow = preferences.subRowColumns?.includes(column.key) || false;
-              const isEditing = editingColumn === column.key;
-              const displayLabel = preferences.columnHeaders[column.key] || column.label;
+            {/* Toggle All */}
+            <div className="flex items-center justify-between py-2 border-b">
+              <span className="text-sm font-medium">Toggle All</span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleToggleAll}
+                className="text-xs"
+              >
+                {preferences.hiddenColumns.length === 0 ? 'Hide All' : 'Show All'}
+              </Button>
+            </div>
 
-              return (
-                <div
-                  key={column.key}
-                  className={cn(
-                    "flex flex-col p-3 rounded-lg border transition-colors space-y-3",
-                    isVisible ? "bg-white border-gray-200" : "bg-gray-50 border-gray-100"
-                  )}
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3 flex-1 min-w-0">
-                      <Checkbox
-                        checked={isVisible}
-                        onCheckedChange={() => !isMandatory && onColumnVisibilityToggle(column.key)}
-                        disabled={isMandatory}
-                        className="flex-shrink-0"
-                      />
-                      
-                      <div className="flex items-center space-x-2 min-w-0">
-                        {isVisible ? (
-                          <Eye className="h-4 w-4 text-green-600 flex-shrink-0" />
-                        ) : (
-                          <EyeOff className="h-4 w-4 text-gray-400 flex-shrink-0" />
-                        )}
+            {/* Column List */}
+            <div className="flex-1 overflow-y-auto space-y-2">
+              {filteredColumns.map((column) => {
+                const isVisible = !preferences.hiddenColumns.includes(column.key);
+                const isMandatory = column.mandatory;
+                const isSubRow = preferences.subRowColumns?.includes(column.key) || false;
+                const isEditing = editingColumn === column.key;
+                const displayLabel = preferences.columnHeaders[column.key] || column.label;
+
+                return (
+                  <div
+                    key={column.key}
+                    className={cn(
+                      "flex flex-col p-3 rounded-lg border transition-colors space-y-3",
+                      isVisible ? "bg-white border-gray-200" : "bg-gray-50 border-gray-100"
+                    )}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3 flex-1 min-w-0">
+                        <Checkbox
+                          checked={isVisible}
+                          onCheckedChange={() => !isMandatory && onColumnVisibilityToggle(column.key)}
+                          disabled={isMandatory}
+                          className="flex-shrink-0"
+                        />
                         
-                        <div className="min-w-0 flex-1">
-                          {isEditing ? (
-                            <div className="flex items-center space-x-2">
-                              <Input
-                                value={editingValue}
-                                onChange={(e) => setEditingValue(e.target.value)}
-                                className="h-6 text-sm font-medium"
-                                autoFocus
-                                onKeyDown={(e) => {
-                                  if (e.key === 'Enter') {
-                                    handleEditSave(column.key);
-                                  } else if (e.key === 'Escape') {
-                                    handleEditCancel();
-                                  }
-                                }}
-                              />
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => handleEditSave(column.key)}
-                                className="h-6 w-6 p-0 text-green-600 hover:text-green-700"
-                              >
-                                <Check className="h-3 w-3" />
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={handleEditCancel}
-                                className="h-6 w-6 p-0 text-red-600 hover:text-red-700"
-                              >
-                                <X className="h-3 w-3" />
-                              </Button>
-                            </div>
+                        <div className="flex items-center space-x-2 min-w-0">
+                          {isVisible ? (
+                            <Eye className="h-4 w-4 text-green-600 flex-shrink-0" />
                           ) : (
-                            <div
-                              className="group/label cursor-pointer"
-                              onClick={() => onColumnHeaderChange && handleEditStart(column.key, displayLabel)}
-                            >
-                              <div className="font-medium text-sm truncate">
-                                {displayLabel}
-                              </div>
-                              <div className="text-xs text-gray-500 truncate">
-                                {column.key}
-                              </div>
-                            </div>
+                            <EyeOff className="h-4 w-4 text-gray-400 flex-shrink-0" />
                           )}
+                          
+                          <div className="min-w-0 flex-1">
+                            {isEditing ? (
+                              <div className="flex items-center space-x-2">
+                                <Input
+                                  value={editingValue}
+                                  onChange={(e) => setEditingValue(e.target.value)}
+                                  className="h-6 text-sm font-medium"
+                                  autoFocus
+                                  onKeyDown={(e) => {
+                                    if (e.key === 'Enter') {
+                                      handleEditSave(column.key);
+                                    } else if (e.key === 'Escape') {
+                                      handleEditCancel();
+                                    }
+                                  }}
+                                />
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleEditSave(column.key)}
+                                  className="h-6 w-6 p-0 text-green-600 hover:text-green-700"
+                                >
+                                  <Check className="h-3 w-3" />
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={handleEditCancel}
+                                  className="h-6 w-6 p-0 text-red-600 hover:text-red-700"
+                                >
+                                  <X className="h-3 w-3" />
+                                </Button>
+                              </div>
+                            ) : (
+                              <div
+                                className="group/label cursor-pointer"
+                                onClick={() => onColumnHeaderChange && handleEditStart(column.key, displayLabel)}
+                              >
+                                <div className="font-medium text-sm truncate">
+                                  {displayLabel}
+                                </div>
+                                <div className="text-xs text-gray-500 truncate">
+                                  {column.key}
+                                </div>
+                              </div>
+                            )}
+                          </div>
                         </div>
                       </div>
-                    </div>
 
-                    <div className="flex items-center space-x-2 flex-shrink-0">
-                      {isMandatory && (
-                        <span className="text-xs bg-orange-100 text-orange-700 px-2 py-1 rounded font-medium">
-                          Required
-                        </span>
-                      )}
-                      
-                      {isSubRow && (
-                        <span className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded font-medium flex items-center gap-1">
-                          <ChevronDown className="h-3 w-3" />
-                          Sub-row
-                        </span>
-                      )}
-                      
-                      {column.type && (
-                        <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded">
-                          {column.type}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Sub-row setting */}
-                  {onSubRowToggle && (
-                    <div className="flex items-center justify-between pl-6 pt-2 border-t border-gray-100">
-                      <div className="flex items-center space-x-2">
-                        <ChevronDown className="h-3 w-3 text-purple-600" />
-                        <span className="text-xs text-gray-600">Show in sub-row</span>
+                      <div className="flex items-center space-x-2 flex-shrink-0">
+                        {isMandatory && (
+                          <span className="text-xs bg-orange-100 text-orange-700 px-2 py-1 rounded font-medium">
+                            Required
+                          </span>
+                        )}
+                        
+                        {isSubRow && isSubRowConfigEnabled && (
+                          <span className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded font-medium flex items-center gap-1">
+                            <ChevronDown className="h-3 w-3" />
+                            Sub-row
+                          </span>
+                        )}
+                        
+                        {column.type && (
+                          <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded">
+                            {column.type}
+                          </span>
+                        )}
                       </div>
-                      <Switch
-                        checked={isSubRow}
-                        onCheckedChange={() => onSubRowToggle(column.key)}
-                        className="h-4 w-7"
-                      />
                     </div>
-                  )}
+
+                    {/* Sub-row setting - only show when sub-row config is enabled */}
+                    {onSubRowToggle && isSubRowConfigEnabled && (
+                      <div className="flex items-center justify-between pl-6 pt-2 border-t border-gray-100">
+                        <div className="flex items-center space-x-2">
+                          <ChevronDown className="h-3 w-3 text-purple-600" />
+                          <span className="text-xs text-gray-600">Show in sub-row</span>
+                        </div>
+                        <Switch
+                          checked={isSubRow}
+                          onCheckedChange={() => onSubRowToggle(column.key)}
+                          className="h-4 w-7 data-[state=checked]:bg-purple-600"
+                        />
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+
+              {filteredColumns.length === 0 && (
+                <div className="text-center py-8 text-gray-500">
+                  <Search className="h-8 w-8 mx-auto mb-2 text-gray-300" />
+                  <p>No columns found matching "{searchTerm}"</p>
                 </div>
-              );
-            })}
+              )}
+            </div>
 
-            {filteredColumns.length === 0 && (
-              <div className="text-center py-8 text-gray-500">
-                <Search className="h-8 w-8 mx-auto mb-2 text-gray-300" />
-                <p>No columns found matching "{searchTerm}"</p>
-              </div>
-            )}
-          </div>
-
-          {/* Summary */}
-          <div className="pt-4 border-t bg-gray-50 rounded-lg px-4 py-3">
-            <div className="text-sm text-gray-600">
-              <div className="flex justify-between">
-                <span>Visible columns:</span>
-                <span className="font-medium">{visibleCount} of {totalCount}</span>
-              </div>
-              <div className="flex justify-between mt-1">
-                <span>Hidden columns:</span>
-                <span className="font-medium">{totalCount - visibleCount}</span>
-              </div>
-              <div className="flex justify-between mt-1">
-                <span>Sub-row columns:</span>
-                <span className="font-medium">{subRowCount}</span>
+            {/* Summary */}
+            <div className="pt-4 border-t bg-gray-50 rounded-lg px-4 py-3">
+              <div className="text-sm text-gray-600">
+                <div className="flex justify-between">
+                  <span>Visible columns:</span>
+                  <span className="font-medium">{visibleCount} of {totalCount}</span>
+                </div>
+                <div className="flex justify-between mt-1">
+                  <span>Hidden columns:</span>
+                  <span className="font-medium">{totalCount - visibleCount}</span>
+                </div>
+                {isSubRowConfigEnabled && (
+                  <div className="flex justify-between mt-1">
+                    <span>Sub-row columns:</span>
+                    <span className="font-medium">{subRowCount}</span>
+                  </div>
+                )}
               </div>
             </div>
           </div>
-        </div>
-      </DialogContent>
-    </Dialog>
+        </DialogContent>
+      </Dialog>
+    </TooltipProvider>
   );
 }

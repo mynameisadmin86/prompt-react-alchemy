@@ -1,4 +1,3 @@
-
 import { useState, useCallback, useEffect } from 'react';
 import { GridPreferences, Column } from '@/types/smartgrid';
 
@@ -15,6 +14,7 @@ export function useGridPreferences<T>(
     columnWidths: {},
     columnHeaders: {},
     subRowColumns: [], // Initialize empty sub-row columns array
+    enableSubRowConfig: false, // Default to disabled
     filters: []
   };
 
@@ -116,6 +116,16 @@ export function useGridPreferences<T>(
     savePreferences(newPreferences);
   }, [preferences, savePreferences]);
 
+  const toggleSubRowConfig = useCallback((enabled: boolean) => {
+    const newPreferences = { 
+      ...preferences, 
+      enableSubRowConfig: enabled,
+      // Clear all sub-row columns when disabling the feature
+      subRowColumns: enabled ? preferences.subRowColumns : []
+    };
+    savePreferences(newPreferences);
+  }, [preferences, savePreferences]);
+
   return {
     preferences,
     updateColumnOrder,
@@ -123,6 +133,7 @@ export function useGridPreferences<T>(
     updateColumnWidth,
     updateColumnHeader,
     toggleSubRow, // New function for toggling sub-row
+    toggleSubRowConfig, // New function for toggling sub-row configuration
     savePreferences
   };
 }
