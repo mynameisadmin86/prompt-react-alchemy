@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -7,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { GripVertical } from 'lucide-react';
+import { GripVertical, Eye, EyeOff } from 'lucide-react';
 import { PanelConfig, FieldVisibilityConfig } from '@/types/dynamicPanel';
 
 interface EnhancedFieldVisibilityModalProps {
@@ -211,6 +210,7 @@ export const EnhancedFieldVisibilityModal: React.FC<EnhancedFieldVisibilityModal
               <div className="space-y-4 max-h-96 overflow-y-auto">
                 {fieldConfigs.map((fieldConfig, index) => {
                   const isMandatory = panelConfig[fieldConfig.fieldId]?.mandatory;
+                  const isVisible = fieldConfig.visible;
                   
                   return (
                     <div
@@ -225,7 +225,7 @@ export const EnhancedFieldVisibilityModal: React.FC<EnhancedFieldVisibilityModal
                         const newConfigs = [...fieldConfigs];
                         const draggedItem = newConfigs[draggedIndex];
                         newConfigs.splice(draggedIndex, 1);
-                        newConfigs.splice(index, 0, draggedItem);
+                        newConfigs.splice(index, 0, draggedgedItem);
                         
                         // Update order
                         const updatedConfigs = newConfigs.map((config, idx) => ({
@@ -241,7 +241,7 @@ export const EnhancedFieldVisibilityModal: React.FC<EnhancedFieldVisibilityModal
                       <GripVertical className="h-4 w-4 text-gray-400 cursor-grab" />
                       
                       <Checkbox
-                        checked={fieldConfig.visible}
+                        checked={isVisible}
                         onCheckedChange={(checked) => 
                           setFieldConfigs(prev => 
                             prev.map(config => 
@@ -251,6 +251,14 @@ export const EnhancedFieldVisibilityModal: React.FC<EnhancedFieldVisibilityModal
                         }
                         disabled={isMandatory}
                       />
+
+                      <div className="flex items-center space-x-2 flex-shrink-0">
+                        {isVisible ? (
+                          <Eye className="h-4 w-4 text-green-600" />
+                        ) : (
+                          <EyeOff className="h-4 w-4 text-gray-400" />
+                        )}
+                      </div>
                       
                       <div className="flex-1">
                         <Input
