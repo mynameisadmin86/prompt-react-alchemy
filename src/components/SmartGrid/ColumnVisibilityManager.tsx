@@ -1,7 +1,7 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Switch } from '@/components/ui/switch';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Settings2, Eye, EyeOff, Search, RotateCcw, ChevronDown, Check, X } from 'lucide-react';
@@ -37,6 +37,7 @@ export function ColumnVisibilityManager({
 
   const visibleCount = columns.filter(col => !preferences.hiddenColumns.includes(col.key)).length;
   const totalCount = columns.length;
+  const subRowCount = preferences.subRowColumns?.length || 0;
 
   const handleToggleAll = () => {
     const allVisible = preferences.hiddenColumns.length === 0;
@@ -130,7 +131,7 @@ export function ColumnVisibilityManager({
             {filteredColumns.map((column) => {
               const isVisible = !preferences.hiddenColumns.includes(column.key);
               const isMandatory = column.mandatory;
-              const isCollapsibleChild = column.collapsibleChild;
+              const isSubRow = preferences.subRowColumns?.includes(column.key) || false;
               const isEditing = editingColumn === column.key;
               const displayLabel = preferences.columnHeaders[column.key] || column.label;
 
@@ -215,6 +216,13 @@ export function ColumnVisibilityManager({
                         </span>
                       )}
                       
+                      {isSubRow && (
+                        <span className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded font-medium flex items-center gap-1">
+                          <ChevronDown className="h-3 w-3" />
+                          Sub-row
+                        </span>
+                      )}
+                      
                       {column.type && (
                         <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded">
                           {column.type}
@@ -223,27 +231,18 @@ export function ColumnVisibilityManager({
                     </div>
                   </div>
 
-                  {/* Sub-row setting - Show for all columns when onSubRowToggle is available */}
+                  {/* Sub-row setting */}
                   {onSubRowToggle && (
                     <div className="flex items-center justify-between pl-6 pt-2 border-t border-gray-100">
                       <div className="flex items-center space-x-2">
                         <ChevronDown className="h-3 w-3 text-purple-600" />
                         <span className="text-xs text-gray-600">Show in sub-row</span>
                       </div>
-                      <Checkbox
-                        checked={isCollapsibleChild || false}
+                      <Switch
+                        checked={isSubRow}
                         onCheckedChange={() => onSubRowToggle(column.key)}
-                        className="h-4 w-4"
+                        className="h-4 w-7"
                       />
-                    </div>
-                  )}
-
-                  {isCollapsibleChild && (
-                    <div className="pl-6">
-                      <span className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded font-medium flex items-center gap-1 inline-flex">
-                        <ChevronDown className="h-3 w-3" />
-                        Sub-row
-                      </span>
                     </div>
                   )}
                 </div>
@@ -271,7 +270,7 @@ export function ColumnVisibilityManager({
               </div>
               <div className="flex justify-between mt-1">
                 <span>Sub-row columns:</span>
-                <span className="font-medium">{columns.filter(col => col.collapsibleChild).length}</span>
+                <span className="font-medium">{subRowCount}</span>
               </div>
             </div>
           </div>

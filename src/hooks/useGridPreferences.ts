@@ -14,6 +14,7 @@ export function useGridPreferences<T>(
     hiddenColumns: [],
     columnWidths: {},
     columnHeaders: {},
+    subRowColumns: [], // Initialize empty sub-row columns array
     filters: []
   };
 
@@ -51,14 +52,15 @@ export function useGridPreferences<T>(
       }
 
       if (loadedPreferences) {
-        // Merge with defaults to handle new columns
+        // Merge with defaults to handle new columns and properties
         const mergedPreferences: GridPreferences = {
           ...defaultPreferences,
           ...loadedPreferences,
           columnOrder: [
             ...loadedPreferences.columnOrder.filter(id => columns.some(col => col.id === id)),
             ...columns.filter(col => !loadedPreferences.columnOrder.includes(col.id)).map(col => col.id)
-          ]
+          ],
+          subRowColumns: loadedPreferences.subRowColumns || [] // Ensure subRowColumns is initialized
         };
         setPreferences(mergedPreferences);
       }
@@ -105,12 +107,22 @@ export function useGridPreferences<T>(
     savePreferences(newPreferences);
   }, [preferences, savePreferences]);
 
+  const toggleSubRow = useCallback((columnId: string) => {
+    const subRowColumns = preferences.subRowColumns.includes(columnId)
+      ? preferences.subRowColumns.filter(id => id !== columnId)
+      : [...preferences.subRowColumns, columnId];
+    
+    const newPreferences = { ...preferences, subRowColumns };
+    savePreferences(newPreferences);
+  }, [preferences, savePreferences]);
+
   return {
     preferences,
     updateColumnOrder,
     toggleColumnVisibility,
     updateColumnWidth,
     updateColumnHeader,
+    toggleSubRow, // New function for toggling sub-row
     savePreferences
   };
 }
