@@ -1,10 +1,8 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { Settings2, Eye, EyeOff, Search, RotateCcw, ChevronDown, Check, X } from 'lucide-react';
 import { GridColumnConfig, GridPreferences } from '@/types/smartgrid';
@@ -78,12 +76,9 @@ export function ColumnVisibilityManager({
     setEditingValue('');
   };
 
-  const handleSubRowToggle = (columnKey: string, shouldShow: boolean) => {
+  const handleSubRowToggle = (columnKey: string) => {
     if (onSubRowToggle) {
-      const isCurrentlySubRow = preferences.subRowColumns?.includes(columnKey) || false;
-      if (shouldShow !== isCurrentlySubRow) {
-        onSubRowToggle(columnKey);
-      }
+      onSubRowToggle(columnKey);
     }
   };
 
@@ -256,24 +251,11 @@ export function ColumnVisibilityManager({
                             </div>
                           </div>
                           
-                          <RadioGroup 
-                            value={isSubRow ? "yes" : "no"} 
-                            onValueChange={(value) => handleSubRowToggle(column.key, value === "yes")}
-                            className="flex items-center space-x-6"
-                          >
-                            <div className="flex items-center space-x-2">
-                              <RadioGroupItem value="no" id={`${column.key}-no`} />
-                              <label htmlFor={`${column.key}-no`} className="text-sm text-gray-700 cursor-pointer">
-                                No
-                              </label>
-                            </div>
-                            <div className="flex items-center space-x-2">
-                              <RadioGroupItem value="yes" id={`${column.key}-yes`} />
-                              <label htmlFor={`${column.key}-yes`} className="text-sm text-purple-700 font-medium cursor-pointer">
-                                Yes
-                              </label>
-                            </div>
-                          </RadioGroup>
+                          <Checkbox
+                            checked={isSubRow}
+                            onCheckedChange={() => handleSubRowToggle(column.key)}
+                            className="flex-shrink-0"
+                          />
                         </div>
                       </div>
                     )}
