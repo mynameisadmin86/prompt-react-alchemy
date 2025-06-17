@@ -194,28 +194,33 @@ export function SmartGrid({
 
   // Custom nested row renderer for collapsible content
   const renderCollapsibleContent = useCallback((row: any) => {
-    if (!hasCollapsibleColumns || collapsibleColumns.length === 0) {
-      return null;
-    }
+    // Show all columns in the collapsible section
+    const allColumns = columns;
 
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {collapsibleColumns.map((column) => {
-          const value = row[column.key];
-          return (
-            <div key={column.key} className="p-3 bg-gray-50 rounded-lg">
-              <div className="text-xs text-gray-500 uppercase tracking-wide mb-1">
-                {column.label}
+      <div className="space-y-4">
+        <div className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-4">
+          <ChevronDown className="h-4 w-4" />
+          Additional Details
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {allColumns.map((column) => {
+            const value = row[column.key];
+            return (
+              <div key={column.key} className="p-3 bg-gray-50 rounded-lg">
+                <div className="text-xs text-gray-500 uppercase tracking-wide mb-1">
+                  {column.label}
+                </div>
+                <div className="text-sm text-gray-900 font-medium">
+                  {renderCollapsibleCellValue(value, column)}
+                </div>
               </div>
-              <div className="text-sm text-gray-900 font-medium">
-                {renderCollapsibleCellValue(value, column)}
-              </div>
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
       </div>
     );
-  }, [hasCollapsibleColumns, collapsibleColumns]);
+  }, [columns]);
 
   // Helper function to render collapsible cell values
   const renderCollapsibleCellValue = useCallback((value: any, column: GridColumnConfig) => {
