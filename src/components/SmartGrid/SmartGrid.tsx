@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -27,6 +28,7 @@ import { CellRenderer } from './CellRenderer';
 import { cn } from '@/lib/utils';
 import { ColumnVisibilityManager } from './ColumnVisibilityManager';
 import { CommonFilter } from './CommonFilter';
+import { ColumnFilter } from './ColumnFilter';
 
 export function SmartGrid({
   columns,
@@ -41,7 +43,10 @@ export function SmartGrid({
   onLinkClick,
   paginationMode = 'pagination',
   nestedRowRenderer,
-  plugins = []
+  plugins = [],
+  selectedRows,
+  onSelectionChange,
+  rowClassName
 }: SmartGridProps) {
   const [gridData, setGridData] = useState(data);
   const [editingCell, setEditingCell] = useState<{ rowIndex: number; columnKey: string } | null>(null);
@@ -56,9 +61,10 @@ export function SmartGrid({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [expandedRows, setExpandedRows] = useState<Set<number>>(new Set());
-  const [selectedRows, setSelectedRows] = useState<Set<number>>(new Set());
+  const [internalSelectedRows, setInternalSelectedRows] = useState<Set<number>>(new Set());
   const [showCheckboxes, setShowCheckboxes] = useState(false);
   const [viewMode, setViewMode] = useState<'table' | 'card'>('table');
+  const [showColumnFilters, setShowColumnFilters] = useState(false);
   
   const [resizingColumn, setResizingColumn] = useState<string | null>(null);
   const [resizeHoverColumn, setResizeHoverColumn] = useState<string | null>(null);
@@ -66,6 +72,10 @@ export function SmartGrid({
   const resizeStartRef = useRef<{ x: number; width: number } | null>(null);
   
   const { toast } = useToast();
+
+  // Use external selectedRows if provided, otherwise use internal state
+  const currentSelectedRows = selectedRows || internalSelectedRows;
+  const handleSelectionChange = onSelectionChange || setInternalSelectedRows;
 
   // Convert GridColumnConfig to Column format for useGridPreferences
   const preferencesColumns = useMemo(() => columns.map(col => ({
@@ -168,9 +178,30 @@ export function SmartGrid({
       ...col,
       label: preferences.columnHeaders[col.key] || col.label,
       hidden: preferences.hiddenColumns.includes(col.key),
-      width: calculatedWidths[col.key] || 100
+      width: calculatedWidths[col.key] || 100,
+      filterable: col.filterable !== false // Enable filtering by default
     }));
   }, [columns, preferences, calculateColumnWidths]);
+
+  // Handle column-specific filter changes
+  const handleColumnFilterChange = useCallback((filter: FilterConfig | null) => {
+    if (!filter) {
+      // Remove filter for this column
+      setFilters(prev => prev.filter(f => f.column !== filter?.column));
+      return;
+    }
+
+    setFilters(prev => {
+      const existing = prev.find(f => f.column === filter.column);
+      if (existing) {
+        // Update existing filter
+        return prev.map(f => f.column === filter.column ? filter : f);
+      } else {
+        // Add new filter
+        return [...prev, filter];
+      }
+    });
+  }, []);
 
   // Process data with sorting and filtering (only if not using lazy loading)
   const processedData = useMemo(() => {
@@ -265,6 +296,7 @@ export function SmartGrid({
       setFilters([]);
       setGlobalFilter('');
       setColumnWidths({});
+      setShowColumnFilters(false);
       
       toast({
         title: "Success",
@@ -332,14 +364,14 @@ export function SmartGrid({
   const gridAPI: GridAPI = useMemo(() => ({
     data: gridData,
     filteredData: processedData,
-    selectedRows: Array.from(selectedRows).map(index => processedData[index]).filter(Boolean),
+    selectedRows: Array.from(currentSelectedRows).map(index => processedData[index]).filter(Boolean),
     columns: orderedColumns,
     preferences,
     actions: {
       exportData: handleExport,
       resetPreferences: handleResetPreferences,
       toggleRowSelection: (rowIndex: number) => {
-        setSelectedRows(prev => {
+        handleSelectionChange(prev => {
           const newSet = new Set(prev);
           if (newSet.has(rowIndex)) {
             newSet.delete(rowIndex);
@@ -350,13 +382,13 @@ export function SmartGrid({
         });
       },
       selectAllRows: () => {
-        setSelectedRows(new Set(Array.from({ length: processedData.length }, (_, i) => i)));
+        handleSelectionChange(new Set(Array.from({ length: processedData.length }, (_, i) => i)));
       },
       clearSelection: () => {
-        setSelectedRows(new Set());
+        handleSelectionChange(new Set());
       }
     }
-  }), [gridData, processedData, selectedRows, orderedColumns, preferences, handleExport, handleResetPreferences]);
+  }), [gridData, processedData, currentSelectedRows, orderedColumns, preferences, handleExport, handleResetPreferences, handleSelectionChange]);
 
   // Pagination
   const paginatedData = useMemo(() => {
@@ -690,12 +722,25 @@ export function SmartGrid({
             />
           </div>
 
-          {/* Common Filter Button */}
-          <CommonFilter
-            columns={orderedColumns}
-            filters={filters}
-            onFiltersChange={setFilters}
-          />
+          {/* Common Filter Button - Updated to toggle column filters */}
+          <Button
+            variant={showColumnFilters ? "default" : "outline"}
+            size="sm"
+            onClick={() => setShowColumnFilters(!showColumnFilters)}
+            disabled={loading}
+            title="Toggle Column Filters"
+            className={cn(
+              "transition-colors",
+              showColumnFilters && "bg-blue-600 hover:bg-blue-700 text-white border-blue-600"
+            )}
+          >
+            <Filter className="h-4 w-4" />
+            {filters.length > 0 && (
+              <span className="ml-1 text-xs bg-blue-100 text-blue-600 rounded-full px-1.5 py-0.5">
+                {filters.length}
+              </span>
+            )}
+          </Button>
 
           {/* Toggle Checkboxes Button - Updated with blue selection state */}
           <Button 
@@ -775,17 +820,18 @@ export function SmartGrid({
                       className="rounded" 
                       onChange={(e) => {
                         if (e.target.checked) {
-                          setSelectedRows(new Set(Array.from({ length: paginatedData.length }, (_, i) => i)));
+                          handleSelectionChange(new Set(Array.from({ length: paginatedData.length }, (_, i) => i)));
                         } else {
-                          setSelectedRows(new Set());
+                          handleSelectionChange(new Set());
                         }
                       }}
-                      checked={selectedRows.size === paginatedData.length && paginatedData.length > 0}
+                      checked={currentSelectedRows.size === paginatedData.length && paginatedData.length > 0}
                     />
                   </TableHead>
                 )}
                 {orderedColumns.map((column, index) => {
                   const shouldHideIcons = resizeHoverColumn === column.key || resizingColumn === column.key;
+                  const currentFilter = filters.find(f => f.column === column.key);
                   return (
                     <TableHead 
                       key={column.key}
@@ -857,30 +903,41 @@ export function SmartGrid({
                           )}
                         </div>
                         
-                        {column.sortable && !shouldHideIcons && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={(e) => {
-                              if (resizingColumn) return;
-                              e.stopPropagation();
-                              handleSort(column.key);
-                            }}
-                            className="h-5 w-5 p-0 hover:bg-transparent transition-opacity flex-shrink-0 ml-1"
-                            disabled={loading || !!resizingColumn}
-                            onDragStart={(e) => e.preventDefault()}
-                          >
-                            {sort?.column === column.key ? (
-                              sort.direction === 'asc' ? (
-                                <ArrowUp className="h-3 w-3 text-blue-600" />
+                        <div className="flex items-center gap-1">
+                          {/* Column Filter - Show when column filters are enabled */}
+                          {showColumnFilters && column.filterable && (
+                            <ColumnFilter
+                              column={column}
+                              currentFilter={currentFilter}
+                              onFilterChange={handleColumnFilterChange}
+                            />
+                          )}
+
+                          {column.sortable && !shouldHideIcons && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={(e) => {
+                                if (resizingColumn) return;
+                                e.stopPropagation();
+                                handleSort(column.key);
+                              }}
+                              className="h-5 w-5 p-0 hover:bg-transparent transition-opacity flex-shrink-0"
+                              disabled={loading || !!resizingColumn}
+                              onDragStart={(e) => e.preventDefault()}
+                            >
+                              {sort?.column === column.key ? (
+                                sort.direction === 'asc' ? (
+                                  <ArrowUp className="h-3 w-3 text-blue-600" />
+                                ) : (
+                                  <ArrowDown className="h-3 w-3 text-blue-600" />
+                                )
                               ) : (
-                                <ArrowDown className="h-3 w-3 text-blue-600" />
-                              )
-                            ) : (
-                              <ArrowUpDown className="h-3 w-3 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" />
-                            )}
-                          </Button>
-                        )}
+                                <ArrowUpDown className="h-3 w-3 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+                              )}
+                            </Button>
+                          )}
+                        </div>
                       </div>
                       
                       {/* Resize Handle - Modified to only show on hover */}
@@ -936,16 +993,21 @@ export function SmartGrid({
               ) : (
                 paginatedData.map((row, rowIndex) => (
                   <React.Fragment key={rowIndex}>
-                    <TableRow className="hover:bg-gray-50/50 transition-colors duration-150 border-b border-gray-100">
+                    <TableRow 
+                      className={cn(
+                        "hover:bg-gray-50/50 transition-colors duration-150 border-b border-gray-100",
+                        rowClassName ? rowClassName(row, rowIndex) : ''
+                      )}
+                    >
                       {/* Checkbox cell */}
                       {showCheckboxes && (
                         <TableCell className="px-3 py-3 border-r border-gray-50 w-[50px]">
                           <input 
                             type="checkbox" 
                             className="rounded" 
-                            checked={selectedRows.has(rowIndex)}
+                            checked={currentSelectedRows.has(rowIndex)}
                             onChange={() => {
-                              setSelectedRows(prev => {
+                              handleSelectionChange(prev => {
                                 const newSet = new Set(prev);
                                 if (newSet.has(rowIndex)) {
                                   newSet.delete(rowIndex);
