@@ -370,7 +370,7 @@ const GridDemo = () => {
 
   const getRowClassName = (row: any, index: number) => {
     console.log(`Row ${index} selected:`, selectedRows.has(index));
-    return selectedRows.has(index) ? 'bg-blue-50 border-l-4 border-blue-500' : '';
+    return selectedRows.has(index) ? '!bg-blue-50 !border-l-4 !border-blue-500 !border-l-blue-500' : '';
   };
 
   return (
@@ -410,6 +410,15 @@ const GridDemo = () => {
 
         {/* Grid Container */}
         <div className="bg-white rounded-lg shadow-sm">
+          <style>{`
+            .smart-grid-row-selected {
+              background-color: #eff6ff !important;
+              border-left: 4px solid #3b82f6 !important;
+            }
+            .smart-grid-row-selected:hover {
+              background-color: #dbeafe !important;
+            }
+          `}</style>
           <SmartGrid
             columns={columns}
             data={processedData}
@@ -419,7 +428,9 @@ const GridDemo = () => {
             onUpdate={handleUpdate}
             selectedRows={selectedRows}
             onSelectionChange={handleRowSelection}
-            rowClassName={getRowClassName}
+            rowClassName={(row: any, index: number) => 
+              selectedRows.has(index) ? 'smart-grid-row-selected' : ''
+            }
           />
           
           {/* Footer with action buttons matching the screenshot style */}
