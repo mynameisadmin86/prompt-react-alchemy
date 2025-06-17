@@ -371,15 +371,13 @@ export function SmartGrid({
       exportData: handleExport,
       resetPreferences: handleResetPreferences,
       toggleRowSelection: (rowIndex: number) => {
-        handleSelectionChange((prev: Set<number>) => {
-          const newSet = new Set(prev);
-          if (newSet.has(rowIndex)) {
-            newSet.delete(rowIndex);
-          } else {
-            newSet.add(rowIndex);
-          }
-          return newSet;
-        });
+        const newSet = new Set(currentSelectedRows);
+        if (newSet.has(rowIndex)) {
+          newSet.delete(rowIndex);
+        } else {
+          newSet.add(rowIndex);
+        }
+        handleSelectionChange(newSet);
       },
       selectAllRows: () => {
         handleSelectionChange(new Set(Array.from({ length: processedData.length }, (_, i) => i)));
@@ -819,7 +817,8 @@ export function SmartGrid({
                       type="checkbox" 
                       className="rounded" 
                       onChange={(e) => {
-                        if (e.target.checked) {
+                        const target = e.target as HTMLInputElement;
+                        if (target.checked) {
                           handleSelectionChange(new Set(Array.from({ length: paginatedData.length }, (_, i) => i)));
                         } else {
                           handleSelectionChange(new Set());
@@ -1034,15 +1033,13 @@ export function SmartGrid({
                             className="rounded" 
                             checked={currentSelectedRows.has(rowIndex)}
                             onChange={() => {
-                              handleSelectionChange((prev: Set<number>) => {
-                                const newSet = new Set(prev);
-                                if (newSet.has(rowIndex)) {
-                                  newSet.delete(rowIndex);
-                                } else {
-                                  newSet.add(rowIndex);
-                                }
-                                return newSet;
-                              });
+                              const newSet = new Set(currentSelectedRows);
+                              if (newSet.has(rowIndex)) {
+                                newSet.delete(rowIndex);
+                              } else {
+                                newSet.add(rowIndex);
+                              }
+                              handleSelectionChange(newSet);
                             }}
                           />
                         </TableCell>
