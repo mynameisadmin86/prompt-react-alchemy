@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { Settings2, Eye, EyeOff, Search, RotateCcw, ChevronDown, Check, X } from 'lucide-react';
 import { GridColumnConfig, GridPreferences } from '@/types/smartgrid';
@@ -255,29 +256,24 @@ export function ColumnVisibilityManager({
                             </div>
                           </div>
                           
-                          <div className="flex items-center space-x-4">
-                            <label className="flex items-center space-x-2 cursor-pointer">
-                              <input
-                                type="radio"
-                                name={`subrow-${column.key}`}
-                                checked={!isSubRow}
-                                onChange={() => handleSubRowToggle(column.key, false)}
-                                className="w-4 h-4 text-gray-600 bg-white border-gray-300 focus:ring-gray-500 focus:ring-2"
-                              />
-                              <span className="text-sm text-gray-700">No</span>
-                            </label>
-                            
-                            <label className="flex items-center space-x-2 cursor-pointer">
-                              <input
-                                type="radio"
-                                name={`subrow-${column.key}`}
-                                checked={isSubRow}
-                                onChange={() => handleSubRowToggle(column.key, true)}
-                                className="w-4 h-4 text-purple-600 bg-white border-purple-300 focus:ring-purple-500 focus:ring-2"
-                              />
-                              <span className="text-sm text-purple-700 font-medium">Yes</span>
-                            </label>
-                          </div>
+                          <RadioGroup 
+                            value={isSubRow ? "yes" : "no"} 
+                            onValueChange={(value) => handleSubRowToggle(column.key, value === "yes")}
+                            className="flex items-center space-x-6"
+                          >
+                            <div className="flex items-center space-x-2">
+                              <RadioGroupItem value="no" id={`${column.key}-no`} />
+                              <label htmlFor={`${column.key}-no`} className="text-sm text-gray-700 cursor-pointer">
+                                No
+                              </label>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <RadioGroupItem value="yes" id={`${column.key}-yes`} />
+                              <label htmlFor={`${column.key}-yes`} className="text-sm text-purple-700 font-medium cursor-pointer">
+                                Yes
+                              </label>
+                            </div>
+                          </RadioGroup>
                         </div>
                       </div>
                     )}
