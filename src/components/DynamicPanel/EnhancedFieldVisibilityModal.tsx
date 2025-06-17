@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -146,6 +145,19 @@ export const EnhancedFieldVisibilityModal: React.FC<EnhancedFieldVisibilityModal
     return (numValue >= 1 && numValue <= 12) ? numValue as 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 : 'full';
   };
 
+  const getFieldTypeDisplay = (fieldType: string) => {
+    const typeMap: Record<string, string> = {
+      'text': 'Text',
+      'select': 'Select',
+      'search': 'Search',
+      'currency': 'Currency',
+      'date': 'Date',
+      'time': 'Time',
+      'textarea': 'Textarea'
+    };
+    return typeMap[fieldType] || fieldType;
+  };
+
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-md max-h-[80vh] overflow-y-auto">
@@ -212,6 +224,7 @@ export const EnhancedFieldVisibilityModal: React.FC<EnhancedFieldVisibilityModal
                 {fieldConfigs.map((fieldConfig, index) => {
                   const isMandatory = panelConfig[fieldConfig.fieldId]?.mandatory;
                   const isVisible = fieldConfig.visible;
+                  const fieldType = panelConfig[fieldConfig.fieldId]?.fieldType;
                   
                   return (
                     <div
@@ -272,6 +285,14 @@ export const EnhancedFieldVisibilityModal: React.FC<EnhancedFieldVisibilityModal
                           className="text-sm"
                           placeholder="Field label"
                         />
+                        <div className="flex items-center justify-between mt-1">
+                          <span className="text-xs text-gray-500">
+                            {fieldConfig.fieldId}
+                          </span>
+                          <span className="text-xs text-blue-600 font-medium">
+                            {getFieldTypeDisplay(fieldType)}
+                          </span>
+                        </div>
                         {isMandatory && (
                           <span className="text-xs text-red-600 mt-1">Mandatory field</span>
                         )}
