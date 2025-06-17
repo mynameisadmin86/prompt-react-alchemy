@@ -914,12 +914,10 @@ export function SmartGrid({
                   </TableHead>
                 )}
                 
-                {/* Child row toggle header */}
-                {hasChildRows && (
-                  <TableHead className="bg-gray-50/80 backdrop-blur-sm font-semibold text-gray-900 px-2 py-3 border-r border-gray-100 w-[40px] flex-shrink-0">
-                    {/* Empty header for toggle column */}
-                  </TableHead>
-                )}
+                {/* Collapsible icon header - always show */}
+                <TableHead className="bg-gray-50/80 backdrop-blur-sm font-semibold text-gray-900 px-2 py-3 border-r border-gray-100 w-[40px] flex-shrink-0">
+                  {/* Empty header for collapsible toggle column */}
+                </TableHead>
                 
                 {visibleColumns.map((column, index) => {
                   const shouldHideIcons = resizeHoverColumn === column.key || resizingColumn === column.key;
@@ -1059,12 +1057,10 @@ export function SmartGrid({
                     </TableHead>
                   )}
                   
-                  {/* Child row toggle column space */}
-                  {hasChildRows && (
-                    <TableHead className="bg-gray-25 px-2 py-2 border-r border-gray-100 w-[40px]">
-                      {/* Empty space for toggle column */}
-                    </TableHead>
-                  )}
+                  {/* Collapsible icon column space - always show */}
+                  <TableHead className="bg-gray-25 px-2 py-2 border-r border-gray-100 w-[40px]">
+                    {/* Empty space for collapsible toggle column */}
+                  </TableHead>
                   
                   {visibleColumns.map((column) => {
                     const currentFilter = filters.find(f => f.column === column.key);
@@ -1104,7 +1100,7 @@ export function SmartGrid({
               {loading ? (
                 <TableRow>
                   <TableCell 
-                    colSpan={visibleColumns.length + (showCheckboxes ? 1 : 0) + (hasChildRows ? 1 : 0) + (plugins.some(plugin => plugin.rowActions) ? 1 : 0)} 
+                    colSpan={visibleColumns.length + (showCheckboxes ? 1 : 0) + 1 + (plugins.some(plugin => plugin.rowActions) ? 1 : 0)} 
                     className="text-center py-12"
                   >
                     <div className="flex items-center justify-center">
@@ -1116,7 +1112,7 @@ export function SmartGrid({
               ) : paginatedData.length === 0 ? (
                 <TableRow>
                   <TableCell 
-                    colSpan={visibleColumns.length + (showCheckboxes ? 1 : 0) + (hasChildRows ? 1 : 0) + (plugins.some(plugin => plugin.rowActions) ? 1 : 0)} 
+                    colSpan={visibleColumns.length + (showCheckboxes ? 1 : 0) + 1 + (plugins.some(plugin => plugin.rowActions) ? 1 : 0)} 
                     className="text-center py-12 text-gray-500"
                   >
                     <div className="space-y-2">
@@ -1154,27 +1150,25 @@ export function SmartGrid({
                         </TableCell>
                       )}
                       
-                      {/* Child row toggle cell */}
-                      {hasChildRows && (
-                        <TableCell className="px-2 py-3 border-r border-gray-50 w-[40px]">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => toggleRowExpansion(rowIndex)}
-                            onKeyDown={(e) => handleRowToggleKeyDown(e, rowIndex)}
-                            className="h-6 w-6 p-0 hover:bg-gray-100 transition-all duration-200"
-                            aria-expanded={expandedRows.has(rowIndex)}
-                            aria-label={`${expandedRows.has(rowIndex) ? 'Collapse' : 'Expand'} row details`}
-                          >
-                            <ChevronRight 
-                              className={cn(
-                                "h-4 w-4 transition-transform duration-200",
-                                expandedRows.has(rowIndex) && "rotate-90"
-                              )} 
-                            />
-                          </Button>
-                        </TableCell>
-                      )}
+                      {/* Collapsible icon cell - always show */}
+                      <TableCell className="px-2 py-3 border-r border-gray-50 w-[40px]">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => toggleRowExpansion(rowIndex)}
+                          onKeyDown={(e) => handleRowToggleKeyDown(e, rowIndex)}
+                          className="h-6 w-6 p-0 hover:bg-gray-100 transition-all duration-200"
+                          aria-expanded={expandedRows.has(rowIndex)}
+                          aria-label={`${expandedRows.has(rowIndex) ? 'Collapse' : 'Expand'} row details`}
+                        >
+                          <ChevronRight 
+                            className={cn(
+                              "h-4 w-4 transition-transform duration-200",
+                              expandedRows.has(rowIndex) && "rotate-90"
+                            )} 
+                          />
+                        </Button>
+                      </TableCell>
                       
                       {visibleColumns.map((column, columnIndex) => (
                         <TableCell 
@@ -1196,11 +1190,11 @@ export function SmartGrid({
                       )}
                     </TableRow>
                     
-                    {/* Expandable child row content */}
-                    {hasChildRows && expandedRows.has(rowIndex) && (
+                    {/* Expandable child row content - always available */}
+                    {expandedRows.has(rowIndex) && (
                       <TableRow className="bg-gray-50/30">
                         <TableCell 
-                          colSpan={visibleColumns.length + (showCheckboxes ? 1 : 0) + (hasChildRows ? 1 : 0) + (plugins.some(plugin => plugin.rowActions) ? 1 : 0)} 
+                          colSpan={visibleColumns.length + (showCheckboxes ? 1 : 0) + 1 + (plugins.some(plugin => plugin.rowActions) ? 1 : 0)} 
                           className="p-0 border-b border-gray-200"
                         >
                           <div className="bg-gradient-to-r from-gray-50/50 to-white border-l-4 border-blue-500 animate-accordion-down">
