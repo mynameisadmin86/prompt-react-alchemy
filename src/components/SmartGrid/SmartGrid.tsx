@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -53,7 +54,21 @@ export function SmartGrid({
   onSelectionChange,
   rowClassName
 }: SmartGridProps) {
-  const [preferences, setPreferences] = useGridPreferences({ columns });
+  // Convert GridColumnConfig to legacy Column format for useGridPreferences
+  const legacyColumns = useMemo(() => 
+    columns.map(col => ({
+      id: col.key,
+      header: col.label,
+      accessor: col.key as any,
+      sortable: col.sortable,
+      filterable: col.filterable,
+      editable: col.editable,
+      mandatory: col.mandatory,
+      type: 'text' as const
+    })), [columns]);
+
+  const preferencesData = useGridPreferences(legacyColumns);
+  const [preferences, setPreferences] = useState(preferencesData.preferences);
   const [columnOrder, setColumnOrder] = useState(preferences?.columnOrder || columns.map(col => col.key));
   const tableRef = useRef<HTMLTableElement>(null);
   
@@ -435,8 +450,8 @@ export function SmartGrid({
                 <th className="w-12 px-4 py-3 text-left">
                   <Checkbox 
                     className="rounded" 
-                    onChange={(e) => {
-                      if (e.target.checked) {
+                    onCheckedChange={(checked) => {
+                      if (checked) {
                         handleSelectionChangeUnified(new Set(Array.from({ length: paginatedData.length }, (_, i) => i)));
                       } else {
                         handleSelectionChangeUnified(new Set());
@@ -510,7 +525,7 @@ export function SmartGrid({
                         <Checkbox 
                           className="rounded" 
                           checked={currentSelectedRows.has(rowIndex)}
-                          onChange={() => {
+                          onCheckedChange={() => {
                             handleSelectionChangeUnified(prev => {
                               const newSet = new Set(prev);
                               if (newSet.has(rowIndex)) {
@@ -551,8 +566,15 @@ export function SmartGrid({
                               >
                                 <CellRenderer
                                   value={row[column.key]}
+                                  row={row}
                                   column={column}
-                                  rowData={row}
+                                  rowIndex={rowIndex}
+                                  columnIndex={orderedColumns.indexOf(column)}
+                                  isEditing={isEditing}
+                                  isEditable={isEditable}
+                                  onEdit={handleInlineEdit}
+                                  onEditStart={(rowIdx, colKey) => setEditingCell({ row: rowIdx, column: colKey })}
+                                  onEditCancel={() => setEditingCell(null)}
                                   onLinkClick={onLinkClick}
                                 />
                               </div>
@@ -645,7 +667,7 @@ export function SmartGrid({
       <ColumnManager
         isOpen={isColumnManagerOpen}
         onClose={() => setIsColumnManagerOpen(false)}
-        columns={columns}
+        columns={legacyColumns}
         preferences={preferences}
         onPreferencesChange={updatePreferences}
       />
