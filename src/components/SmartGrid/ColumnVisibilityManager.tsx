@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Settings2, Eye, EyeOff, Search, RotateCcw, ChevronDown, ChevronRight } from 'lucide-react';
+import { Settings2, Eye, EyeOff, Search, RotateCcw } from 'lucide-react';
 import { GridColumnConfig, GridPreferences } from '@/types/smartgrid';
 import { cn } from '@/lib/utils';
 
@@ -13,15 +13,13 @@ interface ColumnVisibilityManagerProps {
   preferences: GridPreferences;
   onColumnVisibilityToggle: (columnId: string) => void;
   onResetToDefaults: () => void;
-  onColumnConfigChange?: (columnId: string, config: Partial<GridColumnConfig>) => void;
 }
 
 export function ColumnVisibilityManager({
   columns,
   preferences,
   onColumnVisibilityToggle,
-  onResetToDefaults,
-  onColumnConfigChange
+  onResetToDefaults
 }: ColumnVisibilityManagerProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -33,7 +31,6 @@ export function ColumnVisibilityManager({
 
   const visibleCount = columns.filter(col => !preferences.hiddenColumns.includes(col.key)).length;
   const totalCount = columns.length;
-  const hasCollapsibleChildren = columns.some(col => col.collapsibleChild);
 
   const handleToggleAll = () => {
     const allVisible = preferences.hiddenColumns.length === 0;
@@ -51,17 +48,6 @@ export function ColumnVisibilityManager({
       preferences.hiddenColumns.forEach(columnId => {
         onColumnVisibilityToggle(columnId);
       });
-    }
-  };
-
-  const handleCollapsibleChildToggle = (columnId: string) => {
-    if (onColumnConfigChange) {
-      const column = columns.find(col => col.key === columnId);
-      if (column) {
-        onColumnConfigChange(columnId, {
-          collapsibleChild: !column.collapsibleChild
-        });
-      }
     }
   };
 
@@ -120,90 +106,54 @@ export function ColumnVisibilityManager({
             {filteredColumns.map((column) => {
               const isVisible = !preferences.hiddenColumns.includes(column.key);
               const isMandatory = column.mandatory;
-              const isCollapsibleChild = column.collapsibleChild;
 
               return (
                 <div
                   key={column.key}
                   className={cn(
-                    "rounded-lg border transition-colors",
+                    "flex items-center justify-between p-3 rounded-lg border transition-colors",
                     isVisible ? "bg-white border-gray-200" : "bg-gray-50 border-gray-100"
                   )}
                 >
-                  {/* Main row */}
-                  <div className="flex items-center justify-between p-3">
-                    <div className="flex items-center space-x-3 flex-1 min-w-0">
-                      <Checkbox
-                        checked={isVisible}
-                        onCheckedChange={() => !isMandatory && onColumnVisibilityToggle(column.key)}
-                        disabled={isMandatory}
-                        className="flex-shrink-0"
-                      />
+                  <div className="flex items-center space-x-3 flex-1 min-w-0">
+                    <Checkbox
+                      checked={isVisible}
+                      onCheckedChange={() => !isMandatory && onColumnVisibilityToggle(column.key)}
+                      disabled={isMandatory}
+                      className="flex-shrink-0"
+                    />
+                    
+                    <div className="flex items-center space-x-2 min-w-0">
+                      {isVisible ? (
+                        <Eye className="h-4 w-4 text-green-600 flex-shrink-0" />
+                      ) : (
+                        <EyeOff className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                      )}
                       
-                      <div className="flex items-center space-x-2 min-w-0">
-                        {isVisible ? (
-                          <Eye className="h-4 w-4 text-green-600 flex-shrink-0" />
-                        ) : (
-                          <EyeOff className="h-4 w-4 text-gray-400 flex-shrink-0" />
-                        )}
-                        
-                        <div className="min-w-0">
-                          <div className="font-medium text-sm truncate">
-                            {column.label}
-                          </div>
-                          <div className="text-xs text-gray-500 truncate">
-                            {column.key}
-                          </div>
+                      <div className="min-w-0">
+                        <div className="font-medium text-sm truncate">
+                          {column.label}
+                        </div>
+                        <div className="text-xs text-gray-500 truncate">
+                          {column.key}
                         </div>
                       </div>
-                    </div>
-
-                    <div className="flex items-center space-x-2 flex-shrink-0">
-                      {isMandatory && (
-                        <span className="text-xs bg-orange-100 text-orange-700 px-2 py-1 rounded font-medium">
-                          Required
-                        </span>
-                      )}
-                      
-                      {column.type && (
-                        <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded">
-                          {column.type}
-                        </span>
-                      )}
-
-                      {isCollapsibleChild && (
-                        <span className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded">
-                          Collapsible
-                        </span>
-                      )}
                     </div>
                   </div>
 
-                  {/* Collapsible Child Configuration */}
-                  {onColumnConfigChange && (
-                    <div className="px-3 pb-3 border-t border-gray-100">
-                      <div className="flex items-center justify-between pt-2">
-                        <div className="flex items-center space-x-2">
-                          {isCollapsibleChild ? (
-                            <ChevronDown className="h-4 w-4 text-purple-600" />
-                          ) : (
-                            <ChevronRight className="h-4 w-4 text-gray-400" />
-                          )}
-                          <span className="text-sm text-gray-600">Collapsible Child</span>
-                        </div>
-                        <Checkbox
-                          checked={isCollapsibleChild}
-                          onCheckedChange={() => handleCollapsibleChildToggle(column.key)}
-                          className="flex-shrink-0"
-                        />
-                      </div>
-                      {isCollapsibleChild && (
-                        <div className="mt-2 p-2 bg-purple-50 rounded text-xs text-purple-700">
-                          This column will be shown in the expandable row details
-                        </div>
-                      )}
-                    </div>
-                  )}
+                  <div className="flex items-center space-x-2 flex-shrink-0">
+                    {isMandatory && (
+                      <span className="text-xs bg-orange-100 text-orange-700 px-2 py-1 rounded font-medium">
+                        Required
+                      </span>
+                    )}
+                    
+                    {column.type && (
+                      <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded">
+                        {column.type}
+                      </span>
+                    )}
+                  </div>
                 </div>
               );
             })}
@@ -227,14 +177,6 @@ export function ColumnVisibilityManager({
                 <span>Hidden columns:</span>
                 <span className="font-medium">{totalCount - visibleCount}</span>
               </div>
-              {hasCollapsibleChildren && (
-                <div className="flex justify-between mt-1">
-                  <span>Collapsible children:</span>
-                  <span className="font-medium text-purple-700">
-                    {columns.filter(col => col.collapsibleChild).length}
-                  </span>
-                </div>
-              )}
             </div>
           </div>
         </div>

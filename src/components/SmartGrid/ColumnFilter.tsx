@@ -2,45 +2,66 @@
 import React, { useState, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { X } from 'lucide-react';
-import { FilterConfig } from '@/types/smartgrid';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Filter, X } from 'lucide-react';
+import { GridColumnConfig, FilterConfig } from '@/types/smartgrid';
+import { cn } from '@/lib/utils';
 
 interface ColumnFilterProps {
-  column: any; // TanStack table column
-  table: any; // TanStack table instance
+  column: GridColumnConfig;
+  currentFilter?: FilterConfig;
+  onFilterChange: (filter: FilterConfig | null) => void;
 }
 
-export function ColumnFilter({ column, table }: ColumnFilterProps) {
-  const [value, setValue] = useState(column.getFilterValue() || '');
+export function ColumnFilter({ column, currentFilter, onFilterChange }: ColumnFilterProps) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [value, setValue] = useState('');
 
+  // Update local value when currentFilter changes
   useEffect(() => {
-    setValue(column.getFilterValue() || '');
-  }, [column.getFilterValue()]);
+    setValue(currentFilter?.value || '');
+  }, [currentFilter]);
 
-  const handleFilterChange = (newValue: string) => {
-    setValue(newValue);
-    column.setFilterValue(newValue || undefined);
+  if (!column.filterable) {
+    return null;
+  }
+
+  const handleApplyFilter = () => {
+    if (value.trim()) {
+      onFilterChange({
+        column: column.key,
+        value: value.trim(),
+        operator: 'contains'
+      });
+    } else {
+      onFilterChange(null);
+    }
+    setIsOpen(false);
   };
 
   const handleClearFilter = () => {
     setValue('');
-    column.setFilterValue(undefined);
+    onFilterChange(null);
+    setIsOpen(false);
   };
 
-  const hasActiveFilter = column.getFilterValue();
+  const hasActiveFilter = currentFilter && currentFilter.value;
 
   return (
-    <div className="relative w-full">
+    <div className="w-full">
       <Input
         value={value}
-        onChange={(e) => handleFilterChange(e.target.value)}
-        placeholder={`Filter...`}
-        className="h-8 text-xs pr-8"
+        onChange={(e) => setValue(e.target.value)}
+        placeholder={`Filter ${column.label.toLowerCase()}...`}
+        className="h-8 text-xs"
         onKeyDown={(e) => {
-          if (e.key === 'Escape') {
+          if (e.key === 'Enter') {
+            handleApplyFilter();
+          } else if (e.key === 'Escape') {
             handleClearFilter();
           }
         }}
+        onBlur={handleApplyFilter}
       />
       {hasActiveFilter && (
         <Button

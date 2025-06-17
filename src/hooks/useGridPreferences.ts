@@ -1,29 +1,20 @@
 
 import { useState, useCallback, useEffect } from 'react';
-import { GridPreferences, GridColumnConfig, SortConfig, FilterConfig } from '@/types/smartgrid';
+import { GridPreferences, Column } from '@/types/smartgrid';
 
-interface UseGridPreferencesProps {
-  columns: GridColumnConfig[];
-  persistPreferences?: boolean;
-  preferencesKey?: string;
-  onPreferenceSave?: (preferences: GridPreferences) => Promise<void>;
-  onPreferenceLoad?: () => Promise<GridPreferences | null>;
-}
-
-export function useGridPreferences({
-  columns,
-  persistPreferences,
-  preferencesKey,
-  onPreferenceSave,
-  onPreferenceLoad
-}: UseGridPreferencesProps) {
+export function useGridPreferences<T>(
+  columns: Column<T>[],
+  persistPreferences?: boolean,
+  preferencesKey?: string,
+  onPreferenceSave?: (preferences: GridPreferences) => Promise<void>,
+  onPreferenceLoad?: () => Promise<GridPreferences | null>
+) {
   const defaultPreferences: GridPreferences = {
-    columnOrder: columns.map(col => col.key),
+    columnOrder: columns.map(col => col.id),
     hiddenColumns: [],
     columnWidths: {},
     columnHeaders: {},
-    filters: [],
-    pageSize: 10
+    filters: []
   };
 
   const [preferences, setPreferences] = useState<GridPreferences>(defaultPreferences);
@@ -65,8 +56,8 @@ export function useGridPreferences({
           ...defaultPreferences,
           ...loadedPreferences,
           columnOrder: [
-            ...loadedPreferences.columnOrder.filter(id => columns.some(col => col.key === id)),
-            ...columns.filter(col => !loadedPreferences.columnOrder.includes(col.key)).map(col => col.key)
+            ...loadedPreferences.columnOrder.filter(id => columns.some(col => col.id === id)),
+            ...columns.filter(col => !loadedPreferences.columnOrder.includes(col.id)).map(col => col.id)
           ]
         };
         setPreferences(mergedPreferences);
@@ -87,7 +78,7 @@ export function useGridPreferences({
   }, [preferences, savePreferences]);
 
   const toggleColumnVisibility = useCallback((columnId: string) => {
-    const column = columns.find(col => col.key === columnId);
+    const column = columns.find(col => col.id === columnId);
     if (column?.mandatory) return; // Can't hide mandatory columns
 
     const hiddenColumns = preferences.hiddenColumns.includes(columnId)
@@ -114,48 +105,12 @@ export function useGridPreferences({
     savePreferences(newPreferences);
   }, [preferences, savePreferences]);
 
-  const resetPreferences = useCallback(() => {
-    savePreferences(defaultPreferences);
-  }, [savePreferences, defaultPreferences]);
-
-  const setColumnOrder = useCallback((newOrder: string[]) => {
-    updateColumnOrder(newOrder);
-  }, [updateColumnOrder]);
-
-  const setColumnHeader = useCallback((columnId: string, header: string) => {
-    updateColumnHeader(columnId, header);
-  }, [updateColumnHeader]);
-
-  const applySort = useCallback((sortConfig: SortConfig) => {
-    const newPreferences = { ...preferences, sort: sortConfig };
-    savePreferences(newPreferences);
-  }, [preferences, savePreferences]);
-
-  const applyFilter = useCallback((filterConfig: FilterConfig) => {
-    const existingFilters = preferences.filters.filter(f => f.column !== filterConfig.column);
-    const newFilters = filterConfig.value ? [...existingFilters, filterConfig] : existingFilters;
-    const newPreferences = { ...preferences, filters: newFilters };
-    savePreferences(newPreferences);
-  }, [preferences, savePreferences]);
-
-  const setPageSize = useCallback((pageSize: number) => {
-    const newPreferences = { ...preferences, pageSize };
-    savePreferences(newPreferences);
-  }, [preferences, savePreferences]);
-
   return {
     preferences,
-    setPreferences,
-    resetPreferences,
     updateColumnOrder,
     toggleColumnVisibility,
     updateColumnWidth,
     updateColumnHeader,
-    setColumnOrder,
-    setColumnHeader,
-    applySort,
-    applyFilter,
-    setPageSize,
     savePreferences
   };
 }
