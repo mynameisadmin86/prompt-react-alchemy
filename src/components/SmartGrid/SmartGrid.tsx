@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -186,14 +185,17 @@ export function SmartGrid({
   // Handle column-specific filter changes
   const handleColumnFilterChange = useCallback((filter: FilterConfig | null) => {
     if (!filter) {
-      // Remove filter for this column
-      setFilters(prev => prev.filter(f => f.column !== filter?.column));
+      // If filter is null, we need to find which column to clear
+      // This is a limitation of the current design, but we'll handle it
       return;
     }
 
     setFilters(prev => {
       const existing = prev.find(f => f.column === filter.column);
-      if (existing) {
+      if (filter.value === '' || filter.value == null) {
+        // Remove filter if value is empty
+        return prev.filter(f => f.column !== filter.column);
+      } else if (existing) {
         // Update existing filter
         return prev.map(f => f.column === filter.column ? filter : f);
       } else {
@@ -955,7 +957,7 @@ export function SmartGrid({
                 )}
               </TableRow>
               
-              {/* Column Filter Row - Only show when filters are enabled */}
+              {/* Column Filter Row - Fixed implementation */}
               {showColumnFilters && (
                 <TableRow className="hover:bg-transparent border-b border-gray-200">
                   {/* Checkbox column space */}
@@ -969,14 +971,20 @@ export function SmartGrid({
                     return (
                       <TableHead 
                         key={`filter-${column.key}`}
-                        className="bg-gray-25 px-2 py-2 border-r border-gray-100 last:border-r-0"
+                        className="bg-gray-25 px-2 py-2 border-r border-gray-100 last:border-r-0 relative"
                         style={{ width: `${column.width}px` }}
                       >
                         {column.filterable && (
                           <ColumnFilter
                             column={column}
                             currentFilter={currentFilter}
-                            onFilterChange={handleColumnFilterChange}
+                            onFilterChange={(filter) => {
+                              if (filter) {
+                                handleColumnFilterChange(filter);
+                              } else {
+                                handleClearColumnFilter(column.key);
+                              }
+                            }}
                           />
                         )}
                       </TableHead>
