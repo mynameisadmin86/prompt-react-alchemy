@@ -1,7 +1,8 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Switch } from '@/components/ui/switch';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -233,18 +234,35 @@ export function ColumnVisibilityManager({
                       </div>
                     </div>
 
-                    {/* Sub-row setting - always available at column level */}
+                    {/* Sub-row setting with radio buttons */}
                     {onSubRowToggle && (
                       <div className="flex items-center justify-between pl-6 pt-2 border-t border-gray-100">
                         <div className="flex items-center space-x-2">
                           <ChevronDown className="h-3 w-3 text-purple-600" />
                           <span className="text-xs text-gray-600">Show in sub-row</span>
                         </div>
-                        <Switch
-                          checked={isSubRow}
-                          onCheckedChange={() => onSubRowToggle(column.key)}
-                          className="h-4 w-7 data-[state=checked]:bg-purple-600"
-                        />
+                        <RadioGroup
+                          value={isSubRow ? "enabled" : "disabled"}
+                          onValueChange={(value) => {
+                            if ((value === "enabled") !== isSubRow) {
+                              onSubRowToggle(column.key);
+                            }
+                          }}
+                          className="flex items-center space-x-4"
+                        >
+                          <div className="flex items-center space-x-1">
+                            <RadioGroupItem value="disabled" id={`${column.key}-disabled`} className="h-3 w-3" />
+                            <label htmlFor={`${column.key}-disabled`} className="text-xs text-gray-600 cursor-pointer">
+                              No
+                            </label>
+                          </div>
+                          <div className="flex items-center space-x-1">
+                            <RadioGroupItem value="enabled" id={`${column.key}-enabled`} className="h-3 w-3" />
+                            <label htmlFor={`${column.key}-enabled`} className="text-xs text-purple-600 cursor-pointer">
+                              Yes
+                            </label>
+                          </div>
+                        </RadioGroup>
                       </div>
                     )}
                   </div>
