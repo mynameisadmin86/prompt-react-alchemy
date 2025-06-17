@@ -67,7 +67,8 @@ const GridDemo = () => {
       label: 'Planned Start and End Date Time',
       type: 'EditableText',
       sortable: true,
-      editable: true
+      editable: true,
+      subRow: true // Make this column a sub-row column
     },
     {
       key: 'actualStartEndDateTime',
@@ -93,7 +94,7 @@ const GridDemo = () => {
       sortable: true,
       editable: false,
       infoTextField: 'arrivalPointDetails',
-      collapsibleChild: true // Make this column collapsible
+      collapsapsibleChild: true // Make this column collapsible
     },
     {
       key: 'customer',
