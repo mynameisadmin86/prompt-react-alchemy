@@ -39,6 +39,10 @@ interface SampleData {
 
 const GridDemo = () => {
   const [selectedRows, setSelectedRows] = useState<Set<number>>(new Set());
+  const [preferences, setPreferences] = useState({
+    columnHeaders: {} as Record<string, string>,
+    hiddenColumns: [] as string[]
+  });
   const [columns, setColumns] = useState<GridColumnConfig[]>([
     {
       key: 'id',
@@ -93,7 +97,7 @@ const GridDemo = () => {
       sortable: true,
       editable: false,
       infoTextField: 'arrivalPointDetails',
-      collapsibleChild: true // Make this column collapsible
+      collapsapsibleChild: true // Make this column collapsible
     },
     {
       key: 'customer',
@@ -381,6 +385,21 @@ const GridDemo = () => {
     );
   };
 
+  const handleColumnHeaderChange = (columnKey: string, newHeader: string) => {
+    setPreferences(prev => ({
+      ...prev,
+      columnHeaders: {
+        ...prev.columnHeaders,
+        [columnKey]: newHeader
+      }
+    }));
+    
+    toast({
+      title: "Header Updated",
+      description: `Column header changed to "${newHeader}"`
+    });
+  };
+
   const getRowClassName = (row: any, index: number) => {
     console.log(`Row ${index} selected:`, selectedRows.has(index));
     return selectedRows.has(index) ? '!bg-blue-50 !border-l-4 !border-blue-500 !border-l-blue-500' : '';
@@ -440,6 +459,7 @@ const GridDemo = () => {
             onLinkClick={handleLinkClick}
             onUpdate={handleUpdate}
             onSubRowToggle={handleSubRowToggle}
+            onColumnHeaderChange={handleColumnHeaderChange}
             selectedRows={selectedRows}
             onSelectionChange={handleRowSelection}
             rowClassName={(row: any, index: number) => 
