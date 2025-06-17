@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -5,7 +6,7 @@ import { Switch } from '@/components/ui/switch';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Settings2, Eye, EyeOff, Search, RotateCcw, ChevronDown, Check, X, Info } from 'lucide-react';
+import { Settings2, Eye, EyeOff, Search, RotateCcw, ChevronDown, Check, X } from 'lucide-react';
 import { GridColumnConfig, GridPreferences } from '@/types/smartgrid';
 import { cn } from '@/lib/utils';
 
@@ -15,7 +16,6 @@ interface ColumnVisibilityManagerProps {
   onColumnVisibilityToggle: (columnId: string) => void;
   onColumnHeaderChange?: (columnId: string, newHeader: string) => void;
   onSubRowToggle?: (columnId: string) => void;
-  onSubRowConfigToggle?: (enabled: boolean) => void;
   onResetToDefaults: () => void;
 }
 
@@ -25,7 +25,6 @@ export function ColumnVisibilityManager({
   onColumnVisibilityToggle,
   onColumnHeaderChange,
   onSubRowToggle,
-  onSubRowConfigToggle,
   onResetToDefaults
 }: ColumnVisibilityManagerProps) {
   const [isOpen, setIsOpen] = useState(false);
@@ -41,8 +40,6 @@ export function ColumnVisibilityManager({
   const visibleCount = columns.filter(col => !preferences.hiddenColumns.includes(col.key)).length;
   const totalCount = columns.length;
   const subRowCount = preferences.subRowColumns?.length || 0;
-
-  const isSubRowConfigEnabled = preferences.enableSubRowConfig || false;
 
   const handleToggleAll = () => {
     const allVisible = preferences.hiddenColumns.length === 0;
@@ -116,29 +113,6 @@ export function ColumnVisibilityManager({
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-9"
-              />
-            </div>
-
-            {/* Sub-row Configuration Toggle */}
-            <div className="flex items-center justify-between py-3 px-4 bg-purple-50 rounded-lg border border-purple-200">
-              <div className="flex items-center space-x-2">
-                <ChevronDown className="h-4 w-4 text-purple-600" />
-                <span className="text-sm font-medium text-purple-900">Enable Sub-row Configuration</span>
-                {!isSubRowConfigEnabled && (
-                  <Tooltip>
-                    <TooltipTrigger>
-                      <Info className="h-3 w-3 text-purple-500" />
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Sub-row feature is turned off</p>
-                    </TooltipContent>
-                  </Tooltip>
-                )}
-              </div>
-              <Switch
-                checked={isSubRowConfigEnabled}
-                onCheckedChange={onSubRowConfigToggle}
-                className="data-[state=checked]:bg-purple-600"
               />
             </div>
 
@@ -245,7 +219,7 @@ export function ColumnVisibilityManager({
                           </span>
                         )}
                         
-                        {isSubRow && isSubRowConfigEnabled && (
+                        {isSubRow && (
                           <span className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded font-medium flex items-center gap-1">
                             <ChevronDown className="h-3 w-3" />
                             Sub-row
@@ -260,8 +234,8 @@ export function ColumnVisibilityManager({
                       </div>
                     </div>
 
-                    {/* Sub-row setting - only show when sub-row config is enabled */}
-                    {onSubRowToggle && isSubRowConfigEnabled && (
+                    {/* Sub-row setting - always available at column level */}
+                    {onSubRowToggle && (
                       <div className="flex items-center justify-between pl-6 pt-2 border-t border-gray-100">
                         <div className="flex items-center space-x-2">
                           <ChevronDown className="h-3 w-3 text-purple-600" />
@@ -297,12 +271,10 @@ export function ColumnVisibilityManager({
                   <span>Hidden columns:</span>
                   <span className="font-medium">{totalCount - visibleCount}</span>
                 </div>
-                {isSubRowConfigEnabled && (
-                  <div className="flex justify-between mt-1">
-                    <span>Sub-row columns:</span>
-                    <span className="font-medium">{subRowCount}</span>
-                  </div>
-                )}
+                <div className="flex justify-between mt-1">
+                  <span>Sub-row columns:</span>
+                  <span className="font-medium">{subRowCount}</span>
+                </div>
               </div>
             </div>
           </div>
