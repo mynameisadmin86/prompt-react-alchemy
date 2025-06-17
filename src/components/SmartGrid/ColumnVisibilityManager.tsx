@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Settings2, Eye, EyeOff, Search, RotateCcw, ChevronDown, Edit2, Check, X } from 'lucide-react';
+import { Settings2, Eye, EyeOff, Search, RotateCcw, ChevronDown, Check, X } from 'lucide-react';
 import { GridColumnConfig, GridPreferences } from '@/types/smartgrid';
 import { cn } from '@/lib/utils';
 
@@ -192,26 +192,16 @@ export function ColumnVisibilityManager({
                               </Button>
                             </div>
                           ) : (
-                            <div className="group/label flex items-center space-x-2">
-                              <div>
-                                <div className="font-medium text-sm truncate">
-                                  {displayLabel}
-                                </div>
-                                <div className="text-xs text-gray-500 truncate">
-                                  {column.key}
-                                </div>
+                            <div
+                              className="group/label cursor-pointer"
+                              onMouseEnter={() => onColumnHeaderChange && handleEditStart(column.key, displayLabel)}
+                            >
+                              <div className="font-medium text-sm truncate">
+                                {displayLabel}
                               </div>
-                              {onColumnHeaderChange && (
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => handleEditStart(column.key, displayLabel)}
-                                  className="h-5 w-5 p-0 opacity-0 group-hover/label:opacity-100 transition-opacity"
-                                  title="Edit column name"
-                                >
-                                  <Edit2 className="h-3 w-3" />
-                                </Button>
-                              )}
+                              <div className="text-xs text-gray-500 truncate">
+                                {column.key}
+                              </div>
                             </div>
                           )}
                         </div>
