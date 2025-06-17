@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Settings2, Eye, EyeOff, Search, RotateCcw, ChevronDown, Edit2, Check, X } from 'lucide-react';
+import { Settings2, Eye, EyeOff, Search, RotateCcw, ChevronDown } from 'lucide-react';
 import { GridColumnConfig, GridPreferences } from '@/types/smartgrid';
 import { cn } from '@/lib/utils';
 
@@ -13,7 +13,6 @@ interface ColumnVisibilityManagerProps {
   preferences: GridPreferences;
   onColumnVisibilityToggle: (columnId: string) => void;
   onSubRowToggle?: (columnId: string) => void;
-  onColumnHeaderChange?: (columnId: string, newHeader: string) => void;
   onResetToDefaults: () => void;
 }
 
@@ -22,13 +21,10 @@ export function ColumnVisibilityManager({
   preferences,
   onColumnVisibilityToggle,
   onSubRowToggle,
-  onColumnHeaderChange,
   onResetToDefaults
 }: ColumnVisibilityManagerProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const [editingHeader, setEditingHeader] = useState<string | null>(null);
-  const [editingValue, setEditingValue] = useState('');
 
   const filteredColumns = columns.filter(column =>
     column.label.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -57,24 +53,6 @@ export function ColumnVisibilityManager({
     }
   };
 
-  const handleStartEditing = (columnKey: string, currentLabel: string) => {
-    setEditingHeader(columnKey);
-    setEditingValue(preferences.columnHeaders[columnKey] || currentLabel);
-  };
-
-  const handleSaveHeader = (columnKey: string) => {
-    if (onColumnHeaderChange && editingValue.trim()) {
-      onColumnHeaderChange(columnKey, editingValue.trim());
-    }
-    setEditingHeader(null);
-    setEditingValue('');
-  };
-
-  const handleCancelEditing = () => {
-    setEditingHeader(null);
-    setEditingValue('');
-  };
-
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
@@ -84,7 +62,7 @@ export function ColumnVisibilityManager({
         </Button>
       </DialogTrigger>
       
-      <DialogContent className="max-w-lg max-h-[80vh] flex flex-col">
+      <DialogContent className="max-w-md max-h-[80vh] flex flex-col">
         <DialogHeader className="pb-4 border-b">
           <DialogTitle className="flex items-center justify-between">
             <span>Configure Columns</span>
@@ -131,8 +109,6 @@ export function ColumnVisibilityManager({
               const isVisible = !preferences.hiddenColumns.includes(column.key);
               const isMandatory = column.mandatory;
               const isCollapsibleChild = column.collapsibleChild;
-              const customHeader = preferences.columnHeaders[column.key];
-              const displayHeader = customHeader || column.label;
 
               return (
                 <div
@@ -158,62 +134,13 @@ export function ColumnVisibilityManager({
                           <EyeOff className="h-4 w-4 text-gray-400 flex-shrink-0" />
                         )}
                         
-                        <div className="min-w-0 flex-1">
-                          {editingHeader === column.key ? (
-                            <div className="flex items-center space-x-2">
-                              <Input
-                                value={editingValue}
-                                onChange={(e) => setEditingValue(e.target.value)}
-                                onKeyDown={(e) => {
-                                  if (e.key === 'Enter') {
-                                    handleSaveHeader(column.key);
-                                  } else if (e.key === 'Escape') {
-                                    handleCancelEditing();
-                                  }
-                                }}
-                                className="h-6 text-sm flex-1"
-                                autoFocus
-                              />
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                onClick={() => handleSaveHeader(column.key)}
-                                className="h-6 w-6 p-0"
-                              >
-                                <Check className="h-3 w-3 text-green-600" />
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                onClick={handleCancelEditing}
-                                className="h-6 w-6 p-0"
-                              >
-                                <X className="h-3 w-3 text-red-600" />
-                              </Button>
-                            </div>
-                          ) : (
-                            <div className="flex items-center space-x-2">
-                              <div>
-                                <div className="font-medium text-sm truncate">
-                                  {displayHeader}
-                                </div>
-                                <div className="text-xs text-gray-500 truncate">
-                                  {column.key}
-                                </div>
-                              </div>
-                              {onColumnHeaderChange && (
-                                <Button
-                                  size="sm"
-                                  variant="ghost"
-                                  onClick={() => handleStartEditing(column.key, column.label)}
-                                  className="h-6 w-6 p-0 opacity-60 hover:opacity-100"
-                                  title="Edit column header"
-                                >
-                                  <Edit2 className="h-3 w-3" />
-                                </Button>
-                              )}
-                            </div>
-                          )}
+                        <div className="min-w-0">
+                          <div className="font-medium text-sm truncate">
+                            {column.label}
+                          </div>
+                          <div className="text-xs text-gray-500 truncate">
+                            {column.key}
+                          </div>
                         </div>
                       </div>
                     </div>
