@@ -199,26 +199,20 @@ export function SmartGrid({
     }
 
     return (
-      <div className="space-y-4">
-        <div className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-4">
-          <ChevronDown className="h-4 w-4" />
-          Additional Details
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {collapsibleColumns.map((column) => {
-            const value = row[column.key];
-            return (
-              <div key={column.key} className="p-3 bg-gray-50 rounded-lg">
-                <div className="text-xs text-gray-500 uppercase tracking-wide mb-1">
-                  {column.label}
-                </div>
-                <div className="text-sm text-gray-900 font-medium">
-                  {renderCollapsibleCellValue(value, column)}
-                </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {collapsibleColumns.map((column) => {
+          const value = row[column.key];
+          return (
+            <div key={column.key} className="p-3 bg-gray-50 rounded-lg">
+              <div className="text-xs text-gray-500 uppercase tracking-wide mb-1">
+                {column.label}
               </div>
-            );
-          })}
-        </div>
+              <div className="text-sm text-gray-900 font-medium">
+                {renderCollapsibleCellValue(value, column)}
+              </div>
+            </div>
+          );
+        })}
       </div>
     );
   }, [hasCollapsibleColumns, collapsibleColumns]);
