@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Settings2, Eye, EyeOff, Search, RotateCcw, Filter, ArrowUpDown, Edit, Flag, ChevronDown } from 'lucide-react';
+import { Settings2, Eye, EyeOff, Search, RotateCcw } from 'lucide-react';
 import { GridColumnConfig, GridPreferences } from '@/types/smartgrid';
 import { cn } from '@/lib/utils';
 
@@ -51,28 +51,6 @@ export function ColumnVisibilityManager({
     }
   };
 
-  const getColumnFlags = (column: GridColumnConfig) => {
-    const flags = [];
-    
-    if (column.mandatory) {
-      flags.push({ icon: Flag, label: 'Required', className: 'text-red-600', bgClassName: 'bg-red-100' });
-    }
-    if (column.sortable) {
-      flags.push({ icon: ArrowUpDown, label: 'Sortable', className: 'text-blue-600', bgClassName: 'bg-blue-100' });
-    }
-    if (column.filterable) {
-      flags.push({ icon: Filter, label: 'Filterable', className: 'text-green-600', bgClassName: 'bg-green-100' });
-    }
-    if (column.editable) {
-      flags.push({ icon: Edit, label: 'Editable', className: 'text-purple-600', bgClassName: 'bg-purple-100' });
-    }
-    if (column.childRow) {
-      flags.push({ icon: ChevronDown, label: 'Sub-row', className: 'text-orange-600', bgClassName: 'bg-orange-100' });
-    }
-    
-    return flags;
-  };
-
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
@@ -82,7 +60,7 @@ export function ColumnVisibilityManager({
         </Button>
       </DialogTrigger>
       
-      <DialogContent className="max-w-2xl max-h-[80vh] flex flex-col">
+      <DialogContent className="max-w-md max-h-[80vh] flex flex-col">
         <DialogHeader className="pb-4 border-b">
           <DialogTitle className="flex items-center justify-between">
             <span>Configure Columns</span>
@@ -124,76 +102,57 @@ export function ColumnVisibilityManager({
           </div>
 
           {/* Column List */}
-          <div className="flex-1 overflow-y-auto space-y-3">
+          <div className="flex-1 overflow-y-auto space-y-2">
             {filteredColumns.map((column) => {
               const isVisible = !preferences.hiddenColumns.includes(column.key);
               const isMandatory = column.mandatory;
-              const flags = getColumnFlags(column);
 
               return (
                 <div
                   key={column.key}
                   className={cn(
-                    "flex items-start justify-between p-4 rounded-lg border transition-colors",
+                    "flex items-center justify-between p-3 rounded-lg border transition-colors",
                     isVisible ? "bg-white border-gray-200" : "bg-gray-50 border-gray-100"
                   )}
                 >
-                  <div className="flex items-start space-x-3 flex-1 min-w-0">
+                  <div className="flex items-center space-x-3 flex-1 min-w-0">
                     <Checkbox
                       checked={isVisible}
                       onCheckedChange={() => !isMandatory && onColumnVisibilityToggle(column.key)}
                       disabled={isMandatory}
-                      className="flex-shrink-0 mt-1"
+                      className="flex-shrink-0"
                     />
                     
-                    <div className="flex items-start space-x-2 min-w-0 flex-1">
+                    <div className="flex items-center space-x-2 min-w-0">
                       {isVisible ? (
-                        <Eye className="h-4 w-4 text-green-600 flex-shrink-0 mt-1" />
+                        <Eye className="h-4 w-4 text-green-600 flex-shrink-0" />
                       ) : (
-                        <EyeOff className="h-4 w-4 text-gray-400 flex-shrink-0 mt-1" />
+                        <EyeOff className="h-4 w-4 text-gray-400 flex-shrink-0" />
                       )}
                       
-                      <div className="min-w-0 flex-1">
-                        <div className="font-medium text-sm truncate mb-1">
+                      <div className="min-w-0">
+                        <div className="font-medium text-sm truncate">
                           {column.label}
                         </div>
-                        <div className="text-xs text-gray-500 truncate mb-2">
+                        <div className="text-xs text-gray-500 truncate">
                           {column.key}
                         </div>
-                        
-                        {/* Column Type Badge */}
-                        {column.type && (
-                          <div className="mb-2">
-                            <span className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded font-medium">
-                              {column.type}
-                            </span>
-                          </div>
-                        )}
-                        
-                        {/* Flags */}
-                        {flags.length > 0 && (
-                          <div className="flex flex-wrap gap-1">
-                            {flags.map((flag, index) => {
-                              const IconComponent = flag.icon;
-                              return (
-                                <div
-                                  key={index}
-                                  className={cn(
-                                    "flex items-center space-x-1 px-2 py-1 rounded text-xs font-medium",
-                                    flag.bgClassName,
-                                    flag.className
-                                  )}
-                                  title={flag.label}
-                                >
-                                  <IconComponent className="h-3 w-3" />
-                                  <span>{flag.label}</span>
-                                </div>
-                              );
-                            })}
-                          </div>
-                        )}
                       </div>
                     </div>
+                  </div>
+
+                  <div className="flex items-center space-x-2 flex-shrink-0">
+                    {isMandatory && (
+                      <span className="text-xs bg-orange-100 text-orange-700 px-2 py-1 rounded font-medium">
+                        Required
+                      </span>
+                    )}
+                    
+                    {column.type && (
+                      <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded">
+                        {column.type}
+                      </span>
+                    )}
                   </div>
                 </div>
               );

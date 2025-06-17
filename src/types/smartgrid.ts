@@ -1,3 +1,4 @@
+
 import React from 'react';
 
 export type GridColumnType =
@@ -23,7 +24,6 @@ export interface GridColumnConfig {
   order?: number;
   options?: string[];
   collapsibleChild?: boolean; // New property for collapsible row content
-  childRow?: boolean; // New property to indicate if this column enables child rows
   
   // Badge specific properties
   statusMap?: Record<string, string>;
@@ -119,8 +119,6 @@ export interface SmartGridProps {
   selectedRows?: Set<number>;
   onSelectionChange?(selectedRows: Set<number>): void;
   rowClassName?: (row: any, index: number) => string;
-  enableCollapsibleRows?: boolean; // Add new prop
-  renderChildRow?: (rowData: any) => React.ReactNode; // New prop for rendering child content
 }
 
 // Legacy interface for backward compatibility
