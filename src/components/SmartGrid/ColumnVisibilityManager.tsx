@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -77,6 +76,15 @@ export function ColumnVisibilityManager({
     setEditingValue('');
   };
 
+  const handleSubRowToggle = (columnKey: string, shouldShow: boolean) => {
+    if (onSubRowToggle) {
+      const isCurrentlySubRow = preferences.subRowColumns?.includes(columnKey) || false;
+      if (shouldShow !== isCurrentlySubRow) {
+        onSubRowToggle(columnKey);
+      }
+    }
+  };
+
   return (
     <TooltipProvider>
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -87,7 +95,7 @@ export function ColumnVisibilityManager({
           </Button>
         </DialogTrigger>
         
-        <DialogContent className="max-w-4xl max-h-[85vh] flex flex-col">
+        <DialogContent className="max-w-3xl max-h-[85vh] flex flex-col">
           <DialogHeader className="pb-4 border-b">
             <DialogTitle className="flex items-center justify-between">
               <span>Configure Columns</span>
@@ -234,48 +242,42 @@ export function ColumnVisibilityManager({
                       </div>
                     </div>
 
-                    {/* Sub-row Configuration Section - Always visible when onSubRowToggle is provided */}
-                    <div className="pt-3 border-t border-gray-100 bg-gray-25">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-2">
-                          <ChevronDown className="h-4 w-4 text-purple-600" />
-                          <span className="text-sm text-gray-700 font-medium">Show in sub-row</span>
-                          <span className="text-xs text-gray-500">(displays additional details below main row)</span>
-                        </div>
-                        
-                        <div className="flex items-center space-x-8 bg-white rounded-lg border border-gray-200 p-2">
-                          <label className="flex items-center space-x-2 cursor-pointer">
-                            <input
-                              type="radio"
-                              name={`subrow-${column.key}`}
-                              checked={!isSubRow}
-                              onChange={() => {
-                                if (isSubRow && onSubRowToggle) {
-                                  onSubRowToggle(column.key);
-                                }
-                              }}
-                              className="h-4 w-4 text-gray-600 border-gray-300 focus:ring-gray-500"
-                            />
-                            <span className="text-sm text-gray-700">No</span>
-                          </label>
+                    {/* Sub-row Configuration Section */}
+                    {onSubRowToggle && (
+                      <div className="pt-3 border-t border-gray-100 bg-gray-50/50 rounded-lg p-3">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-2">
+                            <ChevronDown className="h-4 w-4 text-purple-600" />
+                            <span className="text-sm text-gray-700 font-medium">Show in sub-row</span>
+                            <span className="text-xs text-gray-500">(displays additional details below main row)</span>
+                          </div>
                           
-                          <label className="flex items-center space-x-2 cursor-pointer">
-                            <input
-                              type="radio"
-                              name={`subrow-${column.key}`}
-                              checked={isSubRow}
-                              onChange={() => {
-                                if (!isSubRow && onSubRowToggle) {
-                                  onSubRowToggle(column.key);
-                                }
-                              }}
-                              className="h-4 w-4 text-purple-600 border-purple-300 focus:ring-purple-500"
-                            />
-                            <span className="text-sm text-purple-700 font-medium">Yes</span>
-                          </label>
+                          <div className="flex items-center space-x-4 bg-white rounded-lg border border-gray-200 p-2">
+                            <label className="flex items-center space-x-2 cursor-pointer">
+                              <input
+                                type="radio"
+                                name={`subrow-${column.key}`}
+                                checked={!isSubRow}
+                                onChange={() => handleSubRowToggle(column.key, false)}
+                                className="h-4 w-4 text-gray-600 border-gray-300 focus:ring-gray-500 focus:ring-2"
+                              />
+                              <span className="text-sm text-gray-700">No</span>
+                            </label>
+                            
+                            <label className="flex items-center space-x-2 cursor-pointer">
+                              <input
+                                type="radio"
+                                name={`subrow-${column.key}`}
+                                checked={isSubRow}
+                                onChange={() => handleSubRowToggle(column.key, true)}
+                                className="h-4 w-4 text-purple-600 border-purple-300 focus:ring-purple-500 focus:ring-2"
+                              />
+                              <span className="text-sm text-purple-700 font-medium">Yes</span>
+                            </label>
+                          </div>
                         </div>
                       </div>
-                    </div>
+                    )}
                   </div>
                 );
               })}
