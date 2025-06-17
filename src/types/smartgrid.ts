@@ -114,6 +114,7 @@ export interface SmartGridProps {
   onUpdate?(row: any): Promise<void>;
   onLinkClick?(rowData: any, columnKey: string): void;
   onSubRowToggle?(columnKey: string): void;
+  onColumnHeaderChange?(columnKey: string, newHeader: string): void;
   paginationMode?: 'pagination' | 'infinite';
   nestedRowRenderer?(row: any): React.ReactNode;
   plugins?: GridPlugin[];

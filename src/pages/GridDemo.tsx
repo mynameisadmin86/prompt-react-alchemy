@@ -93,7 +93,7 @@ const GridDemo = () => {
       sortable: true,
       editable: false,
       infoTextField: 'arrivalPointDetails',
-      collapsibleChild: true // Make this column collapsible
+      collapsapsibleChild: true // Make this column collapsible
     },
     {
       key: 'customer',
@@ -381,6 +381,21 @@ const GridDemo = () => {
     );
   };
 
+  const handleColumnHeaderChange = (columnKey: string, newHeader: string) => {
+    setColumns(prevColumns => 
+      prevColumns.map(col => 
+        col.key === columnKey 
+          ? { ...col, label: newHeader }
+          : col
+      )
+    );
+    
+    toast({
+      title: "Column Updated",
+      description: `Column header changed to "${newHeader}"`
+    });
+  };
+
   const getRowClassName = (row: any, index: number) => {
     console.log(`Row ${index} selected:`, selectedRows.has(index));
     return selectedRows.has(index) ? '!bg-blue-50 !border-l-4 !border-blue-500 !border-l-blue-500' : '';
@@ -440,6 +455,7 @@ const GridDemo = () => {
             onLinkClick={handleLinkClick}
             onUpdate={handleUpdate}
             onSubRowToggle={handleSubRowToggle}
+            onColumnHeaderChange={handleColumnHeaderChange}
             selectedRows={selectedRows}
             onSelectionChange={handleRowSelection}
             rowClassName={(row: any, index: number) => 

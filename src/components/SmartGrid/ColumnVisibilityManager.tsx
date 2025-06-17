@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Settings2, Eye, EyeOff, Search, RotateCcw, ChevronDown } from 'lucide-react';
+import { Settings2, Eye, EyeOff, Search, RotateCcw, ChevronDown, Edit2, Check, X } from 'lucide-react';
 import { GridColumnConfig, GridPreferences } from '@/types/smartgrid';
 import { cn } from '@/lib/utils';
 
@@ -13,6 +13,7 @@ interface ColumnVisibilityManagerProps {
   preferences: GridPreferences;
   onColumnVisibilityToggle: (columnId: string) => void;
   onSubRowToggle?: (columnId: string) => void;
+  onColumnHeaderChange?: (columnKey: string, newHeader: string) => void;
   onResetToDefaults: () => void;
 }
 
@@ -21,10 +22,13 @@ export function ColumnVisibilityManager({
   preferences,
   onColumnVisibilityToggle,
   onSubRowToggle,
+  onColumnHeaderChange,
   onResetToDefaults
 }: ColumnVisibilityManagerProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [editingHeader, setEditingHeader] = useState<string | null>(null);
+  const [tempHeaderValue, setTempHeaderValue] = useState('');
 
   const filteredColumns = columns.filter(column =>
     column.label.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -50,6 +54,32 @@ export function ColumnVisibilityManager({
       preferences.hiddenColumns.forEach(columnId => {
         onColumnVisibilityToggle(columnId);
       });
+    }
+  };
+
+  const handleStartEdit = (columnKey: string, currentLabel: string) => {
+    setEditingHeader(columnKey);
+    setTempHeaderValue(currentLabel);
+  };
+
+  const handleSaveEdit = (columnKey: string) => {
+    if (onColumnHeaderChange && tempHeaderValue.trim() !== '') {
+      onColumnHeaderChange(columnKey, tempHeaderValue.trim());
+    }
+    setEditingHeader(null);
+    setTempHeaderValue('');
+  };
+
+  const handleCancelEdit = () => {
+    setEditingHeader(null);
+    setTempHeaderValue('');
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent, columnKey: string) => {
+    if (e.key === 'Enter') {
+      handleSaveEdit(columnKey);
+    } else if (e.key === 'Escape') {
+      handleCancelEdit();
     }
   };
 
@@ -109,6 +139,7 @@ export function ColumnVisibilityManager({
               const isVisible = !preferences.hiddenColumns.includes(column.key);
               const isMandatory = column.mandatory;
               const isCollapsibleChild = column.collapsibleChild;
+              const isEditingThisHeader = editingHeader === column.key;
 
               return (
                 <div
@@ -134,13 +165,56 @@ export function ColumnVisibilityManager({
                           <EyeOff className="h-4 w-4 text-gray-400 flex-shrink-0" />
                         )}
                         
-                        <div className="min-w-0">
-                          <div className="font-medium text-sm truncate">
-                            {column.label}
-                          </div>
-                          <div className="text-xs text-gray-500 truncate">
-                            {column.key}
-                          </div>
+                        <div className="min-w-0 flex-1">
+                          {isEditingThisHeader ? (
+                            <div className="flex items-center space-x-2">
+                              <Input
+                                value={tempHeaderValue}
+                                onChange={(e) => setTempHeaderValue(e.target.value)}
+                                onKeyDown={(e) => handleKeyPress(e, column.key)}
+                                className="h-7 text-sm"
+                                autoFocus
+                              />
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => handleSaveEdit(column.key)}
+                                className="h-7 w-7 p-0"
+                              >
+                                <Check className="h-3 w-3 text-green-600" />
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={handleCancelEdit}
+                                className="h-7 w-7 p-0"
+                              >
+                                <X className="h-3 w-3 text-red-600" />
+                              </Button>
+                            </div>
+                          ) : (
+                            <div className="flex items-center space-x-2">
+                              <div>
+                                <div className="font-medium text-sm truncate">
+                                  {column.label}
+                                </div>
+                                <div className="text-xs text-gray-500 truncate">
+                                  {column.key}
+                                </div>
+                              </div>
+                              {onColumnHeaderChange && (
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  onClick={() => handleStartEdit(column.key, column.label)}
+                                  className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 hover:opacity-100"
+                                  title="Edit column name"
+                                >
+                                  <Edit2 className="h-3 w-3" />
+                                </Button>
+                              )}
+                            </div>
+                          )}
                         </div>
                       </div>
                     </div>
