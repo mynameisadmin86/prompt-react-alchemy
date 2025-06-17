@@ -194,8 +194,9 @@ export function SmartGrid({
 
   // Custom nested row renderer for collapsible content
   const renderCollapsibleContent = useCallback((row: any) => {
-    // Show all columns in the collapsible section
-    const allColumns = columns;
+    if (!hasCollapsibleColumns || collapsibleColumns.length === 0) {
+      return null;
+    }
 
     return (
       <div className="space-y-4">
@@ -204,7 +205,7 @@ export function SmartGrid({
           Additional Details
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {allColumns.map((column) => {
+          {collapsibleColumns.map((column) => {
             const value = row[column.key];
             return (
               <div key={column.key} className="p-3 bg-gray-50 rounded-lg">
@@ -220,7 +221,7 @@ export function SmartGrid({
         </div>
       </div>
     );
-  }, [columns]);
+  }, [hasCollapsibleColumns, collapsibleColumns]);
 
   // Helper function to render collapsible cell values
   const renderCollapsibleCellValue = useCallback((value: any, column: GridColumnConfig) => {

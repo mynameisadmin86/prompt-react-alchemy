@@ -39,7 +39,6 @@ interface SampleData {
 
 const GridDemo = () => {
   const [selectedRows, setSelectedRows] = useState<Set<number>>(new Set());
-  const [additionalDetailsColumns, setAdditionalDetailsColumns] = useState<string[]>(['actualStartEndDateTime', 'departurePoint']);
   const { toast } = useToast();
 
   const columns: GridColumnConfig[] = [
@@ -372,17 +371,6 @@ const GridDemo = () => {
     setSelectedRows(selectedRowIndices);
   };
 
-  const handleAdditionalDetailsToggle = (columnId: string) => {
-    console.log('Toggling additional details for column:', columnId);
-    setAdditionalDetailsColumns(prev => {
-      if (prev.includes(columnId)) {
-        return prev.filter(id => id !== columnId);
-      } else {
-        return [...prev, columnId];
-      }
-    });
-  };
-
   const getRowClassName = (row: any, index: number) => {
     console.log(`Row ${index} selected:`, selectedRows.has(index));
     return selectedRows.has(index) ? '!bg-blue-50 !border-l-4 !border-blue-500 !border-l-blue-500' : '';
@@ -421,8 +409,6 @@ const GridDemo = () => {
         {/* Debug info */}
         <div className="text-sm text-gray-600">
           Selected rows: {Array.from(selectedRows).join(', ') || 'None'}
-          <br />
-          Additional Details Columns: {additionalDetailsColumns.join(', ') || 'None'}
         </div>
 
         {/* Grid Container */}
@@ -448,8 +434,6 @@ const GridDemo = () => {
             rowClassName={(row: any, index: number) => 
               selectedRows.has(index) ? 'smart-grid-row-selected' : ''
             }
-            additionalDetailsColumns={additionalDetailsColumns}
-            onAdditionalDetailsToggle={handleAdditionalDetailsToggle}
           />
           
           {/* Footer with action buttons matching the screenshot style */}
