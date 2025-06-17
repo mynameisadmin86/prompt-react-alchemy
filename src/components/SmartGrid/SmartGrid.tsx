@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import {
   useReactTable,
@@ -168,10 +167,19 @@ export function SmartGrid({
           }
 
           if (column.type === 'EditableText' && isEditable && editingRow === info.row.index) {
+            // Create a compatible column object for CellEditor
+            const legacyColumn = {
+              id: column.key,
+              header: column.label,
+              accessor: column.key,
+              type: 'text' as const,
+              options: column.options?.map(opt => ({ label: opt, value: opt })) || []
+            };
+            
             return (
               <CellEditor
                 value={value}
-                column={column}
+                column={legacyColumn}
                 onSave={(newValue: any) => handleInlineEditSave(info.row.index, column.key, newValue)}
                 onCancel={handleInlineEditCancel}
               />
