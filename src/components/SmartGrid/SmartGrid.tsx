@@ -185,8 +185,6 @@ export function SmartGrid({
   // Handle column-specific filter changes
   const handleColumnFilterChange = useCallback((filter: FilterConfig | null) => {
     if (!filter) {
-      // If filter is null, we need to find which column to clear
-      // This is a limitation of the current design, but we'll handle it
       return;
     }
 
@@ -205,6 +203,11 @@ export function SmartGrid({
     });
   }, []);
 
+  // Handle clearing a specific column filter
+  const handleClearColumnFilter = useCallback((columnKey: string) => {
+    setFilters(prev => prev.filter(f => f.column !== columnKey));
+  }, []);
+
   // Process data with sorting and filtering (only if not using lazy loading)
   const processedData = useMemo(() => {
     if (onDataFetch) {
@@ -214,10 +217,10 @@ export function SmartGrid({
 
     let result = [...gridData];
 
-    // Apply global filter
+    // Apply global filter - now searches ALL columns including hidden ones
     if (globalFilter) {
       result = result.filter(row =>
-        orderedColumns.some(col => {
+        columns.some(col => {
           const value = row[col.key];
           return String(value || '').toLowerCase().includes(globalFilter.toLowerCase());
         })
@@ -275,7 +278,7 @@ export function SmartGrid({
     }
 
     return result;
-  }, [gridData, globalFilter, filters, sort, orderedColumns, onDataFetch]);
+  }, [gridData, globalFilter, filters, sort, columns, onDataFetch]);
 
   // Define handleExport and handleResetPreferences after processedData and orderedColumns
   const handleExport = useCallback((format: 'csv') => {
@@ -714,7 +717,7 @@ export function SmartGrid({
           <div className="relative w-64">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
             <Input
-              placeholder="Search..."
+              placeholder="Search all columns..."
               value={globalFilter}
               onChange={(e) => setGlobalFilter(e.target.value)}
               className="pl-9 w-full"
