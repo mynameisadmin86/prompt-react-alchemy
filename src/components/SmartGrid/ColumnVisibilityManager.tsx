@@ -56,6 +56,18 @@ export function ColumnVisibilityManager({
     }
   };
 
+  const handleAdditionalDetailsToggle = (columnKey: string, show: boolean) => {
+    if (!onAdditionalDetailsToggle) return;
+    
+    const isCurrentlyInAdditionalDetails = additionalDetailsColumns.includes(columnKey);
+    
+    if (show && !isCurrentlyInAdditionalDetails) {
+      onAdditionalDetailsToggle(columnKey);
+    } else if (!show && isCurrentlyInAdditionalDetails) {
+      onAdditionalDetailsToggle(columnKey);
+    }
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
@@ -165,29 +177,23 @@ export function ColumnVisibilityManager({
                   </div>
 
                   {/* Additional Details Radio Option */}
-                  {onAdditionalDetailsToggle && (
+                  {onAdditionalDetailsToggle && isVisible && (
                     <div className="pl-9 pt-2 border-t border-gray-100">
                       <div className="text-xs text-gray-600 mb-2">Show in Additional Details:</div>
                       <RadioGroup
                         value={isInAdditionalDetails ? "yes" : "no"}
-                        onValueChange={(value) => {
-                          if (value === "yes" && !isInAdditionalDetails) {
-                            onAdditionalDetailsToggle(column.key);
-                          } else if (value === "no" && isInAdditionalDetails) {
-                            onAdditionalDetailsToggle(column.key);
-                          }
-                        }}
+                        onValueChange={(value) => handleAdditionalDetailsToggle(column.key, value === "yes")}
                         className="flex space-x-4"
                       >
                         <div className="flex items-center space-x-2">
                           <RadioGroupItem value="yes" id={`${column.key}-yes`} />
-                          <label htmlFor={`${column.key}-yes`} className="text-xs text-gray-700">
+                          <label htmlFor={`${column.key}-yes`} className="text-xs text-gray-700 cursor-pointer">
                             Yes
                           </label>
                         </div>
                         <div className="flex items-center space-x-2">
                           <RadioGroupItem value="no" id={`${column.key}-no`} />
-                          <label htmlFor={`${column.key}-no`} className="text-xs text-gray-700">
+                          <label htmlFor={`${column.key}-no`} className="text-xs text-gray-700 cursor-pointer">
                             No
                           </label>
                         </div>
