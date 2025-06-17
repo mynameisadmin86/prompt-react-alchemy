@@ -1,3 +1,4 @@
+
 import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import {
   useReactTable,
@@ -14,7 +15,6 @@ import {
   Table,
 } from '@tanstack/react-table';
 import {
-  ColumnManager,
   ColumnVisibilityManager,
   ColumnFilter,
   CommonFilter
@@ -26,7 +26,6 @@ import {
   SortConfig,
   FilterConfig
 } from '@/types/smartgrid';
-import { useSmartGridData } from '@/hooks/useSmartGridData';
 import { useGridPreferences } from '@/hooks/useGridPreferences';
 import { CellEditor } from './CellEditor';
 import { Button } from '@/components/ui/button';
@@ -43,7 +42,7 @@ import {
 // Define a custom filter function
 const fuzzyFilter: FilterFn<any> = (row, columnId, value) => {
   const rowValue = row.getValue(columnId);
-  if (rowValue === undefined || rowValue === null) return false; // Handle null/undefined values
+  if (rowValue === undefined || rowValue === null) return false;
 
   const searchTerm = String(value).toLowerCase();
   const normalizedRowValue = String(rowValue).toLowerCase();
@@ -95,8 +94,13 @@ export function SmartGrid({
     onPreferenceSave
   });
 
+  // Filter out collapsible child columns from main table display
+  const mainColumns = useMemo(() => {
+    return columns.filter(col => !col.collapsibleChild);
+  }, [columns]);
+
   const reactTableColumns = useMemo<ColumnDef<any>[]>(() => {
-    return columns.map(column => {
+    return mainColumns.map(column => {
       const isEditable = editableColumns === true || (Array.isArray(editableColumns) && editableColumns.includes(column.key));
 
       return {
@@ -182,7 +186,7 @@ export function SmartGrid({
         
       };
     });
-  }, [columns, editableColumns, onLinkClick, editingRow]);
+  }, [mainColumns, editableColumns, onLinkClick, editingRow]);
 
   const table = useReactTable({
     data: tableData,
@@ -192,12 +196,14 @@ export function SmartGrid({
       columnVisibility: columnVisibility,
       columnFilters: columnFilters,
       rowSelection: rowSelection,
+      globalFilter: globalFilter,
     },
     enableMultiRowSelection: false,
     onRowSelectionChange: setRowSelection,
     onSortingChange: setSorting,
     onColumnVisibilityChange: setColumnVisibility,
     onColumnFiltersChange: setColumnFilters,
+    onGlobalFilterChange: setGlobalFilter,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
@@ -205,16 +211,11 @@ export function SmartGrid({
     filterFns: {
       fuzzy: fuzzyFilter,
     },
+    globalFilterFn: fuzzyFilter,
     initialState: {
       pagination: {
         pageSize: preferences.pageSize || 10,
       },
-    },
-    onStateChange: (updater) => {
-      const updatedState = updater(table.getState());
-      if (updatedState.pagination.pageSize !== table.getState().pagination.pageSize) {
-        setPageSize(updatedState.pagination.pageSize);
-      }
     },
   });
 
@@ -293,6 +294,12 @@ export function SmartGrid({
     return columns.filter(column => !preferences.hiddenColumns.includes(column.key));
   }, [columns, preferences.hiddenColumns]);
 
+  const collapsibleColumns = useMemo(() => {
+    return columns.filter(column => column.collapsibleChild);
+  }, [columns]);
+
+  const hasCollapsibleRows = collapsibleColumns.length > 0;
+
   return (
     <div className="w-full">
       {/* Toolbar */}
@@ -300,8 +307,13 @@ export function SmartGrid({
         <div className="flex items-center space-x-2">
           <CommonFilter
             columns={visibleColumns}
-            onFilterApply={handleFilterApply}
-            onFilterClear={handleFilterClear}
+            onFilterChange={(filter) => {
+              if (filter) {
+                setGlobalFilter(filter.value);
+              } else {
+                setGlobalFilter('');
+              }
+            }}
           />
           <ColumnVisibilityManager
             columns={columns}
@@ -421,8 +433,6 @@ export function SmartGrid({
                             header.column.columnDef.header,
                             header.getContext()
                           )}
-                          {/* <ArrowDown className="inline-block w-4 h-4 ml-1 align-middle" /> */}
-                          {/* <ArrowUp className="inline-block w-4 h-4 ml-1 align-middle" /> */}
                           {{
                             asc: <ArrowUp className="inline-block w-4 h-4 ml-1 align-middle" />,
                             desc: <ArrowDown className="inline-block w-4 h-4 ml-1 align-middle" />,
@@ -458,20 +468,23 @@ export function SmartGrid({
                       )
                     })}
                   </tr>
-                  {nestedRowRenderer && columns.some(col => col.collapsibleChild) && row.getVisibleCells().map(cell => {
-                    if (columns.find(col => col.key === cell.column.id)?.collapsibleChild) {
-                      return (
-                        <tr key={`${row.id}-details`} className="bg-gray-50">
-                          <td colSpan={reactTableColumns.length}>
-                            <div className="p-4">
-                              {nestedRowRenderer(row.original)}
-                            </div>
-                          </td>
-                        </tr>
-                      );
-                    }
-                    return null;
-                  })}
+                  {hasCollapsibleRows && nestedRowRenderer && (
+                    <tr key={`${row.id}-details`} className="bg-gray-50">
+                      <td colSpan={reactTableColumns.length}>
+                        <div className="p-4">
+                          <div className="grid grid-cols-2 gap-4">
+                            {collapsibleColumns.map(column => (
+                              <div key={column.key} className="flex flex-col">
+                                <span className="text-sm font-medium text-gray-600">{column.label}</span>
+                                <span className="text-sm">{row.original[column.key]}</span>
+                              </div>
+                            ))}
+                          </div>
+                          {nestedRowRenderer(row.original)}
+                        </div>
+                      </td>
+                    </tr>
+                  )}
                 </React.Fragment>
               )
             })}
