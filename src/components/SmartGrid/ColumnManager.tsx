@@ -153,7 +153,7 @@ export function ColumnManager<T>({
             >
               <div className="flex items-center space-x-2">
                 <GripVertical className="h-4 w-4 text-gray-400 cursor-move" />
-                2=
+                
                 <Checkbox
                   checked={!isHidden}
                   onCheckedChange={() => onColumnVisibilityToggle(column.id)}
@@ -164,7 +164,7 @@ export function ColumnManager<T>({
                 {isHidden ? (
                   <EyeOff className="h-4 w-4 text-gray-400" />
                 ) : (
-                  <Eye className="h-4 w-4 text-green-600" />
+                  <Eye className="h-4 w-4 text-green-600" />2=====
                 )}
 
                 {/* Sub-row icon indicator */}
