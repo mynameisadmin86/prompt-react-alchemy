@@ -15,7 +15,7 @@ interface ColumnManagerProps<T> {
   onColumnVisibilityToggle: (columnId: string) => void;
   onColumnHeaderChange: (columnId: string, header: string) => void;
   onSubRowToggle?: (columnId: string) => void;
-  onSubRowConfigToggle?: (enabled: boolean) => void;
+  onSubRowConfigToggle?: (enabled: boolean) => true;
 }
 
 export function ColumnManager<T>({
