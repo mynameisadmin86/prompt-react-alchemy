@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -5,6 +6,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { Settings, ChevronDown, ChevronUp } from 'lucide-react';
 import { FieldRenderer } from './FieldRenderer';
 import { EnhancedFieldVisibilityModal } from './EnhancedFieldVisibilityModal';
+import { PanelStatusIndicator } from './PanelStatusIndicator';
 import { DynamicPanelProps, PanelConfig, PanelSettings } from '@/types/dynamicPanel';
 
 export const DynamicPanel: React.FC<DynamicPanelProps> = ({
@@ -28,6 +30,7 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
   const [currentPanelWidth, setCurrentPanelWidth] = useState<'full' | 'half' | 'third' | 'quarter' | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12>(panelWidth);
   const [isCollapsible, setIsCollapsible] = useState(collapsible);
   const [panelVisible, setPanelVisible] = useState(true);
+  const [showStatusIndicator, setShowStatusIndicator] = useState(true);
   const [isOpen, setIsOpen] = useState(true);
   const [formData, setFormData] = useState(initialData);
   const [isConfigModalOpen, setIsConfigModalOpen] = useState(false);
@@ -75,7 +78,8 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
     newTitle?: string, 
     newWidth?: 'full' | 'half' | 'third' | 'quarter' | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12,
     newCollapsible?: boolean,
-    newPanelVisible?: boolean
+    newPanelVisible?: boolean,
+    newShowStatusIndicator?: boolean
   ) => {
     setPanelConfig(updatedConfig);
     
@@ -97,6 +101,10 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
     if (newPanelVisible !== undefined) {
       setPanelVisible(newPanelVisible);
     }
+
+    if (newShowStatusIndicator !== undefined) {
+      setShowStatusIndicator(newShowStatusIndicator);
+    }
     
     if (saveUserPanelConfig) {
       try {
@@ -104,6 +112,7 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
           title: newTitle || panelTitle,
           width: newWidth || currentPanelWidth,
           collapsible: newCollapsible !== undefined ? newCollapsible : isCollapsible,
+          showStatusIndicator: newShowStatusIndicator !== undefined ? newShowStatusIndicator : showStatusIndicator,
           fields: updatedConfig
         };
         await saveUserPanelConfig(userId, panelId, settings);
@@ -172,6 +181,7 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
         panelWidth={currentPanelWidth}
         collapsible={isCollapsible}
         panelVisible={panelVisible}
+        showStatusIndicator={showStatusIndicator}
         onSave={handleConfigSave}
       />
     );
@@ -186,6 +196,11 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
               <div className="flex items-center gap-2">
                 <div className="w-5 h-5 border-2 border-purple-500 rounded"></div>
                 <CardTitle className="text-sm font-medium text-gray-700">{panelTitle}</CardTitle>
+                <PanelStatusIndicator 
+                  panelConfig={panelConfig}
+                  formData={formData}
+                  showStatus={showStatusIndicator}
+                />
                 {showPreview && (
                   <span className="text-xs text-blue-600 font-medium">DB000023/42</span>
                 )}
@@ -228,6 +243,7 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
               panelWidth={currentPanelWidth}
               collapsible={isCollapsible}
               panelVisible={panelVisible}
+              showStatusIndicator={showStatusIndicator}
               onSave={handleConfigSave}
             />
           )}
@@ -242,6 +258,11 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
         <div className="flex items-center gap-2">
           <div className="w-5 h-5 border-2 border-purple-500 rounded"></div>
           <CardTitle className="text-sm font-medium text-gray-700">{panelTitle}</CardTitle>
+          <PanelStatusIndicator 
+            panelConfig={panelConfig}
+            formData={formData}
+            showStatus={showStatusIndicator}
+          />
           {showPreview && (
             <span className="text-xs text-blue-600 font-medium">DB000023/42</span>
           )}
@@ -271,6 +292,7 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
           panelWidth={currentPanelWidth}
           collapsible={isCollapsible}
           panelVisible={panelVisible}
+          showStatusIndicator={showStatusIndicator}
           onSave={handleConfigSave}
         />
       )}
