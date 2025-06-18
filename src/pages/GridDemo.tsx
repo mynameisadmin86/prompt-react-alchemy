@@ -160,8 +160,15 @@ const GridDemo = () => {
 
   // Initialize columns in the grid state
   useEffect(() => {
+    console.log('Initializing columns in GridDemo');
     gridState.setColumns(initialColumns);
   }, []);
+
+  // Log when columns change
+  useEffect(() => {
+    console.log('Columns changed in GridDemo:', gridState.columns);
+    console.log('Sub-row columns:', gridState.columns.filter(col => col.subRow).map(col => col.key));
+  }, [gridState.columns, gridState.forceUpdate]);
   
   const { toast } = useToast();
 
@@ -423,6 +430,10 @@ const GridDemo = () => {
         {/* Debug info */}
         <div className="text-sm text-gray-600">
           Selected rows: {Array.from(selectedRows).join(', ') || 'None'}
+          <br />
+          Sub-row columns: {gridState.columns.filter(col => col.subRow).map(col => col.key).join(', ') || 'None'}
+          <br />
+          Force update counter: {gridState.forceUpdate}
         </div>
 
         {/* Grid Container */}
@@ -437,6 +448,7 @@ const GridDemo = () => {
             }
           `}</style>
           <SmartGrid
+            key={`grid-${gridState.forceUpdate}`}
             columns={gridState.columns}
             data={processedData}
             editableColumns={['plannedStartEndDateTime']}

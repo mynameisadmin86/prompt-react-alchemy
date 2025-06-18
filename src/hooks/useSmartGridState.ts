@@ -23,6 +23,7 @@ export function useSmartGridState() {
   const [resizingColumn, setResizingColumn] = useState<string | null>(null);
   const [resizeHoverColumn, setResizeHoverColumn] = useState<string | null>(null);
   const [columnWidths, setColumnWidths] = useState<Record<string, number>>({});
+  const [forceUpdate, setForceUpdate] = useState(0);
   const resizeStartRef = useRef<{ x: number; width: number } | null>(null);
 
   const handleColumnFilterChange = useCallback((filter: FilterConfig | null) => {
@@ -82,8 +83,13 @@ export function useSmartGridState() {
           : col
       );
       console.log('Updated columns with sub-row changes:', updatedColumns);
+      console.log('Sub-row columns now:', updatedColumns.filter(col => col.subRow).map(col => col.key));
       return updatedColumns;
     });
+    
+    // Force a re-render to ensure the grid reflects the column changes
+    setForceUpdate(prev => prev + 1);
+    console.log('Forcing grid update due to sub-row toggle');
   }, []);
 
   return {
@@ -129,6 +135,7 @@ export function useSmartGridState() {
     columnWidths,
     setColumnWidths,
     resizeStartRef,
+    forceUpdate,
     
     // Actions
     handleColumnFilterChange,
