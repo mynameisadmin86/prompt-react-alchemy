@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -6,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { TooltipProvider } from '@/components/ui/tooltip';
-import { Settings2, Eye, EyeOff, Search, RotateCcw, ChevronDown, Check, X, GripVertical } from 'lucide-react';
+import { Settings2, Eye, EyeOff, Search, RotateCcw, ChevronDown, Check, X } from 'lucide-react';
 import { GridColumnConfig, GridPreferences } from '@/types/smartgrid';
 import { cn } from '@/lib/utils';
 
@@ -16,7 +15,6 @@ interface ColumnVisibilityManagerProps {
   onColumnVisibilityToggle: (columnId: string) => void;
   onColumnHeaderChange?: (columnId: string, newHeader: string) => void;
   onSubRowToggle?: (columnId: string) => void;
-  onColumnReorder?: (sourceIndex: number, destinationIndex: number) => void;
   onResetToDefaults: () => void;
 }
 
@@ -26,15 +24,12 @@ export function ColumnVisibilityManager({
   onColumnVisibilityToggle,
   onColumnHeaderChange,
   onSubRowToggle,
-  onColumnReorder,
   onResetToDefaults
 }: ColumnVisibilityManagerProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [editingColumn, setEditingColumn] = useState<string | null>(null);
   const [editingValue, setEditingValue] = useState('');
-  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
-  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
 
   const filteredColumns = columns.filter(column =>
     column.label.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -87,38 +82,6 @@ export function ColumnVisibilityManager({
     if (onSubRowToggle) {
       onSubRowToggle(columnKey);
     }
-  };
-
-  const handleDragStart = (e: React.DragEvent, index: number) => {
-    setDraggedIndex(index);
-    e.dataTransfer.effectAllowed = 'move';
-    e.dataTransfer.setData('text/html', '');
-  };
-
-  const handleDragEnd = () => {
-    setDraggedIndex(null);
-    setDragOverIndex(null);
-  };
-
-  const handleDragOver = (e: React.DragEvent, index: number) => {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = 'move';
-    setDragOverIndex(index);
-  };
-
-  const handleDragLeave = () => {
-    setDragOverIndex(null);
-  };
-
-  const handleDrop = (e: React.DragEvent, dropIndex: number) => {
-    e.preventDefault();
-    
-    if (draggedIndex !== null && draggedIndex !== dropIndex && onColumnReorder) {
-      onColumnReorder(draggedIndex, dropIndex);
-    }
-    
-    setDraggedIndex(null);
-    setDragOverIndex(null);
   };
 
   return (
@@ -209,39 +172,24 @@ export function ColumnVisibilityManager({
 
             {/* Column List */}
             <div className="flex-1 overflow-y-auto space-y-3">
-              {filteredColumns.map((column, index) => {
+              {filteredColumns.map((column) => {
                 const isVisible = !preferences.hiddenColumns.includes(column.key);
                 const isMandatory = column.mandatory;
                 const isSubRow = preferences.subRowColumns?.includes(column.key) || false;
                 const isEditing = editingColumn === column.key;
                 const displayLabel = preferences.columnHeaders[column.key] || column.label;
-                const isDragging = draggedIndex === index;
-                const isDragOver = dragOverIndex === index;
 
                 return (
                   <div
                     key={column.key}
-                    draggable={!searchTerm} // Only allow drag when not searching
-                    onDragStart={(e) => handleDragStart(e, index)}
-                    onDragEnd={handleDragEnd}
-                    onDragOver={(e) => handleDragOver(e, index)}
-                    onDragLeave={handleDragLeave}
-                    onDrop={(e) => handleDrop(e, index)}
                     className={cn(
-                      "p-4 rounded-lg border transition-all duration-200 select-none",
-                      isVisible ? "bg-white border-gray-200" : "bg-gray-50 border-gray-100",
-                      isDragging && "opacity-50 scale-95",
-                      isDragOver && "border-blue-300 bg-blue-50",
-                      !searchTerm && "cursor-move"
+                      "p-4 rounded-lg border transition-colors",
+                      isVisible ? "bg-white border-gray-200" : "bg-gray-50 border-gray-100"
                     )}
                   >
                     {/* Main Column Configuration */}
                     <div className="flex items-center justify-between mb-4">
                       <div className="flex items-center space-x-3 flex-1 min-w-0">
-                        {!searchTerm && (
-                          <GripVertical className="h-4 w-4 text-gray-400 flex-shrink-0 cursor-grab active:cursor-grabbing" />
-                        )}
-                        
                         <Checkbox
                           checked={isVisible}
                           onCheckedChange={() => !isMandatory && onColumnVisibilityToggle(column.key)}
