@@ -1,39 +1,18 @@
-import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
+import { ChevronDown, ChevronRight, MoreHorizontal } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
-import { 
-  ArrowUpDown, 
-  ArrowUp, 
-  ArrowDown, 
-  Download, 
-  Filter, 
-  Search, 
-  RotateCcw, 
-  ChevronRight, 
-  ChevronDown, 
-  Edit2, 
-  GripVertical,
-  CheckSquare,
-  Grid2x2,
-  List,
-} from 'lucide-react';
-import { SmartGridProps, GridColumnConfig, SortConfig, FilterConfig, GridAPI } from '@/types/smartgrid';
-import { exportToCSV } from '@/utils/gridExport';
-import { useToast } from '@/hooks/use-toast';
-import { useGridPreferences } from '@/hooks/useGridPreferences';
+import { Checkbox } from '@/components/ui/checkbox';
 import { CellRenderer } from './CellRenderer';
-import { cn } from '@/lib/utils';
-import { ColumnVisibilityManager } from './ColumnVisibilityManager';
+import { CellEditor } from './CellEditor';
+import { ColumnManager } from './ColumnManager';
 import { CommonFilter } from './CommonFilter';
-import { ColumnFilter } from './ColumnFilter';
-import { DraggableSubRow } from './DraggableSubRow';
+import { GridColumnConfig, SmartGridProps } from '@/types/smartgrid';
+import { useGridPreferences } from '@/hooks/useGridPreferences';
 
 export function SmartGrid({
   columns,
   data,
-  editableColumns = true,
+  editableColumns = [],
   mandatoryColumns = [],
   onInlineEdit,
   onBulkUpdate,
@@ -41,128 +20,69 @@ export function SmartGrid({
   onDataFetch,
   onUpdate,
   onLinkClick,
+  onSubRowToggle,
   paginationMode = 'pagination',
   nestedRowRenderer,
   plugins = [],
-  selectedRows,
+  selectedRows = new Set(),
   onSelectionChange,
   rowClassName
 }: SmartGridProps) {
-  const [gridData, setGridData] = useState(data);
-  const [editingCell, setEditingCell] = useState<{ rowIndex: number; columnKey: string } | null>(null);
-  const [editingHeader, setEditingHeader] = useState<string | null>(null);
-  const [draggedColumn, setDraggedColumn] = useState<string | null>(null);
-  const [dragOverColumn, setDragOverColumn] = useState<string | null>(null);
-  const [sort, setSort] = useState<SortConfig | undefined>();
-  const [filters, setFilters] = useState<FilterConfig[]>([]);
-  const [globalFilter, setGlobalFilter] = useState('');
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize] = useState(10);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [editingCell, setEditingCell] = useState<{row: number, column: string} | null>(null);
   const [expandedRows, setExpandedRows] = useState<Set<number>>(new Set());
-  const [internalSelectedRows, setInternalSelectedRows] = useState<Set<number>>(new Set());
-  const [showCheckboxes, setShowCheckboxes] = useState(false);
-  const [viewMode, setViewMode] = useState<'table' | 'card'>('table');
-  const [showColumnFilters, setShowColumnFilters] = useState(false);
-  
-  const [resizingColumn, setResizingColumn] = useState<string | null>(null);
-  const [resizeHoverColumn, setResizeHoverColumn] = useState<string | null>(null);
-  const [columnWidths, setColumnWidths] = useState<Record<string, number>>({});
-  const resizeStartRef = useRef<{ x: number; width: number } | null>(null);
-  
-  const { toast } = useToast();
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
-  // Use external selectedRows if provided, otherwise use internal state
-  const currentSelectedRows = selectedRows || internalSelectedRows;
-  const handleSelectionChange = onSelectionChange || setInternalSelectedRows;
+  const legacyColumnConversion = useMemo(() => {
+    return columns.map(col => ({
+      id: col.key,
+      header: col.label,
+      accessor: col.key as any,
+      sortable: col.sortable,
+      filterable: col.filterable,
+      editable: col.editable,
+      mandatory: col.mandatory,
+      type: 'text' as const,
+      render: undefined
+    }));
+  }, [columns]);
 
-  // Convert GridColumnConfig to Column format for useGridPreferences
-  const preferencesColumns = useMemo(() => columns.map(col => ({
-    id: col.key,
-    header: col.label,
-    accessor: col.key,
-    mandatory: col.mandatory
-  })), [columns]);
-
-  // Initialize preferences hook with proper async handling
   const {
     preferences,
     updateColumnOrder,
     toggleColumnVisibility,
+    updateColumnWidth,
     updateColumnHeader,
-    updateSubRowColumnOrder,
+    toggleSubRow,
     savePreferences
   } = useGridPreferences(
-    preferencesColumns,
-    true, // persistPreferences
-    'smartgrid-preferences',
-    onPreferenceSave ? async (preferences) => {
-      try {
-        await Promise.resolve(onPreferenceSave(preferences));
-      } catch (error) {
-        console.error('Failed to save preferences:', error);
-        setError('Failed to save preferences');
-      }
-    } : undefined
+    legacyColumnConversion,
+    true,
+    'smart-grid-preferences',
+    onPreferenceSave
   );
 
-  // Calculate responsive column widths based on content type and available space
+  // Calculate column widths based on content and available space
   const calculateColumnWidths = useCallback((visibleColumns: GridColumnConfig[]) => {
-    const containerWidth = window.innerWidth - 64; // Account for padding
-    const checkboxWidth = showCheckboxes ? 50 : 0;
-    const actionsWidth = plugins.some(plugin => plugin.rowActions) ? 100 : 0;
-    const availableWidth = containerWidth - checkboxWidth - actionsWidth;
+    const containerWidth = 1200; // Default container width
+    const checkboxWidth = 40;
+    const actionsWidth = 100;
+    const baseWidth = 150;
     
-    const totalColumns = visibleColumns.length;
-    let remainingWidth = availableWidth;
+    const availableWidth = containerWidth - 
+      (onSelectionChange ? checkboxWidth : 0) - 
+      (plugins.some(p => p.rowActions) ? actionsWidth : 0);
+    
     const calculatedWidths: Record<string, number> = {};
+    const numColumns = visibleColumns.length;
+    const widthPerColumn = Math.max(baseWidth, availableWidth / numColumns);
     
-    // First pass: assign minimum widths based on content type with extra space for headers
     visibleColumns.forEach(col => {
-      let minWidth = 120; // Increased minimum width for header content
-      
-      switch (col.type) {
-        case 'Badge':
-          minWidth = 100;
-          break;
-        case 'Date':
-          minWidth = 140;
-          break;
-        case 'DateTimeRange':
-          minWidth = 200;
-          break;
-        case 'Link':
-          minWidth = 150;
-          break;
-        case 'ExpandableCount':
-          minWidth = 90;
-          break;
-        case 'Text':
-        case 'EditableText':
-        default:
-          minWidth = 120;
-          break;
-      }
-      
-      // Use stored preference, custom width, or calculated minimum
-      const customWidth = columnWidths[col.key];
-      const preferredWidth = preferences.columnWidths[col.key];
-      calculatedWidths[col.key] = customWidth || (preferredWidth ? Math.max(minWidth, preferredWidth) : minWidth);
-      remainingWidth -= calculatedWidths[col.key];
+      calculatedWidths[col.key] = preferences.columnWidths[col.key] || widthPerColumn;
     });
     
-    // Second pass: distribute remaining width proportionally
-    if (remainingWidth > 0) {
-      const totalCurrentWidth = Object.values(calculatedWidths).reduce((sum, width) => sum + width, 0);
-      visibleColumns.forEach(col => {
-        const proportion = calculatedWidths[col.key] / totalCurrentWidth;
-        calculatedWidths[col.key] += remainingWidth * proportion;
-      });
-    }
-    
     return calculatedWidths;
-  }, [preferences.columnWidths, showCheckboxes, plugins, columnWidths]);
+  }, [preferences.columnWidths, onSelectionChange, plugins]);
 
   // Apply preferences to get ordered and visible columns with responsive widths - FILTER OUT SUB-ROW COLUMNS
   const orderedColumns = useMemo(() => {
@@ -178,1098 +98,356 @@ export function SmartGrid({
     
     return visibleColumns.map(col => ({
       ...col,
-      label: preferences.columnHeaders[col.key] || col.label,
-      hidden: preferences.hiddenColumns.includes(col.key),
-      width: calculatedWidths[col.key] || 100,
-      filterable: col.filterable !== false // Enable filtering by default
+      width: calculatedWidths[col.key]
     }));
-  }, [columns, preferences, calculateColumnWidths]);
+  }, [columns, preferences.columnOrder, preferences.hiddenColumns, calculateColumnWidths]);
 
-  // Check if any column has collapsibleChild set to true
-  const hasCollapsibleColumns = useMemo(() => {
-    return columns.some(col => col.collapsibleChild === true);
-  }, [columns]);
-
-  // Get collapsible columns
-  const collapsibleColumns = useMemo(() => {
-    return columns.filter(col => col.collapsibleChild === true);
-  }, [columns]);
-
-  // Get sub-row columns (columns marked with subRow: true)
+  // Get sub-row columns using subRow flag from column config
   const subRowColumns = useMemo(() => {
-    return columns.filter(col => col.subRow === true);
-  }, [columns]);
+    return columns.filter(col => col.subRow && !preferences.hiddenColumns.includes(col.key));
+  }, [columns, preferences.hiddenColumns]);
 
-  // Check if any column has subRow set to true
-  const hasSubRowColumns = useMemo(() => {
-    return subRowColumns.length > 0;
-  }, [subRowColumns]);
-
-  // Helper function to render collapsible cell values
-  const renderCollapsibleCellValue = useCallback((value: any, column: GridColumnConfig) => {
-    if (value == null) return '-';
-    
-    switch (column.type) {
-      case 'Badge':
-        return (
-          <span className={cn(
-            "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium",
-            column.statusMap?.[value] || "bg-gray-100 text-gray-800"
-          )}>
-            {value}
-          </span>
-        );
-      case 'Date':
-        return new Date(value).toLocaleDateString();
-      case 'Link':
-        return (
-          <span className="text-blue-600 hover:text-blue-800 cursor-pointer">
-            {value}
-          </span>
-        );
-      default:
-        return String(value);
-    }
-  }, []);
-
-  // Render collapsible content
-  const renderCollapsibleContent = useCallback((row: any) => {
-    if (!hasCollapsibleColumns || collapsibleColumns.length === 0) {
-      return null;
-    }
-
-    return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {collapsibleColumns.map((column) => {
-          const value = row[column.key];
-          return (
-            <div key={column.key} className="p-3 bg-gray-50 rounded-lg">
-              <div className="text-xs text-gray-500 uppercase tracking-wide mb-1">
-                {column.label}
-              </div>
-              <div className="text-sm text-gray-900 font-medium">
-                {renderCollapsibleCellValue(value, column)}
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    );
-  }, [hasCollapsibleColumns, collapsibleColumns, renderCollapsibleCellValue]);
-
-  // Enhanced nested row renderer for sub-row columns with drag-and-drop
-  const renderSubRowContent = useCallback((row: any) => {
-    if (hasSubRowColumns && subRowColumns.length > 0) {
-      return (
-        <DraggableSubRow
-          row={row}
-          columns={subRowColumns}
-          subRowColumnOrder={preferences.subRowColumnOrder}
-          onReorderSubRowColumns={updateSubRowColumnOrder}
-        />
-      );
-    }
-
-    // Fallback to collapsible content if no sub-row columns
-    return renderCollapsibleContent(row);
-  }, [hasSubRowColumns, subRowColumns, preferences.subRowColumnOrder, updateSubRowColumnOrder, renderCollapsibleContent]);
-
-  // Use sub-row renderer if we have sub-row columns, otherwise use collapsible or custom renderer
-  const effectiveNestedRowRenderer = hasSubRowColumns ? renderSubRowContent : (hasCollapsibleColumns ? renderCollapsibleContent : nestedRowRenderer);
-
-  // Handle column-specific filter changes
-  const handleColumnFilterChange = useCallback((filter: FilterConfig | null) => {
-    if (!filter) {
-      return;
-    }
-
-    setFilters(prev => {
-      const existing = prev.find(f => f.column === filter.column);
-      if (filter.value === '' || filter.value == null) {
-        // Remove filter if value is empty
-        return prev.filter(f => f.column !== filter.column);
-      } else if (existing) {
-        // Update existing filter
-        return prev.map(f => f.column === filter.column ? filter : f);
-      } else {
-        // Add new filter
-        return [...prev, filter];
-      }
-    });
-  }, []);
-
-  // Handle clearing a specific column filter
-  const handleClearColumnFilter = useCallback((columnKey: string) => {
-    setFilters(prev => prev.filter(f => f.column !== columnKey));
-  }, []);
-
-  // Process data with sorting and filtering (only if not using lazy loading)
-  const processedData = useMemo(() => {
-    if (onDataFetch) {
-      // For lazy loading, return data as-is (sorting/filtering handled server-side)
-      return gridData;
-    }
-
-    let result = [...gridData];
-
-    // Apply global filter - now searches ALL columns including hidden ones
-    if (globalFilter) {
-      result = result.filter(row =>
-        columns.some(col => {
-          let value = row[col.key];
-          
-          // Handle status fields that are objects with value property
-          if (value && typeof value === 'object' && 'value' in value) {
-            value = value.value;
-          }
-          
-          return String(value || '').toLowerCase().includes(globalFilter.toLowerCase());
-        })
-      );
-    }
-
-    // Apply column filters
-    if (filters.length > 0) {
-      result = result.filter(row => {
-        return filters.every(filter => {
-          let value = row[filter.column];
-          
-          // Handle status fields that are objects with value property
-          if (value && typeof value === 'object' && 'value' in value) {
-            value = value.value;
-          }
-          
-          const filterValue = filter.value;
-          const operator = filter.operator || 'contains';
-
-          if (value == null) return false;
-
-          const stringValue = String(value).toLowerCase();
-          const stringFilter = String(filterValue).toLowerCase();
-
-          switch (operator) {
-            case 'equals':
-              return stringValue === stringFilter;
-            case 'contains':
-              return stringValue.includes(stringFilter);
-            case 'startsWith':
-              return stringValue.startsWith(stringFilter);
-            case 'endsWith':
-              return stringValue.endsWith(stringFilter);
-            case 'gt':
-              return Number(value) > Number(filterValue);
-            case 'lt':
-              return Number(value) < Number(filterValue);
-            case 'gte':
-              return Number(value) >= Number(filterValue);
-            case 'lte':
-              return Number(value) <= Number(filterValue);
-            default:
-              return true;
-          }
-        });
-      });
-    }
-
-    // Apply sorting
-    if (sort) {
-      result.sort((a, b) => {
-        let aValue = a[sort.column];
-        let bValue = b[sort.column];
-        
-        // Handle status fields that are objects with value property
-        if (aValue && typeof aValue === 'object' && 'value' in aValue) {
-          aValue = aValue.value;
-        }
-        if (bValue && typeof bValue === 'object' && 'value' in bValue) {
-          bValue = bValue.value;
-        }
-        
-        if (aValue === bValue) return 0;
-        
-        const comparison = aValue < bValue ? -1 : 1;
-        return sort.direction === 'asc' ? comparison : -comparison;
-      });
-    }
-
-    return result;
-  }, [gridData, globalFilter, filters, sort, columns, onDataFetch]);
-
-  // Define handleExport and handleResetPreferences after processedData and orderedColumns
-  const handleExport = useCallback((format: 'csv') => {
-    const filename = `export-${new Date().toISOString().split('T')[0]}.${format}`;
-    exportToCSV(processedData, orderedColumns, filename);
-  }, [processedData, orderedColumns]);
-
-  const handleResetPreferences = useCallback(async () => {
-    const defaultPreferences = {
-      columnOrder: columns.map(col => col.key),
-      hiddenColumns: [],
-      columnWidths: {},
-      columnHeaders: {},
-      subRowColumns: [],
-      subRowColumnOrder: [], // Reset sub-row column order
-      filters: []
-    };
-    
-    try {
-      await savePreferences(defaultPreferences);
-      setSort(undefined);
-      setFilters([]);
-      setGlobalFilter('');
-      setColumnWidths({});
-      setShowColumnFilters(false);
-      
-      toast({
-        title: "Success",
-        description: "Column preferences have been reset to defaults"
-      });
-    } catch (error) {
-      setError('Failed to reset preferences');
-      toast({
-        title: "Error",
-        description: "Failed to reset preferences",
-        variant: "destructive"
-      });
-    }
-  }, [columns, savePreferences, toast]);
-
-  // Handle sorting
-  const handleSort = useCallback((columnKey: string) => {
-    setSort(prev => {
-      if (prev?.column === columnKey) {
-        return prev.direction === 'asc' 
-          ? { column: columnKey, direction: 'desc' }
-          : undefined;
-      }
-      return { column: columnKey, direction: 'asc' };
-    });
-  }, []);
-
-  // Handle column resizing
-  const handleResizeStart = useCallback((e: React.MouseEvent, columnKey: string) => {
-    e.preventDefault();
-    e.stopPropagation();
-    
-    const startX = e.clientX;
-    const currentColumn = orderedColumns.find(col => col.key === columnKey);
-    const startWidth = currentColumn?.width || 100;
-    
-    setResizingColumn(columnKey);
-    resizeStartRef.current = { x: startX, width: startWidth };
-
-    const handleMouseMove = (e: MouseEvent) => {
-      if (!resizeStartRef.current) return;
-      
-      const deltaX = e.clientX - resizeStartRef.current.x;
-      const newWidth = Math.max(80, resizeStartRef.current.width + deltaX);
-      
-      setColumnWidths(prev => ({
-        ...prev,
-        [columnKey]: newWidth
-      }));
-    };
-
-    const handleMouseUp = () => {
-      setResizingColumn(null);
-      setResizeHoverColumn(null);
-      resizeStartRef.current = null;
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseup', handleMouseUp);
-    };
-
-    document.addEventListener('mousemove', handleMouseMove);
-    document.addEventListener('mouseup', handleMouseUp);
-  }, [orderedColumns]);
-
-  // Create Grid API for plugins
-  const gridAPI: GridAPI = useMemo(() => ({
-    data: gridData,
-    filteredData: processedData,
-    selectedRows: Array.from(currentSelectedRows).map(index => processedData[index]).filter(Boolean),
-    columns: orderedColumns,
-    preferences,
-    actions: {
-      exportData: handleExport,
-      resetPreferences: handleResetPreferences,
-      toggleRowSelection: (rowIndex: number) => {
-        const newSet = new Set(currentSelectedRows);
-        if (newSet.has(rowIndex)) {
-          newSet.delete(rowIndex);
-        } else {
-          newSet.add(rowIndex);
-        }
-        handleSelectionChange(newSet);
-      },
-      selectAllRows: () => {
-        handleSelectionChange(new Set(Array.from({ length: processedData.length }, (_, i) => i)));
-      },
-      clearSelection: () => {
-        handleSelectionChange(new Set());
-      }
-    }
-  }), [gridData, processedData, currentSelectedRows, orderedColumns, preferences, handleExport, handleResetPreferences, handleSelectionChange]);
-
-  // Pagination
   const paginatedData = useMemo(() => {
-    if (paginationMode !== 'pagination' || onDataFetch) return processedData;
-    const start = (currentPage - 1) * pageSize;
-    return processedData.slice(start, start + pageSize);
-  }, [processedData, paginationMode, currentPage, pageSize, onDataFetch]);
-
-  const totalPages = Math.ceil(processedData.length / pageSize);
-
-  // Handle header editing
-  const handleHeaderEdit = useCallback((columnKey: string, newHeader: string) => {
-    if (resizingColumn) return;
+    if (paginationMode === 'infinite') return data;
     
-    if (newHeader.trim() && newHeader !== preferences.columnHeaders[columnKey]) {
-      updateColumnHeader(columnKey, newHeader.trim());
-      toast({
-        title: "Success",
-        description: "Column header updated"
-      });
+    const startIndex = (currentPage - 1) * pageSize;
+    const endIndex = startIndex + pageSize;
+    return data.slice(startIndex, endIndex);
+  }, [data, currentPage, pageSize, paginationMode]);
+
+  const totalPages = Math.ceil(data.length / pageSize);
+
+  const handleCellEdit = (rowIndex: number, columnKey: string, value: any) => {
+    if (onInlineEdit) {
+      const updatedRow = { ...paginatedData[rowIndex], [columnKey]: value };
+      onInlineEdit(rowIndex, updatedRow);
     }
-    setEditingHeader(null);
-  }, [updateColumnHeader, preferences.columnHeaders, toast, resizingColumn]);
-
-  const handleHeaderClick = useCallback((columnKey: string) => {
-    if (resizingColumn) return;
-    setEditingHeader(columnKey);
-  }, [resizingColumn]);
-
-  // Handle drag and drop for column reordering
-  const handleColumnDragStart = useCallback((e: React.DragEvent, columnKey: string) => {
-    if (editingHeader || resizingColumn) {
-      e.preventDefault();
-      return;
-    }
-    e.stopPropagation();
-    setDraggedColumn(columnKey);
-    e.dataTransfer.effectAllowed = 'move';
-    e.dataTransfer.setData('text/plain', columnKey);
-  }, [editingHeader, resizingColumn]);
-
-  const handleColumnDragOver = useCallback((e: React.DragEvent, targetColumnKey: string) => {
-    if (resizingColumn) {
-      e.preventDefault();
-      return;
-    }
-    
-    e.preventDefault();
-    e.stopPropagation();
-    if (draggedColumn && draggedColumn !== targetColumnKey) {
-      setDragOverColumn(targetColumnKey);
-      e.dataTransfer.dropEffect = 'move';
-    }
-  }, [draggedColumn, resizingColumn]);
-
-  const handleColumnDragLeave = useCallback((e: React.DragEvent) => {
-    if (resizingColumn) return;
-    
-    e.stopPropagation();
-    if (!e.currentTarget.contains(e.relatedTarget as Node)) {
-      setDragOverColumn(null);
-    }
-  }, [resizingColumn]);
-
-  const handleColumnDrop = useCallback((e: React.DragEvent, targetColumnKey: string) => {
-    if (resizingColumn) {
-      e.preventDefault();
-      return;
-    }
-    
-    e.preventDefault();
-    e.stopPropagation();
-    
-    if (!draggedColumn || draggedColumn === targetColumnKey) {
-      setDraggedColumn(null);
-      setDragOverColumn(null);
-      return;
-    }
-
-    const newOrder = [...preferences.columnOrder];
-    const draggedIndex = newOrder.indexOf(draggedColumn);
-    const targetIndex = newOrder.indexOf(targetColumnKey);
-
-    newOrder.splice(draggedIndex, 1);
-    newOrder.splice(targetIndex, 0, draggedColumn);
-
-    updateColumnOrder(newOrder);
-    setDraggedColumn(null);
-    setDragOverColumn(null);
-    
-    toast({
-      title: "Success",
-      description: "Column order updated"
-    });
-  }, [draggedColumn, preferences.columnOrder, updateColumnOrder, toast, resizingColumn]);
-
-  const handleColumnDragEnd = useCallback(() => {
-    if (resizingColumn) return;
-    setDraggedColumn(null);
-    setDragOverColumn(null);
-  }, [resizingColumn]);
-
-  // Toggle row expansion
-  const toggleRowExpansion = useCallback((rowIndex: number) => {
-    setExpandedRows(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(rowIndex)) {
-        newSet.delete(rowIndex);
-      } else {
-        newSet.add(rowIndex);
-      }
-      return newSet;
-    });
-  }, []);
-
-  // Determine if a column is editable
-  const isColumnEditable = useCallback((column: GridColumnConfig, columnIndex: number) => {
-    if (columnIndex === 0) return false;
-    
-    if (Array.isArray(editableColumns)) {
-      return editableColumns.includes(column.key);
-    }
-    
-    return editableColumns && column.editable;
-  }, [editableColumns]);
-
-  // Cell editing functions
-  const handleCellEdit = useCallback(async (rowIndex: number, columnKey: string, value: any) => {
-    const actualRowIndex = onDataFetch ? rowIndex : (currentPage - 1) * pageSize + rowIndex;
-    const updatedData = [...gridData];
-    const originalRow = updatedData[actualRowIndex];
-    const updatedRow = { ...originalRow, [columnKey]: value };
-    
-    updatedData[actualRowIndex] = updatedRow;
-    setGridData(updatedData);
     setEditingCell(null);
+  };
+
+  const handleRowToggle = (rowIndex: number) => {
+    const newExpanded = new Set(expandedRows);
+    if (newExpanded.has(rowIndex)) {
+      newExpanded.delete(rowIndex);
+    } else {
+      newExpanded.add(rowIndex);
+    }
+    setExpandedRows(newExpanded);
+  };
+
+  const handleColumnSubRowToggle = (columnKey: string) => {
+    // Update the column's subRow flag directly
+    if (onSubRowToggle) {
+      onSubRowToggle(columnKey);
+    }
+  };
+
+  const handleSelectionChange = (rowIndex: number) => {
+    if (!onSelectionChange) return;
     
-    if (onUpdate) {
-      setLoading(true);
-      setError(null);
-      try {
-        await onUpdate(updatedRow);
-        toast({
-          title: "Success",
-          description: "Row updated successfully"
-        });
-      } catch (err) {
-        updatedData[actualRowIndex] = originalRow;
-        setGridData(updatedData);
-        setError('Failed to update row');
-        toast({
-          title: "Error",
-          description: "Failed to update row",
-          variant: "destructive"
-        });
-        console.error('Update error:', err);
-      } finally {
-        setLoading(false);
-      }
-    } else if (onInlineEdit) {
-      onInlineEdit(actualRowIndex, updatedRow);
+    const newSelection = new Set(selectedRows);
+    if (newSelection.has(rowIndex)) {
+      newSelection.delete(rowIndex);
+    } else {
+      newSelection.add(rowIndex);
     }
-  }, [gridData, currentPage, pageSize, onInlineEdit, onUpdate, onDataFetch, toast]);
+    onSelectionChange(newSelection);
+  };
 
-  const handleEditStart = useCallback((rowIndex: number, columnKey: string) => {
-    setEditingCell({ rowIndex, columnKey });
-  }, []);
-
-  const handleEditCancel = useCallback(() => {
-    setEditingCell(null);
-  }, []);
-
-  const renderCell = useCallback((row: any, column: GridColumnConfig, rowIndex: number, columnIndex: number) => {
-    const value = row[column.key];
-    const isEditing = editingCell?.rowIndex === rowIndex && editingCell?.columnKey === column.key;
-    const isEditable = isColumnEditable(column, columnIndex);
-
-    if (columnIndex === 0 && (effectiveNestedRowRenderer || hasCollapsibleColumns)) {
-      const isExpanded = expandedRows.has(rowIndex);
-      return (
-        <div className="flex items-center space-x-1 min-w-0">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => toggleRowExpansion(rowIndex)}
-            className="h-5 w-5 p-0 hover:bg-gray-100 flex-shrink-0"
-          >
-            {isExpanded ? (
-              <ChevronDown className="h-3 w-3" />
-            ) : (
-              <ChevronRight className="h-3 w-3" />
-            )}
-          </Button>
-          <div className="flex-1 min-w-0 truncate">
-            <CellRenderer
-              value={value}
-              row={row}
-              column={column}
-              rowIndex={rowIndex}
-              columnIndex={columnIndex}
-              isEditing={isEditing}
-              isEditable={isEditable}
-              onEdit={handleCellEdit}
-              onEditStart={handleEditStart}
-              onEditCancel={handleEditCancel}
-              onLinkClick={onLinkClick}
-              loading={loading}
-            />
-          </div>
-        </div>
-      );
+  const handleSelectAll = () => {
+    if (!onSelectionChange) return;
+    
+    if (selectedRows.size === paginatedData.length) {
+      onSelectionChange(new Set());
+    } else {
+      const allIndices = new Set(paginatedData.map((_, index) => index));
+      onSelectionChange(allIndices);
     }
+  };
 
-    return (
-      <div className="min-w-0 truncate">
-        <CellRenderer
-          value={value}
-          row={row}
-          column={column}
-          rowIndex={rowIndex}
-          columnIndex={columnIndex}
-          isEditing={isEditing}
-          isEditable={isEditable}
-          onEdit={handleCellEdit}
-          onEditStart={handleEditStart}
-          onEditCancel={handleEditCancel}
-          onLinkClick={onLinkClick}
-          loading={loading}
-        />
-      </div>
-    );
-  }, [editingCell, isColumnEditable, effectiveNestedRowRenderer, hasCollapsibleColumns, expandedRows, toggleRowExpansion, handleCellEdit, handleEditStart, handleEditCancel, onLinkClick, loading]);
-
-  // Update grid data when prop data changes (only if not using lazy loading)
-  useEffect(() => {
-    if (!onDataFetch) {
-      setGridData(data);
-    }
-  }, [data, onDataFetch]);
-
-  // Fixed renderPluginToolbarItems function to prevent React Fragment errors
-  const renderPluginToolbarItems = useCallback(() => {
-    return plugins
-      .filter(plugin => plugin.toolbar)
-      .map(plugin => (
-        <React.Fragment key={`toolbar-${plugin.id}`}>
-          {plugin.toolbar!(gridAPI)}
-        </React.Fragment>
-      ));
-  }, [plugins, gridAPI]);
-
-  // Fixed renderPluginRowActions function to prevent React Fragment errors
-  const renderPluginRowActions = useCallback((row: any, rowIndex: number) => {
-    return plugins
-      .filter(plugin => plugin.rowActions)
-      .map(plugin => (
-        <React.Fragment key={`row-action-${plugin.id}-${rowIndex}`}>
-          {plugin.rowActions!(row, rowIndex, gridAPI)}
-        </React.Fragment>
-      ));
-  }, [plugins, gridAPI]);
-
-  // Fixed renderPluginFooterItems function to prevent React Fragment errors
-  const renderPluginFooterItems = useCallback(() => {
-    return plugins
-      .filter(plugin => plugin.footer)
-      .map(plugin => (
-        <React.Fragment key={`footer-${plugin.id}`}>
-          {plugin.footer!(gridAPI)}
-        </React.Fragment>
-      ));
-  }, [plugins, gridAPI]);
-
-  // Initialize plugins
-  useEffect(() => {
-    plugins.forEach(plugin => {
-      if (plugin.init) {
-        plugin.init(gridAPI);
-      }
-    });
-
-    return () => {
-      plugins.forEach(plugin => {
-        if (plugin.destroy) {
-          plugin.destroy();
-        }
-      });
-    };
-  }, [plugins, gridAPI]);
-
-  // Error boundary component
-  if (error) {
-    return (
-      <div className="p-4 border border-red-300 rounded-lg bg-red-50">
-        <h3 className="text-lg font-medium text-red-800 mb-2">Error</h3>
-        <p className="text-red-600 mb-4">{error}</p>
-        <Button 
-          variant="outline" 
-          onClick={() => setError(null)}
-          className="text-red-700 border-red-300 hover:bg-red-100"
-        >
-          Dismiss
-        </Button>
-      </div>
-    );
-  }
+  const showCheckboxes = !!onSelectionChange;
+  const hasSubRowData = subRowColumns.length > 0;
 
   return (
-    <div className="space-y-4 w-full">
-      {/* Toolbar */}
-      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between bg-white p-4 rounded-lg border shadow-sm">
-        <div className="flex items-center space-x-2">
-          {/* Show active filters count */}
-          {filters.length > 0 && (
-            <div className="text-sm text-blue-600 bg-blue-50 px-2 py-1 rounded">
-              {filters.length} filter{filters.length > 1 ? 's' : ''} active
-            </div>
-          )}
+    <div className="w-full">
+      {/* Header with filters and column manager */}
+      <div className="flex items-center justify-between p-4 border-b bg-gray-50/50">
+        <div className="flex items-center space-x-4">
+          <CommonFilter />
         </div>
-
+        
         <div className="flex items-center space-x-2">
-          {/* Search box - first */}
-          <div className="relative w-64">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-            <Input
-              placeholder="Search all columns..."
-              value={globalFilter}
-              onChange={(e) => setGlobalFilter(e.target.value)}
-              className="pl-9 w-full"
-              disabled={loading}
+          {plugins.map((plugin) => 
+            plugin.toolbar && (
+              <div key={plugin.id}>
+                {plugin.toolbar({
+                  data,
+                  filteredData: paginatedData,
+                  selectedRows: Array.from(selectedRows).map(i => paginatedData[i]),
+                  columns,
+                  preferences,
+                  actions: {
+                    exportData: () => {},
+                    resetPreferences: () => savePreferences({
+                      columnOrder: columns.map(col => col.key),
+                      hiddenColumns: [],
+                      columnWidths: {},
+                      columnHeaders: {},
+                      subRowColumns: [],
+                      subRowColumnOrder: [],
+                      filters: []
+                    }),
+                    toggleRowSelection: handleSelectionChange,
+                    selectAllRows: handleSelectAll,
+                    clearSelection: () => onSelectionChange?.(new Set())
+                  }
+                })}
+              </div>
+            )
+          )}
+          <div className="relative">
+            <ColumnManager
+              columns={legacyColumnConversion}
+              preferences={preferences}
+              onColumnOrderChange={updateColumnOrder}
+              onColumnVisibilityToggle={toggleColumnVisibility}
+              onColumnHeaderChange={updateColumnHeader}
+              onSubRowToggle={handleColumnSubRowToggle}
             />
           </div>
-
-          {/* Common Filter Button - Updated to toggle column filters */}
-          <Button
-            variant={showColumnFilters ? "default" : "outline"}
-            size="sm"
-            onClick={() => setShowColumnFilters(!showColumnFilters)}
-            disabled={loading}
-            title="Toggle Column Filters"
-            className={cn(
-              "transition-colors",
-              showColumnFilters && "bg-blue-600 hover:bg-blue-700 text-white border-blue-600"
-            )}
-          >
-            <Filter className="h-4 w-4" />
-            {filters.length > 0 && (
-              <span className="ml-1 text-xs bg-blue-100 text-blue-600 rounded-full px-1.5 py-0.5">
-                {filters.length}
-              </span>
-            )}
-          </Button>
-
-          {/* Toggle Checkboxes Button - Updated with blue selection state */}
-          <Button 
-            variant={showCheckboxes ? "default" : "outline"}
-            size="sm" 
-            onClick={() => setShowCheckboxes(!showCheckboxes)}
-            disabled={loading}
-            title="Toggle Checkboxes"
-            className={cn(
-              "transition-colors",
-              showCheckboxes && "bg-blue-600 hover:bg-blue-700 text-white border-blue-600"
-            )}
-          >
-            <CheckSquare className="h-4 w-4" />
-          </Button>
-
-          {/* Toggle View Mode Button - Updated with better visual states */}
-          <Button 
-            variant="outline"
-            size="sm" 
-            onClick={() => setViewMode(viewMode === 'table' ? 'card' : 'table')}
-            disabled={loading}
-            title={`Switch to ${viewMode === 'table' ? 'Card' : 'Table'} View`}
-            className={cn(
-              "transition-colors",
-              viewMode === 'card' && "bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100"
-            )}
-          >
-            {viewMode === 'table' ? (
-              <Grid2x2 className="h-4 w-4" />
-            ) : (
-              <List className="h-4 w-4" />
-            )}
-          </Button>
-
-          {/* Column Visibility Manager */}
-          <ColumnVisibilityManager
-            columns={columns}
-            preferences={preferences}
-            onColumnVisibilityToggle={toggleColumnVisibility}
-            onColumnHeaderChange={updateColumnHeader}
-            onResetToDefaults={handleResetPreferences}
-          />
-
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={handleResetPreferences} 
-            disabled={loading}
-            title="Reset All"
-          >
-            <RotateCcw className="h-4 w-4" />
-          </Button>
-          
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={() => handleExport('csv')} 
-            disabled={loading}
-            title="Download CSV"
-          >
-            <Download className="h-4 w-4" />
-          </Button>
         </div>
       </div>
 
-      {/* Table Container with no horizontal scroll */}
-      <div className="bg-white rounded-lg border shadow-sm overflow-hidden">
-        <div className="w-full">
-          <Table className="w-full table-fixed">
-            <TableHeader className="sticky top-0 z-20 bg-white shadow-sm border-b-2 border-gray-100">
-              <TableRow className="hover:bg-transparent">
-                {/* Checkbox header */}
-                {showCheckboxes && (
-                  <TableHead className="bg-gray-50/80 backdrop-blur-sm font-semibold text-gray-900 px-3 py-3 border-r border-gray-100 w-[50px] flex-shrink-0">
-                    <input 
-                      type="checkbox" 
-                      className="rounded" 
-                      onChange={(e) => {
-                        const target = e.target as HTMLInputElement;
-                        if (target.checked) {
-                          handleSelectionChange(new Set(Array.from({ length: paginatedData.length }, (_, i) => i)));
-                        } else {
-                          handleSelectionChange(new Set());
-                        }
-                      }}
-                      checked={currentSelectedRows.size === paginatedData.length && paginatedData.length > 0}
-                    />
-                  </TableHead>
-                )}
-                {orderedColumns.map((column, index) => {
-                  const shouldHideIcons = resizeHoverColumn === column.key || resizingColumn === column.key;
-                  const currentFilter = filters.find(f => f.column === column.key);
-                  return (
-                    <TableHead 
-                      key={column.key}
-                      className={cn(
-                        "relative group bg-gray-50/80 backdrop-blur-sm font-semibold text-gray-900 px-2 py-3 border-r border-gray-100 last:border-r-0",
-                        draggedColumn === column.key && "opacity-50",
-                        dragOverColumn === column.key && "bg-blue-100 border-blue-300",
-                        resizingColumn === column.key && "bg-blue-50",
-                        !resizingColumn && "cursor-move"
+      {/* Table */}
+      <div className="relative overflow-auto">
+        <table className="w-full border-collapse">
+          <thead className="bg-gray-50 sticky top-0 z-10">
+            <tr>
+              {hasSubRowData && (
+                <th className="w-8 p-2 text-left font-medium text-gray-900 border-b border-gray-200"></th>
+              )}
+              {showCheckboxes && (
+                <th className="w-12 p-3 text-left font-medium text-gray-900 border-b border-gray-200">
+                  <Checkbox 
+                    checked={selectedRows.size === paginatedData.length && paginatedData.length > 0}
+                    onCheckedChange={handleSelectAll}
+                  />
+                </th>
+              )}
+              {orderedColumns.map((column) => {
+                const displayHeader = preferences.columnHeaders[column.key] || column.label;
+                return (
+                  <th
+                    key={column.key}
+                    className="p-3 text-left font-medium text-gray-900 border-b border-gray-200 bg-gray-50"
+                    style={{ width: column.width }}
+                  >
+                    <div className="flex items-center space-x-2">
+                      <span className="truncate">{displayHeader}</span>
+                      {column.sortable && (
+                        <Button variant="ghost" size="sm" className="h-4 w-4 p-0">
+                          <ChevronDown className="h-3 w-3" />
+                        </Button>
                       )}
-                      style={{ width: `${column.width}px`, minWidth: `${Math.max(120, column.width)}px` }}
-                      draggable={!editingHeader && !resizingColumn}
-                      onDragStart={(e) => handleColumnDragStart(e, column.key)}
-                      onDragOver={(e) => handleColumnDragOver(e, column.key)}
-                      onDragLeave={handleColumnDragLeave}
-                      onDrop={(e) => handleColumnDrop(e, column.key)}
-                      onDragEnd={handleColumnDragEnd}
-                    >
-                      <div className="flex items-center justify-between gap-1 min-w-0">
-                        <div className="flex items-center gap-1 min-w-0 flex-1">
-                          {!shouldHideIcons && (
-                            <GripVertical className="h-3 w-3 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
-                          )}
-                          {editingHeader === column.key ? (
-                            <Input
-                              defaultValue={column.label}
-                              onBlur={(e) => handleHeaderEdit(column.key, e.target.value)}
-                              onKeyDown={(e) => {
-                                if (e.key === 'Enter') {
-                                  handleHeaderEdit(column.key, e.currentTarget.value);
-                                } else if (e.key === 'Escape') {
-                                  setEditingHeader(null);
-                                }
-                              }}
-                              className="h-5 px-1 text-sm font-semibold bg-white border-blue-300 focus:border-blue-500 min-w-0"
-                              autoFocus
-                              onFocus={(e) => e.target.select()}
-                              onClick={(e) => e.stopPropagation()}
-                              onDragStart={(e) => e.preventDefault()}
-                            />
-                          ) : (
-                            <div 
-                              className={cn(
-                                "flex items-center gap-1 rounded px-1 py-0.5 -mx-1 -my-0.5 transition-colors group/header flex-1 min-w-0",
-                                !resizingColumn && "cursor-pointer hover:bg-gray-100/50"
-                              )}
-                              onClick={(e) => {
-                                if (resizingColumn) return;
-                                e.stopPropagation();
-                                handleHeaderClick(column.key);
-                              }}
-                              onDragStart={(e) => e.preventDefault()}
-                            >
-                              <span 
-                                className="select-none text-sm font-semibold flex-1 min-w-0" 
-                                style={{ 
-                                  whiteSpace: 'nowrap',
-                                  overflow: 'visible',
-                                  textOverflow: 'clip'
-                                }}
-                                title={column.label}
-                              >
-                                {column.label}
-                              </span>
-                              {column.editable && !shouldHideIcons && (
-                                <Edit2 className="h-3 w-3 text-gray-400 opacity-0 group-hover/header:opacity-100 transition-opacity flex-shrink-0" />
-                              )}
-                            </div>
-                          )}
-                        </div>
-                        
-                        <div className="flex items-center gap-1">
-                          {column.sortable && !shouldHideIcons && (
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={(e) => {
-                                if (resizingColumn) return;
-                                e.stopPropagation();
-                                handleSort(column.key);
-                              }}
-                              className="h-5 w-5 p-0 hover:bg-transparent transition-opacity flex-shrink-0"
-                              disabled={loading || !!resizingColumn}
-                              onDragStart={(e) => e.preventDefault()}
-                            >
-                              {sort?.column === column.key ? (
-                                sort.direction === 'asc' ? (
-                                  <ArrowUp className="h-3 w-3 text-blue-600" />
-                                ) : (
-                                  <ArrowDown className="h-3 w-3 text-blue-600" />
-                                )
-                              ) : (
-                                <ArrowUpDown className="h-3 w-3 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" />
-                              )}
-                            </Button>
-                          )}
-                        </div>
-                      </div>
-                      
-                      {/* Resize Handle - Modified to only show on hover */}
-                      <div
-                        className="absolute top-0 right-0 w-2 h-full cursor-col-resize bg-transparent hover:bg-blue-300/50 transition-colors flex items-center justify-center group/resize z-30"
-                        onMouseDown={(e) => handleResizeStart(e, column.key)}
-                        onMouseEnter={() => setResizeHoverColumn(column.key)}
-                        onMouseLeave={() => setResizeHoverColumn(null)}
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                        }}
-                        onDragStart={(e) => e.preventDefault()}
-                      >
-                        <div className="w-0.5 h-4 bg-gray-300 opacity-0 group-hover/resize:opacity-100 transition-opacity" />
-                      </div>
-                    </TableHead>
-                  );
-                })}
-                {/* Plugin row actions header */}
-                {plugins.some(plugin => plugin.rowActions) && (
-                  <TableHead className="bg-gray-50/80 backdrop-blur-sm font-semibold text-gray-900 px-3 py-3 text-center w-[100px] flex-shrink-0">
-                    Actions
-                  </TableHead>
-                )}
-              </TableRow>
+                    </div>
+                  </th>
+                );
+              })}
+              {plugins.some(p => p.rowActions) && (
+                <th className="w-24 p-3 text-left font-medium text-gray-900 border-b border-gray-200">
+                  Actions
+                </th>
+              )}
+            </tr>
+          </thead>
+          <tbody>
+            {paginatedData.map((row, rowIndex) => {
+              const isExpanded = expandedRows.has(rowIndex);
+              const isSelected = selectedRows.has(rowIndex);
+              const customClassName = rowClassName ? rowClassName(row, rowIndex) : '';
               
-              {/* Column Filter Row */}
-              {showColumnFilters && (
-                <TableRow className="hover:bg-transparent border-b border-gray-200">
-                  {/* Checkbox column space */}
-                  {showCheckboxes && (
-                    <TableHead className="bg-gray-25 px-3 py-2 border-r border-gray-100 w-[50px]">
-                      {/* Empty space for checkbox column */}
-                    </TableHead>
-                  )}
-                  {orderedColumns.map((column) => {
-                    const currentFilter = filters.find(f => f.column === column.key);
-                    return (
-                      <TableHead 
-                        key={`filter-${column.key}`}
-                        className="bg-gray-25 px-2 py-2 border-r border-gray-100 last:border-r-0 relative"
-                        style={{ width: `${column.width}px` }}
-                      >
-                        {column.filterable && (
-                          <ColumnFilter
+              return (
+                <React.Fragment key={rowIndex}>
+                  {/* Main row */}
+                  <tr 
+                    className={`border-b border-gray-200 hover:bg-gray-50 ${customClassName} ${
+                      isSelected ? 'bg-blue-50 border-l-4 border-l-blue-500' : ''
+                    }`}
+                  >
+                    {hasSubRowData && (
+                      <td className="w-8 p-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleRowToggle(rowIndex)}
+                          className="h-6 w-6 p-0"
+                        >
+                          {isExpanded ? (
+                            <ChevronDown className="h-4 w-4" />
+                          ) : (
+                            <ChevronRight className="h-4 w-4" />
+                          )}
+                        </Button>
+                      </td>
+                    )}
+                    {showCheckboxes && (
+                      <td className="w-12 p-3">
+                        <Checkbox 
+                          checked={isSelected}
+                          onCheckedChange={() => handleSelectionChange(rowIndex)}
+                        />
+                      </td>
+                    )}
+                    {orderedColumns.map((column) => (
+                      <td key={column.key} className="p-3 border-r border-gray-100 last:border-r-0">
+                        {editingCell?.row === rowIndex && editingCell?.column === column.key ? (
+                          <CellEditor
+                            value={row[column.key]}
+                            column={{ ...column, id: column.key, header: column.label, accessor: column.key }}
+                            onSave={(value) => handleCellEdit(rowIndex, column.key, value)}
+                            onCancel={() => setEditingCell(null)}
+                          />
+                        ) : (
+                          <CellRenderer
+                            value={row[column.key]}
                             column={column}
-                            currentFilter={currentFilter}
-                            onFilterChange={(filter) => {
-                              if (filter) {
-                                handleColumnFilterChange(filter);
-                              } else {
-                                handleClearColumnFilter(column.key);
-                              }
-                            }}
+                            rowData={row}
+                            onEdit={
+                              editableColumns === true || 
+                              (Array.isArray(editableColumns) && editableColumns.includes(column.key))
+                                ? () => setEditingCell({ row: rowIndex, column: column.key })
+                                : undefined
+                            }
+                            onLinkClick={onLinkClick}
                           />
                         )}
-                      </TableHead>
-                    );
-                  })}
-                  {/* Plugin row actions column space */}
-                  {plugins.some(plugin => plugin.rowActions) && (
-                    <TableHead className="bg-gray-25 px-3 py-2 text-center w-[100px]">
-                      {/* Empty space for actions column */}
-                    </TableHead>
-                  )}
-                </TableRow>
-              )}
-            </TableHeader>
-            <TableBody>
-              {loading ? (
-                <TableRow>
-                  <TableCell 
-                    colSpan={orderedColumns.length + (showCheckboxes ? 1 : 0) + (plugins.some(plugin => plugin.rowActions) ? 1 : 0)} 
-                    className="text-center py-12"
-                  >
-                    <div className="flex items-center justify-center">
-                      <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
-                      <span className="ml-2 text-gray-600">Loading...</span>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ) : paginatedData.length === 0 ? (
-                <TableRow>
-                  <TableCell 
-                    colSpan={orderedColumns.length + (showCheckboxes ? 1 : 0) + (plugins.some(plugin => plugin.rowActions) ? 1 : 0)} 
-                    className="text-center py-12 text-gray-500"
-                  >
-                    <div className="space-y-2">
-                      <div className="text-lg font-medium">No data available</div>
-                      <div className="text-sm">Try adjusting your search or filters</div>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ) : (
-                paginatedData.map((row, rowIndex) => (
-                  <React.Fragment key={rowIndex}>
-                    <TableRow 
-                      className={cn(
-                        "hover:bg-gray-50/50 transition-colors duration-150 border-b border-gray-100",
-                        rowClassName ? rowClassName(row, rowIndex) : ''
-                      )}
-                    >
-                      {/* Checkbox cell */}
-                      {showCheckboxes && (
-                        <TableCell className="px-3 py-3 border-r border-gray-50 w-[50px]">
-                          <input 
-                            type="checkbox" 
-                            className="rounded" 
-                            checked={currentSelectedRows.has(rowIndex)}
-                            onChange={() => {
-                              const newSet = new Set(currentSelectedRows);
-                              if (newSet.has(rowIndex)) {
-                                newSet.delete(rowIndex);
-                              } else {
-                                newSet.add(rowIndex);
-                              }
-                              handleSelectionChange(newSet);
-                            }}
-                          />
-                        </TableCell>
-                      )}
-                      {orderedColumns.map((column, columnIndex) => (
-                        <TableCell 
-                          key={column.key} 
-                          className="relative px-3 py-3 border-r border-gray-50 last:border-r-0 align-top overflow-hidden"
-                          style={{ width: `${column.width}px` }}
-                        >
-                          {renderCell(row, column, rowIndex, columnIndex)}
-                        </TableCell>
-                      ))}
-                      {/* Plugin row actions */}
-                      {plugins.some(plugin => plugin.rowActions) && (
-                        <TableCell className="px-3 py-3 text-center align-top w-[100px]">
-                          <div className="flex items-center justify-center space-x-1">
-                            {renderPluginRowActions(row, rowIndex)}
-                          </div>
-                        </TableCell>
-                      )}
-                    </TableRow>
-                    {/* Nested row content */}
-                    {effectiveNestedRowRenderer && expandedRows.has(rowIndex) && (
-                      <TableRow className="bg-gray-50/30">
-                        <TableCell 
-                          colSpan={orderedColumns.length + (showCheckboxes ? 1 : 0) + (plugins.some(plugin => plugin.rowActions) ? 1 : 0)} 
-                          className="p-0 border-b border-gray-200"
-                        >
-                          <div className="bg-gradient-to-r from-gray-50/50 to-white border-l-4 border-blue-500">
-                            <div className="p-6 pl-12">
-                              {effectiveNestedRowRenderer(row)}
-                            </div>
-                          </div>
-                        </TableCell>
-                      </TableRow>
+                      </td>
+                    ))}
+                    {plugins.some(p => p.rowActions) && (
+                      <td className="w-24 p-3">
+                        <div className="flex items-center space-x-1">
+                          {plugins.map((plugin) => 
+                            plugin.rowActions && (
+                              <div key={plugin.id}>
+                                {plugin.rowActions(row, rowIndex, {
+                                  data,
+                                  filteredData: paginatedData,
+                                  selectedRows: Array.from(selectedRows).map(i => paginatedData[i]),
+                                  columns,
+                                  preferences,
+                                  actions: {
+                                    exportData: () => {},
+                                    resetPreferences: () => {},
+                                    toggleRowSelection: handleSelectionChange,
+                                    selectAllRows: handleSelectAll,
+                                    clearSelection: () => onSelectionChange?.(new Set())
+                                  }
+                                })}
+                              </div>
+                            )
+                          )}
+                          <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </td>
                     )}
-                  </React.Fragment>
-                ))
-              )}
-            </TableBody>
-          </Table>
-        </div>
+                  </tr>
+                  
+                  {/* Sub-row */}
+                  {isExpanded && hasSubRowData && (
+                    <tr className="bg-gray-50/50">
+                      <td 
+                        colSpan={
+                          (hasSubRowData ? 1 : 0) + 
+                          (showCheckboxes ? 1 : 0) + 
+                          orderedColumns.length + 
+                          (plugins.some(p => p.rowActions) ? 1 : 0)
+                        }
+                        className="p-0"
+                      >
+                        <div className="p-4 bg-white border-l-4 border-l-gray-300 mx-4 mb-2 rounded-r">
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            {subRowColumns.map((column) => (
+                              <div key={column.key} className="space-y-1">
+                                <div className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+                                  {preferences.columnHeaders[column.key] || column.label}
+                                </div>
+                                <div className="text-sm text-gray-900">
+                                  <CellRenderer
+                                    value={row[column.key]}
+                                    column={column}
+                                    rowData={row}
+                                    onLinkClick={onLinkClick}
+                                  />
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                </React.Fragment>
+              );
+            })}
+          </tbody>
+        </table>
       </div>
 
       {/* Pagination */}
-      {paginationMode === 'pagination' && totalPages > 1 && (
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-white p-4 rounded-lg border shadow-sm">
-          <div className="text-sm text-gray-600 order-2 sm:order-1">
-            Showing {(currentPage - 1) * pageSize + 1} to{' '}
-            {Math.min(currentPage * pageSize, processedData.length)} of{' '}
-            {processedData.length} entries
+      {paginationMode === 'pagination' && (
+        <div className="flex items-center justify-between p-4 border-t bg-gray-50/50">
+          <div className="text-sm text-gray-700">
+            Showing {(currentPage - 1) * pageSize + 1} to {Math.min(currentPage * pageSize, data.length)} of {data.length} results
           </div>
-          
-          <Pagination className="order-1 sm:order-2">
-            <PaginationContent>
-              <PaginationItem>
-                <PaginationPrevious
-                  onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-                  className={cn(
-                    currentPage === 1 || loading ? 'pointer-events-none opacity-50' : 'cursor-pointer hover:bg-gray-100'
-                  )}
-                />
-              </PaginationItem>
-              
-              {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                const pageNum = i + 1;
-                return (
-                  <PaginationItem key={pageNum}>
-                    <PaginationLink
-                      onClick={() => setCurrentPage(pageNum)}
-                      isActive={currentPage === pageNum}
-                      className={cn(
-                        "cursor-pointer transition-colors duration-150",
-                        loading && "pointer-events-none opacity-50",
-                        currentPage === pageNum && "bg-blue-600 text-white hover:bg-blue-700"
-                      )}
-                    >
-                      {pageNum}
-                    </PaginationLink>
-                  </PaginationItem>
-                );
-              })}
-              
-              <PaginationItem>
-                <PaginationNext
-                  onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
-                  className={cn(
-                    currentPage === totalPages || loading ? 'pointer-events-none opacity-50' : 'cursor-pointer hover:bg-gray-100'
-                  )}
-                />
-              </PaginationItem>
-            </PaginationContent>
-          </Pagination>
+          <div className="flex items-center space-x-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+              disabled={currentPage === 1}
+            >
+              Previous
+            </Button>
+            <span className="text-sm text-gray-700">
+              Page {currentPage} of {totalPages}
+            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+              disabled={currentPage === totalPages}
+            >
+              Next
+            </Button>
+          </div>
         </div>
       )}
 
-      {/* Plugin footer items */}
-      {plugins.some(plugin => plugin.footer) && (
-        <div className="flex items-center justify-center space-x-4 pt-4 border-t bg-white p-4 rounded-lg border shadow-sm">
-          {renderPluginFooterItems()}
+      {/* Footer */}
+      {plugins.some(p => p.footer) && (
+        <div className="border-t bg-gray-50/50">
+          {plugins.map((plugin) => 
+            plugin.footer && (
+              <div key={plugin.id}>
+                {plugin.footer({
+                  data,
+                  filteredData: paginatedData,
+                  selectedRows: Array.from(selectedRows).map(i => paginatedData[i]),
+                  columns,
+                  preferences,
+                  actions: {
+                    exportData: () => {},
+                    resetPreferences: () => {},
+                    toggleRowSelection: handleSelectionChange,
+                    selectAllRows: handleSelectAll,
+                    clearSelection: () => onSelectionChange?.(new Set())
+                  }
+                })}
+              </div>
+            )
+          )}
         </div>
       )}
     </div>
