@@ -58,12 +58,14 @@ export function ColumnManager<T>({
   };
 
   const handleSubRowToggle = (columnId: string) => {
+    console.log('Sub-row toggle clicked for column:', columnId);
     if (onSubRowToggle) {
       onSubRowToggle(columnId);
     }
   };
 
   const handleSubRowConfigToggle = (enabled: boolean) => {
+    console.log('Sub-row config toggle:', enabled);
     if (onSubRowConfigToggle) {
       onSubRowConfigToggle(enabled);
     }

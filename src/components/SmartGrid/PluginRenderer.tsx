@@ -16,14 +16,14 @@ export function PluginRenderer({ plugins, gridAPI, type }: PluginRendererProps) 
   if (relevantPlugins.length === 0) return null;
 
   return (
-    <>
+    <div className="flex items-center gap-2">
       {relevantPlugins.map(plugin => (
-        <React.Fragment key={`${type}-${plugin.id}`}>
+        <div key={`${type}-${plugin.id}`}>
           {type === 'toolbar' && plugin.toolbar ? plugin.toolbar(gridAPI) : null}
           {type === 'footer' && plugin.footer ? plugin.footer(gridAPI) : null}
-        </React.Fragment>
+        </div>
       ))}
-    </>
+    </div>
   );
 }
 
@@ -40,12 +40,12 @@ export function PluginRowActions({ plugins, gridAPI, row, rowIndex }: PluginRowA
   if (pluginsWithRowActions.length === 0) return null;
 
   return (
-    <>
+    <div className="flex items-center gap-1">
       {pluginsWithRowActions.map(plugin => (
-        <React.Fragment key={`row-action-${plugin.id}-${rowIndex}`}>
+        <div key={`row-action-${plugin.id}-${rowIndex}`}>
           {plugin.rowActions!(row, rowIndex, gridAPI)}
-        </React.Fragment>
+        </div>
       ))}
-    </>
+    </div>
   );
 }

@@ -57,13 +57,17 @@ export function useSmartGridState() {
   }, []);
 
   const toggleRowExpansion = useCallback((rowIndex: number) => {
+    console.log('Toggling row expansion for row:', rowIndex);
     setExpandedRows(prev => {
       const newSet = new Set(prev);
       if (newSet.has(rowIndex)) {
         newSet.delete(rowIndex);
+        console.log('Row collapsed:', rowIndex);
       } else {
         newSet.add(rowIndex);
+        console.log('Row expanded:', rowIndex);
       }
+      console.log('Updated expanded rows:', Array.from(newSet));
       return newSet;
     });
   }, []);
