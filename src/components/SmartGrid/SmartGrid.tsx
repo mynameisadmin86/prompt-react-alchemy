@@ -408,6 +408,7 @@ export function SmartGrid({
       columnWidths: {},
       columnHeaders: {},
       subRowColumns: [],
+      enableSubRowConfig: true,
       subRowColumnOrder: [], // Reset sub-row column order
       filters: []
     };

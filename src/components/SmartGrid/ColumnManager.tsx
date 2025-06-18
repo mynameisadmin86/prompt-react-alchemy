@@ -228,7 +228,7 @@ export function ColumnManager<T>({
                   )}
 
                   {/* Sub-row checkbox moved to the end */}
-                  {true && (
+                  {preferences.enableSubRowConfig && (
                     <div className="flex items-center space-x-1">
                       <Checkbox
                         checked={isSubRow}
