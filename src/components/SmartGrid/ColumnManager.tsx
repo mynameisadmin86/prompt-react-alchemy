@@ -6,6 +6,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Switch } from '@/components/ui/switch';
 import { Settings, GripVertical, Edit2, Eye, EyeOff, ChevronDown } from 'lucide-react';
 import { Column, GridPreferences } from '@/types/smartgrid';
+import { SubRowConfigurationModal } from './SubRowConfigurationModal';
 
 interface ColumnManagerProps<T> {
   columns: Column<T>[];
@@ -69,17 +70,48 @@ export function ColumnManager<T>({
     }
   };
 
+  const handleSelectAllSubRows = () => {
+    if (onSubRowToggle) {
+      const visibleColumns = columns.filter(col => !preferences.hiddenColumns.includes(col.id));
+      visibleColumns.forEach(column => {
+        if (!preferences.subRowColumns?.includes(column.id)) {
+          onSubRowToggle(column.id);
+        }
+      });
+    }
+  };
+
+  const handleDeselectAllSubRows = () => {
+    if (onSubRowToggle) {
+      const subRowColumns = preferences.subRowColumns || [];
+      subRowColumns.forEach(columnId => {
+        onSubRowToggle(columnId);
+      });
+    }
+  };
+
   if (!isOpen) {
     return (
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={() => setIsOpen(true)}
-        className="flex items-center space-x-2"
-      >
-        <Settings className="h-4 w-4" />
-        <span>Columns</span>
-      </Button>
+      <div className="flex space-x-2">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setIsOpen(true)}
+          className="flex items-center space-x-2"
+        >
+          <Settings className="h-4 w-4" />
+          <span>Columns</span>
+        </Button>
+        
+        <SubRowConfigurationModal
+          columns={columns}
+          preferences={preferences}
+          onSubRowToggle={handleSubRowToggle}
+          onSubRowConfigToggle={handleSubRowConfigToggle}
+          onSelectAll={handleSelectAllSubRows}
+          onDeselectAll={handleDeselectAllSubRows}
+        />
+      </div>
     );
   }
 
