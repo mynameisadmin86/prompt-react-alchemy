@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -114,6 +113,14 @@ export function ColumnVisibilityManager({
   const handleSubRowDragEnd = () => {
     setDraggedSubRowIndex(null);
     setDragOverSubRowIndex(null);
+  };
+
+  const handleSubRowPropertyToggle = (columnKey: string) => {
+    // Find the column and toggle its subRow property
+    const column = columns.find(col => col.key === columnKey);
+    if (column) {
+      column.subRow = !column.subRow;
+    }
   };
 
   return (
@@ -314,8 +321,27 @@ export function ColumnVisibilityManager({
                     </div>
 
                     {/* Sub-row Configuration Section */}
+                    <div className="pt-3 border-t border-gray-100">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-3">
+                          <ChevronDown className="h-4 w-4 text-purple-600" />
+                          <div>
+                            <span className="text-sm text-gray-700 font-medium">Show as sub-row column</span>
+                            <div className="text-xs text-gray-500">Displays this column as a sub-row type</div>
+                          </div>
+                        </div>
+                        
+                        <Checkbox
+                          checked={column.subRow || false}
+                          onCheckedChange={() => handleSubRowPropertyToggle(column.key)}
+                          className="flex-shrink-0"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Legacy Sub-row Toggle (if onSubRowToggle exists) */}
                     {onSubRowToggle && (
-                      <div className="pt-3 border-t border-gray-100">
+                      <div className="pt-3 border-t border-gray-100 mt-3">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center space-x-3">
                             <ChevronDown className="h-4 w-4 text-purple-600" />
@@ -326,7 +352,7 @@ export function ColumnVisibilityManager({
                           </div>
                           
                           <Checkbox
-                            checked={isSubRow}
+                            checked={preferences.subRowColumns?.includes(column.key) || false}
                             onCheckedChange={() => handleSubRowToggle(column.key)}
                             className="flex-shrink-0"
                           />
