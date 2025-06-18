@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo } from 'react';
 import { SmartGrid } from '@/components/SmartGrid';
 import { GridColumnConfig } from '@/types/smartgrid';
@@ -68,7 +69,7 @@ const GridDemo = () => {
       type: 'EditableText',
       sortable: true,
       editable: true,
-      subRow: true // Make this column a sub-row column
+      subRow: true
     },
     {
       key: 'actualStartEndDateTime',
@@ -76,7 +77,7 @@ const GridDemo = () => {
       type: 'DateTimeRange',
       sortable: true,
       editable: false,
-      collapsibleChild: true // Make this column collapsible
+      subRow: true
     },
     {
       key: 'departurePoint',
@@ -85,7 +86,7 @@ const GridDemo = () => {
       sortable: true,
       editable: false,
       infoTextField: 'departurePointDetails',
-      collapsibleChild: true // Make this column collapsible
+      subRow: true
     },
     {
       key: 'arrivalPoint',
