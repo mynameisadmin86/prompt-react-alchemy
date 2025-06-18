@@ -119,7 +119,7 @@ export function ColumnManager<T>({
           <span className="text-xs text-gray-500">Allow columns to be displayed in expandable sub-rows</span>
         </div>
         <Switch
-          checked={preferences.enableSubRowConfig || false}
+          checked={preferences.enableSubRowConfig || true}
           onCheckedChange={handleSubRowConfigToggle}
         />
       </div>
