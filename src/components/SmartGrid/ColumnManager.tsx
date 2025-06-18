@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -26,6 +25,8 @@ export function ColumnManager<T>({
   const [isOpen, setIsOpen] = useState(false);
   const [editingHeader, setEditingHeader] = useState<string | null>(null);
   const [draggedColumn, setDraggedColumn] = useState<string | null>(null);
+
+  const hasSubRowSupport = Boolean(onSubRowToggle);
 
   const orderedColumns = preferences.columnOrder
     .map(id => columns.find(col => col.id === id))
@@ -103,8 +104,8 @@ export function ColumnManager<T>({
         </Button>
       </div>
 
-      {/* Sub-row bulk actions */}
-      {onSubRowToggle && (
+      {/* Sub-row bulk actions - only show if sub-row support is enabled */}
+      {hasSubRowSupport && (
         <div className="mb-4 p-3 bg-purple-50 rounded-lg border border-purple-200">
           <div className="flex items-center justify-between mb-3">
             <span className="text-sm font-medium text-purple-800">Sub-row Actions</span>
@@ -164,8 +165,8 @@ export function ColumnManager<T>({
                   <Eye className="h-4 w-4 text-green-600" />
                 )}
 
-                {/* Sub-row icon indicator */}
-                {isSubRow && (
+                {/* Sub-row icon indicator - only show if sub-row support is enabled */}
+                {hasSubRowSupport && isSubRow && (
                   <ChevronDown className="h-4 w-4 text-purple-600" />
                 )}
 
@@ -206,8 +207,8 @@ export function ColumnManager<T>({
                     </span>
                   )}
 
-                  {/* Sub-row checkbox moved to the end */}
-                  {onSubRowToggle && (
+                  {/* Sub-row checkbox - only show if sub-row support is enabled */}
+                  {hasSubRowSupport && (
                     <div className="flex items-center space-x-1">
                       <Checkbox
                         checked={isSubRow}
@@ -230,7 +231,7 @@ export function ColumnManager<T>({
           <span>Visible columns:</span>
           <span className="font-medium">{orderedColumns.length - preferences.hiddenColumns.length}</span>
         </div>
-        {onSubRowToggle && (
+        {hasSubRowSupport && (
           <div className="flex justify-between">
             <span>Sub-row columns:</span>
             <span className="font-medium">{preferences.subRowColumns?.length || 0}</span>
