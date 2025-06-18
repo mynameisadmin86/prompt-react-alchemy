@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Printer, MoreHorizontal, User, Train, UserCheck, Container } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useSmartGridState } from '@/hooks/useSmartGridState';
+import { DraggableSubRow } from '@/components/SmartGrid/DraggableSubRow';
 import {
   Breadcrumb,
   BreadcrumbList,
@@ -158,10 +159,11 @@ const GridDemo = () => {
     }
   ];
 
-  // Initialize columns in the grid state
+  // Initialize columns and data in the grid state
   useEffect(() => {
     console.log('Initializing columns in GridDemo');
     gridState.setColumns(initialColumns);
+    gridState.setGridData(processedData);
   }, []);
 
   // Log when columns change
@@ -336,7 +338,6 @@ const GridDemo = () => {
     }
   ];
 
-  // ... keep existing code (getStatusColor function)
   const getStatusColor = (status: string) => {
     const statusColors: Record<string, string> = {
       // Status column colors
@@ -357,7 +358,6 @@ const GridDemo = () => {
     return statusColors[status] || 'bg-gray-100 text-gray-800 border-gray-300';
   };
 
-  // ... keep existing code (processedData and other handlers)
   const processedData = useMemo(() => {
     return sampleData.map(row => ({
       ...row,
@@ -378,6 +378,13 @@ const GridDemo = () => {
 
   const handleUpdate = async (updatedRow: any) => {
     console.log('Updating row:', updatedRow);
+    // Update the grid data
+    gridState.setGridData(prev => 
+      prev.map((row, index) => 
+        index === updatedRow.index ? { ...row, ...updatedRow } : row
+      )
+    );
+    
     // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 500));
     
@@ -392,9 +399,20 @@ const GridDemo = () => {
     setSelectedRows(selectedRowIndices);
   };
 
-  const getRowClassName = (row: any, index: number) => {
-    console.log(`Row ${index} selected:`, selectedRows.has(index));
-    return selectedRows.has(index) ? '!bg-blue-50 !border-l-4 !border-blue-500 !border-l-blue-500' : '';
+  const renderSubRow = (row: any, rowIndex: number) => {
+    return (
+      <DraggableSubRow
+        row={row}
+        rowIndex={rowIndex}
+        columns={gridState.columns}
+        subRowColumnOrder={gridState.subRowColumnOrder}
+        editingCell={gridState.editingCell}
+        onReorderSubRowColumns={gridState.handleReorderSubRowColumns}
+        onSubRowEdit={gridState.handleSubRowEdit}
+        onSubRowEditStart={gridState.handleSubRowEditStart}
+        onSubRowEditCancel={gridState.handleSubRowEditCancel}
+      />
+    );
   };
 
   return (
@@ -434,6 +452,8 @@ const GridDemo = () => {
           Sub-row columns: {gridState.columns.filter(col => col.subRow).map(col => col.key).join(', ') || 'None'}
           <br />
           Force update counter: {gridState.forceUpdate}
+          <br />
+          Expanded rows: {Array.from(gridState.expandedRows).join(', ') || 'None'}
         </div>
 
         {/* Grid Container */}
@@ -450,7 +470,7 @@ const GridDemo = () => {
           <SmartGrid
             key={`grid-${gridState.forceUpdate}`}
             columns={gridState.columns}
-            data={processedData}
+            data={gridState.gridData.length > 0 ? gridState.gridData : processedData}
             editableColumns={['plannedStartEndDateTime']}
             paginationMode="pagination"
             onLinkClick={handleLinkClick}
@@ -461,6 +481,7 @@ const GridDemo = () => {
             rowClassName={(row: any, index: number) => 
               selectedRows.has(index) ? 'smart-grid-row-selected' : ''
             }
+            nestedRowRenderer={renderSubRow}
           />
           
           {/* Footer with action buttons matching the screenshot style */}

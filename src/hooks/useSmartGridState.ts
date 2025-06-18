@@ -24,6 +24,7 @@ export function useSmartGridState() {
   const [resizeHoverColumn, setResizeHoverColumn] = useState<string | null>(null);
   const [columnWidths, setColumnWidths] = useState<Record<string, number>>({});
   const [forceUpdate, setForceUpdate] = useState(0);
+  const [subRowColumnOrder, setSubRowColumnOrder] = useState<string[]>([]);
   const resizeStartRef = useRef<{ x: number; width: number } | null>(null);
 
   const handleColumnFilterChange = useCallback((filter: FilterConfig | null) => {
@@ -92,6 +93,41 @@ export function useSmartGridState() {
     console.log('Forcing grid update due to sub-row toggle');
   }, []);
 
+  const handleSubRowEdit = useCallback((rowIndex: number, columnKey: string, value: any) => {
+    console.log('Handling sub-row edit:', { rowIndex, columnKey, value });
+    setGridData(prev => {
+      const updatedData = [...prev];
+      if (updatedData[rowIndex]) {
+        updatedData[rowIndex] = {
+          ...updatedData[rowIndex],
+          [columnKey]: value
+        };
+        console.log('Updated row data:', updatedData[rowIndex]);
+      }
+      return updatedData;
+    });
+    
+    // Clear editing state
+    setEditingCell(null);
+    setForceUpdate(prev => prev + 1);
+  }, []);
+
+  const handleSubRowEditStart = useCallback((rowIndex: number, columnKey: string) => {
+    console.log('Starting sub-row edit:', { rowIndex, columnKey });
+    setEditingCell({ rowIndex, columnKey });
+  }, []);
+
+  const handleSubRowEditCancel = useCallback(() => {
+    console.log('Cancelling sub-row edit');
+    setEditingCell(null);
+  }, []);
+
+  const handleReorderSubRowColumns = useCallback((newOrder: string[]) => {
+    console.log('Reordering sub-row columns:', newOrder);
+    setSubRowColumnOrder(newOrder);
+    setForceUpdate(prev => prev + 1);
+  }, []);
+
   return {
     // State
     gridData,
@@ -136,12 +172,17 @@ export function useSmartGridState() {
     setColumnWidths,
     resizeStartRef,
     forceUpdate,
+    subRowColumnOrder,
     
     // Actions
     handleColumnFilterChange,
     handleClearColumnFilter,
     handleSort,
     toggleRowExpansion,
-    handleSubRowToggle
+    handleSubRowToggle,
+    handleSubRowEdit,
+    handleSubRowEditStart,
+    handleSubRowEditCancel,
+    handleReorderSubRowColumns
   };
 }
