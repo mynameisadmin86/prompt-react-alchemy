@@ -164,14 +164,15 @@ export function SmartGrid({
     return calculatedWidths;
   }, [preferences.columnWidths, showCheckboxes, plugins, columnWidths]);
 
-  // Apply preferences to get ordered and visible columns - SHOW ALL COLUMNS (including sub-row ones)
+  // Apply preferences to get ordered and visible columns - FILTER OUT SUB-ROW COLUMNS from main table
   const orderedColumns = useMemo(() => {
     const columnMap = new Map(columns.map(col => [col.key, col]));
     
     const visibleColumns = preferences.columnOrder
       .map(id => columnMap.get(id))
       .filter((col): col is GridColumnConfig => col !== undefined)
-      .filter(col => !preferences.hiddenColumns.includes(col.key));
+      .filter(col => !preferences.hiddenColumns.includes(col.key))
+      .filter(col => !col.subRow); // Filter out sub-row columns from main table
     
     const calculatedWidths = calculateColumnWidths(visibleColumns);
     
@@ -685,15 +686,6 @@ export function SmartGrid({
     const value = row[column.key];
     const isEditing = editingCell?.rowIndex === rowIndex && editingCell?.columnKey === column.key;
     const isEditable = isColumnEditable(column, columnIndex);
-
-    // If this is a sub-row column, don't display in main row - show placeholder or empty
-    if (column.subRow) {
-      return (
-        <div className="text-gray-400 text-sm italic">
-          View in sub-row
-        </div>
-      );
-    }
 
     if (columnIndex === 0 && (effectiveNestedRowRenderer || hasCollapsibleColumns)) {
       const isExpanded = expandedRows.has(rowIndex);
