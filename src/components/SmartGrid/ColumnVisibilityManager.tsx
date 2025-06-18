@@ -3,7 +3,6 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Switch } from '@/components/ui/switch';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { Settings2, Eye, EyeOff, Search, RotateCcw, ChevronDown, Check, X, GripVertical } from 'lucide-react';
@@ -17,7 +16,6 @@ interface ColumnVisibilityManagerProps {
   onColumnHeaderChange?: (columnId: string, newHeader: string) => void;
   onSubRowToggle?: (columnId: string) => void;
   onSubRowReorder?: (newOrder: string[]) => void;
-  onSubRowConfigToggle?: (enabled: boolean) => void;
   onResetToDefaults: () => void;
 }
 
@@ -28,7 +26,6 @@ export function ColumnVisibilityManager({
   onColumnHeaderChange,
   onSubRowToggle,
   onSubRowReorder,
-  onSubRowConfigToggle,
   onResetToDefaults
 }: ColumnVisibilityManagerProps) {
   const [isOpen, setIsOpen] = useState(false);
@@ -45,8 +42,27 @@ export function ColumnVisibilityManager({
 
   const visibleCount = columns.filter(col => !preferences.hiddenColumns.includes(col.key)).length;
   const totalCount = columns.length;
+  const subRowCount = preferences.subRowColumns?.length || 0;
   const subRowColumns = preferences.subRowColumns || [];
-  const isSubRowEnabled = preferences.enableSubRowConfig || false;
+
+  const handleToggleAll = () => {
+    const allVisible = preferences.hiddenColumns.length === 0;
+    const mandatoryColumns = columns.filter(col => col.mandatory).map(col => col.key);
+    
+    if (allVisible) {
+      // Hide all non-mandatory columns
+      columns.forEach(col => {
+        if (!col.mandatory) {
+          onColumnVisibilityToggle(col.key);
+        }
+      });
+    } else {
+      // Show all columns
+      preferences.hiddenColumns.forEach(columnId => {
+        onColumnVisibilityToggle(columnId);
+      });
+    }
+  };
 
   const handleEditStart = (columnKey: string, currentLabel: string) => {
     setEditingColumn(columnKey);
@@ -119,12 +135,6 @@ export function ColumnVisibilityManager({
     setDragOverSubRowIndex(null);
   };
 
-  const handleSubRowConfigToggle = (enabled: boolean) => {
-    if (onSubRowConfigToggle) {
-      onSubRowConfigToggle(enabled);
-    }
-  };
-
   return (
     <TooltipProvider>
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -152,18 +162,6 @@ export function ColumnVisibilityManager({
           </DialogHeader>
 
           <div className="flex flex-col space-y-4 flex-1 min-h-0">
-            {/* Sub-row Configuration Toggle */}
-            <div className="flex items-center justify-between p-4 bg-purple-50 rounded-lg border border-purple-200">
-              <div className="flex flex-col">
-                <span className="text-sm font-medium text-purple-900">Enable Sub-row Configuration</span>
-                <span className="text-xs text-purple-600">Allow columns to be displayed in expandable sub-rows</span>
-              </div>
-              <Switch
-                checked={isSubRowEnabled}
-                onCheckedChange={handleSubRowConfigToggle}
-              />
-            </div>
-
             {/* Search */}
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -176,7 +174,7 @@ export function ColumnVisibilityManager({
             </div>
 
             {/* Sub-row Columns Badges */}
-            {isSubRowEnabled && subRowColumns.length > 0 && (
+            {subRowColumns.length > 0 && (
               <div className="p-4 bg-purple-50 rounded-lg border border-purple-200">
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center space-x-2">
@@ -227,6 +225,19 @@ export function ColumnVisibilityManager({
                 </div>
               </div>
             )}
+
+            {/* Toggle All */}
+            <div className="flex items-center justify-between py-2 border-b">
+              <span className="text-sm font-medium">Toggle All</span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleToggleAll}
+                className="text-xs"
+              >
+                {preferences.hiddenColumns.length === 0 ? 'Hide All' : 'Show All'}
+              </Button>
+            </div>
 
             {/* Column List */}
             <div className="flex-1 overflow-y-auto space-y-3">
@@ -319,7 +330,7 @@ export function ColumnVisibilityManager({
                           </span>
                         )}
                         
-                        {isSubRowEnabled && isSubRow && (
+                        {isSubRow && (
                           <span className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded font-medium flex items-center gap-1">
                             <ChevronDown className="h-3 w-3" />
                             Sub-row
@@ -335,7 +346,7 @@ export function ColumnVisibilityManager({
                     </div>
 
                     {/* Sub-row Configuration Section */}
-                    {isSubRowEnabled && onSubRowToggle && (
+                    {onSubRowToggle && (
                       <div className="pt-3 border-t border-gray-100">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center space-x-3">
@@ -364,6 +375,24 @@ export function ColumnVisibilityManager({
                   <p>No columns found matching "{searchTerm}"</p>
                 </div>
               )}
+            </div>
+
+            {/* Summary */}
+            <div className="pt-4 border-t bg-gray-50 rounded-lg px-4 py-3">
+              <div className="text-sm text-gray-600">
+                <div className="flex justify-between">
+                  <span>Visible columns:</span>
+                  <span className="font-medium">{visibleCount} of {totalCount}</span>
+                </div>
+                <div className="flex justify-between mt-1">
+                  <span>Hidden columns:</span>
+                  <span className="font-medium">{totalCount - visibleCount}</span>
+                </div>
+                <div className="flex justify-between mt-1">
+                  <span>Sub-row columns:</span>
+                  <span className="font-medium">{subRowCount}</span>
+                </div>
+              </div>
             </div>
           </div>
         </DialogContent>

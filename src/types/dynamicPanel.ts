@@ -20,7 +20,6 @@ export interface PanelSettings {
   title: string;
   width?: 'full' | 'half' | 'third' | 'quarter' | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12;
   collapsible?: boolean;
-  showStatusIndicator?: boolean;
   fields: PanelConfig;
 }
 

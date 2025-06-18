@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { SmartGrid } from '@/components/SmartGrid';
 import { GridColumnConfig } from '@/types/smartgrid';
@@ -47,24 +46,21 @@ const GridDemo = () => {
       type: 'Link',
       sortable: true,
       editable: false,
-      mandatory: true,
-      subRow: false
+      mandatory: true
     },
     {
       key: 'status',
       label: 'Status',
       type: 'Badge',
       sortable: true,
-      editable: false,
-      subRow: false
+      editable: false
     },
     {
       key: 'tripBillingStatus',
       label: 'Trip Billing Status',
       type: 'Badge',
       sortable: true,
-      editable: false,
-      subRow: false
+      editable: false
     },
     {
       key: 'plannedStartEndDateTime',
@@ -72,7 +68,7 @@ const GridDemo = () => {
       type: 'EditableText',
       sortable: true,
       editable: true,
-      subRow: true
+      subRow: true // Make this column a sub-row column
     },
     {
       key: 'actualStartEndDateTime',
@@ -80,7 +76,7 @@ const GridDemo = () => {
       type: 'DateTimeRange',
       sortable: true,
       editable: false,
-      subRow: true
+      collapsibleChild: true // Make this column collapsible
     },
     {
       key: 'departurePoint',
@@ -89,7 +85,7 @@ const GridDemo = () => {
       sortable: true,
       editable: false,
       infoTextField: 'departurePointDetails',
-      subRow: true
+      collapsibleChild: true // Make this column collapsible
     },
     {
       key: 'arrivalPoint',
@@ -98,7 +94,7 @@ const GridDemo = () => {
       sortable: true,
       editable: false,
       infoTextField: 'arrivalPointDetails',
-      subRow: true // Make this column collapsible
+      collapsibleChild: true // Make this column collapsible
     },
     {
       key: 'customer',
