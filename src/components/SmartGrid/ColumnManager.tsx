@@ -119,13 +119,13 @@ export function ColumnManager<T>({
           <span className="text-xs text-gray-500">Allow columns to be displayed in expandable sub-rows</span>
         </div>
         <Switch
-          checked={preferences.enableSubRowConfig || true}
+          checked={true || true}
           onCheckedChange={handleSubRowConfigToggle}
         />
       </div>
 
       {/* Sub-row bulk actions */}
-      {preferences.enableSubRowConfig && (
+      {true && (
         <div className="mb-4 p-3 bg-purple-50 rounded-lg border border-purple-200">
           <div className="flex items-center justify-between mb-3">
             <span className="text-sm font-medium text-purple-800">Sub-row Actions</span>
@@ -228,7 +228,7 @@ export function ColumnManager<T>({
                   )}
 
                   {/* Sub-row checkbox moved to the end */}
-                  {preferences.enableSubRowConfig && (
+                  {true && (
                     <div className="flex items-center space-x-1">
                       <Checkbox
                         checked={isSubRow}
@@ -251,7 +251,7 @@ export function ColumnManager<T>({
           <span>Visible columns:</span>
           <span className="font-medium">{orderedColumns.length - preferences.hiddenColumns.length}</span>
         </div>
-        {preferences.enableSubRowConfig && (
+        {true && (
           <div className="flex justify-between">
             <span>Sub-row columns:</span>
             <span className="font-medium">{preferences.subRowColumns?.length || 0}</span>
