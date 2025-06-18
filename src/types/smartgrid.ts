@@ -23,8 +23,7 @@ export interface GridColumnConfig {
   hidden?: boolean;
   order?: number;
   options?: string[];
-  collapsibleChild?: boolean; // New property for collapsible row content
-  subRow?: boolean; // New property for sub-row display
+  subRow?: boolean; // Property for sub-row display
   
   // Badge specific properties
   statusMap?: Record<string, string>;
@@ -75,7 +74,6 @@ export interface GridPreferences {
   columnHeaders: Record<string, string>;
   subRowColumns: string[]; // Existing property for tracking sub-row columns
   subRowColumnOrder: string[]; // New property for sub-row column ordering
-  enableSubRowConfig?: boolean; // New property for enabling/disabling sub-row configuration
   sort?: SortConfig;
   filters: FilterConfig[];
   pageSize?: number;

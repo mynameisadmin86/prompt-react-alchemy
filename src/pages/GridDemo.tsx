@@ -46,21 +46,24 @@ const GridDemo = () => {
       type: 'Link',
       sortable: true,
       editable: false,
-      mandatory: true
+      mandatory: true,
+      subRow: false
     },
     {
       key: 'status',
       label: 'Status',
       type: 'Badge',
       sortable: true,
-      editable: false
+      editable: false,
+      subRow: false
     },
     {
       key: 'tripBillingStatus',
       label: 'Trip Billing Status',
       type: 'Badge',
       sortable: true,
-      editable: false
+      editable: false,
+      subRow: false
     },
     {
       key: 'plannedStartEndDateTime',
@@ -68,7 +71,7 @@ const GridDemo = () => {
       type: 'EditableText',
       sortable: true,
       editable: true,
-      subRow: true // Make this column a sub-row column
+      subRow: true
     },
     {
       key: 'actualStartEndDateTime',
@@ -76,7 +79,7 @@ const GridDemo = () => {
       type: 'DateTimeRange',
       sortable: true,
       editable: false,
-      collapsibleChild: true // Make this column collapsible
+      subRow: true
     },
     {
       key: 'departurePoint',
@@ -85,7 +88,7 @@ const GridDemo = () => {
       sortable: true,
       editable: false,
       infoTextField: 'departurePointDetails',
-      collapsibleChild: true // Make this column collapsible
+      subRow: true
     },
     {
       key: 'arrivalPoint',
@@ -94,7 +97,7 @@ const GridDemo = () => {
       sortable: true,
       editable: false,
       infoTextField: 'arrivalPointDetails',
-      collapsibleChild: true // Make this column collapsible
+      subRow: true
     },
     {
       key: 'customer',
@@ -376,7 +379,7 @@ const GridDemo = () => {
     setColumns(prevColumns => 
       prevColumns.map(col => 
         col.key === columnKey 
-          ? { ...col, collapsibleChild: !col.collapsibleChild }
+          ? { ...col, subRow: !col.subRow }
           : col
       )
     );
