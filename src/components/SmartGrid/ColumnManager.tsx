@@ -162,25 +162,23 @@ export function ColumnManager<T>({
               </div>
 
               {/* Sub-row toggle section */}
-              {onSubRowToggle && (
-                <div className="pl-6 pt-2 border-t border-gray-100">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                      <ChevronDown className="h-4 w-4 text-purple-600" />
-                      <div>
-                        <span className="text-sm text-gray-700 font-medium">Sub-row</span>
-                        <div className="text-xs text-gray-500">Show in expandable sub-row</div>
-                      </div>
+              <div className="pl-6 pt-2 border-t border-gray-100">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <ChevronDown className="h-4 w-4 text-purple-600" />
+                    <div>
+                      <span className="text-sm text-gray-700 font-medium">Sub-row</span>
+                      <div className="text-xs text-gray-500">Show in expandable sub-row</div>
                     </div>
-                    
-                    <Checkbox
-                      checked={isSubRow}
-                      onCheckedChange={() => handleSubRowToggle(column.id)}
-                      className="shrink-0"
-                    />
                   </div>
+                  
+                  <Checkbox
+                    checked={isSubRow}
+                    onCheckedChange={() => handleSubRowToggle(column.id)}
+                    className="shrink-0"
+                  />
                 </div>
-              )}
+              </div>
             </div>
           );
         })}
