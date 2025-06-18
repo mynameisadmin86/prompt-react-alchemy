@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -35,8 +36,10 @@ export const EnhancedFieldVisibilityModal: React.FC<EnhancedFieldVisibilityModal
 }) => {
   const [fieldConfigs, setFieldConfigs] = useState<FieldVisibilityConfig[]>([]);
   const [currentTitle, setCurrentTitle] = useState(panelTitle);
-  const [currentWidth, setCurrentWidth] = useState<'full' | 'half'>(
-    panelWidth === 'half' || panelWidth === 6 ? 'half' : 'full'
+  const [currentWidth, setCurrentWidth] = useState<'full' | 'half' | 'third' | 'quarter'>(
+    panelWidth === 'half' || panelWidth === 6 ? 'half' :
+    panelWidth === 'third' || panelWidth === 4 ? 'third' :
+    panelWidth === 'quarter' || panelWidth === 3 ? 'quarter' : 'full'
   );
   const [currentCollapsible, setCurrentCollapsible] = useState(collapsible);
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
@@ -53,7 +56,11 @@ export const EnhancedFieldVisibilityModal: React.FC<EnhancedFieldVisibilityModal
     
     setFieldConfigs(configs);
     setCurrentTitle(panelTitle);
-    setCurrentWidth(panelWidth === 'half' || panelWidth === 6 ? 'half' : 'full');
+    setCurrentWidth(
+      panelWidth === 'half' || panelWidth === 6 ? 'half' :
+      panelWidth === 'third' || panelWidth === 4 ? 'third' :
+      panelWidth === 'quarter' || panelWidth === 3 ? 'quarter' : 'full'
+    );
     setCurrentCollapsible(collapsible);
   }, [panelConfig, panelTitle, panelWidth, collapsible]);
 
@@ -183,13 +190,15 @@ export const EnhancedFieldVisibilityModal: React.FC<EnhancedFieldVisibilityModal
               
               <div className="space-y-2">
                 <Label htmlFor="panel-width">Panel Width</Label>
-                <Select value={currentWidth} onValueChange={(value: 'full' | 'half') => setCurrentWidth(value)}>
+                <Select value={currentWidth} onValueChange={(value: 'full' | 'half' | 'third' | 'quarter') => setCurrentWidth(value)}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select width" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="full">Full (12 columns)</SelectItem>
                     <SelectItem value="half">Half (6 columns)</SelectItem>
+                    <SelectItem value="third">Third (4 columns)</SelectItem>
+                    <SelectItem value="quarter">Quarter (3 columns)</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
