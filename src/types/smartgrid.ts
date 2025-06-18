@@ -1,3 +1,4 @@
+
 import React from 'react';
 
 export type GridColumnType =
@@ -23,6 +24,7 @@ export interface GridColumnConfig {
   order?: number;
   options?: string[];
   subRow?: boolean; // Property for sub-row display
+  width?: number; // Column width in pixels
   
   // Badge specific properties
   statusMap?: Record<string, string>;
