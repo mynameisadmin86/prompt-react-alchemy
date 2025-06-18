@@ -6,7 +6,6 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Switch } from '@/components/ui/switch';
 import { Settings, GripVertical, Edit2, Eye, EyeOff, ChevronDown } from 'lucide-react';
 import { Column, GridPreferences } from '@/types/smartgrid';
-import { SubRowConfigurationModal } from './SubRowConfigurationModal';
 
 interface ColumnManagerProps<T> {
   columns: Column<T>[];
@@ -15,7 +14,7 @@ interface ColumnManagerProps<T> {
   onColumnVisibilityToggle: (columnId: string) => void;
   onColumnHeaderChange: (columnId: string, header: string) => void;
   onSubRowToggle?: (columnId: string) => void;
-  onSubRowConfigToggle?: (enabled: boolean) => true;
+  onSubRowConfigToggle?: (enabled: boolean) => void;
 }
 
 export function ColumnManager<T>({
@@ -92,31 +91,20 @@ export function ColumnManager<T>({
 
   if (!isOpen) {
     return (
-      <div className="flex space-x-2">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => setIsOpen(true)}
-          className="flex items-center space-x-2"
-        >
-          <Settings className="h-4 w-4" />
-          <span>Columns</span>
-        </Button>
-        
-        <SubRowConfigurationModal
-          columns={columns}
-          preferences={preferences}
-          onSubRowToggle={handleSubRowToggle}
-          onSubRowConfigToggle={handleSubRowConfigToggle}
-          onSelectAll={handleSelectAllSubRows}
-          onDeselectAll={handleDeselectAllSubRows}
-        />
-      </div>
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={() => setIsOpen(true)}
+        className="flex items-center space-x-2"
+      >
+        <Settings className="h-4 w-4" />
+        <span>Columns</span>
+      </Button>
     );
   }
 
   return (
-    <div className="absolute top-full right-0 mt-2 w-80 bg-white border rounded-lg shadow-lg z-50 p-4">
+    <div className="absolute top-full right-0 mt-2 w-96 bg-white border rounded-lg shadow-lg z-50 p-4">
       <div className="flex items-center justify-between mb-4">
         <h3 className="font-semibold">Manage Columns</h3>
         <Button size="sm" variant="ghost" onClick={() => setIsOpen(false)}>
@@ -135,8 +123,38 @@ export function ColumnManager<T>({
           onCheckedChange={handleSubRowConfigToggle}
         />
       </div>
+
+      {/* Sub-row bulk actions */}
+      {preferences.enableSubRowConfig && (
+        <div className="mb-4 p-3 bg-purple-50 rounded-lg border border-purple-200">
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-sm font-medium text-purple-800">Sub-row Actions</span>
+            <span className="text-xs text-purple-600">
+              {preferences.subRowColumns?.length || 0} selected
+            </span>
+          </div>
+          <div className="flex space-x-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleSelectAllSubRows}
+              className="flex-1 text-xs"
+            >
+              Select All
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleDeselectAllSubRows}
+              className="flex-1 text-xs"
+            >
+              Deselect All
+            </Button>
+          </div>
+        </div>
+      )}
       
-      <div className="space-y-2 max-h-64 overflow-y-auto">
+      <div className="space-y-2 max-h-72 overflow-y-auto">
         {orderedColumns.map((column) => {
           const isHidden = preferences.hiddenColumns.includes(column.id);
           const isSubRow = preferences.subRowColumns?.includes(column.id) || false;
