@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -189,8 +190,21 @@ export const EnhancedFieldVisibilityModal: React.FC<EnhancedFieldVisibilityModal
                   checked={currentPanelVisible}
                   onCheckedChange={(checked) => setCurrentPanelVisible(checked as boolean)}
                 />
-                <Label htmlFor="panel-visible">Show panel</Label>
+                <Label htmlFor="panel-visible" className="flex items-center space-x-2">
+                  <span>Show panel</span>
+                  {!currentPanelVisible && (
+                    <span className="text-xs bg-red-100 text-red-800 px-2 py-0.5 rounded">Hidden</span>
+                  )}
+                </Label>
               </div>
+
+              {!currentPanelVisible && (
+                <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-md">
+                  <p className="text-sm text-yellow-800">
+                    This panel is currently hidden. Check "Show panel" to make it visible again.
+                  </p>
+                </div>
+              )}
 
               <div className="space-y-2">
                 <Label htmlFor="panel-title">Panel Title</Label>
