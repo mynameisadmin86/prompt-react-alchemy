@@ -45,7 +45,9 @@ export function SmartGrid({
       editable: col.editable,
       mandatory: col.mandatory,
       type: 'text' as const,
-      render: undefined
+      render: undefined,
+      // Convert string[] options to expected format
+      options: col.options ? col.options.map(opt => ({ label: opt, value: opt })) : undefined
     }));
   }, [columns]);
 
@@ -313,21 +315,28 @@ export function SmartGrid({
                         {editingCell?.row === rowIndex && editingCell?.column === column.key ? (
                           <CellEditor
                             value={row[column.key]}
-                            column={{ ...column, id: column.key, header: column.label, accessor: column.key, type: 'text' }}
+                            column={{ 
+                              ...legacyColumnConversion.find(c => c.id === column.key)!,
+                              type: 'text' as const
+                            }}
                             onSave={(value) => handleCellEdit(rowIndex, column.key, value)}
                             onCancel={() => setEditingCell(null)}
                           />
                         ) : (
                           <CellRenderer
                             value={row[column.key]}
+                            row={row}
                             column={column}
-                            rowData={row}
-                            onEdit={
+                            rowIndex={rowIndex}
+                            columnIndex={orderedColumns.findIndex(c => c.key === column.key)}
+                            isEditing={false}
+                            isEditable={
                               editableColumns === true || 
                               (Array.isArray(editableColumns) && editableColumns.includes(column.key))
-                                ? () => setEditingCell({ row: rowIndex, column: column.key })
-                                : undefined
                             }
+                            onEdit={handleCellEdit}
+                            onEditStart={() => setEditingCell({ row: rowIndex, column: column.key })}
+                            onEditCancel={() => setEditingCell(null)}
                             onLinkClick={onLinkClick}
                           />
                         )}
@@ -386,8 +395,15 @@ export function SmartGrid({
                                 <div className="text-sm text-gray-900">
                                   <CellRenderer
                                     value={row[column.key]}
+                                    row={row}
                                     column={column}
-                                    rowData={row}
+                                    rowIndex={rowIndex}
+                                    columnIndex={0}
+                                    isEditing={false}
+                                    isEditable={false}
+                                    onEdit={() => {}}
+                                    onEditStart={() => {}}
+                                    onEditCancel={() => {}}
                                     onLinkClick={onLinkClick}
                                   />
                                 </div>
