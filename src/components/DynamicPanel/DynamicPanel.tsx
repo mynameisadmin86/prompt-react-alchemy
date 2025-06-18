@@ -52,6 +52,9 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
             if (userSettings.collapsible !== undefined) {
               setIsCollapsible(userSettings.collapsible);
             }
+            if (userSettings.showStatusIndicator !== undefined) {
+              setShowStatusIndicator(userSettings.showStatusIndicator);
+            }
           }
         } catch (error) {
           console.error('Failed to load user panel config:', error);
@@ -78,8 +81,7 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
     newTitle?: string, 
     newWidth?: 'full' | 'half' | 'third' | 'quarter' | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12,
     newCollapsible?: boolean,
-    newPanelVisible?: boolean,
-    newShowStatusIndicator?: boolean
+    newPanelVisible?: boolean
   ) => {
     setPanelConfig(updatedConfig);
     
@@ -101,10 +103,6 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
     if (newPanelVisible !== undefined) {
       setPanelVisible(newPanelVisible);
     }
-
-    if (newShowStatusIndicator !== undefined) {
-      setShowStatusIndicator(newShowStatusIndicator);
-    }
     
     if (saveUserPanelConfig) {
       try {
@@ -112,7 +110,7 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
           title: newTitle || panelTitle,
           width: newWidth || currentPanelWidth,
           collapsible: newCollapsible !== undefined ? newCollapsible : isCollapsible,
-          showStatusIndicator: newShowStatusIndicator !== undefined ? newShowStatusIndicator : showStatusIndicator,
+          showStatusIndicator: showStatusIndicator,
           fields: updatedConfig
         };
         await saveUserPanelConfig(userId, panelId, settings);
@@ -181,7 +179,6 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
         panelWidth={currentPanelWidth}
         collapsible={isCollapsible}
         panelVisible={panelVisible}
-        showStatusIndicator={showStatusIndicator}
         onSave={handleConfigSave}
       />
     );
@@ -243,7 +240,6 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
               panelWidth={currentPanelWidth}
               collapsible={isCollapsible}
               panelVisible={panelVisible}
-              showStatusIndicator={showStatusIndicator}
               onSave={handleConfigSave}
             />
           )}
@@ -292,7 +288,6 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
           panelWidth={currentPanelWidth}
           collapsible={isCollapsible}
           panelVisible={panelVisible}
-          showStatusIndicator={showStatusIndicator}
           onSave={handleConfigSave}
         />
       )}
