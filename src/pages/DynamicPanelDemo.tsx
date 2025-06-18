@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { DynamicPanel } from '@/components/DynamicPanel';
 import { DynamicPanelPreview } from '@/components/DynamicPanel/DynamicPanelPreview';
+import { PanelVisibilityManager } from '@/components/DynamicPanel/PanelVisibilityManager';
 import { PanelConfig, PanelSettings } from '@/types/dynamicPanel';
 import { Button } from '@/components/ui/button';
 import { Eye, EyeOff } from 'lucide-react';
@@ -28,6 +29,11 @@ const DynamicPanelDemo = () => {
   const [basicDetailsWidth, setBasicDetailsWidth] = useState<'full' | 'half' | 'third' | 'quarter' | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12>(12);
   const [operationalDetailsWidth, setOperationalDetailsWidth] = useState<'full' | 'half' | 'third' | 'quarter' | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12>(6);
   const [billingDetailsWidth, setBillingDetailsWidth] = useState<'full' | 'half' | 'third' | 'quarter' | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12>(6);
+
+  // Panel visibility state
+  const [basicDetailsVisible, setBasicDetailsVisible] = useState(true);
+  const [operationalDetailsVisible, setOperationalDetailsVisible] = useState(true);
+  const [billingDetailsVisible, setBillingDetailsVisible] = useState(true);
 
   // Basic Details Panel Configuration
   const basicDetailsConfig: PanelConfig = {
@@ -276,6 +282,27 @@ const DynamicPanelDemo = () => {
     console.log(`Saved config for panel ${panelId}:`, settings);
   };
 
+  // Panel visibility management
+  const panels = [
+    { id: 'basic-details', title: basicDetailsTitle, visible: basicDetailsVisible },
+    { id: 'operational-details', title: operationalDetailsTitle, visible: operationalDetailsVisible },
+    { id: 'billing-details', title: billingDetailsTitle, visible: billingDetailsVisible }
+  ];
+
+  const handlePanelVisibilityChange = (panelId: string, visible: boolean) => {
+    switch (panelId) {
+      case 'basic-details':
+        setBasicDetailsVisible(visible);
+        break;
+      case 'operational-details':
+        setOperationalDetailsVisible(visible);
+        break;
+      case 'billing-details':
+        setBillingDetailsVisible(visible);
+        break;
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto p-6 space-y-6">
@@ -296,7 +323,7 @@ const DynamicPanelDemo = () => {
           </BreadcrumbList>
         </Breadcrumb>
 
-        {/* Title and Preview Toggle */}
+        {/* Title and Controls */}
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-semibold text-gray-900">Dynamic Panel Configuration</h1>
@@ -304,23 +331,29 @@ const DynamicPanelDemo = () => {
               Configure field visibility, ordering, and labels for each panel
             </p>
           </div>
-          <Button
-            onClick={() => setShowPreview(!showPreview)}
-            variant="outline"
-            className="flex items-center gap-2"
-          >
-            {showPreview ? (
-              <>
-                <EyeOff className="h-4 w-4" />
-                Hide Preview
-              </>
-            ) : (
-              <>
-                <Eye className="h-4 w-4" />
-                Show Preview
-              </>
-            )}
-          </Button>
+          <div className="flex items-center gap-3">
+            <PanelVisibilityManager
+              panels={panels}
+              onVisibilityChange={handlePanelVisibilityChange}
+            />
+            <Button
+              onClick={() => setShowPreview(!showPreview)}
+              variant="outline"
+              className="flex items-center gap-2"
+            >
+              {showPreview ? (
+                <>
+                  <EyeOff className="h-4 w-4" />
+                  Hide Preview
+                </>
+              ) : (
+                <>
+                  <Eye className="h-4 w-4" />
+                  Show Preview
+                </>
+              )}
+            </Button>
+          </div>
         </div>
 
         {/* Preview or Configuration Mode */}
@@ -333,73 +366,96 @@ const DynamicPanelDemo = () => {
           <>
             {/* Dynamic Panels in 12-column grid */}
             <div className="grid grid-cols-12 gap-6">
-              <DynamicPanel
-                panelId="basic-details"
-                panelTitle={basicDetailsTitle}
-                panelConfig={basicDetailsConfig}
-                initialData={basicDetailsData}
-                onDataChange={setBasicDetailsData}
-                onTitleChange={setBasicDetailsTitle}
-                onWidthChange={setBasicDetailsWidth}
-                getUserPanelConfig={getUserPanelConfig}
-                saveUserPanelConfig={saveUserPanelConfig}
-                userId="current-user"
-                panelWidth={basicDetailsWidth}
-              />
+              {basicDetailsVisible && (
+                <DynamicPanel
+                  panelId="basic-details"
+                  panelTitle={basicDetailsTitle}
+                  panelConfig={basicDetailsConfig}
+                  initialData={basicDetailsData}
+                  onDataChange={setBasicDetailsData}
+                  onTitleChange={setBasicDetailsTitle}
+                  onWidthChange={setBasicDetailsWidth}
+                  getUserPanelConfig={getUserPanelConfig}
+                  saveUserPanelConfig={saveUserPanelConfig}
+                  userId="current-user"
+                  panelWidth={basicDetailsWidth}
+                />
+              )}
 
-              <DynamicPanel
-                panelId="operational-details"
-                panelTitle={operationalDetailsTitle}
-                panelConfig={operationalDetailsConfig}
-                initialData={operationalDetailsData}
-                onDataChange={setOperationalDetailsData}
-                onTitleChange={setOperationalDetailsTitle}
-                onWidthChange={setOperationalDetailsWidth}
-                getUserPanelConfig={getUserPanelConfig}
-                saveUserPanelConfig={saveUserPanelConfig}
-                userId="current-user"
-                panelWidth={operationalDetailsWidth}
-              />
+              {operationalDetailsVisible && (
+                <DynamicPanel
+                  panelId="operational-details"
+                  panelTitle={operationalDetailsTitle}
+                  panelConfig={operationalDetailsConfig}
+                  initialData={operationalDetailsData}
+                  onDataChange={setOperationalDetailsData}
+                  onTitleChange={setOperationalDetailsTitle}
+                  onWidthChange={setOperationalDetailsWidth}
+                  getUserPanelConfig={getUserPanelConfig}
+                  saveUserPanelConfig={saveUserPanelConfig}
+                  userId="current-user"
+                  panelWidth={operationalDetailsWidth}
+                />
+              )}
 
-              <DynamicPanel
-                panelId="billing-details"
-                panelTitle={billingDetailsTitle}
-                panelConfig={billingDetailsConfig}
-                initialData={billingDetailsData}
-                onDataChange={setBillingDetailsData}
-                onTitleChange={setBillingDetailsTitle}
-                onWidthChange={setBillingDetailsWidth}
-                getUserPanelConfig={getUserPanelConfig}
-                saveUserPanelConfig={saveUserPanelConfig}
-                userId="current-user"
-                panelWidth={billingDetailsWidth}
-              />
+              {billingDetailsVisible && (
+                <DynamicPanel
+                  panelId="billing-details"
+                  panelTitle={billingDetailsTitle}
+                  panelConfig={billingDetailsConfig}
+                  initialData={billingDetailsData}
+                  onDataChange={setBillingDetailsData}
+                  onTitleChange={setBillingDetailsTitle}
+                  onWidthChange={setBillingDetailsWidth}
+                  getUserPanelConfig={getUserPanelConfig}
+                  saveUserPanelConfig={saveUserPanelConfig}
+                  userId="current-user"
+                  panelWidth={billingDetailsWidth}
+                />
+              )}
             </div>
+
+            {/* Show message when all panels are hidden */}
+            {!basicDetailsVisible && !operationalDetailsVisible && !billingDetailsVisible && (
+              <div className="bg-white p-8 rounded-lg shadow-sm text-center">
+                <EyeOff className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                <h3 className="text-lg font-semibold text-gray-700 mb-2">All panels are hidden</h3>
+                <p className="text-gray-500 mb-4">Use the "Manage Panels" button above to show panels.</p>
+              </div>
+            )}
 
             {/* Debug Data Display */}
-            <div className="bg-white p-6 rounded-lg shadow-sm">
-              <h3 className="text-lg font-semibold mb-4">Current Form Data</h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <h4 className="font-medium text-gray-700 mb-2">{basicDetailsTitle}</h4>
-                  <pre className="text-xs bg-gray-100 p-3 rounded overflow-auto">
-                    {JSON.stringify(basicDetailsData, null, 2)}
-                  </pre>
-                </div>
-                <div>
-                  <h4 className="font-medium text-gray-700 mb-2">{operationalDetailsTitle}</h4>
-                  <pre className="text-xs bg-gray-100 p-3 rounded overflow-auto">
-                    {JSON.stringify(operationalDetailsData, null, 2)}
-                  </pre>
-                </div>
-                <div>
-                  <h4 className="font-medium text-gray-700 mb-2">{billingDetailsTitle}</h4>
-                  <pre className="text-xs bg-gray-100 p-3 rounded overflow-auto">
-                    {JSON.stringify(billingDetailsData, null, 2)}
-                  </pre>
+            {(basicDetailsVisible || operationalDetailsVisible || billingDetailsVisible) && (
+              <div className="bg-white p-6 rounded-lg shadow-sm">
+                <h3 className="text-lg font-semibold mb-4">Current Form Data</h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {basicDetailsVisible && (
+                    <div>
+                      <h4 className="font-medium text-gray-700 mb-2">{basicDetailsTitle}</h4>
+                      <pre className="text-xs bg-gray-100 p-3 rounded overflow-auto">
+                        {JSON.stringify(basicDetailsData, null, 2)}
+                      </pre>
+                    </div>
+                  )}
+                  {operationalDetailsVisible && (
+                    <div>
+                      <h4 className="font-medium text-gray-700 mb-2">{operationalDetailsTitle}</h4>
+                      <pre className="text-xs bg-gray-100 p-3 rounded overflow-auto">
+                        {JSON.stringify(operationalDetailsData, null, 2)}
+                      </pre>
+                    </div>
+                  )}
+                  {billingDetailsVisible && (
+                    <div>
+                      <h4 className="font-medium text-gray-700 mb-2">{billingDetailsTitle}</h4>
+                      <pre className="text-xs bg-gray-100 p-3 rounded overflow-auto">
+                        {JSON.stringify(billingDetailsData, null, 2)}
+                      </pre>
+                    </div>
+                  )}
                 </div>
               </div>
-            </div>
+            )}
           </>
         )}
       </div>
