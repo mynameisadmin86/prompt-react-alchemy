@@ -136,7 +136,7 @@ export function ColumnManager<T>({
       <div className="space-y-2 max-h-72 overflow-y-auto">
         {orderedColumns.map((column) => {
           const isHidden = preferences.hiddenColumns.includes(column.id);
-          const isSubRow = preferences.subRowColumns?.includes(column.id) || false;
+          const isSubRow = preferences.subRowColumns?.includes(column.id);
           const customHeader = preferences.columnHeaders[column.id];
           const displayHeader = customHeader || column.header;
 
