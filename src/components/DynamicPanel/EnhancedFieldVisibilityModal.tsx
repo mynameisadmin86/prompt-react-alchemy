@@ -35,7 +35,9 @@ export const EnhancedFieldVisibilityModal: React.FC<EnhancedFieldVisibilityModal
 }) => {
   const [fieldConfigs, setFieldConfigs] = useState<FieldVisibilityConfig[]>([]);
   const [currentTitle, setCurrentTitle] = useState(panelTitle);
-  const [currentWidth, setCurrentWidth] = useState<'full' | 'half' | 'third' | 'quarter' | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12>(panelWidth);
+  const [currentWidth, setCurrentWidth] = useState<'full' | 'half'>(
+    panelWidth === 'half' || panelWidth === 6 ? 'half' : 'full'
+  );
   const [currentCollapsible, setCurrentCollapsible] = useState(collapsible);
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
 
@@ -51,7 +53,7 @@ export const EnhancedFieldVisibilityModal: React.FC<EnhancedFieldVisibilityModal
     
     setFieldConfigs(configs);
     setCurrentTitle(panelTitle);
-    setCurrentWidth(panelWidth);
+    setCurrentWidth(panelWidth === 'half' || panelWidth === 6 ? 'half' : 'full');
     setCurrentCollapsible(collapsible);
   }, [panelConfig, panelTitle, panelWidth, collapsible]);
 
@@ -181,27 +183,13 @@ export const EnhancedFieldVisibilityModal: React.FC<EnhancedFieldVisibilityModal
               
               <div className="space-y-2">
                 <Label htmlFor="panel-width">Panel Width</Label>
-                <Select value={formatWidthValue(currentWidth)} onValueChange={(value) => setCurrentWidth(parseWidthValue(value))}>
+                <Select value={currentWidth} onValueChange={(value: 'full' | 'half') => setCurrentWidth(value)}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select width" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="full">Full (12 columns)</SelectItem>
                     <SelectItem value="half">Half (6 columns)</SelectItem>
-                    <SelectItem value="third">Third (4 columns)</SelectItem>
-                    <SelectItem value="quarter">Quarter (3 columns)</SelectItem>
-                    <SelectItem value="1">1 Column</SelectItem>
-                    <SelectItem value="2">2 Columns</SelectItem>
-                    <SelectItem value="3">3 Columns</SelectItem>
-                    <SelectItem value="4">4 Columns</SelectItem>
-                    <SelectItem value="5">5 Columns</SelectItem>
-                    <SelectItem value="6">6 Columns</SelectItem>
-                    <SelectItem value="7">7 Columns</SelectItem>
-                    <SelectItem value="8">8 Columns</SelectItem>
-                    <SelectItem value="9">9 Columns</SelectItem>
-                    <SelectItem value="10">10 Columns</SelectItem>
-                    <SelectItem value="11">11 Columns</SelectItem>
-                    <SelectItem value="12">12 Columns</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
