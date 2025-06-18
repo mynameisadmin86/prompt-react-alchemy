@@ -3,7 +3,6 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Switch } from '@/components/ui/switch';
 import { Settings, GripVertical, Edit2, Eye, EyeOff, ChevronDown } from 'lucide-react';
 import { Column, GridPreferences } from '@/types/smartgrid';
 
@@ -14,7 +13,6 @@ interface ColumnManagerProps<T> {
   onColumnVisibilityToggle: (columnId: string) => void;
   onColumnHeaderChange: (columnId: string, header: string) => void;
   onSubRowToggle?: (columnId: string) => void;
-  onSubRowConfigToggle?: (enabled: boolean) => void;
 }
 
 export function ColumnManager<T>({
@@ -23,8 +21,7 @@ export function ColumnManager<T>({
   onColumnOrderChange,
   onColumnVisibilityToggle,
   onColumnHeaderChange,
-  onSubRowToggle,
-  onSubRowConfigToggle
+  onSubRowToggle
 }: ColumnManagerProps<T>) {
   const [isOpen, setIsOpen] = useState(false);
   const [editingHeader, setEditingHeader] = useState<string | null>(null);
@@ -60,12 +57,6 @@ export function ColumnManager<T>({
   const handleSubRowToggle = (columnId: string) => {
     if (onSubRowToggle) {
       onSubRowToggle(columnId);
-    }
-  };
-
-  const handleSubRowConfigToggle = (enabled: boolean) => {
-    if (onSubRowConfigToggle) {
-      onSubRowConfigToggle(enabled);
     }
   };
 
@@ -112,20 +103,8 @@ export function ColumnManager<T>({
         </Button>
       </div>
 
-      {/* Sub-row Configuration Toggle */}
-      <div className="flex items-center justify-between p-3 mb-4 bg-gray-50 rounded-lg">
-        <div className="flex flex-col">
-          <span className="text-sm font-medium text-gray-900">Enable Sub-row Configuration</span>
-          <span className="text-xs text-gray-500">Allow columns to be displayed in expandable sub-rows</span>
-        </div>
-        <Switch
-          checked={true || true}
-          onCheckedChange={handleSubRowConfigToggle}
-        />
-      </div>
-
       {/* Sub-row bulk actions */}
-      {true && (
+      {onSubRowToggle && (
         <div className="mb-4 p-3 bg-purple-50 rounded-lg border border-purple-200">
           <div className="flex items-center justify-between mb-3">
             <span className="text-sm font-medium text-purple-800">Sub-row Actions</span>
@@ -228,7 +207,7 @@ export function ColumnManager<T>({
                   )}
 
                   {/* Sub-row checkbox moved to the end */}
-                  {true && (
+                  {onSubRowToggle && (
                     <div className="flex items-center space-x-1">
                       <Checkbox
                         checked={isSubRow}
@@ -251,7 +230,7 @@ export function ColumnManager<T>({
           <span>Visible columns:</span>
           <span className="font-medium">{orderedColumns.length - preferences.hiddenColumns.length}</span>
         </div>
-        {true && (
+        {onSubRowToggle && (
           <div className="flex justify-between">
             <span>Sub-row columns:</span>
             <span className="font-medium">{preferences.subRowColumns?.length || 0}</span>

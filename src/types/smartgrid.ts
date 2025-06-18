@@ -1,3 +1,4 @@
+
 import React from 'react';
 
 export type GridColumnType =
@@ -73,7 +74,6 @@ export interface GridPreferences {
   columnHeaders: Record<string, string>;
   subRowColumns: string[]; // Existing property for tracking sub-row columns
   subRowColumnOrder: string[]; // New property for sub-row column ordering
-  enableSubRowConfig?: boolean; // New property for enabling/disabling sub-row configuration
   sort?: SortConfig;
   filters: FilterConfig[];
   pageSize?: number;
