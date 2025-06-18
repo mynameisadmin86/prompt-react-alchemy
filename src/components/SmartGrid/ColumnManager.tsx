@@ -1,17 +1,11 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from '@/components/ui/sheet';
-import { Settings } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Switch } from '@/components/ui/switch';
+import { Settings, GripVertical, Edit2, Eye, EyeOff, ChevronDown } from 'lucide-react';
 import { Column, GridPreferences } from '@/types/smartgrid';
-import { ColumnSection } from './ColumnSection';
-import { ColumnSummary } from './ColumnSummary';
 
 interface ColumnManagerProps<T> {
   columns: Column<T>[];
@@ -20,6 +14,7 @@ interface ColumnManagerProps<T> {
   onColumnVisibilityToggle: (columnId: string) => void;
   onColumnHeaderChange: (columnId: string, header: string) => void;
   onSubRowToggle?: (columnId: string) => void;
+  onSubRowConfigToggle?: (enabled: boolean) => void;
 }
 
 export function ColumnManager<T>({
@@ -28,164 +23,241 @@ export function ColumnManager<T>({
   onColumnOrderChange,
   onColumnVisibilityToggle,
   onColumnHeaderChange,
-  onSubRowToggle
+  onSubRowToggle,
+  onSubRowConfigToggle
 }: ColumnManagerProps<T>) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [editingHeader, setEditingHeader] = useState<string | null>(null);
   const [draggedColumn, setDraggedColumn] = useState<string | null>(null);
-  const [dragOverSection, setDragOverSection] = useState<'main' | 'sub' | null>(null);
-
-  console.log('ColumnManager rendering with columns:', columns.length);
-  console.log('Has sub-row support:', Boolean(onSubRowToggle));
-
-  const hasSubRowSupport = Boolean(onSubRowToggle);
 
   const orderedColumns = preferences.columnOrder
     .map(id => columns.find(col => col.id === id))
     .filter(Boolean) as Column<T>[];
 
-  console.log('Ordered columns:', orderedColumns.length);
-
-  // Separate main-row and sub-row columns
-  const mainRowColumns = orderedColumns.filter(col => !preferences.subRowColumns?.includes(col.id));
-  const subRowColumns = orderedColumns.filter(col => preferences.subRowColumns?.includes(col.id));
-
-  console.log('Main row columns:', mainRowColumns.length, 'Sub-row columns:', subRowColumns.length);
-
   const handleDragStart = (columnId: string) => {
     setDraggedColumn(columnId);
   };
 
-  const handleDragOver = (e: React.DragEvent, section: 'main' | 'sub') => {
+  const handleDragOver = (e: React.DragEvent, targetColumnId: string) => {
     e.preventDefault();
-    if (draggedColumn) {
-      setDragOverSection(section);
-      e.dataTransfer.dropEffect = 'move';
-    }
+    if (!draggedColumn || draggedColumn === targetColumnId) return;
+
+    const newOrder = [...preferences.columnOrder];
+    const draggedIndex = newOrder.indexOf(draggedColumn);
+    const targetIndex = newOrder.indexOf(targetColumnId);
+
+    newOrder.splice(draggedIndex, 1);
+    newOrder.splice(targetIndex, 0, draggedColumn);
+
+    onColumnOrderChange(newOrder);
   };
 
-  const handleDragLeave = (e: React.DragEvent) => {
-    if (!e.currentTarget.contains(e.relatedTarget as Node)) {
-      setDragOverSection(null);
-    }
+  const handleHeaderSave = (columnId: string, newHeader: string) => {
+    onColumnHeaderChange(columnId, newHeader);
+    setEditingHeader(null);
   };
 
-  const handleDrop = (e: React.DragEvent, targetSection: 'main' | 'sub', targetColumnId?: string) => {
-    e.preventDefault();
-    if (!draggedColumn) return;
-
-    const isCurrentlyInSubRow = preferences.subRowColumns?.includes(draggedColumn);
-    const shouldMoveToSubRow = targetSection === 'sub';
-
-    // Toggle sub-row status if moving between sections
-    if (isCurrentlyInSubRow !== shouldMoveToSubRow && onSubRowToggle) {
-      onSubRowToggle(draggedColumn);
-    }
-
-    // Handle reordering within the same section
-    if (targetColumnId && draggedColumn !== targetColumnId) {
-      const newOrder = [...preferences.columnOrder];
-      const draggedIndex = newOrder.indexOf(draggedColumn);
-      const targetIndex = newOrder.indexOf(targetColumnId);
-
-      newOrder.splice(draggedIndex, 1);
-      newOrder.splice(targetIndex, 0, draggedColumn);
-
-      onColumnOrderChange(newOrder);
-    }
-
-    setDraggedColumn(null);
-    setDragOverSection(null);
-  };
-
-  const handleDragEnd = () => {
-    setDraggedColumn(null);
-    setDragOverSection(null);
-  };
-
-  const handleMoveToSubRow = (columnId: string) => {
+  const handleSubRowToggle = (columnId: string) => {
     if (onSubRowToggle) {
       onSubRowToggle(columnId);
     }
   };
 
-  const handleMoveToMainRow = (columnId: string) => {
-    if (onSubRowToggle) {
-      onSubRowToggle(columnId);
+  const handleSubRowConfigToggle = (enabled: boolean) => {
+    if (onSubRowConfigToggle) {
+      onSubRowConfigToggle(enabled);
     }
   };
+
+  const handleSelectAllSubRows = () => {
+    if (onSubRowToggle) {
+      const visibleColumns = columns.filter(col => !preferences.hiddenColumns.includes(col.id));
+      visibleColumns.forEach(column => {
+        if (!preferences.subRowColumns?.includes(column.id)) {
+          onSubRowToggle(column.id);
+        }
+      });
+    }
+  };
+
+  const handleDeselectAllSubRows = () => {
+    if (onSubRowToggle) {
+      const subRowColumns = preferences.subRowColumns || [];
+      subRowColumns.forEach(columnId => {
+        onSubRowToggle(columnId);
+      });
+    }
+  };
+
+  if (!isOpen) {
+    return (
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={() => setIsOpen(true)}
+        className="flex items-center space-x-2"
+      >
+        <Settings className="h-4 w-4" />
+        <span>Columns</span>
+      </Button>
+    );
+  }
 
   return (
-    <Sheet>
-      <SheetTrigger asChild>
-        <Button
-          variant="outline"
-          size="sm"
-          className="flex items-center space-x-2"
-        >
-          <Settings className="h-4 w-4" />
-          <span>Columns</span>
+    <div className="absolute top-full right-0 mt-2 w-96 bg-white border rounded-lg shadow-lg z-50 p-4">
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="font-semibold">Manage Columns</h3>
+        <Button size="sm" variant="ghost" onClick={() => setIsOpen(false)}>
+          ×
         </Button>
-      </SheetTrigger>
-      <SheetContent className="w-96 sm:max-w-96">
-        <SheetHeader>
-          <SheetTitle>Manage Columns</SheetTitle>
-          <SheetDescription>
-            Configure column visibility, order, and placement
-          </SheetDescription>
-        </SheetHeader>
+      </div>
 
-        <div className="mt-6 space-y-6">
-          {/* Main Row Columns Section */}
-          <ColumnSection
-            title="Main Row Columns"
-            columns={mainRowColumns}
-            section="main"
-            preferences={preferences}
-            draggedColumn={draggedColumn}
-            dragOverSection={dragOverSection}
-            hasSubRowSupport={hasSubRowSupport}
-            onDragStart={handleDragStart}
-            onDragOver={handleDragOver}
-            onDragLeave={handleDragLeave}
-            onDrop={handleDrop}
-            onDragEnd={handleDragEnd}
-            onColumnVisibilityToggle={onColumnVisibilityToggle}
-            onColumnHeaderChange={onColumnHeaderChange}
-            onMoveToSubRow={handleMoveToSubRow}
-            onMoveToMainRow={handleMoveToMainRow}
-          />
-
-          {/* Sub-row Columns Section - only show if sub-row support is enabled */}
-          {hasSubRowSupport && (
-            <ColumnSection
-              title="Sub-row Columns"
-              columns={subRowColumns}
-              section="sub"
-              preferences={preferences}
-              draggedColumn={draggedColumn}
-              dragOverSection={dragOverSection}
-              hasSubRowSupport={hasSubRowSupport}
-              onDragStart={handleDragStart}
-              onDragOver={handleDragOver}
-              onDragLeave={handleDragLeave}
-              onDrop={handleDrop}
-              onDragEnd={handleDragEnd}
-              onColumnVisibilityToggle={onColumnVisibilityToggle}
-              onColumnHeaderChange={onColumnHeaderChange}
-              onMoveToSubRow={handleMoveToSubRow}
-              onMoveToMainRow={handleMoveToMainRow}
-            />
-          )}
-
-          {/* Summary section */}
-          <ColumnSummary
-            orderedColumns={orderedColumns}
-            mainRowColumns={mainRowColumns}
-            subRowColumns={subRowColumns}
-            preferences={preferences}
-            hasSubRowSupport={hasSubRowSupport}
-          />
+      {/* Sub-row Configuration Toggle */}
+      <div className="flex items-center justify-between p-3 mb-4 bg-gray-50 rounded-lg">
+        <div className="flex flex-col">
+          <span className="text-sm font-medium text-gray-900">Enable Sub-row Configuration</span>
+          <span className="text-xs text-gray-500">Allow columns to be displayed in expandable sub-rows</span>
         </div>
-      </SheetContent>
-    </Sheet>
+        <Switch
+          checked={preferences.enableSubRowConfig || false}
+          onCheckedChange={handleSubRowConfigToggle}
+        />
+      </div>
+
+      {/* Sub-row bulk actions */}
+      {preferences.enableSubRowConfig && (
+        <div className="mb-4 p-3 bg-purple-50 rounded-lg border border-purple-200">
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-sm font-medium text-purple-800">Sub-row Actions</span>
+            <span className="text-xs text-purple-600">
+              {preferences.subRowColumns?.length || 0} selected
+            </span>
+          </div>
+          <div className="flex space-x-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleSelectAllSubRows}
+              className="flex-1 text-xs"
+            >
+              Select All
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleDeselectAllSubRows}
+              className="flex-1 text-xs"
+            >
+              Deselect All
+            </Button>
+          </div>
+        </div>
+      )}
+      
+      <div className="space-y-2 max-h-72 overflow-y-auto">
+        {orderedColumns.map((column) => {
+          const isHidden = preferences.hiddenColumns.includes(column.id);
+          const isSubRow = preferences.subRowColumns?.includes(column.id) || false;
+          const customHeader = preferences.columnHeaders[column.id];
+          const displayHeader = customHeader || column.header;
+
+          return (
+            <div
+              key={column.id}
+              className="border rounded p-3 hover:bg-gray-50"
+              draggable
+              onDragStart={() => handleDragStart(column.id)}
+              onDragOver={(e) => handleDragOver(e, column.id)}
+            >
+              <div className="flex items-center space-x-2">
+                <GripVertical className="h-4 w-4 text-gray-400 cursor-move" />
+                
+                <Checkbox
+                  checked={!isHidden}
+                  onCheckedChange={() => onColumnVisibilityToggle(column.id)}
+                  disabled={column.mandatory}
+                  className="shrink-0"
+                />
+
+                {isHidden ? (
+                  <EyeOff className="h-4 w-4 text-gray-400" />
+                ) : (
+                  <Eye className="h-4 w-4 text-green-600" />
+                )}
+
+                {/* Sub-row icon indicator */}
+                {isSubRow && (
+                  <ChevronDown className="h-4 w-4 text-purple-600" />
+                )}
+
+                <div className="flex-1 min-w-0">
+                  {editingHeader === column.id ? (
+                    <Input
+                      defaultValue={displayHeader}
+                      onBlur={(e) => handleHeaderSave(column.id, e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          handleHeaderSave(column.id, e.currentTarget.value);
+                        } else if (e.key === 'Escape') {
+                          setEditingHeader(null);
+                        }
+                      }}
+                      className="h-6 px-1 text-sm"
+                      autoFocus
+                    />
+                  ) : (
+                    <div className="flex items-center space-x-1">
+                      <span className="text-sm truncate">{displayHeader}</span>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => setEditingHeader(column.id)}
+                        className="h-4 w-4 p-0"
+                      >
+                        <Edit2 className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex items-center space-x-2">
+                  {column.mandatory && (
+                    <span className="text-xs text-orange-600 font-medium bg-orange-50 px-2 py-1 rounded">
+                      Required
+                    </span>
+                  )}
+
+                  {/* Sub-row checkbox moved to the end */}
+                  {preferences.enableSubRowConfig && (
+                    <div className="flex items-center space-x-1">
+                      <Checkbox
+                        checked={isSubRow}
+                        onCheckedChange={() => handleSubRowToggle(column.id)}
+                        className="shrink-0"
+                      />
+                      <span className="text-xs text-gray-600">Sub-row</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Summary section */}
+      <div className="mt-4 pt-3 border-t text-sm text-gray-600">
+        <div className="flex justify-between">
+          <span>Visible columns:</span>
+          <span className="font-medium">{orderedColumns.length - preferences.hiddenColumns.length}</span>
+        </div>
+        {preferences.enableSubRowConfig && (
+          <div className="flex justify-between">
+            <span>Sub-row columns:</span>
+            <span className="font-medium">{preferences.subRowColumns?.length || 0}</span>
+          </div>
+        )}
+      </div>
+    </div>
   );
 }

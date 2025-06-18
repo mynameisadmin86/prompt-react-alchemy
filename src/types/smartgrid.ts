@@ -1,4 +1,3 @@
-
 import React from 'react';
 
 export type GridColumnType =
@@ -24,7 +23,6 @@ export interface GridColumnConfig {
   order?: number;
   options?: string[];
   subRow?: boolean; // Property for sub-row display
-  childRow?: boolean; // Property for child-row display
   
   // Badge specific properties
   statusMap?: Record<string, string>;
@@ -75,6 +73,7 @@ export interface GridPreferences {
   columnHeaders: Record<string, string>;
   subRowColumns: string[]; // Existing property for tracking sub-row columns
   subRowColumnOrder: string[]; // New property for sub-row column ordering
+  enableSubRowConfig?: boolean; // New property for enabling/disabling sub-row configuration
   sort?: SortConfig;
   filters: FilterConfig[];
   pageSize?: number;
