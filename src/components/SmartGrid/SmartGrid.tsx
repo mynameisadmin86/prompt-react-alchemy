@@ -185,14 +185,9 @@ export function SmartGrid({
     }));
   }, [columns, preferences, calculateColumnWidths]);
 
-  // Check if any column has collapsibleChild set to true
-  const hasCollapsibleColumns = useMemo(() => {
-    return columns.some(col => col.collapsibleChild === true);
-  }, [columns]);
-
-  // Get collapsible columns
-  const collapsibleColumns = useMemo(() => {
-    return columns.filter(col => col.collapsibleChild === true);
+  // Check if any column has subRow set to true
+  const hasSubRowColumns = useMemo(() => {
+    return columns.some(col => col.subRow === true);
   }, [columns]);
 
   // Get sub-row columns (columns marked with subRow: true)
@@ -200,13 +195,8 @@ export function SmartGrid({
     return columns.filter(col => col.subRow === true);
   }, [columns]);
 
-  // Check if any column has subRow set to true
-  const hasSubRowColumns = useMemo(() => {
-    return subRowColumns.length > 0;
-  }, [subRowColumns]);
-
-  // Helper function to render collapsible cell values
-  const renderCollapsibleCellValue = useCallback((value: any, column: GridColumnConfig) => {
+  // Helper function to render sub-row cell values
+  const renderSubRowCellValue = useCallback((value: any, column: GridColumnConfig) => {
     if (value == null) return '-';
     
     switch (column.type) {
@@ -232,15 +222,15 @@ export function SmartGrid({
     }
   }, []);
 
-  // Render collapsible content
-  const renderCollapsibleContent = useCallback((row: any) => {
-    if (!hasCollapsibleColumns || collapsibleColumns.length === 0) {
+  // Render sub-row content
+  const renderSubRowContent = useCallback((row: any) => {
+    if (!hasSubRowColumns || subRowColumns.length === 0) {
       return null;
     }
 
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {collapsibleColumns.map((column) => {
+        {subRowColumns.map((column) => {
           const value = row[column.key];
           return (
             <div key={column.key} className="p-3 bg-gray-50 rounded-lg">
@@ -248,17 +238,17 @@ export function SmartGrid({
                 {column.label}
               </div>
               <div className="text-sm text-gray-900 font-medium">
-                {renderCollapsibleCellValue(value, column)}
+                {renderSubRowCellValue(value, column)}
               </div>
             </div>
           );
         })}
       </div>
     );
-  }, [hasCollapsibleColumns, collapsibleColumns, renderCollapsibleCellValue]);
+  }, [hasSubRowColumns, subRowColumns, renderSubRowCellValue]);
 
   // Enhanced nested row renderer for sub-row columns with drag-and-drop
-  const renderSubRowContent = useCallback((row: any) => {
+  const renderSubRowContentWithDragDrop = useCallback((row: any) => {
     if (hasSubRowColumns && subRowColumns.length > 0) {
       return (
         <DraggableSubRow
@@ -270,14 +260,13 @@ export function SmartGrid({
       );
     }
 
-    // Fallback to collapsible content if no sub-row columns
-    return renderCollapsibleContent(row);
-  }, [hasSubRowColumns, subRowColumns, preferences.subRowColumnOrder, updateSubRowColumnOrder, renderCollapsibleContent]);
+    // Fallback to basic sub-row content if no sub-row columns
+    return renderSubRowContent(row);
+  }, [hasSubRowColumns, subRowColumns, preferences.subRowColumnOrder, updateSubRowColumnOrder, renderSubRowContent]);
 
-  // Use sub-row renderer if we have sub-row columns, otherwise use collapsible or custom renderer
-  const effectiveNestedRowRenderer = hasSubRowColumns ? renderSubRowContent : (hasCollapsibleColumns ? renderCollapsibleContent : nestedRowRenderer);
+  // Use sub-row renderer if we have sub-row columns, otherwise use custom renderer
+  const effectiveNestedRowRenderer = hasSubRowColumns ? renderSubRowContentWithDragDrop : nestedRowRenderer;
 
-  // Handle column-specific filter changes
   const handleColumnFilterChange = useCallback((filter: FilterConfig | null) => {
     if (!filter) {
       return;
@@ -298,12 +287,10 @@ export function SmartGrid({
     });
   }, []);
 
-  // Handle clearing a specific column filter
   const handleClearColumnFilter = useCallback((columnKey: string) => {
     setFilters(prev => prev.filter(f => f.column !== columnKey));
   }, []);
 
-  // Process data with sorting and filtering (only if not using lazy loading)
   const processedData = useMemo(() => {
     if (onDataFetch) {
       // For lazy loading, return data as-is (sorting/filtering handled server-side)
@@ -395,7 +382,6 @@ export function SmartGrid({
     return result;
   }, [gridData, globalFilter, filters, sort, columns, onDataFetch]);
 
-  // Define handleExport and handleResetPreferences after processedData and orderedColumns
   const handleExport = useCallback((format: 'csv') => {
     const filename = `export-${new Date().toISOString().split('T')[0]}.${format}`;
     exportToCSV(processedData, orderedColumns, filename);
@@ -434,7 +420,6 @@ export function SmartGrid({
     }
   }, [columns, savePreferences, toast]);
 
-  // Handle sorting
   const handleSort = useCallback((columnKey: string) => {
     setSort(prev => {
       if (prev?.column === columnKey) {
@@ -446,7 +431,6 @@ export function SmartGrid({
     });
   }, []);
 
-  // Handle column resizing
   const handleResizeStart = useCallback((e: React.MouseEvent, columnKey: string) => {
     e.preventDefault();
     e.stopPropagation();
@@ -482,7 +466,6 @@ export function SmartGrid({
     document.addEventListener('mouseup', handleMouseUp);
   }, [orderedColumns]);
 
-  // Create Grid API for plugins
   const gridAPI: GridAPI = useMemo(() => ({
     data: gridData,
     filteredData: processedData,
@@ -510,7 +493,6 @@ export function SmartGrid({
     }
   }), [gridData, processedData, currentSelectedRows, orderedColumns, preferences, handleExport, handleResetPreferences, handleSelectionChange]);
 
-  // Pagination
   const paginatedData = useMemo(() => {
     if (paginationMode !== 'pagination' || onDataFetch) return processedData;
     const start = (currentPage - 1) * pageSize;
@@ -519,7 +501,6 @@ export function SmartGrid({
 
   const totalPages = Math.ceil(processedData.length / pageSize);
 
-  // Handle header editing
   const handleHeaderEdit = useCallback((columnKey: string, newHeader: string) => {
     if (resizingColumn) return;
     
@@ -538,7 +519,6 @@ export function SmartGrid({
     setEditingHeader(columnKey);
   }, [resizingColumn]);
 
-  // Handle drag and drop for column reordering
   const handleColumnDragStart = useCallback((e: React.DragEvent, columnKey: string) => {
     if (editingHeader || resizingColumn) {
       e.preventDefault();
@@ -611,7 +591,6 @@ export function SmartGrid({
     setDragOverColumn(null);
   }, [resizingColumn]);
 
-  // Toggle row expansion
   const toggleRowExpansion = useCallback((rowIndex: number) => {
     setExpandedRows(prev => {
       const newSet = new Set(prev);
@@ -624,7 +603,6 @@ export function SmartGrid({
     });
   }, []);
 
-  // Determine if a column is editable
   const isColumnEditable = useCallback((column: GridColumnConfig, columnIndex: number) => {
     if (columnIndex === 0) return false;
     
@@ -635,7 +613,6 @@ export function SmartGrid({
     return editableColumns && column.editable;
   }, [editableColumns]);
 
-  // Cell editing functions
   const handleCellEdit = useCallback(async (rowIndex: number, columnKey: string, value: any) => {
     const actualRowIndex = onDataFetch ? rowIndex : (currentPage - 1) * pageSize + rowIndex;
     const updatedData = [...gridData];
@@ -686,7 +663,7 @@ export function SmartGrid({
     const isEditing = editingCell?.rowIndex === rowIndex && editingCell?.columnKey === column.key;
     const isEditable = isColumnEditable(column, columnIndex);
 
-    if (columnIndex === 0 && (effectiveNestedRowRenderer || hasCollapsibleColumns)) {
+    if (columnIndex === 0 && (effectiveNestedRowRenderer || hasSubRowColumns)) {
       const isExpanded = expandedRows.has(rowIndex);
       return (
         <div className="flex items-center space-x-1 min-w-0">
@@ -740,16 +717,14 @@ export function SmartGrid({
         />
       </div>
     );
-  }, [editingCell, isColumnEditable, effectiveNestedRowRenderer, hasCollapsibleColumns, expandedRows, toggleRowExpansion, handleCellEdit, handleEditStart, handleEditCancel, onLinkClick, loading]);
+  }, [editingCell, isColumnEditable, effectiveNestedRowRenderer, hasSubRowColumns, expandedRows, toggleRowExpansion, handleCellEdit, handleEditStart, handleEditCancel, onLinkClick, loading]);
 
-  // Update grid data when prop data changes (only if not using lazy loading)
   useEffect(() => {
     if (!onDataFetch) {
       setGridData(data);
     }
   }, [data, onDataFetch]);
 
-  // Fixed renderPluginToolbarItems function to prevent React Fragment errors
   const renderPluginToolbarItems = useCallback(() => {
     return plugins
       .filter(plugin => plugin.toolbar)
@@ -760,7 +735,6 @@ export function SmartGrid({
       ));
   }, [plugins, gridAPI]);
 
-  // Fixed renderPluginRowActions function to prevent React Fragment errors
   const renderPluginRowActions = useCallback((row: any, rowIndex: number) => {
     return plugins
       .filter(plugin => plugin.rowActions)
@@ -771,7 +745,6 @@ export function SmartGrid({
       ));
   }, [plugins, gridAPI]);
 
-  // Fixed renderPluginFooterItems function to prevent React Fragment errors
   const renderPluginFooterItems = useCallback(() => {
     return plugins
       .filter(plugin => plugin.footer)
@@ -782,7 +755,6 @@ export function SmartGrid({
       ));
   }, [plugins, gridAPI]);
 
-  // Initialize plugins
   useEffect(() => {
     plugins.forEach(plugin => {
       if (plugin.init) {
@@ -799,7 +771,6 @@ export function SmartGrid({
     };
   }, [plugins, gridAPI]);
 
-  // Error boundary component
   if (error) {
     return (
       <div className="p-4 border border-red-300 rounded-lg bg-red-50">
@@ -818,10 +789,8 @@ export function SmartGrid({
 
   return (
     <div className="space-y-4 w-full">
-      {/* Toolbar */}
       <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between bg-white p-4 rounded-lg border shadow-sm">
         <div className="flex items-center space-x-2">
-          {/* Show active filters count */}
           {filters.length > 0 && (
             <div className="text-sm text-blue-600 bg-blue-50 px-2 py-1 rounded">
               {filters.length} filter{filters.length > 1 ? 's' : ''} active
@@ -830,7 +799,6 @@ export function SmartGrid({
         </div>
 
         <div className="flex items-center space-x-2">
-          {/* Search box - first */}
           <div className="relative w-64">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
             <Input
@@ -842,7 +810,6 @@ export function SmartGrid({
             />
           </div>
 
-          {/* Common Filter Button - Updated to toggle column filters */}
           <Button
             variant={showColumnFilters ? "default" : "outline"}
             size="sm"
@@ -862,7 +829,6 @@ export function SmartGrid({
             )}
           </Button>
 
-          {/* Toggle Checkboxes Button - Updated with blue selection state */}
           <Button 
             variant={showCheckboxes ? "default" : "outline"}
             size="sm" 
@@ -877,7 +843,6 @@ export function SmartGrid({
             <CheckSquare className="h-4 w-4" />
           </Button>
 
-          {/* Toggle View Mode Button - Updated with better visual states */}
           <Button 
             variant="outline"
             size="sm" 
@@ -896,7 +861,6 @@ export function SmartGrid({
             )}
           </Button>
 
-          {/* Column Visibility Manager */}
           <ColumnVisibilityManager
             columns={columns}
             preferences={preferences}
@@ -927,13 +891,11 @@ export function SmartGrid({
         </div>
       </div>
 
-      {/* Table Container with no horizontal scroll */}
       <div className="bg-white rounded-lg border shadow-sm overflow-hidden">
         <div className="w-full">
           <Table className="w-full table-fixed">
             <TableHeader className="sticky top-0 z-20 bg-white shadow-sm border-b-2 border-gray-100">
               <TableRow className="hover:bg-transparent">
-                {/* Checkbox header */}
                 {showCheckboxes && (
                   <TableHead className="bg-gray-50/80 backdrop-blur-sm font-semibold text-gray-900 px-3 py-3 border-r border-gray-100 w-[50px] flex-shrink-0">
                     <input 
@@ -1053,7 +1015,6 @@ export function SmartGrid({
                         </div>
                       </div>
                       
-                      {/* Resize Handle - Modified to only show on hover */}
                       <div
                         className="absolute top-0 right-0 w-2 h-full cursor-col-resize bg-transparent hover:bg-blue-300/50 transition-colors flex items-center justify-center group/resize z-30"
                         onMouseDown={(e) => handleResizeStart(e, column.key)}
@@ -1070,7 +1031,6 @@ export function SmartGrid({
                     </TableHead>
                   );
                 })}
-                {/* Plugin row actions header */}
                 {plugins.some(plugin => plugin.rowActions) && (
                   <TableHead className="bg-gray-50/80 backdrop-blur-sm font-semibold text-gray-900 px-3 py-3 text-center w-[100px] flex-shrink-0">
                     Actions
@@ -1078,13 +1038,10 @@ export function SmartGrid({
                 )}
               </TableRow>
               
-              {/* Column Filter Row */}
               {showColumnFilters && (
                 <TableRow className="hover:bg-transparent border-b border-gray-200">
-                  {/* Checkbox column space */}
                   {showCheckboxes && (
                     <TableHead className="bg-gray-25 px-3 py-2 border-r border-gray-100 w-[50px]">
-                      {/* Empty space for checkbox column */}
                     </TableHead>
                   )}
                   {orderedColumns.map((column) => {
@@ -1111,10 +1068,8 @@ export function SmartGrid({
                       </TableHead>
                     );
                   })}
-                  {/* Plugin row actions column space */}
                   {plugins.some(plugin => plugin.rowActions) && (
                     <TableHead className="bg-gray-25 px-3 py-2 text-center w-[100px]">
-                      {/* Empty space for actions column */}
                     </TableHead>
                   )}
                 </TableRow>
@@ -1154,7 +1109,6 @@ export function SmartGrid({
                         rowClassName ? rowClassName(row, rowIndex) : ''
                       )}
                     >
-                      {/* Checkbox cell */}
                       {showCheckboxes && (
                         <TableCell className="px-3 py-3 border-r border-gray-50 w-[50px]">
                           <input 
@@ -1182,7 +1136,6 @@ export function SmartGrid({
                           {renderCell(row, column, rowIndex, columnIndex)}
                         </TableCell>
                       ))}
-                      {/* Plugin row actions */}
                       {plugins.some(plugin => plugin.rowActions) && (
                         <TableCell className="px-3 py-3 text-center align-top w-[100px]">
                           <div className="flex items-center justify-center space-x-1">
@@ -1191,7 +1144,6 @@ export function SmartGrid({
                         </TableCell>
                       )}
                     </TableRow>
-                    {/* Nested row content */}
                     {effectiveNestedRowRenderer && expandedRows.has(rowIndex) && (
                       <TableRow className="bg-gray-50/30">
                         <TableCell 
@@ -1214,7 +1166,6 @@ export function SmartGrid({
         </div>
       </div>
 
-      {/* Pagination */}
       {paginationMode === 'pagination' && totalPages > 1 && (
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-white p-4 rounded-lg border shadow-sm">
           <div className="text-sm text-gray-600 order-2 sm:order-1">
@@ -1266,7 +1217,6 @@ export function SmartGrid({
         </div>
       )}
 
-      {/* Plugin footer items */}
       {plugins.some(plugin => plugin.footer) && (
         <div className="flex items-center justify-center space-x-4 pt-4 border-t bg-white p-4 rounded-lg border shadow-sm">
           {renderPluginFooterItems()}
