@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -211,7 +212,7 @@ export function ColumnVisibilityManager({
               {filteredColumns.map((column) => {
                 const isVisible = !preferences.hiddenColumns.includes(column.key);
                 const isMandatory = column.mandatory;
-                const isSubRow = preferences.subRowColumns?.includes(column.key) || false;
+                const isSubRow = column.subRow || preferences.subRowColumns?.includes(column.key) || false;
                 const isEditing = editingColumn === column.key;
                 const displayLabel = preferences.columnHeaders[column.key] || column.label;
 
