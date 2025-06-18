@@ -153,7 +153,7 @@ export function ColumnManager<T>({
             >
               <div className="flex items-center space-x-2">
                 <GripVertical className="h-4 w-4 text-gray-400 cursor-move" />
-                
+                2=
                 <Checkbox
                   checked={!isHidden}
                   onCheckedChange={() => onColumnVisibilityToggle(column.id)}
@@ -205,7 +205,7 @@ export function ColumnManager<T>({
                 <div className="flex items-center space-x-2">
                   {column.mandatory && (
                     <span className="text-xs text-orange-600 font-medium bg-orange-50 px-2 py-1 rounded">
-                      Required2=
+                      Required
                     </span>
                   )}
 
