@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -42,27 +43,7 @@ export function ColumnVisibilityManager({
 
   const visibleCount = columns.filter(col => !preferences.hiddenColumns.includes(col.key)).length;
   const totalCount = columns.length;
-  const subRowCount = preferences.subRowColumns?.length || 0;
   const subRowColumns = preferences.subRowColumns || [];
-
-  const handleToggleAll = () => {
-    const allVisible = preferences.hiddenColumns.length === 0;
-    const mandatoryColumns = columns.filter(col => col.mandatory).map(col => col.key);
-    
-    if (allVisible) {
-      // Hide all non-mandatory columns
-      columns.forEach(col => {
-        if (!col.mandatory) {
-          onColumnVisibilityToggle(col.key);
-        }
-      });
-    } else {
-      // Show all columns
-      preferences.hiddenColumns.forEach(columnId => {
-        onColumnVisibilityToggle(columnId);
-      });
-    }
-  };
 
   const handleEditStart = (columnKey: string, currentLabel: string) => {
     setEditingColumn(columnKey);
@@ -226,19 +207,6 @@ export function ColumnVisibilityManager({
               </div>
             )}
 
-            {/* Toggle All */}
-            <div className="flex items-center justify-between py-2 border-b">
-              <span className="text-sm font-medium">Toggle All</span>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleToggleAll}
-                className="text-xs"
-              >
-                {preferences.hiddenColumns.length === 0 ? 'Hide All' : 'Show All'}
-              </Button>
-            </div>
-
             {/* Column List */}
             <div className="flex-1 overflow-y-auto space-y-3">
               {filteredColumns.map((column) => {
@@ -375,24 +343,6 @@ export function ColumnVisibilityManager({
                   <p>No columns found matching "{searchTerm}"</p>
                 </div>
               )}
-            </div>
-
-            {/* Summary */}
-            <div className="pt-4 border-t bg-gray-50 rounded-lg px-4 py-3">
-              <div className="text-sm text-gray-600">
-                <div className="flex justify-between">
-                  <span>Visible columns:</span>
-                  <span className="font-medium">{visibleCount} of {totalCount}</span>
-                </div>
-                <div className="flex justify-between mt-1">
-                  <span>Hidden columns:</span>
-                  <span className="font-medium">{totalCount - visibleCount}</span>
-                </div>
-                <div className="flex justify-between mt-1">
-                  <span>Sub-row columns:</span>
-                  <span className="font-medium">{subRowCount}</span>
-                </div>
-              </div>
             </div>
           </div>
         </DialogContent>
