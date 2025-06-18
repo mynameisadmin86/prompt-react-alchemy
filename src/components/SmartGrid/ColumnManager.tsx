@@ -205,10 +205,10 @@ export function ColumnManager<T>({
                 <div className="flex items-center space-x-2">
                   {column.mandatory && (
                     <span className="text-xs text-orange-600 font-medium bg-orange-50 px-2 py-1 rounded">
-                      Required
+                      Required2=
                     </span>
                   )}
-2=
+
                   {/* Sub-row checkbox moved to the end */}
                   {preferences.enableSubRowConfig && (
                     <div className="flex items-center space-x-1">
