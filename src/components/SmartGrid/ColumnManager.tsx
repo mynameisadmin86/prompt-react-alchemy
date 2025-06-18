@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Settings, GripVertical, Edit2, Eye, EyeOff } from 'lucide-react';
+import { Settings, GripVertical, Edit2, Eye, EyeOff, ChevronDown } from 'lucide-react';
 import { Column, GridPreferences } from '@/types/smartgrid';
 
 interface ColumnManagerProps<T> {
@@ -12,6 +12,7 @@ interface ColumnManagerProps<T> {
   onColumnOrderChange: (newOrder: string[]) => void;
   onColumnVisibilityToggle: (columnId: string) => void;
   onColumnHeaderChange: (columnId: string, header: string) => void;
+  onSubRowToggle?: (columnId: string) => void;
 }
 
 export function ColumnManager<T>({
@@ -19,7 +20,8 @@ export function ColumnManager<T>({
   preferences,
   onColumnOrderChange,
   onColumnVisibilityToggle,
-  onColumnHeaderChange
+  onColumnHeaderChange,
+  onSubRowToggle
 }: ColumnManagerProps<T>) {
   const [isOpen, setIsOpen] = useState(false);
   const [editingHeader, setEditingHeader] = useState<string | null>(null);
@@ -52,6 +54,12 @@ export function ColumnManager<T>({
     setEditingHeader(null);
   };
 
+  const handleSubRowToggle = (columnId: string) => {
+    if (onSubRowToggle) {
+      onSubRowToggle(columnId);
+    }
+  };
+
   if (!isOpen) {
     return (
       <Button
@@ -78,68 +86,112 @@ export function ColumnManager<T>({
       <div className="space-y-2 max-h-64 overflow-y-auto">
         {orderedColumns.map((column) => {
           const isHidden = preferences.hiddenColumns.includes(column.id);
+          const isSubRow = preferences.subRowColumns?.includes(column.id) || false;
           const customHeader = preferences.columnHeaders[column.id];
           const displayHeader = customHeader || column.header;
 
           return (
             <div
               key={column.id}
-              className="flex items-center space-x-2 p-2 border rounded hover:bg-gray-50"
+              className="border rounded p-3 space-y-3 hover:bg-gray-50"
               draggable
               onDragStart={() => handleDragStart(column.id)}
               onDragOver={(e) => handleDragOver(e, column.id)}
             >
-              <GripVertical className="h-4 w-4 text-gray-400 cursor-move" />
-              
-              <Checkbox
-                checked={!isHidden}
-                onCheckedChange={() => onColumnVisibilityToggle(column.id)}
-                disabled={column.mandatory}
-                className="shrink-0"
-              />
+              {/* Main column row */}
+              <div className="flex items-center space-x-2">
+                <GripVertical className="h-4 w-4 text-gray-400 cursor-move" />
+                
+                <Checkbox
+                  checked={!isHidden}
+                  onCheckedChange={() => onColumnVisibilityToggle(column.id)}
+                  disabled={column.mandatory}
+                  className="shrink-0"
+                />
 
-              {isHidden ? (
-                <EyeOff className="h-4 w-4 text-gray-400" />
-              ) : (
-                <Eye className="h-4 w-4 text-green-600" />
-              )}
-
-              <div className="flex-1 min-w-0">
-                {editingHeader === column.id ? (
-                  <Input
-                    defaultValue={displayHeader}
-                    onBlur={(e) => handleHeaderSave(column.id, e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') {
-                        handleHeaderSave(column.id, e.currentTarget.value);
-                      } else if (e.key === 'Escape') {
-                        setEditingHeader(null);
-                      }
-                    }}
-                    className="h-6 px-1 text-sm"
-                    autoFocus
-                  />
+                {isHidden ? (
+                  <EyeOff className="h-4 w-4 text-gray-400" />
                 ) : (
-                  <div className="flex items-center space-x-1">
-                    <span className="text-sm truncate">{displayHeader}</span>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => setEditingHeader(column.id)}
-                      className="h-4 w-4 p-0"
-                    >
-                      <Edit2 className="h-3 w-3" />
-                    </Button>
-                  </div>
+                  <Eye className="h-4 w-4 text-green-600" />
+                )}
+
+                <div className="flex-1 min-w-0">
+                  {editingHeader === column.id ? (
+                    <Input
+                      defaultValue={displayHeader}
+                      onBlur={(e) => handleHeaderSave(column.id, e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          handleHeaderSave(column.id, e.currentTarget.value);
+                        } else if (e.key === 'Escape') {
+                          setEditingHeader(null);
+                        }
+                      }}
+                      className="h-6 px-1 text-sm"
+                      autoFocus
+                    />
+                  ) : (
+                    <div className="flex items-center space-x-1">
+                      <span className="text-sm truncate">{displayHeader}</span>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => setEditingHeader(column.id)}
+                        className="h-4 w-4 p-0"
+                      >
+                        <Edit2 className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  )}
+                </div>
+
+                {column.mandatory && (
+                  <span className="text-xs text-orange-600 font-medium">Required</span>
+                )}
+
+                {isSubRow && (
+                  <span className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded font-medium flex items-center gap-1">
+                    <ChevronDown className="h-3 w-3" />
+                    Sub-row
+                  </span>
                 )}
               </div>
 
-              {column.mandatory && (
-                <span className="text-xs text-orange-600 font-medium">Required</span>
+              {/* Sub-row toggle section */}
+              {onSubRowToggle && (
+                <div className="pl-6 pt-2 border-t border-gray-100">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      <ChevronDown className="h-4 w-4 text-purple-600" />
+                      <div>
+                        <span className="text-sm text-gray-700 font-medium">Sub-row</span>
+                        <div className="text-xs text-gray-500">Show in expandable sub-row</div>
+                      </div>
+                    </div>
+                    
+                    <Checkbox
+                      checked={isSubRow}
+                      onCheckedChange={() => handleSubRowToggle(column.id)}
+                      className="shrink-0"
+                    />
+                  </div>
+                </div>
               )}
             </div>
           );
         })}
+      </div>
+
+      {/* Summary section */}
+      <div className="mt-4 pt-3 border-t text-sm text-gray-600">
+        <div className="flex justify-between">
+          <span>Visible columns:</span>
+          <span className="font-medium">{orderedColumns.length - preferences.hiddenColumns.length}</span>
+        </div>
+        <div className="flex justify-between">
+          <span>Sub-row columns:</span>
+          <span className="font-medium">{preferences.subRowColumns?.length || 0}</span>
+        </div>
       </div>
     </div>
   );
