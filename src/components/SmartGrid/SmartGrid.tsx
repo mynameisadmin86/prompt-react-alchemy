@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,28 +8,24 @@ import {
   ArrowUpDown, 
   ArrowUp, 
   ArrowDown, 
-  Download, 
-  Filter, 
-  Search, 
-  RotateCcw, 
-  ChevronRight, 
-  ChevronDown, 
   Edit2, 
   GripVertical,
-  CheckSquare,
-  Grid2x2,
-  List,
+  ChevronRight, 
+  ChevronDown, 
 } from 'lucide-react';
 import { SmartGridProps, GridColumnConfig, SortConfig, FilterConfig, GridAPI } from '@/types/smartgrid';
 import { exportToCSV } from '@/utils/gridExport';
 import { useToast } from '@/hooks/use-toast';
 import { useGridPreferences } from '@/hooks/useGridPreferences';
+import { useSmartGridState } from '@/hooks/useSmartGridState';
+import { processGridData } from '@/utils/gridDataProcessing';
+import { calculateColumnWidths } from '@/utils/columnWidthCalculations';
 import { CellRenderer } from './CellRenderer';
-import { cn } from '@/lib/utils';
-import { ColumnVisibilityManager } from './ColumnVisibilityManager';
-import { CommonFilter } from './CommonFilter';
+import { GridToolbar } from './GridToolbar';
+import { PluginRenderer, PluginRowActions } from './PluginRenderer';
 import { ColumnFilter } from './ColumnFilter';
 import { DraggableSubRow } from './DraggableSubRow';
+import { cn } from '@/lib/utils';
 
 export function SmartGrid({
   columns,
@@ -48,29 +45,53 @@ export function SmartGrid({
   onSelectionChange,
   rowClassName
 }: SmartGridProps) {
-  const [gridData, setGridData] = useState(data);
-  const [editingCell, setEditingCell] = useState<{ rowIndex: number; columnKey: string } | null>(null);
-  const [editingHeader, setEditingHeader] = useState<string | null>(null);
-  const [draggedColumn, setDraggedColumn] = useState<string | null>(null);
-  const [dragOverColumn, setDragOverColumn] = useState<string | null>(null);
-  const [sort, setSort] = useState<SortConfig | undefined>();
-  const [filters, setFilters] = useState<FilterConfig[]>([]);
-  const [globalFilter, setGlobalFilter] = useState('');
-  const [currentPage, setCurrentPage] = useState(1);
+  const {
+    gridData,
+    setGridData,
+    editingCell,
+    setEditingCell,
+    editingHeader,
+    setEditingHeader,
+    draggedColumn,
+    setDraggedColumn,
+    dragOverColumn,
+    setDragOverColumn,
+    sort,
+    setSort,
+    filters,
+    setFilters,
+    globalFilter,
+    setGlobalFilter,
+    currentPage,
+    setCurrentPage,
+    loading,
+    setLoading,
+    error,
+    setError,
+    expandedRows,
+    setExpandedRows,
+    internalSelectedRows,
+    setInternalSelectedRows,
+    showCheckboxes,
+    setShowCheckboxes,
+    viewMode,
+    setViewMode,
+    showColumnFilters,
+    setShowColumnFilters,
+    resizingColumn,
+    setResizingColumn,
+    resizeHoverColumn,
+    setResizeHoverColumn,
+    columnWidths,
+    setColumnWidths,
+    resizeStartRef,
+    handleColumnFilterChange,
+    handleClearColumnFilter,
+    handleSort,
+    toggleRowExpansion
+  } = useSmartGridState();
+
   const [pageSize] = useState(10);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [expandedRows, setExpandedRows] = useState<Set<number>>(new Set());
-  const [internalSelectedRows, setInternalSelectedRows] = useState<Set<number>>(new Set());
-  const [showCheckboxes, setShowCheckboxes] = useState(false);
-  const [viewMode, setViewMode] = useState<'table' | 'card'>('table');
-  const [showColumnFilters, setShowColumnFilters] = useState(false);
-  
-  const [resizingColumn, setResizingColumn] = useState<string | null>(null);
-  const [resizeHoverColumn, setResizeHoverColumn] = useState<string | null>(null);
-  const [columnWidths, setColumnWidths] = useState<Record<string, number>>({});
-  const resizeStartRef = useRef<{ x: number; width: number } | null>(null);
-  
   const { toast } = useToast();
 
   // Use external selectedRows if provided, otherwise use internal state
@@ -108,61 +129,9 @@ export function SmartGrid({
   );
 
   // Calculate responsive column widths based on content type and available space
-  const calculateColumnWidths = useCallback((visibleColumns: GridColumnConfig[]) => {
-    const containerWidth = window.innerWidth - 64; // Account for padding
-    const checkboxWidth = showCheckboxes ? 50 : 0;
-    const actionsWidth = plugins.some(plugin => plugin.rowActions) ? 100 : 0;
-    const availableWidth = containerWidth - checkboxWidth - actionsWidth;
-    
-    const totalColumns = visibleColumns.length;
-    let remainingWidth = availableWidth;
-    const calculatedWidths: Record<string, number> = {};
-    
-    // First pass: assign minimum widths based on content type with extra space for headers
-    visibleColumns.forEach(col => {
-      let minWidth = 120; // Increased minimum width for header content
-      
-      switch (col.type) {
-        case 'Badge':
-          minWidth = 100;
-          break;
-        case 'Date':
-          minWidth = 140;
-          break;
-        case 'DateTimeRange':
-          minWidth = 200;
-          break;
-        case 'Link':
-          minWidth = 150;
-          break;
-        case 'ExpandableCount':
-          minWidth = 90;
-          break;
-        case 'Text':
-        case 'EditableText':
-        default:
-          minWidth = 120;
-          break;
-      }
-      
-      // Use stored preference, custom width, or calculated minimum
-      const customWidth = columnWidths[col.key];
-      const preferredWidth = preferences.columnWidths[col.key];
-      calculatedWidths[col.key] = customWidth || (preferredWidth ? Math.max(minWidth, preferredWidth) : minWidth);
-      remainingWidth -= calculatedWidths[col.key];
-    });
-    
-    // Second pass: distribute remaining width proportionally
-    if (remainingWidth > 0) {
-      const totalCurrentWidth = Object.values(calculatedWidths).reduce((sum, width) => sum + width, 0);
-      visibleColumns.forEach(col => {
-        const proportion = calculatedWidths[col.key] / totalCurrentWidth;
-        calculatedWidths[col.key] += remainingWidth * proportion;
-      });
-    }
-    
-    return calculatedWidths;
-  }, [preferences.columnWidths, showCheckboxes, plugins, columnWidths]);
+  const calculateColumnWidthsCallback = useCallback((visibleColumns: GridColumnConfig[]) => {
+    return calculateColumnWidths(visibleColumns, showCheckboxes, plugins, preferences, columnWidths);
+  }, [preferences, showCheckboxes, plugins, columnWidths]);
 
   // Apply preferences to get ordered and visible columns - FILTER OUT SUB-ROW COLUMNS from main table
   const orderedColumns = useMemo(() => {
@@ -174,7 +143,7 @@ export function SmartGrid({
       .filter(col => !preferences.hiddenColumns.includes(col.key))
       .filter(col => !col.subRow); // Filter out sub-row columns from main table
     
-    const calculatedWidths = calculateColumnWidths(visibleColumns);
+    const calculatedWidths = calculateColumnWidthsCallback(visibleColumns);
     
     return visibleColumns.map(col => ({
       ...col,
@@ -183,17 +152,7 @@ export function SmartGrid({
       width: calculatedWidths[col.key] || 100,
       filterable: col.filterable !== false // Enable filtering by default
     }));
-  }, [columns, preferences, calculateColumnWidths]);
-
-  // Check if any column has collapsibleChild set to true
-  const hasCollapsibleColumns = useMemo(() => {
-    return columns.some(col => col.subRow === true);
-  }, [columns]);
-
-  // Get collapsible columns
-  const collapsibleColumns = useMemo(() => {
-    return columns.filter(col => col.subRow === true);
-  }, [columns]);
+  }, [columns, preferences, calculateColumnWidthsCallback]);
 
   // Get sub-row columns (columns marked with subRow: true)
   const subRowColumns = useMemo(() => {
@@ -204,6 +163,16 @@ export function SmartGrid({
   const hasSubRowColumns = useMemo(() => {
     return subRowColumns.length > 0;
   }, [subRowColumns]);
+
+  // Check if any column has collapsibleChild set to true
+  const hasCollapsibleColumns = useMemo(() => {
+    return columns.some(col => col.subRow === true);
+  }, [columns]);
+
+  // Get collapsible columns
+  const collapsibleColumns = useMemo(() => {
+    return columns.filter(col => col.subRow === true);
+  }, [columns]);
 
   // Helper function to render collapsible cell values
   const renderCollapsibleCellValue = useCallback((value: any, column: GridColumnConfig) => {
@@ -277,122 +246,9 @@ export function SmartGrid({
   // Use sub-row renderer if we have sub-row columns, otherwise use collapsible or custom renderer
   const effectiveNestedRowRenderer = hasSubRowColumns ? renderSubRowContent : (hasCollapsibleColumns ? renderCollapsibleContent : nestedRowRenderer);
 
-  // Handle column-specific filter changes
-  const handleColumnFilterChange = useCallback((filter: FilterConfig | null) => {
-    if (!filter) {
-      return;
-    }
-
-    setFilters(prev => {
-      const existing = prev.find(f => f.column === filter.column);
-      if (filter.value === '' || filter.value == null) {
-        // Remove filter if value is empty
-        return prev.filter(f => f.column !== filter.column);
-      } else if (existing) {
-        // Update existing filter
-        return prev.map(f => f.column === filter.column ? filter : f);
-      } else {
-        // Add new filter
-        return [...prev, filter];
-      }
-    });
-  }, []);
-
-  // Handle clearing a specific column filter
-  const handleClearColumnFilter = useCallback((columnKey: string) => {
-    setFilters(prev => prev.filter(f => f.column !== columnKey));
-  }, []);
-
   // Process data with sorting and filtering (only if not using lazy loading)
   const processedData = useMemo(() => {
-    if (onDataFetch) {
-      // For lazy loading, return data as-is (sorting/filtering handled server-side)
-      return gridData;
-    }
-
-    let result = [...gridData];
-
-    // Apply global filter - now searches ALL columns including hidden ones
-    if (globalFilter) {
-      result = result.filter(row =>
-        columns.some(col => {
-          let value = row[col.key];
-          
-          // Handle status fields that are objects with value property
-          if (value && typeof value === 'object' && 'value' in value) {
-            value = value.value;
-          }
-          
-          return String(value || '').toLowerCase().includes(globalFilter.toLowerCase());
-        })
-      );
-    }
-
-    // Apply column filters
-    if (filters.length > 0) {
-      result = result.filter(row => {
-        return filters.every(filter => {
-          let value = row[filter.column];
-          
-          // Handle status fields that are objects with value property
-          if (value && typeof value === 'object' && 'value' in value) {
-            value = value.value;
-          }
-          
-          const filterValue = filter.value;
-          const operator = filter.operator || 'contains';
-
-          if (value == null) return false;
-
-          const stringValue = String(value).toLowerCase();
-          const stringFilter = String(filterValue).toLowerCase();
-
-          switch (operator) {
-            case 'equals':
-              return stringValue === stringFilter;
-            case 'contains':
-              return stringValue.includes(stringFilter);
-            case 'startsWith':
-              return stringValue.startsWith(stringFilter);
-            case 'endsWith':
-              return stringValue.endsWith(stringFilter);
-            case 'gt':
-              return Number(value) > Number(filterValue);
-            case 'lt':
-              return Number(value) < Number(filterValue);
-            case 'gte':
-              return Number(value) >= Number(filterValue);
-            case 'lte':
-              return Number(value) <= Number(filterValue);
-            default:
-              return true;
-          }
-        });
-      });
-    }
-
-    // Apply sorting
-    if (sort) {
-      result.sort((a, b) => {
-        let aValue = a[sort.column];
-        let bValue = b[sort.column];
-        
-        // Handle status fields that are objects with value property
-        if (aValue && typeof aValue === 'object' && 'value' in aValue) {
-          aValue = aValue.value;
-        }
-        if (bValue && typeof bValue === 'object' && 'value' in bValue) {
-          bValue = bValue.value;
-        }
-        
-        if (aValue === bValue) return 0;
-        
-        const comparison = aValue < bValue ? -1 : 1;
-        return sort.direction === 'asc' ? comparison : -comparison;
-      });
-    }
-
-    return result;
+    return processGridData(gridData, globalFilter, filters, sort, columns, onDataFetch);
   }, [gridData, globalFilter, filters, sort, columns, onDataFetch]);
 
   // Define handleExport and handleResetPreferences after processedData and orderedColumns
@@ -432,19 +288,7 @@ export function SmartGrid({
         variant: "destructive"
       });
     }
-  }, [columns, savePreferences, toast]);
-
-  // Handle sorting
-  const handleSort = useCallback((columnKey: string) => {
-    setSort(prev => {
-      if (prev?.column === columnKey) {
-        return prev.direction === 'asc' 
-          ? { column: columnKey, direction: 'desc' }
-          : undefined;
-      }
-      return { column: columnKey, direction: 'asc' };
-    });
-  }, []);
+  }, [columns, savePreferences, toast, setSort, setFilters, setGlobalFilter, setColumnWidths, setShowColumnFilters]);
 
   // Handle column resizing
   const handleResizeStart = useCallback((e: React.MouseEvent, columnKey: string) => {
@@ -480,7 +324,7 @@ export function SmartGrid({
 
     document.addEventListener('mousemove', handleMouseMove);
     document.addEventListener('mouseup', handleMouseUp);
-  }, [orderedColumns]);
+  }, [orderedColumns, setResizingColumn, setResizeHoverColumn, setColumnWidths]);
 
   // Create Grid API for plugins
   const gridAPI: GridAPI = useMemo(() => ({
@@ -531,12 +375,12 @@ export function SmartGrid({
       });
     }
     setEditingHeader(null);
-  }, [updateColumnHeader, preferences.columnHeaders, toast, resizingColumn]);
+  }, [updateColumnHeader, preferences.columnHeaders, toast, resizingColumn, setEditingHeader]);
 
   const handleHeaderClick = useCallback((columnKey: string) => {
     if (resizingColumn) return;
     setEditingHeader(columnKey);
-  }, [resizingColumn]);
+  }, [resizingColumn, setEditingHeader]);
 
   // Handle drag and drop for column reordering
   const handleColumnDragStart = useCallback((e: React.DragEvent, columnKey: string) => {
@@ -548,7 +392,7 @@ export function SmartGrid({
     setDraggedColumn(columnKey);
     e.dataTransfer.effectAllowed = 'move';
     e.dataTransfer.setData('text/plain', columnKey);
-  }, [editingHeader, resizingColumn]);
+  }, [editingHeader, resizingColumn, setDraggedColumn]);
 
   const handleColumnDragOver = useCallback((e: React.DragEvent, targetColumnKey: string) => {
     if (resizingColumn) {
@@ -562,7 +406,7 @@ export function SmartGrid({
       setDragOverColumn(targetColumnKey);
       e.dataTransfer.dropEffect = 'move';
     }
-  }, [draggedColumn, resizingColumn]);
+  }, [draggedColumn, resizingColumn, setDragOverColumn]);
 
   const handleColumnDragLeave = useCallback((e: React.DragEvent) => {
     if (resizingColumn) return;
@@ -571,7 +415,7 @@ export function SmartGrid({
     if (!e.currentTarget.contains(e.relatedTarget as Node)) {
       setDragOverColumn(null);
     }
-  }, [resizingColumn]);
+  }, [resizingColumn, setDragOverColumn]);
 
   const handleColumnDrop = useCallback((e: React.DragEvent, targetColumnKey: string) => {
     if (resizingColumn) {
@@ -603,26 +447,13 @@ export function SmartGrid({
       title: "Success",
       description: "Column order updated"
     });
-  }, [draggedColumn, preferences.columnOrder, updateColumnOrder, toast, resizingColumn]);
+  }, [draggedColumn, preferences.columnOrder, updateColumnOrder, toast, resizingColumn, setDraggedColumn, setDragOverColumn]);
 
   const handleColumnDragEnd = useCallback(() => {
     if (resizingColumn) return;
     setDraggedColumn(null);
     setDragOverColumn(null);
-  }, [resizingColumn]);
-
-  // Toggle row expansion
-  const toggleRowExpansion = useCallback((rowIndex: number) => {
-    setExpandedRows(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(rowIndex)) {
-        newSet.delete(rowIndex);
-      } else {
-        newSet.add(rowIndex);
-      }
-      return newSet;
-    });
-  }, []);
+  }, [resizingColumn, setDraggedColumn, setDragOverColumn]);
 
   // Determine if a column is editable
   const isColumnEditable = useCallback((column: GridColumnConfig, columnIndex: number) => {
@@ -671,17 +502,17 @@ export function SmartGrid({
     } else if (onInlineEdit) {
       onInlineEdit(actualRowIndex, updatedRow);
     }
-  }, [gridData, currentPage, pageSize, onInlineEdit, onUpdate, onDataFetch, toast]);
+  }, [gridData, currentPage, pageSize, onInlineEdit, onUpdate, onDataFetch, toast, setGridData, setEditingCell, setLoading, setError]);
 
   const handleEditStart = useCallback((rowIndex: number, columnKey: string) => {
     setEditingCell({ rowIndex, columnKey });
-  }, []);
+  }, [setEditingCell]);
 
   const handleEditCancel = useCallback(() => {
     setEditingCell(null);
-  }, []);
+  }, [setEditingCell]);
 
-  // renderCell function - updated to handle sub-row columns properly
+  // renderCell function
   const renderCell = useCallback((row: any, column: GridColumnConfig, rowIndex: number, columnIndex: number) => {
     const value = row[column.key];
     const isEditing = editingCell?.rowIndex === rowIndex && editingCell?.columnKey === column.key;
@@ -748,40 +579,7 @@ export function SmartGrid({
     if (!onDataFetch) {
       setGridData(data);
     }
-  }, [data, onDataFetch]);
-
-  // Fixed renderPluginToolbarItems function to prevent React Fragment errors
-  const renderPluginToolbarItems = useCallback(() => {
-    return plugins
-      .filter(plugin => plugin.toolbar)
-      .map(plugin => (
-        <React.Fragment key={`toolbar-${plugin.id}`}>
-          {plugin.toolbar!(gridAPI)}
-        </React.Fragment>
-      ));
-  }, [plugins, gridAPI]);
-
-  // Fixed renderPluginRowActions function to prevent React Fragment errors
-  const renderPluginRowActions = useCallback((row: any, rowIndex: number) => {
-    return plugins
-      .filter(plugin => plugin.rowActions)
-      .map(plugin => (
-        <React.Fragment key={`row-action-${plugin.id}-${rowIndex}`}>
-          {plugin.rowActions!(row, rowIndex, gridAPI)}
-        </React.Fragment>
-      ));
-  }, [plugins, gridAPI]);
-
-  // Fixed renderPluginFooterItems function to prevent React Fragment errors
-  const renderPluginFooterItems = useCallback(() => {
-    return plugins
-      .filter(plugin => plugin.footer)
-      .map(plugin => (
-        <React.Fragment key={`footer-${plugin.id}`}>
-          {plugin.footer!(gridAPI)}
-        </React.Fragment>
-      ));
-  }, [plugins, gridAPI]);
+  }, [data, onDataFetch, setGridData]);
 
   // Initialize plugins
   useEffect(() => {
@@ -820,113 +618,24 @@ export function SmartGrid({
   return (
     <div className="space-y-4 w-full">
       {/* Toolbar */}
-      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between bg-white p-4 rounded-lg border shadow-sm">
-        <div className="flex items-center space-x-2">
-          {/* Show active filters count */}
-          {filters.length > 0 && (
-            <div className="text-sm text-blue-600 bg-blue-50 px-2 py-1 rounded">
-              {filters.length} filter{filters.length > 1 ? 's' : ''} active
-            </div>
-          )}
-        </div>
-
-        <div className="flex items-center space-x-2">
-          {/* Search box - first */}
-          <div className="relative w-64">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-            <Input
-              placeholder="Search all columns..."
-              value={globalFilter}
-              onChange={(e) => setGlobalFilter(e.target.value)}
-              className="pl-9 w-full"
-              disabled={loading}
-            />
-          </div>
-
-          {/* Common Filter Button - Updated to toggle column filters */}
-          <Button
-            variant={showColumnFilters ? "default" : "outline"}
-            size="sm"
-            onClick={() => setShowColumnFilters(!showColumnFilters)}
-            disabled={loading}
-            title="Toggle Column Filters"
-            className={cn(
-              "transition-colors",
-              showColumnFilters && "bg-blue-600 hover:bg-blue-700 text-white border-blue-600"
-            )}
-          >
-            <Filter className="h-4 w-4" />
-            {filters.length > 0 && (
-              <span className="ml-1 text-xs bg-blue-100 text-blue-600 rounded-full px-1.5 py-0.5">
-                {filters.length}
-              </span>
-            )}
-          </Button>
-
-          {/* Toggle Checkboxes Button - Updated with blue selection state */}
-          <Button 
-            variant={showCheckboxes ? "default" : "outline"}
-            size="sm" 
-            onClick={() => setShowCheckboxes(!showCheckboxes)}
-            disabled={loading}
-            title="Toggle Checkboxes"
-            className={cn(
-              "transition-colors",
-              showCheckboxes && "bg-blue-600 hover:bg-blue-700 text-white border-blue-600"
-            )}
-          >
-            <CheckSquare className="h-4 w-4" />
-          </Button>
-
-          {/* Toggle View Mode Button - Updated with better visual states */}
-          <Button 
-            variant="outline"
-            size="sm" 
-            onClick={() => setViewMode(viewMode === 'table' ? 'card' : 'table')}
-            disabled={loading}
-            title={`Switch to ${viewMode === 'table' ? 'Card' : 'Table'} View`}
-            className={cn(
-              "transition-colors",
-              viewMode === 'card' && "bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100"
-            )}
-          >
-            {viewMode === 'table' ? (
-              <Grid2x2 className="h-4 w-4" />
-            ) : (
-              <List className="h-4 w-4" />
-            )}
-          </Button>
-
-          {/* Column Visibility Manager */}
-          <ColumnVisibilityManager
-            columns={columns}
-            preferences={preferences}
-            onColumnVisibilityToggle={toggleColumnVisibility}
-            onColumnHeaderChange={updateColumnHeader}
-            onResetToDefaults={handleResetPreferences}
-          />
-
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={handleResetPreferences} 
-            disabled={loading}
-            title="Reset All"
-          >
-            <RotateCcw className="h-4 w-4" />
-          </Button>
-          
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={() => handleExport('csv')} 
-            disabled={loading}
-            title="Download CSV"
-          >
-            <Download className="h-4 w-4" />
-          </Button>
-        </div>
-      </div>
+      <GridToolbar
+        globalFilter={globalFilter}
+        setGlobalFilter={setGlobalFilter}
+        showColumnFilters={showColumnFilters}
+        setShowColumnFilters={setShowColumnFilters}
+        showCheckboxes={showCheckboxes}
+        setShowCheckboxes={setShowCheckboxes}
+        viewMode={viewMode}
+        setViewMode={setViewMode}
+        loading={loading}
+        filters={filters}
+        columns={columns}
+        preferences={preferences}
+        onColumnVisibilityToggle={toggleColumnVisibility}
+        onColumnHeaderChange={updateColumnHeader}
+        onResetToDefaults={handleResetPreferences}
+        onExport={handleExport}
+      />
 
       {/* Table Container with no horizontal scroll */}
       <div className="bg-white rounded-lg border shadow-sm overflow-hidden">
@@ -1187,7 +896,12 @@ export function SmartGrid({
                       {plugins.some(plugin => plugin.rowActions) && (
                         <TableCell className="px-3 py-3 text-center align-top w-[100px]">
                           <div className="flex items-center justify-center space-x-1">
-                            {renderPluginRowActions(row, rowIndex)}
+                            <PluginRowActions
+                              plugins={plugins}
+                              gridAPI={gridAPI}
+                              row={row}
+                              rowIndex={rowIndex}
+                            />
                           </div>
                         </TableCell>
                       )}
@@ -1270,7 +984,7 @@ export function SmartGrid({
       {/* Plugin footer items */}
       {plugins.some(plugin => plugin.footer) && (
         <div className="flex items-center justify-center space-x-4 pt-4 border-t bg-white p-4 rounded-lg border shadow-sm">
-          {renderPluginFooterItems()}
+          <PluginRenderer plugins={plugins} gridAPI={gridAPI} type="footer" />
         </div>
       )}
     </div>
