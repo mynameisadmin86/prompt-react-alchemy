@@ -64,9 +64,9 @@ export function ColumnManager<T>({
     }
   };
 
-  const handleSubRowConfigToggle = (columnId: string) => {
+  const handleSubRowConfigToggle = (enabled: boolean) => {
     if (onSubRowConfigToggle) {
-      onSubRowConfigToggle(columnId);
+      onSubRowConfigToggle(enabled);
     }
   };
 
