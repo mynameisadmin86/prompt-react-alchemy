@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo, useCallback } from 'react';
 import { ChevronDown, ChevronRight, MoreHorizontal } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -6,7 +7,7 @@ import { CellRenderer } from './CellRenderer';
 import { CellEditor } from './CellEditor';
 import { ColumnManager } from './ColumnManager';
 import { CommonFilter } from './CommonFilter';
-import { GridColumnConfig, SmartGridProps } from '@/types/smartgrid';
+import { GridColumnConfig, SmartGridProps, FilterConfig } from '@/types/smartgrid';
 import { useGridPreferences } from '@/hooks/useGridPreferences';
 
 export function SmartGrid({
@@ -32,6 +33,7 @@ export function SmartGrid({
   const [expandedRows, setExpandedRows] = useState<Set<number>>(new Set());
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
+  const [filters, setFilters] = useState<FilterConfig[]>([]);
 
   const legacyColumnConversion = useMemo(() => {
     return columns.map(col => ({
@@ -165,6 +167,10 @@ export function SmartGrid({
     }
   };
 
+  const handleFiltersChange = (newFilters: FilterConfig[]) => {
+    setFilters(newFilters);
+  };
+
   const showCheckboxes = !!onSelectionChange;
   const hasSubRowData = subRowColumns.length > 0;
 
@@ -173,7 +179,11 @@ export function SmartGrid({
       {/* Header with filters and column manager */}
       <div className="flex items-center justify-between p-4 border-b bg-gray-50/50">
         <div className="flex items-center space-x-4">
-          <CommonFilter />
+          <CommonFilter 
+            columns={columns} 
+            filters={filters} 
+            onFiltersChange={handleFiltersChange} 
+          />
         </div>
         
         <div className="flex items-center space-x-2">
@@ -303,7 +313,7 @@ export function SmartGrid({
                         {editingCell?.row === rowIndex && editingCell?.column === column.key ? (
                           <CellEditor
                             value={row[column.key]}
-                            column={{ ...column, id: column.key, header: column.label, accessor: column.key }}
+                            column={{ ...column, id: column.key, header: column.label, accessor: column.key, type: 'text' }}
                             onSave={(value) => handleCellEdit(rowIndex, column.key, value)}
                             onCancel={() => setEditingCell(null)}
                           />
