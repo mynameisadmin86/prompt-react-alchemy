@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -17,11 +16,13 @@ interface EnhancedFieldVisibilityModalProps {
   panelTitle: string;
   panelWidth: 'full' | 'half' | 'third' | 'quarter' | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12;
   collapsible?: boolean;
+  panelVisible?: boolean;
   onSave: (
     updatedConfig: PanelConfig, 
     newTitle?: string, 
     newWidth?: 'full' | 'half' | 'third' | 'quarter' | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12,
-    newCollapsible?: boolean
+    newCollapsible?: boolean,
+    newPanelVisible?: boolean
   ) => void;
 }
 
@@ -32,6 +33,7 @@ export const EnhancedFieldVisibilityModal: React.FC<EnhancedFieldVisibilityModal
   panelTitle,
   panelWidth,
   collapsible = false,
+  panelVisible = true,
   onSave
 }) => {
   const [fieldConfigs, setFieldConfigs] = useState<FieldVisibilityConfig[]>([]);
@@ -42,6 +44,7 @@ export const EnhancedFieldVisibilityModal: React.FC<EnhancedFieldVisibilityModal
     panelWidth === 'quarter' || panelWidth === 3 ? 'quarter' : 'full'
   );
   const [currentCollapsible, setCurrentCollapsible] = useState(collapsible);
+  const [currentPanelVisible, setCurrentPanelVisible] = useState(panelVisible);
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
 
   useEffect(() => {
@@ -62,7 +65,8 @@ export const EnhancedFieldVisibilityModal: React.FC<EnhancedFieldVisibilityModal
       panelWidth === 'quarter' || panelWidth === 3 ? 'quarter' : 'full'
     );
     setCurrentCollapsible(collapsible);
-  }, [panelConfig, panelTitle, panelWidth, collapsible]);
+    setCurrentPanelVisible(panelVisible);
+  }, [panelConfig, panelTitle, panelWidth, collapsible, panelVisible]);
 
   const handleVisibilityChange = (fieldId: string, visible: boolean) => {
     setFieldConfigs(prev => 
@@ -121,7 +125,7 @@ export const EnhancedFieldVisibilityModal: React.FC<EnhancedFieldVisibilityModal
       }
     });
 
-    onSave(updatedConfig, currentTitle, currentWidth, currentCollapsible);
+    onSave(updatedConfig, currentTitle, currentWidth, currentCollapsible, currentPanelVisible);
     onClose();
   };
 
@@ -139,6 +143,7 @@ export const EnhancedFieldVisibilityModal: React.FC<EnhancedFieldVisibilityModal
     setCurrentTitle(panelTitle);
     setCurrentWidth('full');
     setCurrentCollapsible(false);
+    setCurrentPanelVisible(true);
   };
 
   const formatWidthValue = (value: 'full' | 'half' | 'third' | 'quarter' | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12) => {
@@ -178,6 +183,15 @@ export const EnhancedFieldVisibilityModal: React.FC<EnhancedFieldVisibilityModal
           <AccordionItem value="panel-settings">
             <AccordionTrigger>Panel Settings</AccordionTrigger>
             <AccordionContent className="space-y-4">
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="panel-visible"
+                  checked={currentPanelVisible}
+                  onCheckedChange={(checked) => setCurrentPanelVisible(checked as boolean)}
+                />
+                <Label htmlFor="panel-visible">Show panel</Label>
+              </div>
+
               <div className="space-y-2">
                 <Label htmlFor="panel-title">Panel Title</Label>
                 <Input
