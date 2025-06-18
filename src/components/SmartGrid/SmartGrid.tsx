@@ -164,14 +164,15 @@ export function SmartGrid({
     return calculatedWidths;
   }, [preferences.columnWidths, showCheckboxes, plugins, columnWidths]);
 
-  // Apply preferences to get ordered and visible columns with responsive widths
+  // Apply preferences to get ordered and visible columns with responsive widths - FILTER OUT SUB-ROW COLUMNS
   const orderedColumns = useMemo(() => {
     const columnMap = new Map(columns.map(col => [col.key, col]));
     
     const visibleColumns = preferences.columnOrder
       .map(id => columnMap.get(id))
       .filter((col): col is GridColumnConfig => col !== undefined)
-      .filter(col => !preferences.hiddenColumns.includes(col.key));
+      .filter(col => !preferences.hiddenColumns.includes(col.key))
+      .filter(col => !col.subRow); // Filter out sub-row columns from main table
     
     const calculatedWidths = calculateColumnWidths(visibleColumns);
     
