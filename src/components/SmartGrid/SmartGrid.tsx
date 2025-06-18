@@ -187,12 +187,12 @@ export function SmartGrid({
 
   // Check if any column has collapsibleChild set to true
   const hasCollapsibleColumns = useMemo(() => {
-    return columns.some(col => col.subRow === true);
+    return columns.some(col => col.collapsibleChild === true);
   }, [columns]);
 
   // Get collapsible columns
   const collapsibleColumns = useMemo(() => {
-    return columns.filter(col => col.subRow === true);
+    return columns.filter(col => col.collapsibleChild === true);
   }, [columns]);
 
   // Get sub-row columns (columns marked with subRow: true)
@@ -408,7 +408,6 @@ export function SmartGrid({
       columnWidths: {},
       columnHeaders: {},
       subRowColumns: [],
-      enableSubRowConfig: true,
       subRowColumnOrder: [], // Reset sub-row column order
       filters: []
     };

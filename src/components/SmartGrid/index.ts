@@ -2,6 +2,7 @@
 export { SmartGrid } from './SmartGrid';
 export { CellEditor } from './CellEditor';
 export { ColumnManager } from './ColumnManager';
+export { SubRowConfigurationModal } from './SubRowConfigurationModal';
 export { ColumnVisibilityManager } from './ColumnVisibilityManager';
 export { ColumnFilter } from './ColumnFilter';
 export { CommonFilter } from './CommonFilter';

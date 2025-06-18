@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { Switch } from '@/components/ui/switch';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { Settings2, Eye, EyeOff, Search, RotateCcw, ChevronDown, Check, X, GripVertical } from 'lucide-react';
@@ -16,6 +17,7 @@ interface ColumnVisibilityManagerProps {
   onColumnHeaderChange?: (columnId: string, newHeader: string) => void;
   onSubRowToggle?: (columnId: string) => void;
   onSubRowReorder?: (newOrder: string[]) => void;
+  onSubRowConfigToggle?: (enabled: boolean) => void;
   onResetToDefaults: () => void;
 }
 
@@ -26,6 +28,7 @@ export function ColumnVisibilityManager({
   onColumnHeaderChange,
   onSubRowToggle,
   onSubRowReorder,
+  onSubRowConfigToggle,
   onResetToDefaults
 }: ColumnVisibilityManagerProps) {
   const [isOpen, setIsOpen] = useState(false);
@@ -43,6 +46,7 @@ export function ColumnVisibilityManager({
   const visibleCount = columns.filter(col => !preferences.hiddenColumns.includes(col.key)).length;
   const totalCount = columns.length;
   const subRowColumns = preferences.subRowColumns || [];
+  const isSubRowEnabled = preferences.enableSubRowConfig || false;
 
   const handleEditStart = (columnKey: string, currentLabel: string) => {
     setEditingColumn(columnKey);
@@ -115,6 +119,12 @@ export function ColumnVisibilityManager({
     setDragOverSubRowIndex(null);
   };
 
+  const handleSubRowConfigToggle = (enabled: boolean) => {
+    if (onSubRowConfigToggle) {
+      onSubRowConfigToggle(enabled);
+    }
+  };
+
   return (
     <TooltipProvider>
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -142,6 +152,18 @@ export function ColumnVisibilityManager({
           </DialogHeader>
 
           <div className="flex flex-col space-y-4 flex-1 min-h-0">
+            {/* Sub-row Configuration Toggle */}
+            <div className="flex items-center justify-between p-4 bg-purple-50 rounded-lg border border-purple-200">
+              <div className="flex flex-col">
+                <span className="text-sm font-medium text-purple-900">Enable Sub-row Configuration</span>
+                <span className="text-xs text-purple-600">Allow columns to be displayed in expandable sub-rows</span>
+              </div>
+              <Switch
+                checked={isSubRowEnabled}
+                onCheckedChange={handleSubRowConfigToggle}
+              />
+            </div>
+
             {/* Search */}
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -154,7 +176,7 @@ export function ColumnVisibilityManager({
             </div>
 
             {/* Sub-row Columns Badges */}
-            {subRowColumns.length > 0 && (
+            {isSubRowEnabled && subRowColumns.length > 0 && (
               <div className="p-4 bg-purple-50 rounded-lg border border-purple-200">
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center space-x-2">
@@ -297,7 +319,7 @@ export function ColumnVisibilityManager({
                           </span>
                         )}
                         
-                        {isSubRow && (
+                        {isSubRowEnabled && isSubRow && (
                           <span className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded font-medium flex items-center gap-1">
                             <ChevronDown className="h-3 w-3" />
                             Sub-row
@@ -313,7 +335,7 @@ export function ColumnVisibilityManager({
                     </div>
 
                     {/* Sub-row Configuration Section */}
-                    {onSubRowToggle && (
+                    {isSubRowEnabled && onSubRowToggle && (
                       <div className="pt-3 border-t border-gray-100">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center space-x-3">
