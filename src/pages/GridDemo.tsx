@@ -47,21 +47,24 @@ const GridDemo = () => {
       type: 'Link',
       sortable: true,
       editable: false,
-      mandatory: true
+      mandatory: true,
+      subRow: false
     },
     {
       key: 'status',
       label: 'Status',
       type: 'Badge',
       sortable: true,
-      editable: false
+      editable: false,
+      subRow: false
     },
     {
       key: 'tripBillingStatus',
       label: 'Trip Billing Status',
       type: 'Badge',
       sortable: true,
-      editable: false
+      editable: false,
+      subRow: false
     },
     {
       key: 'plannedStartEndDateTime',
@@ -95,7 +98,7 @@ const GridDemo = () => {
       sortable: true,
       editable: false,
       infoTextField: 'arrivalPointDetails',
-      collapsibleChild: true // Make this column collapsible
+      subRow: true // Make this column collapsible
     },
     {
       key: 'customer',
