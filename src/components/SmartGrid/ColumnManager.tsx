@@ -135,6 +135,11 @@ export function ColumnManager<T>({
                   <Eye className="h-4 w-4 text-green-600" />
                 )}
 
+                {/* Sub-row icon indicator */}
+                {isSubRow && (
+                  <ChevronDown className="h-4 w-4 text-purple-600" />
+                )}
+
                 <div className="flex-1 min-w-0">
                   {editingHeader === column.id ? (
                     <Input
