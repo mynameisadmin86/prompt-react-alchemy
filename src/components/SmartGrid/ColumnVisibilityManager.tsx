@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { TooltipProvider } from '@/components/ui/tooltip';
-import { Settings2, Eye, EyeOff, Search, RotateCcw, ChevronDown, Check, X } from 'lucide-react';
+import { Settings2, Eye, EyeOff, Search, RotateCcw, ChevronDown, Check, X, GripVertical } from 'lucide-react';
 import { GridColumnConfig, GridPreferences } from '@/types/smartgrid';
 import { cn } from '@/lib/utils';
 
@@ -15,6 +15,7 @@ interface ColumnVisibilityManagerProps {
   onColumnVisibilityToggle: (columnId: string) => void;
   onColumnHeaderChange?: (columnId: string, newHeader: string) => void;
   onSubRowToggle?: (columnId: string) => void;
+  onSubRowReorder?: (newOrder: string[]) => void;
   onResetToDefaults: () => void;
 }
 
@@ -24,12 +25,15 @@ export function ColumnVisibilityManager({
   onColumnVisibilityToggle,
   onColumnHeaderChange,
   onSubRowToggle,
+  onSubRowReorder,
   onResetToDefaults
 }: ColumnVisibilityManagerProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [editingColumn, setEditingColumn] = useState<string | null>(null);
   const [editingValue, setEditingValue] = useState('');
+  const [draggedSubRowIndex, setDraggedSubRowIndex] = useState<number | null>(null);
+  const [dragOverSubRowIndex, setDragOverSubRowIndex] = useState<number | null>(null);
 
   const filteredColumns = columns.filter(column =>
     column.label.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -84,6 +88,53 @@ export function ColumnVisibilityManager({
     }
   };
 
+  const handleSubRowDragStart = (e: React.DragEvent, index: number) => {
+    setDraggedSubRowIndex(index);
+    e.dataTransfer.effectAllowed = 'move';
+  };
+
+  const handleSubRowDragOver = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    setDragOverSubRowIndex(index);
+  };
+
+  const handleSubRowDragLeave = () => {
+    setDragOverSubRowIndex(null);
+  };
+
+  const handleSubRowDrop = (e: React.DragEvent, dropIndex: number) => {
+    e.preventDefault();
+    
+    if (draggedSubRowIndex === null || draggedSubRowIndex === dropIndex) {
+      setDraggedSubRowIndex(null);
+      setDragOverSubRowIndex(null);
+      return;
+    }
+
+    const newOrder = [...subRowColumns];
+    const draggedItem = newOrder[draggedSubRowIndex];
+    
+    // Remove the dragged item
+    newOrder.splice(draggedSubRowIndex, 1);
+    
+    // Insert at the new position
+    const adjustedDropIndex = draggedSubRowIndex < dropIndex ? dropIndex - 1 : dropIndex;
+    newOrder.splice(adjustedDropIndex, 0, draggedItem);
+
+    if (onSubRowReorder) {
+      onSubRowReorder(newOrder);
+    }
+
+    setDraggedSubRowIndex(null);
+    setDragOverSubRowIndex(null);
+  };
+
+  const handleSubRowDragEnd = () => {
+    setDraggedSubRowIndex(null);
+    setDragOverSubRowIndex(null);
+  };
+
   return (
     <TooltipProvider>
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -133,26 +184,44 @@ export function ColumnVisibilityManager({
                   <span className="text-xs text-purple-600">{subRowColumns.length} column{subRowColumns.length !== 1 ? 's' : ''}</span>
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  {subRowColumns.map((columnKey) => {
+                  {subRowColumns.map((columnKey, index) => {
                     const column = columns.find(col => col.key === columnKey);
                     const displayLabel = preferences.columnHeaders[columnKey] || column?.label || columnKey;
+                    const isDragging = draggedSubRowIndex === index;
+                    const isDragOver = dragOverSubRowIndex === index;
                     
                     return (
                       <Badge
                         key={columnKey}
                         variant="secondary"
-                        className="cursor-pointer bg-purple-100 text-purple-800 hover:bg-purple-200 border border-purple-300 transition-colors"
-                        onClick={() => handleSubRowToggle(columnKey)}
-                        title="Click to move back to main row"
+                        draggable
+                        onDragStart={(e) => handleSubRowDragStart(e, index)}
+                        onDragOver={(e) => handleSubRowDragOver(e, index)}
+                        onDragLeave={handleSubRowDragLeave}
+                        onDrop={(e) => handleSubRowDrop(e, index)}
+                        onDragEnd={handleSubRowDragEnd}
+                        className={cn(
+                          "cursor-move bg-purple-100 text-purple-800 hover:bg-purple-200 border border-purple-300 transition-all flex items-center gap-1",
+                          isDragging && "opacity-50 scale-95",
+                          isDragOver && "ring-2 ring-purple-400 ring-offset-2"
+                        )}
+                        title="Drag to reorder, click X to remove from sub-row"
                       >
+                        <GripVertical className="h-3 w-3 text-purple-600" />
                         {displayLabel}
-                        <X className="h-3 w-3 ml-1" />
+                        <X 
+                          className="h-3 w-3 hover:text-purple-900 cursor-pointer" 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleSubRowToggle(columnKey);
+                          }}
+                        />
                       </Badge>
                     );
                   })}
                 </div>
                 <div className="text-xs text-purple-600 mt-2">
-                  Click any badge to move the column back to the main row
+                  Drag badges to reorder columns or click X to move back to main row
                 </div>
               </div>
             )}
