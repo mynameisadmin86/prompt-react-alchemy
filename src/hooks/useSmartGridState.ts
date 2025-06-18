@@ -1,9 +1,10 @@
 
 import { useState, useCallback, useRef } from 'react';
-import { SortConfig, FilterConfig } from '@/types/smartgrid';
+import { SortConfig, FilterConfig, GridColumnConfig } from '@/types/smartgrid';
 
 export function useSmartGridState() {
   const [gridData, setGridData] = useState<any[]>([]);
+  const [columns, setColumns] = useState<GridColumnConfig[]>([]);
   const [editingCell, setEditingCell] = useState<{ rowIndex: number; columnKey: string } | null>(null);
   const [editingHeader, setEditingHeader] = useState<string | null>(null);
   const [draggedColumn, setDraggedColumn] = useState<string | null>(null);
@@ -72,10 +73,25 @@ export function useSmartGridState() {
     });
   }, []);
 
+  const handleSubRowToggle = useCallback((columnKey: string) => {
+    console.log('Handling sub-row toggle for column:', columnKey);
+    setColumns(prev => {
+      const updatedColumns = prev.map(col => 
+        col.key === columnKey 
+          ? { ...col, subRow: !col.subRow }
+          : col
+      );
+      console.log('Updated columns with sub-row changes:', updatedColumns);
+      return updatedColumns;
+    });
+  }, []);
+
   return {
     // State
     gridData,
     setGridData,
+    columns,
+    setColumns,
     editingCell,
     setEditingCell,
     editingHeader,
@@ -118,6 +134,7 @@ export function useSmartGridState() {
     handleColumnFilterChange,
     handleClearColumnFilter,
     handleSort,
-    toggleRowExpansion
+    toggleRowExpansion,
+    handleSubRowToggle
   };
 }

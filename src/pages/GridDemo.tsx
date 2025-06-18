@@ -1,9 +1,10 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { SmartGrid } from '@/components/SmartGrid';
 import { GridColumnConfig } from '@/types/smartgrid';
 import { Button } from '@/components/ui/button';
 import { Printer, MoreHorizontal, User, Train, UserCheck, Container } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useSmartGridState } from '@/hooks/useSmartGridState';
 import {
   Breadcrumb,
   BreadcrumbList,
@@ -39,7 +40,9 @@ interface SampleData {
 
 const GridDemo = () => {
   const [selectedRows, setSelectedRows] = useState<Set<number>>(new Set());
-  const [columns, setColumns] = useState<GridColumnConfig[]>([
+  const gridState = useSmartGridState();
+  
+  const initialColumns: GridColumnConfig[] = [
     {
       key: 'id',
       label: 'Trip Plan No',
@@ -153,7 +156,12 @@ const GridDemo = () => {
         </div>
       )
     }
-  ]);
+  ];
+
+  // Initialize columns in the grid state
+  useEffect(() => {
+    gridState.setColumns(initialColumns);
+  }, []);
   
   const { toast } = useToast();
 
@@ -321,6 +329,7 @@ const GridDemo = () => {
     }
   ];
 
+  // ... keep existing code (getStatusColor function)
   const getStatusColor = (status: string) => {
     const statusColors: Record<string, string> = {
       // Status column colors
@@ -341,6 +350,7 @@ const GridDemo = () => {
     return statusColors[status] || 'bg-gray-100 text-gray-800 border-gray-300';
   };
 
+  // ... keep existing code (processedData and other handlers)
   const processedData = useMemo(() => {
     return sampleData.map(row => ({
       ...row,
@@ -373,16 +383,6 @@ const GridDemo = () => {
   const handleRowSelection = (selectedRowIndices: Set<number>) => {
     console.log('Selected rows changed:', selectedRowIndices);
     setSelectedRows(selectedRowIndices);
-  };
-
-  const handleSubRowToggle = (columnKey: string) => {
-    setColumns(prevColumns => 
-      prevColumns.map(col => 
-        col.key === columnKey 
-          ? { ...col, subRow: !col.subRow }
-          : col
-      )
-    );
   };
 
   const getRowClassName = (row: any, index: number) => {
@@ -437,13 +437,13 @@ const GridDemo = () => {
             }
           `}</style>
           <SmartGrid
-            columns={columns}
+            columns={gridState.columns}
             data={processedData}
             editableColumns={['plannedStartEndDateTime']}
             paginationMode="pagination"
             onLinkClick={handleLinkClick}
             onUpdate={handleUpdate}
-            onSubRowToggle={handleSubRowToggle}
+            onSubRowToggle={gridState.handleSubRowToggle}
             selectedRows={selectedRows}
             onSelectionChange={handleRowSelection}
             rowClassName={(row: any, index: number) => 
