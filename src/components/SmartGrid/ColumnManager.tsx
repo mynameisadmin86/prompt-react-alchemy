@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
@@ -34,15 +33,22 @@ export function ColumnManager<T>({
   const [draggedColumn, setDraggedColumn] = useState<string | null>(null);
   const [dragOverSection, setDragOverSection] = useState<'main' | 'sub' | null>(null);
 
+  console.log('ColumnManager rendering with columns:', columns.length);
+  console.log('Has sub-row support:', Boolean(onSubRowToggle));
+
   const hasSubRowSupport = Boolean(onSubRowToggle);
 
   const orderedColumns = preferences.columnOrder
     .map(id => columns.find(col => col.id === id))
     .filter(Boolean) as Column<T>[];
 
+  console.log('Ordered columns:', orderedColumns.length);
+
   // Separate main-row and sub-row columns
   const mainRowColumns = orderedColumns.filter(col => !preferences.subRowColumns?.includes(col.id));
   const subRowColumns = orderedColumns.filter(col => preferences.subRowColumns?.includes(col.id));
+
+  console.log('Main row columns:', mainRowColumns.length, 'Sub-row columns:', subRowColumns.length);
 
   const handleDragStart = (columnId: string) => {
     setDraggedColumn(columnId);
