@@ -114,12 +114,11 @@ export function ColumnManager<T>({
           return (
             <div
               key={column.id}
-              className={`border rounded p-3 hover:bg-gray-50 ${preferences.enableSubRowConfig ? 'space-y-3' : ''}`}
+              className="border rounded p-3 hover:bg-gray-50"
               draggable
               onDragStart={() => handleDragStart(column.id)}
               onDragOver={(e) => handleDragOver(e, column.id)}
             >
-              {/* Main column row */}
               <div className="flex items-center space-x-2">
                 <GripVertical className="h-4 w-4 text-gray-400 cursor-move" />
                 
@@ -173,35 +172,19 @@ export function ColumnManager<T>({
                     </span>
                   )}
 
-                  {preferences.enableSubRowConfig && isSubRow && (
-                    <span className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded font-medium flex items-center gap-1">
-                      <ChevronDown className="h-3 w-3" />
-                      Sub-row
-                    </span>
+                  {/* Sub-row checkbox moved to the end */}
+                  {preferences.enableSubRowConfig && (
+                    <div className="flex items-center space-x-1">
+                      <Checkbox
+                        checked={isSubRow}
+                        onCheckedChange={() => handleSubRowToggle(column.id)}
+                        className="shrink-0"
+                      />
+                      <span className="text-xs text-gray-600">Sub-row</span>
+                    </div>
                   )}
                 </div>
               </div>
-
-              {/* Sub-row toggle section - only show when sub-row config is enabled */}
-              {preferences.enableSubRowConfig && (
-                <div className="pl-6 pt-2 border-t border-gray-100">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                      <ChevronDown className="h-4 w-4 text-purple-600" />
-                      <div>
-                        <span className="text-sm text-gray-700 font-medium">Sub-row</span>
-                        <div className="text-xs text-gray-500">Show in expandable sub-row</div>
-                      </div>
-                    </div>
-                    
-                    <Checkbox
-                      checked={isSubRow}
-                      onCheckedChange={() => handleSubRowToggle(column.id)}
-                      className="shrink-0"
-                    />
-                  </div>
-                </div>
-              )}
             </div>
           );
         })}
