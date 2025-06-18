@@ -13,7 +13,8 @@ export function useGridColumns() {
       sortable: true,
       editable: false,
       mandatory: true,
-      subRow: false
+      subRow: false,
+      childRow: false
     },
     {
       key: 'status',
@@ -21,7 +22,8 @@ export function useGridColumns() {
       type: 'Badge',
       sortable: true,
       editable: false,
-      subRow: false
+      subRow: false,
+      childRow: false
     },
     {
       key: 'tripBillingStatus',
@@ -29,7 +31,8 @@ export function useGridColumns() {
       type: 'Badge',
       sortable: true,
       editable: false,
-      subRow: false
+      subRow: false,
+      childRow: false
     },
     {
       key: 'plannedStartEndDateTime',
@@ -37,7 +40,8 @@ export function useGridColumns() {
       type: 'EditableText',
       sortable: true,
       editable: true,
-      subRow: true
+      subRow: true,
+      childRow: false
     },
     {
       key: 'actualStartEndDateTime',
@@ -45,7 +49,8 @@ export function useGridColumns() {
       type: 'DateTimeRange',
       sortable: true,
       editable: false,
-      subRow: true
+      subRow: true,
+      childRow: false
     },
     {
       key: 'departurePoint',
@@ -54,7 +59,8 @@ export function useGridColumns() {
       sortable: true,
       editable: false,
       infoTextField: 'departurePointDetails',
-      subRow: true
+      subRow: true,
+      childRow: false
     },
     {
       key: 'arrivalPoint',
@@ -63,7 +69,8 @@ export function useGridColumns() {
       sortable: true,
       editable: false,
       infoTextField: 'arrivalPointDetails',
-      subRow: true
+      subRow: true,
+      childRow: false
     },
     {
       key: 'customer',
@@ -71,7 +78,8 @@ export function useGridColumns() {
       type: 'ExpandableCount',
       sortable: true,
       editable: false,
-      renderExpandedContent: ExpandableCustomerContent
+      renderExpandedContent: ExpandableCustomerContent,
+      childRow: false
     },
     {
       key: 'resources',
@@ -79,7 +87,8 @@ export function useGridColumns() {
       type: 'ExpandableCount',
       sortable: true,
       editable: false,
-      renderExpandedContent: ExpandableResourceContent
+      renderExpandedContent: ExpandableResourceContent,
+      childRow: false
     }
   ]);
 
@@ -93,9 +102,20 @@ export function useGridColumns() {
     );
   };
 
+  const handleChildRowToggle = (columnKey: string) => {
+    setColumns(prevColumns => 
+      prevColumns.map(col => 
+        col.key === columnKey 
+          ? { ...col, childRow: !col.childRow }
+          : col
+      )
+    );
+  };
+
   return {
     columns,
     setColumns,
-    handleSubRowToggle
+    handleSubRowToggle,
+    handleChildRowToggle
   };
 }

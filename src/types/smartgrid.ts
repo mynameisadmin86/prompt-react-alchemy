@@ -24,6 +24,7 @@ export interface GridColumnConfig {
   order?: number;
   options?: string[];
   subRow?: boolean; // Property for sub-row display
+  childRow?: boolean; // Property for child-row display
   
   // Badge specific properties
   statusMap?: Record<string, string>;

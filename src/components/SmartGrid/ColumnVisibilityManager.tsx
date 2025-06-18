@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { TooltipProvider } from '@/components/ui/tooltip';
-import { Settings2, Eye, EyeOff, Search, RotateCcw, ChevronDown, Check, X, GripVertical } from 'lucide-react';
+import { Settings2, Eye, EyeOff, Search, RotateCcw, ChevronDown, Check, X, GripVertical, Layers } from 'lucide-react';
 import { GridColumnConfig, GridPreferences } from '@/types/smartgrid';
 import { cn } from '@/lib/utils';
 
@@ -15,6 +15,7 @@ interface ColumnVisibilityManagerProps {
   onColumnVisibilityToggle: (columnId: string) => void;
   onColumnHeaderChange?: (columnId: string, newHeader: string) => void;
   onSubRowToggle?: (columnId: string) => void;
+  onChildRowToggle?: (columnId: string) => void;
   onSubRowReorder?: (newOrder: string[]) => void;
   onResetToDefaults: () => void;
 }
@@ -25,6 +26,7 @@ export function ColumnVisibilityManager({
   onColumnVisibilityToggle,
   onColumnHeaderChange,
   onSubRowToggle,
+  onChildRowToggle,
   onSubRowReorder,
   onResetToDefaults
 }: ColumnVisibilityManagerProps) {
@@ -65,6 +67,12 @@ export function ColumnVisibilityManager({
   const handleSubRowToggle = (columnKey: string) => {
     if (onSubRowToggle) {
       onSubRowToggle(columnKey);
+    }
+  };
+
+  const handleChildRowToggle = (columnKey: string) => {
+    if (onChildRowToggle) {
+      onChildRowToggle(columnKey);
     }
   };
 
@@ -212,6 +220,7 @@ export function ColumnVisibilityManager({
                 const isVisible = !preferences.hiddenColumns.includes(column.key);
                 const isMandatory = column.mandatory;
                 const isSubRow = preferences.subRowColumns?.includes(column.key) || false;
+                const isChildRow = column.childRow || false;
                 const isEditing = editingColumn === column.key;
                 const displayLabel = preferences.columnHeaders[column.key] || column.label;
 
@@ -303,6 +312,13 @@ export function ColumnVisibilityManager({
                             Sub-row
                           </span>
                         )}
+
+                        {isChildRow && (
+                          <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded font-medium flex items-center gap-1">
+                            <Layers className="h-3 w-3" />
+                            Child-row
+                          </span>
+                        )}
                         
                         {column.type && (
                           <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded">
@@ -327,6 +343,27 @@ export function ColumnVisibilityManager({
                           <Checkbox
                             checked={isSubRow}
                             onCheckedChange={() => handleSubRowToggle(column.key)}
+                            className="flex-shrink-0"
+                          />
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Child-row Configuration Section */}
+                    {onChildRowToggle && (
+                      <div className="pt-3 border-t border-gray-100">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-3">
+                            <Layers className="h-4 w-4 text-green-600" />
+                            <div>
+                              <span className="text-sm text-gray-700 font-medium">Show in child-row</span>
+                              <div className="text-xs text-gray-500">Displays as nested child content</div>
+                            </div>
+                          </div>
+                          
+                          <Checkbox
+                            checked={isChildRow}
+                            onCheckedChange={() => handleChildRowToggle(column.key)}
                             className="flex-shrink-0"
                           />
                         </div>
