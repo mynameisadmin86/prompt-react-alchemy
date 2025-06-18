@@ -185,28 +185,18 @@ export function SmartGrid({
     }));
   }, [columns, preferences, calculateColumnWidths]);
 
-  // Check if any column has collapsibleChild set to true
-  const hasCollapsibleColumns = useMemo(() => {
-    return columns.some(col => col.collapsibleChild === true);
-  }, [columns]);
-
-  // Get collapsible columns
-  const collapsibleColumns = useMemo(() => {
-    return columns.filter(col => col.collapsibleChild === true);
+  // Check if any column has subRow set to true
+  const hasSubRowColumns = useMemo(() => {
+    return columns.some(col => col.subRow === true);
   }, [columns]);
 
   // Get sub-row columns (columns marked with subRow: true)
   const subRowColumns = useMemo(() => {
-    return columns.filter(col => col.subRow == true);
+    return columns.filter(col => col.subRow === true);
   }, [columns]);
 
-  // Check if any column has subRow set to true
-  const hasSubRowColumns = useMemo(() => {
-    return subRowColumns.length > 0;
-  }, [subRowColumns]);
-
-  // Helper function to render collapsible cell values
-  const renderCollapsibleCellValue = useCallback((value: any, column: GridColumnConfig) => {
+  // Helper function to render sub-row cell values
+  const renderSubRowCellValue = useCallback((value: any, column: GridColumnConfig) => {
     if (value == null) return '-';
     
     switch (column.type) {
@@ -232,15 +222,15 @@ export function SmartGrid({
     }
   }, []);
 
-  // Render collapsible content
-  const renderCollapsibleContent = useCallback((row: any) => {
-    if (!hasCollapsibleColumns || collapsibleColumns.length === 0) {
+  // Render sub-row content
+  const renderSubRowContent = useCallback((row: any) => {
+    if (!hasSubRowColumns || subRowColumns.length === 0) {
       return null;
     }
 
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {collapsibleColumns.map((column) => {
+        {subRowColumns.map((column) => {
           const value = row[column.key];
           return (
             <div key={column.key} className="p-3 bg-gray-50 rounded-lg">
@@ -248,17 +238,17 @@ export function SmartGrid({
                 {column.label}
               </div>
               <div className="text-sm text-gray-900 font-medium">
-                {renderCollapsibleCellValue(value, column)}
+                {renderSubRowCellValue(value, column)}
               </div>
             </div>
           );
         })}
       </div>
     );
-  }, [hasCollapsibleColumns, collapsibleColumns, renderCollapsibleCellValue]);
+  }, [hasSubRowColumns, subRowColumns, renderSubRowCellValue]);
 
   // Enhanced nested row renderer for sub-row columns with drag-and-drop
-  const renderSubRowContent = useCallback((row: any) => {
+  const renderNestedSubRowContent = useCallback((row: any) => {
     if (hasSubRowColumns && subRowColumns.length > 0) {
       return (
         <DraggableSubRow
@@ -270,12 +260,12 @@ export function SmartGrid({
       );
     }
 
-    // Fallback to collapsible content if no sub-row columns
-    return renderCollapsibleContent(row);
-  }, [hasSubRowColumns, subRowColumns, preferences.subRowColumnOrder, updateSubRowColumnOrder, renderCollapsibleContent]);
+    // Fallback to sub-row content if no sub-row columns
+    return renderSubRowContent(row);
+  }, [hasSubRowColumns, subRowColumns, preferences.subRowColumnOrder, updateSubRowColumnOrder, renderSubRowContent]);
 
-  // Use sub-row renderer if we have sub-row columns, otherwise use collapsible or custom renderer
-  const effectiveNestedRowRenderer = hasSubRowColumns ? renderSubRowContent : (hasCollapsibleColumns ? renderCollapsibleContent : nestedRowRenderer);
+  // Use sub-row renderer if we have sub-row columns, otherwise use custom renderer
+  const effectiveNestedRowRenderer = hasSubRowColumns ? renderNestedSubRowContent : nestedRowRenderer;
 
   // Handle column-specific filter changes
   const handleColumnFilterChange = useCallback((filter: FilterConfig | null) => {
@@ -686,7 +676,7 @@ export function SmartGrid({
     const isEditing = editingCell?.rowIndex === rowIndex && editingCell?.columnKey === column.key;
     const isEditable = isColumnEditable(column, columnIndex);
 
-    if (columnIndex === 0 && (effectiveNestedRowRenderer || hasCollapsibleColumns)) {
+    if (columnIndex === 0 && (effectiveNestedRowRenderer || hasSubRowColumns)) {
       const isExpanded = expandedRows.has(rowIndex);
       return (
         <div className="flex items-center space-x-1 min-w-0">
@@ -740,7 +730,7 @@ export function SmartGrid({
         />
       </div>
     );
-  }, [editingCell, isColumnEditable, effectiveNestedRowRenderer, hasCollapsibleColumns, expandedRows, toggleRowExpansion, handleCellEdit, handleEditStart, handleEditCancel, onLinkClick, loading]);
+  }, [editingCell, isColumnEditable, effectiveNestedRowRenderer, hasSubRowColumns, expandedRows, toggleRowExpansion, handleCellEdit, handleEditStart, handleEditCancel, onLinkClick, loading]);
 
   // Update grid data when prop data changes (only if not using lazy loading)
   useEffect(() => {
