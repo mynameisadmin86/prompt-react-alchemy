@@ -1,10 +1,8 @@
 import React, { useState } from 'react';
 import { DynamicPanel } from '@/components/DynamicPanel';
-import { DynamicPanelPreview } from '@/components/DynamicPanel/DynamicPanelPreview';
 import { PanelVisibilityManager } from '@/components/DynamicPanel/PanelVisibilityManager';
 import { PanelConfig, PanelSettings } from '@/types/dynamicPanel';
-import { Button } from '@/components/ui/button';
-import { Eye, EyeOff } from 'lucide-react';
+import { EyeOff } from 'lucide-react';
 import {
   Breadcrumb,
   BreadcrumbList,
@@ -18,7 +16,6 @@ const DynamicPanelDemo = () => {
   const [basicDetailsData, setBasicDetailsData] = useState({});
   const [operationalDetailsData, setOperationalDetailsData] = useState({});
   const [billingDetailsData, setBillingDetailsData] = useState({});
-  const [showPreview, setShowPreview] = useState(false);
 
   // Panel titles state
   const [basicDetailsTitle, setBasicDetailsTitle] = useState('Basic Details');
@@ -331,132 +328,103 @@ const DynamicPanelDemo = () => {
               Configure field visibility, ordering, and labels for each panel
             </p>
           </div>
-          <div className="flex items-center gap-3">
-            <PanelVisibilityManager
-              panels={panels}
-              onVisibilityChange={handlePanelVisibilityChange}
-            />
-            <Button
-              onClick={() => setShowPreview(!showPreview)}
-              variant="outline"
-              className="flex items-center gap-2"
-            >
-              {showPreview ? (
-                <>
-                  <EyeOff className="h-4 w-4" />
-                  Hide Preview
-                </>
-              ) : (
-                <>
-                  <Eye className="h-4 w-4" />
-                  Show Preview
-                </>
-              )}
-            </Button>
-          </div>
+          <PanelVisibilityManager
+            panels={panels}
+            onVisibilityChange={handlePanelVisibilityChange}
+          />
         </div>
 
-        {/* Preview or Configuration Mode */}
-        {showPreview ? (
-          <div className="bg-white p-6 rounded-lg shadow-sm">
-            <h3 className="text-lg font-semibold mb-4">Panel Preview - 12 Column Grid Layout</h3>
-            <DynamicPanelPreview />
+        {/* Dynamic Panels in 12-column grid */}
+        <div className="grid grid-cols-12 gap-6">
+          {basicDetailsVisible && (
+            <DynamicPanel
+              panelId="basic-details"
+              panelTitle={basicDetailsTitle}
+              panelConfig={basicDetailsConfig}
+              initialData={basicDetailsData}
+              onDataChange={setBasicDetailsData}
+              onTitleChange={setBasicDetailsTitle}
+              onWidthChange={setBasicDetailsWidth}
+              getUserPanelConfig={getUserPanelConfig}
+              saveUserPanelConfig={saveUserPanelConfig}
+              userId="current-user"
+              panelWidth={basicDetailsWidth}
+            />
+          )}
+
+          {operationalDetailsVisible && (
+            <DynamicPanel
+              panelId="operational-details"
+              panelTitle={operationalDetailsTitle}
+              panelConfig={operationalDetailsConfig}
+              initialData={operationalDetailsData}
+              onDataChange={setOperationalDetailsData}
+              onTitleChange={setOperationalDetailsTitle}
+              onWidthChange={setOperationalDetailsWidth}
+              getUserPanelConfig={getUserPanelConfig}
+              saveUserPanelConfig={saveUserPanelConfig}
+              userId="current-user"
+              panelWidth={operationalDetailsWidth}
+            />
+          )}
+
+          {billingDetailsVisible && (
+            <DynamicPanel
+              panelId="billing-details"
+              panelTitle={billingDetailsTitle}
+              panelConfig={billingDetailsConfig}
+              initialData={billingDetailsData}
+              onDataChange={setBillingDetailsData}
+              onTitleChange={setBillingDetailsTitle}
+              onWidthChange={setBasicDetailsWidth}
+              getUserPanelConfig={getUserPanelConfig}
+              saveUserPanelConfig={saveUserPanelConfig}
+              userId="current-user"
+              panelWidth={billingDetailsWidth}
+            />
+          )}
+        </div>
+
+        {/* Show message when all panels are hidden */}
+        {!basicDetailsVisible && !operationalDetailsVisible && !billingDetailsVisible && (
+          <div className="bg-white p-8 rounded-lg shadow-sm text-center">
+            <EyeOff className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+            <h3 className="text-lg font-semibold text-gray-700 mb-2">All panels are hidden</h3>
+            <p className="text-gray-500 mb-4">Use the "Manage Panels" button above to show panels.</p>
           </div>
-        ) : (
-          <>
-            {/* Dynamic Panels in 12-column grid */}
-            <div className="grid grid-cols-12 gap-6">
+        )}
+
+        {/* Debug Data Display */}
+        {(basicDetailsVisible || operationalDetailsVisible || billingDetailsVisible) && (
+          <div className="bg-white p-6 rounded-lg shadow-sm">
+            <h3 className="text-lg font-semibold mb-4">Current Form Data</h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {basicDetailsVisible && (
-                <DynamicPanel
-                  panelId="basic-details"
-                  panelTitle={basicDetailsTitle}
-                  panelConfig={basicDetailsConfig}
-                  initialData={basicDetailsData}
-                  onDataChange={setBasicDetailsData}
-                  onTitleChange={setBasicDetailsTitle}
-                  onWidthChange={setBasicDetailsWidth}
-                  getUserPanelConfig={getUserPanelConfig}
-                  saveUserPanelConfig={saveUserPanelConfig}
-                  userId="current-user"
-                  panelWidth={basicDetailsWidth}
-                />
+                <div>
+                  <h4 className="font-medium text-gray-700 mb-2">{basicDetailsTitle}</h4>
+                  <pre className="text-xs bg-gray-100 p-3 rounded overflow-auto">
+                    {JSON.stringify(basicDetailsData, null, 2)}
+                  </pre>
+                </div>
               )}
-
               {operationalDetailsVisible && (
-                <DynamicPanel
-                  panelId="operational-details"
-                  panelTitle={operationalDetailsTitle}
-                  panelConfig={operationalDetailsConfig}
-                  initialData={operationalDetailsData}
-                  onDataChange={setOperationalDetailsData}
-                  onTitleChange={setOperationalDetailsTitle}
-                  onWidthChange={setOperationalDetailsWidth}
-                  getUserPanelConfig={getUserPanelConfig}
-                  saveUserPanelConfig={saveUserPanelConfig}
-                  userId="current-user"
-                  panelWidth={operationalDetailsWidth}
-                />
+                <div>
+                  <h4 className="font-medium text-gray-700 mb-2">{operationalDetailsTitle}</h4>
+                  <pre className="text-xs bg-gray-100 p-3 rounded overflow-auto">
+                    {JSON.stringify(operationalDetailsData, null, 2)}
+                  </pre>
+                </div>
               )}
-
               {billingDetailsVisible && (
-                <DynamicPanel
-                  panelId="billing-details"
-                  panelTitle={billingDetailsTitle}
-                  panelConfig={billingDetailsConfig}
-                  initialData={billingDetailsData}
-                  onDataChange={setBillingDetailsData}
-                  onTitleChange={setBillingDetailsTitle}
-                  onWidthChange={setBillingDetailsWidth}
-                  getUserPanelConfig={getUserPanelConfig}
-                  saveUserPanelConfig={saveUserPanelConfig}
-                  userId="current-user"
-                  panelWidth={billingDetailsWidth}
-                />
+                <div>
+                  <h4 className="font-medium text-gray-700 mb-2">{billingDetailsTitle}</h4>
+                  <pre className="text-xs bg-gray-100 p-3 rounded overflow-auto">
+                    {JSON.stringify(billingDetailsData, null, 2)}
+                  </pre>
+                </div>
               )}
             </div>
-
-            {/* Show message when all panels are hidden */}
-            {!basicDetailsVisible && !operationalDetailsVisible && !billingDetailsVisible && (
-              <div className="bg-white p-8 rounded-lg shadow-sm text-center">
-                <EyeOff className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-gray-700 mb-2">All panels are hidden</h3>
-                <p className="text-gray-500 mb-4">Use the "Manage Panels" button above to show panels.</p>
-              </div>
-            )}
-
-            {/* Debug Data Display */}
-            {(basicDetailsVisible || operationalDetailsVisible || billingDetailsVisible) && (
-              <div className="bg-white p-6 rounded-lg shadow-sm">
-                <h3 className="text-lg font-semibold mb-4">Current Form Data</h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {basicDetailsVisible && (
-                    <div>
-                      <h4 className="font-medium text-gray-700 mb-2">{basicDetailsTitle}</h4>
-                      <pre className="text-xs bg-gray-100 p-3 rounded overflow-auto">
-                        {JSON.stringify(basicDetailsData, null, 2)}
-                      </pre>
-                    </div>
-                  )}
-                  {operationalDetailsVisible && (
-                    <div>
-                      <h4 className="font-medium text-gray-700 mb-2">{operationalDetailsTitle}</h4>
-                      <pre className="text-xs bg-gray-100 p-3 rounded overflow-auto">
-                        {JSON.stringify(operationalDetailsData, null, 2)}
-                      </pre>
-                    </div>
-                  )}
-                  {billingDetailsVisible && (
-                    <div>
-                      <h4 className="font-medium text-gray-700 mb-2">{billingDetailsTitle}</h4>
-                      <pre className="text-xs bg-gray-100 p-3 rounded overflow-auto">
-                        {JSON.stringify(billingDetailsData, null, 2)}
-                      </pre>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-          </>
+          </div>
         )}
       </div>
     </div>
