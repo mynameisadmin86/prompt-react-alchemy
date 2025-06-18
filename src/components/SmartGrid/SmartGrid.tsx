@@ -204,20 +204,35 @@ export function SmartGrid({
     return subRowColumns.length > 0;
   }, [subRowColumns]);
 
-  // Enhanced nested row renderer for sub-row columns with drag-and-drop
-  const renderSubRowContent = useCallback((row: any) => {
-    if (hasSubRowColumns && subRowColumns.length > 0) {
-      return (
-        <DraggableSubRow
-          row={row}
-          columns={subRowColumns}
-          subRowColumnOrder={preferences.subRowColumnOrder}
-          onReorderSubRowColumns={updateSubRowColumnOrder}
-        />
-      );
+  // Helper function to render collapsible cell values
+  const renderCollapsibleCellValue = useCallback((value: any, column: GridColumnConfig) => {
+    if (value == null) return '-';
+    
+    switch (column.type) {
+      case 'Badge':
+        return (
+          <span className={cn(
+            "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium",
+            column.statusMap?.[value] || "bg-gray-100 text-gray-800"
+          )}>
+            {value}
+          </span>
+        );
+      case 'Date':
+        return new Date(value).toLocaleDateString();
+      case 'Link':
+        return (
+          <span className="text-blue-600 hover:text-blue-800 cursor-pointer">
+            {value}
+          </span>
+        );
+      default:
+        return String(value);
     }
+  }, []);
 
-    // Fallback to collapsible content if no sub-row columns
+  // Render collapsible content
+  const renderCollapsibleContent = useCallback((row: any) => {
     if (!hasCollapsibleColumns || collapsibleColumns.length === 0) {
       return null;
     }
@@ -239,7 +254,24 @@ export function SmartGrid({
         })}
       </div>
     );
-  }, [hasSubRowColumns, subRowColumns, preferences.subRowColumnOrder, updateSubRowColumnOrder, hasCollapsibleColumns, collapsibleColumns]);
+  }, [hasCollapsibleColumns, collapsibleColumns, renderCollapsibleCellValue]);
+
+  // Enhanced nested row renderer for sub-row columns with drag-and-drop
+  const renderSubRowContent = useCallback((row: any) => {
+    if (hasSubRowColumns && subRowColumns.length > 0) {
+      return (
+        <DraggableSubRow
+          row={row}
+          columns={subRowColumns}
+          subRowColumnOrder={preferences.subRowColumnOrder}
+          onReorderSubRowColumns={updateSubRowColumnOrder}
+        />
+      );
+    }
+
+    // Fallback to collapsible content if no sub-row columns
+    return renderCollapsibleContent(row);
+  }, [hasSubRowColumns, subRowColumns, preferences.subRowColumnOrder, updateSubRowColumnOrder, renderCollapsibleContent]);
 
   // Use sub-row renderer if we have sub-row columns, otherwise use collapsible or custom renderer
   const effectiveNestedRowRenderer = hasSubRowColumns ? renderSubRowContent : (hasCollapsibleColumns ? renderCollapsibleContent : nestedRowRenderer);
@@ -918,7 +950,7 @@ export function SmartGrid({
                     />
                   </TableHead>
                 )}
-                {visibleColumns.map((column, index) => {
+                {orderedColumns.map((column, index) => {
                   const shouldHideIcons = resizeHoverColumn === column.key || resizingColumn === column.key;
                   const currentFilter = filters.find(f => f.column === column.key);
                   return (
@@ -1054,7 +1086,7 @@ export function SmartGrid({
                       {/* Empty space for checkbox column */}
                     </TableHead>
                   )}
-                  {visibleColumns.map((column) => {
+                  {orderedColumns.map((column) => {
                     const currentFilter = filters.find(f => f.column === column.key);
                     return (
                       <TableHead 
@@ -1091,7 +1123,7 @@ export function SmartGrid({
               {loading ? (
                 <TableRow>
                   <TableCell 
-                    colSpan={visibleColumns.length + (showCheckboxes ? 1 : 0) + (plugins.some(plugin => plugin.rowActions) ? 1 : 0)} 
+                    colSpan={orderedColumns.length + (showCheckboxes ? 1 : 0) + (plugins.some(plugin => plugin.rowActions) ? 1 : 0)} 
                     className="text-center py-12"
                   >
                     <div className="flex items-center justify-center">
@@ -1103,7 +1135,7 @@ export function SmartGrid({
               ) : paginatedData.length === 0 ? (
                 <TableRow>
                   <TableCell 
-                    colSpan={visibleColumns.length + (showCheckboxes ? 1 : 0) + (plugins.some(plugin => plugin.rowActions) ? 1 : 0)} 
+                    colSpan={orderedColumns.length + (showCheckboxes ? 1 : 0) + (plugins.some(plugin => plugin.rowActions) ? 1 : 0)} 
                     className="text-center py-12 text-gray-500"
                   >
                     <div className="space-y-2">
@@ -1140,7 +1172,7 @@ export function SmartGrid({
                           />
                         </TableCell>
                       )}
-                      {visibleColumns.map((column, columnIndex) => (
+                      {orderedColumns.map((column, columnIndex) => (
                         <TableCell 
                           key={column.key} 
                           className="relative px-3 py-3 border-r border-gray-50 last:border-r-0 align-top overflow-hidden"
@@ -1162,7 +1194,7 @@ export function SmartGrid({
                     {effectiveNestedRowRenderer && expandedRows.has(rowIndex) && (
                       <TableRow className="bg-gray-50/30">
                         <TableCell 
-                          colSpan={visibleColumns.length + (showCheckboxes ? 1 : 0) + (plugins.some(plugin => plugin.rowActions) ? 1 : 0)} 
+                          colSpan={orderedColumns.length + (showCheckboxes ? 1 : 0) + (plugins.some(plugin => plugin.rowActions) ? 1 : 0)} 
                           className="p-0 border-b border-gray-200"
                         >
                           <div className="bg-gradient-to-r from-gray-50/50 to-white border-l-4 border-blue-500">
