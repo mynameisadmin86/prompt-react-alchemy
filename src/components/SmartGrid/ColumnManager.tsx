@@ -164,7 +164,7 @@ export function ColumnManager<T>({
                 {isHidden ? (
                   <EyeOff className="h-4 w-4 text-gray-400" />
                 ) : (
-                  <Eye className="h-4 w-4 text-green-600" />2=====
+                  <Eye className="h-4 w-4 text-green-600" />
                 )}
 
                 {/* Sub-row icon indicator */}
