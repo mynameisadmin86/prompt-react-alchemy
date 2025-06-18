@@ -145,16 +145,20 @@ export function ColumnManager<T>({
                   )}
                 </div>
 
-                {column.mandatory && (
-                  <span className="text-xs text-orange-600 font-medium">Required</span>
-                )}
+                <div className="flex items-center space-x-2">
+                  {column.mandatory && (
+                    <span className="text-xs text-orange-600 font-medium bg-orange-50 px-2 py-1 rounded">
+                      Required
+                    </span>
+                  )}
 
-                {isSubRow && (
-                  <span className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded font-medium flex items-center gap-1">
-                    <ChevronDown className="h-3 w-3" />
-                    Sub-row
-                  </span>
-                )}
+                  {isSubRow && (
+                    <span className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded font-medium flex items-center gap-1">
+                      <ChevronDown className="h-3 w-3" />
+                      Sub-row
+                    </span>
+                  )}
+                </div>
               </div>
 
               {/* Sub-row toggle section */}
