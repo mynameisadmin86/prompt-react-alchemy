@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -29,6 +28,7 @@ import { cn } from '@/lib/utils';
 import { ColumnVisibilityManager } from './ColumnVisibilityManager';
 import { CommonFilter } from './CommonFilter';
 import { ColumnFilter } from './ColumnFilter';
+import { DraggableSubRow } from './DraggableSubRow';
 
 export function SmartGrid({
   columns,
@@ -91,6 +91,7 @@ export function SmartGrid({
     updateColumnOrder,
     toggleColumnVisibility,
     updateColumnHeader,
+    updateSubRowColumnOrder,
     savePreferences
   } = useGridPreferences(
     preferencesColumns,
@@ -193,8 +194,30 @@ export function SmartGrid({
     return columns.filter(col => col.collapsibleChild === true);
   }, [columns]);
 
-  // Custom nested row renderer for collapsible content
-  const renderCollapsibleContent = useCallback((row: any) => {
+  // Get sub-row columns (columns marked with subRow: true)
+  const subRowColumns = useMemo(() => {
+    return columns.filter(col => col.subRow === true);
+  }, [columns]);
+
+  // Check if any column has subRow set to true
+  const hasSubRowColumns = useMemo(() => {
+    return subRowColumns.length > 0;
+  }, [subRowColumns]);
+
+  // Enhanced nested row renderer for sub-row columns with drag-and-drop
+  const renderSubRowContent = useCallback((row: any) => {
+    if (hasSubRowColumns && subRowColumns.length > 0) {
+      return (
+        <DraggableSubRow
+          row={row}
+          columns={subRowColumns}
+          subRowColumnOrder={preferences.subRowColumnOrder}
+          onReorderSubRowColumns={updateSubRowColumnOrder}
+        />
+      );
+    }
+
+    // Fallback to collapsible content if no sub-row columns
     if (!hasCollapsibleColumns || collapsibleColumns.length === 0) {
       return null;
     }
@@ -216,60 +239,10 @@ export function SmartGrid({
         })}
       </div>
     );
-  }, [hasCollapsibleColumns, collapsibleColumns]);
+  }, [hasSubRowColumns, subRowColumns, preferences.subRowColumnOrder, updateSubRowColumnOrder, hasCollapsibleColumns, collapsibleColumns]);
 
-  // Helper function to render collapsible cell values
-  const renderCollapsibleCellValue = useCallback((value: any, column: GridColumnConfig) => {
-    if (value === null || value === undefined) {
-      return <span className="text-gray-400">-</span>;
-    }
-
-    switch (column.type) {
-      case 'Badge':
-        // Handle both object format {value, variant} and string format
-        let displayValue: string;
-        let statusColor: string;
-
-        if (typeof value === 'object' && value !== null && 'value' in value) {
-          displayValue = value.value;
-          statusColor = value.variant || 'bg-gray-50 text-gray-600 border border-gray-200';
-        } else {
-          displayValue = String(value || '');
-          statusColor = 'bg-gray-50 text-gray-600 border border-gray-200';
-        }
-
-        return (
-          <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${statusColor}`}>
-            {displayValue}
-          </span>
-        );
-      case 'DateTimeRange':
-        const [date, time] = String(value).split(' ');
-        return (
-          <div>
-            <div className="font-medium">{date}</div>
-            <div className="text-xs text-gray-500">{time}</div>
-          </div>
-        );
-      case 'Date':
-        try {
-          const date = new Date(value);
-          return date.toLocaleDateString();
-        } catch {
-          return String(value);
-        }
-      default:
-        return String(value);
-    }
-  }, []);
-
-  // Filter out collapsible columns from the main table display
-  const visibleColumns = useMemo(() => {
-    return orderedColumns.filter(col => !col.collapsibleChild);
-  }, [orderedColumns]);
-
-  // Use custom renderer if we have collapsible columns, otherwise use the provided one
-  const effectiveNestedRowRenderer = hasCollapsibleColumns ? renderCollapsibleContent : nestedRowRenderer;
+  // Use sub-row renderer if we have sub-row columns, otherwise use collapsible or custom renderer
+  const effectiveNestedRowRenderer = hasSubRowColumns ? renderSubRowContent : (hasCollapsibleColumns ? renderCollapsibleContent : nestedRowRenderer);
 
   // Handle column-specific filter changes
   const handleColumnFilterChange = useCallback((filter: FilterConfig | null) => {
@@ -401,7 +374,8 @@ export function SmartGrid({
       hiddenColumns: [],
       columnWidths: {},
       columnHeaders: {},
-      subRowColumns: [], // Add missing subRowColumns property
+      subRowColumns: [],
+      subRowColumnOrder: [], // Reset sub-row column order
       filters: []
     };
     

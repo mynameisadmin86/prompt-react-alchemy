@@ -1,3 +1,4 @@
+
 import { useState, useCallback, useEffect } from 'react';
 import { GridPreferences, Column } from '@/types/smartgrid';
 
@@ -14,6 +15,7 @@ export function useGridPreferences<T>(
     columnWidths: {},
     columnHeaders: {},
     subRowColumns: [], // Initialize empty sub-row columns array
+    subRowColumnOrder: [], // Initialize empty sub-row column order array
     filters: []
   };
 
@@ -59,7 +61,8 @@ export function useGridPreferences<T>(
             ...loadedPreferences.columnOrder.filter(id => columns.some(col => col.id === id)),
             ...columns.filter(col => !loadedPreferences.columnOrder.includes(col.id)).map(col => col.id)
           ],
-          subRowColumns: loadedPreferences.subRowColumns || [] // Ensure subRowColumns is initialized
+          subRowColumns: loadedPreferences.subRowColumns || [], // Ensure subRowColumns is initialized
+          subRowColumnOrder: loadedPreferences.subRowColumnOrder || [] // Ensure subRowColumnOrder is initialized
         };
         setPreferences(mergedPreferences);
       }
@@ -115,6 +118,11 @@ export function useGridPreferences<T>(
     savePreferences(newPreferences);
   }, [preferences, savePreferences]);
 
+  const updateSubRowColumnOrder = useCallback((newOrder: string[]) => {
+    const newPreferences = { ...preferences, subRowColumnOrder: newOrder };
+    savePreferences(newPreferences);
+  }, [preferences, savePreferences]);
+
   return {
     preferences,
     updateColumnOrder,
@@ -122,6 +130,7 @@ export function useGridPreferences<T>(
     updateColumnWidth,
     updateColumnHeader,
     toggleSubRow, // Function for toggling sub-row at column level
+    updateSubRowColumnOrder, // New function for updating sub-row column order
     savePreferences
   };
 }
