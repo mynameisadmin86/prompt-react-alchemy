@@ -161,7 +161,7 @@ export function ColumnManager<T>({
                 </div>
               </div>
 
-              {/* Sub-row toggle section */}22
+              {/* Sub-row toggle section */}
               {onSubRowToggle && (
                 <div className="pl-6 pt-2 border-t border-gray-100">
                   <div className="flex items-center justify-between">
