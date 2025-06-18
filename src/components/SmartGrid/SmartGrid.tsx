@@ -474,19 +474,6 @@ export function SmartGrid({
     setDragOverColumn(null);
   }, [resizingColumn, setDraggedColumn, setDragOverColumn]);
 
-  // Toggle row expansion
-  const toggleRowExpansion = useCallback((rowIndex: number) => {
-    setExpandedRows(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(rowIndex)) {
-        newSet.delete(rowIndex);
-      } else {
-        newSet.add(rowIndex);
-      }
-      return newSet;
-    });
-  }, [setExpandedRows]);
-
   // Determine if a column is editable
   const isColumnEditable = useCallback((column: GridColumnConfig, columnIndex: number) => {
     if (columnIndex === 0) return false;
