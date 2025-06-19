@@ -1,10 +1,11 @@
+
 import React from 'react';
 
 export type GridColumnType =
   | 'Link'                 // Clickable cell with optional onClick or URL
   | 'Badge'                // Color-coded label based on value
   | 'DateTimeRange'        // Two date-time values in a vertical stack
-  | 'TextWithTooltip'      // Text with an optional info icon showing a tooltip
+  | 'TextWithTooltip'      // Text with an info icon showing a tooltip
   | 'ExpandableCount'      // "+N" style count, expandable to view details
   | 'Text'                 // Standard text cell
   | 'Date'                 // Formatted date
@@ -117,7 +118,7 @@ export interface SmartGridProps {
   onLinkClick?(rowData: any, columnKey: string): void;
   onSubRowToggle?(columnKey: string): void;
   paginationMode?: 'pagination' | 'infinite';
-  nestedRowRenderer?(row: any): React.ReactNode;
+  nestedRowRenderer?(row: any, rowIndex: number): React.ReactNode;
   plugins?: GridPlugin[];
   selectedRows?: Set<number>;
   onSelectionChange?(selectedRows: Set<number>): void;
