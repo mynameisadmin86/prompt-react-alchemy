@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -227,21 +226,26 @@ export function SmartGrid({
   }, [hasCollapsibleColumns, collapsibleColumns, renderCollapsibleCellValue]);
 
   // Enhanced nested row renderer for sub-row columns with drag-and-drop
-  const renderSubRowContent = useCallback((row: any) => {
+  const renderSubRowContent = useCallback((row: any, rowIndex: number) => {
     if (hasSubRowColumns && subRowColumns.length > 0) {
       return (
         <DraggableSubRow
           row={row}
+          rowIndex={rowIndex}
           columns={subRowColumns}
           subRowColumnOrder={preferences.subRowColumnOrder}
+          editingCell={editingCell}
           onReorderSubRowColumns={updateSubRowColumnOrder}
+          onSubRowEdit={handleSubRowEdit}
+          onSubRowEditStart={handleSubRowEditStart}
+          onSubRowEditCancel={handleSubRowEditCancel}
         />
       );
     }
 
     // Fallback to collapsible content if no sub-row columns
     return renderCollapsibleContent(row);
-  }, [hasSubRowColumns, subRowColumns, preferences.subRowColumnOrder, updateSubRowColumnOrder, renderCollapsibleContent]);
+  }, [hasSubRowColumns, subRowColumns, preferences.subRowColumnOrder, editingCell, updateSubRowColumnOrder, handleSubRowEdit, handleSubRowEditStart, handleSubRowEditCancel, renderCollapsibleContent]);
 
   // Use sub-row renderer if we have sub-row columns, otherwise use collapsible or custom renderer
   const effectiveNestedRowRenderer = hasSubRowColumns ? renderSubRowContent : (hasCollapsibleColumns ? renderCollapsibleContent : nestedRowRenderer);
@@ -915,7 +919,7 @@ export function SmartGrid({
                         >
                           <div className="bg-gradient-to-r from-gray-50/50 to-white border-l-4 border-blue-500">
                             <div className="p-6 pl-12">
-                              {effectiveNestedRowRenderer(row)}
+                              {effectiveNestedRowRenderer(row, rowIndex)}
                             </div>
                           </div>
                         </TableCell>

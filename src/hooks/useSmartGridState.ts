@@ -1,4 +1,3 @@
-
 import { useState, useCallback, useRef } from 'react';
 import { SortConfig, FilterConfig, GridColumnConfig } from '@/types/smartgrid';
 
