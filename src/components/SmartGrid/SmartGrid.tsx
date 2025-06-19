@@ -87,7 +87,10 @@ export function SmartGrid({
     handleColumnFilterChange,
     handleClearColumnFilter,
     handleSort,
-    toggleRowExpansion
+    toggleRowExpansion,
+    handleSubRowEdit,
+    handleSubRowEditStart,
+    handleSubRowEditCancel
   } = useSmartGridState();
 
   const [pageSize] = useState(10);
