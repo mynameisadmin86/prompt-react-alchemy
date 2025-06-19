@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -32,6 +31,7 @@ interface GridToolbarProps {
   onColumnHeaderChange: (columnId: string, header: string) => void;
   onResetToDefaults: () => void;
   onExport: (format: 'csv') => void;
+  onSubRowToggle?: (columnKey: string) => void;
 }
 
 export function GridToolbar({
@@ -50,7 +50,8 @@ export function GridToolbar({
   onColumnVisibilityToggle,
   onColumnHeaderChange,
   onResetToDefaults,
-  onExport
+  onExport,
+  onSubRowToggle
 }: GridToolbarProps) {
   return (
     <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between bg-white p-4 rounded-lg border shadow-sm">
@@ -137,6 +138,7 @@ export function GridToolbar({
           onColumnVisibilityToggle={onColumnVisibilityToggle}
           onColumnHeaderChange={onColumnHeaderChange}
           onResetToDefaults={onResetToDefaults}
+          onSubRowToggle={onSubRowToggle}
         />
 
         <Button 
