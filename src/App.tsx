@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import GridDemo from "./pages/GridDemo";
+import TripPlansSearchHub from "./pages/TripPlansSearchHub";
 import DynamicPanelDemo from "./pages/DynamicPanelDemo";
 import NotFound from "./pages/NotFound";
 
@@ -20,6 +21,7 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/grid-demo" element={<GridDemo />} />
+          <Route path="/trip-plans-search-hub" element={<TripPlansSearchHub />} />
           <Route path="/dynamic-panel-demo" element={<DynamicPanelDemo />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />

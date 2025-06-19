@@ -1,57 +1,122 @@
 
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { Grid, ArrowRight } from 'lucide-react';
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Grid, Search, Settings, Database } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const Index = () => {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
-      <div className="text-center max-w-2xl mx-auto px-4">
-        <div className="mb-8">
-          <Grid className="h-16 w-16 mx-auto mb-4 text-blue-600" />
-          <h1 className="text-4xl font-bold mb-4 text-gray-900">
-            SmartGrid Component
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+      <div className="container mx-auto px-4 py-16">
+        <div className="text-center mb-16">
+          <h1 className="text-4xl font-bold text-gray-900 mb-4">
+            Smart Components Showcase
           </h1>
-          <p className="text-xl text-gray-600 mb-8">
-            A powerful, extensible data grid with advanced features like inline editing, 
-            sorting, filtering, nested rows, and plugin architecture.
+          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+            Explore our collection of smart, reusable components built with React, TypeScript, and Tailwind CSS
           </p>
         </div>
 
-        <div className="space-y-4">
-          <Link to="/grid-demo">
-            <Button size="lg" className="w-full sm:w-auto">
-              View Grid Demo
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
-          </Link>
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+          <Card className="hover:shadow-lg transition-shadow duration-300">
+            <CardHeader>
+              <div className="flex items-center space-x-3">
+                <div className="p-2 bg-blue-100 rounded-lg">
+                  <Grid className="h-6 w-6 text-blue-600" />
+                </div>
+                <div>
+                  <CardTitle>Smart Grid</CardTitle>
+                  <CardDescription>Advanced data grid component</CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <p className="text-gray-600 mb-4">
+                A powerful data grid with sorting, filtering, pagination, inline editing, and customizable columns.
+              </p>
+              <Link to="/grid-demo">
+                <Button className="w-full">
+                  View Demo
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
+
+          <Card className="hover:shadow-lg transition-shadow duration-300">
+            <CardHeader>
+              <div className="flex items-center space-x-3">
+                <div className="p-2 bg-green-100 rounded-lg">
+                  <Search className="h-6 w-6 text-green-600" />
+                </div>
+                <div>
+                  <CardTitle>Trip Plans Search Hub</CardTitle>
+                  <CardDescription>Advanced search interface</CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <p className="text-gray-600 mb-4">
+                A comprehensive search interface with collapsible filters and smart grid integration for trip management.
+              </p>
+              <Link to="/trip-plans-search-hub">
+                <Button className="w-full">
+                  View Demo
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
+
+          <Card className="hover:shadow-lg transition-shadow duration-300">
+            <CardHeader>
+              <div className="flex items-center space-x-3">
+                <div className="p-2 bg-purple-100 rounded-lg">
+                  <Settings className="h-6 w-6 text-purple-600" />
+                </div>
+                <div>
+                  <CardTitle>Dynamic Panel</CardTitle>
+                  <CardDescription>Configurable panel system</CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <p className="text-gray-600 mb-4">
+                A flexible panel component with customizable fields, validation, and dynamic layout capabilities.
+              </p>
+              <Link to="/dynamic-panel-demo">
+                <Button className="w-full">
+                  View Demo
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
         </div>
 
-        <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="p-6 bg-white rounded-lg shadow-sm">
-            <h3 className="text-lg font-semibold mb-2 text-gray-900">
-              Advanced Editing
-            </h3>
-            <p className="text-gray-600 text-sm">
-              Inline editing with validation, bulk updates via CSV upload, and real-time data synchronization.
+        <div className="text-center mt-16">
+          <div className="max-w-3xl mx-auto">
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">
+              Built with Modern Technologies
+            </h2>
+            <p className="text-gray-600 mb-8">
+              Our components leverage the latest web technologies to provide exceptional performance, 
+              accessibility, and developer experience.
             </p>
-          </div>
-          <div className="p-6 bg-white rounded-lg shadow-sm">
-            <h3 className="text-lg font-semibold mb-2 text-gray-900">
-              Plugin Architecture
-            </h3>
-            <p className="text-gray-600 text-sm">
-              Extensible design allowing custom toolbar buttons, row actions, and footer components.
-            </p>
-          </div>
-          <div className="p-6 bg-white rounded-lg shadow-sm">
-            <h3 className="text-lg font-semibold mb-2 text-gray-900">
-              Rich Features
-            </h3>
-            <p className="text-gray-600 text-sm">
-              Nested rows, multiple export formats, preference persistence, and responsive design.
-            </p>
+            <div className="flex flex-wrap justify-center gap-4">
+              <span className="px-4 py-2 bg-white rounded-full text-sm font-medium text-gray-700 shadow-sm">
+                React 18
+              </span>
+              <span className="px-4 py-2 bg-white rounded-full text-sm font-medium text-gray-700 shadow-sm">
+                TypeScript
+              </span>
+              <span className="px-4 py-2 bg-white rounded-full text-sm font-medium text-gray-700 shadow-sm">
+                Tailwind CSS
+              </span>
+              <span className="px-4 py-2 bg-white rounded-full text-sm font-medium text-gray-700 shadow-sm">
+                Shadcn/ui
+              </span>
+              <span className="px-4 py-2 bg-white rounded-full text-sm font-medium text-gray-700 shadow-sm">
+                Vite
+              </span>
+            </div>
           </div>
         </div>
       </div>
