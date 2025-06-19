@@ -37,6 +37,7 @@ export function SmartGrid({
   onDataFetch,
   onUpdate,
   onLinkClick,
+  onSubRowToggle,
   paginationMode = 'pagination',
   nestedRowRenderer,
   plugins = [],
@@ -47,6 +48,8 @@ export function SmartGrid({
   const {
     gridData,
     setGridData,
+    columns: stateColumns,
+    setColumns,
     editingCell,
     setEditingCell,
     editingHeader,
@@ -88,6 +91,7 @@ export function SmartGrid({
     handleClearColumnFilter,
     handleSort,
     toggleRowExpansion,
+    handleSubRowToggle,
     handleSubRowEdit,
     handleSubRowEditStart,
     handleSubRowEditCancel
@@ -100,13 +104,16 @@ export function SmartGrid({
   const currentSelectedRows = selectedRows || internalSelectedRows;
   const handleSelectionChange = onSelectionChange || setInternalSelectedRows;
 
+  // Use the current state columns (which include sub-row updates) instead of props
+  const currentColumns = stateColumns.length > 0 ? stateColumns : columns;
+
   // Convert GridColumnConfig to Column format for useGridPreferences
-  const preferencesColumns = useMemo(() => columns.map(col => ({
+  const preferencesColumns = useMemo(() => currentColumns.map(col => ({
     id: col.key,
     header: col.label,
     accessor: col.key,
     mandatory: col.mandatory
-  })), [columns]);
+  })), [currentColumns]);
 
   // Initialize preferences hook with proper async handling
   const {
@@ -137,7 +144,7 @@ export function SmartGrid({
 
   // Apply preferences to get ordered and visible columns - FILTER OUT SUB-ROW COLUMNS from main table
   const orderedColumns = useMemo(() => {
-    const columnMap = new Map(columns.map(col => [col.key, col]));
+    const columnMap = new Map(currentColumns.map(col => [col.key, col]));
     
     const visibleColumns = preferences.columnOrder
       .map(id => columnMap.get(id))
@@ -154,12 +161,12 @@ export function SmartGrid({
       width: calculatedWidths[col.key] || 100,
       filterable: col.filterable !== false // Enable filtering by default
     }));
-  }, [columns, preferences, calculateColumnWidthsCallback]);
+  }, [currentColumns, preferences, calculateColumnWidthsCallback]);
 
   // Get sub-row columns (columns marked with subRow: true)
   const subRowColumns = useMemo(() => {
-    return columns.filter(col => col.subRow === true);
-  }, [columns]);
+    return currentColumns.filter(col => col.subRow === true);
+  }, [currentColumns]);
 
   // Check if any column has subRow set to true
   const hasSubRowColumns = useMemo(() => {
@@ -168,13 +175,26 @@ export function SmartGrid({
 
   // Check if any column has collapsibleChild set to true
   const hasCollapsibleColumns = useMemo(() => {
-    return columns.some(col => col.subRow === true);
-  }, [columns]);
+    return currentColumns.some(col => col.subRow === true);
+  }, [currentColumns]);
 
   // Get collapsible columns
   const collapsibleColumns = useMemo(() => {
-    return columns.filter(col => col.subRow === true);
-  }, [columns]);
+    return currentColumns.filter(col => col.subRow === true);
+  }, [currentColumns]);
+
+  // Handle sub-row toggle with proper column updates
+  const handleSubRowToggleInternal = useCallback((columnKey: string) => {
+    console.log('Internal sub-row toggle for column:', columnKey);
+    
+    // Call the hook's toggle function
+    handleSubRowToggle(columnKey);
+    
+    // Also call the external handler if provided
+    if (onSubRowToggle) {
+      onSubRowToggle(columnKey);
+    }
+  }, [handleSubRowToggle, onSubRowToggle]);
 
   // Helper function to render collapsible cell values
   const renderCollapsibleCellValue = useCallback((value: any, column: GridColumnConfig) => {
@@ -255,8 +275,8 @@ export function SmartGrid({
 
   // Process data with sorting and filtering (only if not using lazy loading)
   const processedData = useMemo(() => {
-    return processGridData(gridData, globalFilter, filters, sort, columns, onDataFetch);
-  }, [gridData, globalFilter, filters, sort, columns, onDataFetch]);
+    return processGridData(gridData, globalFilter, filters, sort, currentColumns, onDataFetch);
+  }, [gridData, globalFilter, filters, sort, currentColumns, onDataFetch]);
 
   // Define handleExport and handleResetPreferences after processedData and orderedColumns
   const handleExport = useCallback((format: 'csv') => {
@@ -266,7 +286,7 @@ export function SmartGrid({
 
   const handleResetPreferences = useCallback(async () => {
     const defaultPreferences = {
-      columnOrder: columns.map(col => col.key),
+      columnOrder: currentColumns.map(col => col.key),
       hiddenColumns: [],
       columnWidths: {},
       columnHeaders: {},
@@ -295,7 +315,7 @@ export function SmartGrid({
         variant: "destructive"
       });
     }
-  }, [columns, savePreferences, toast, setSort, setFilters, setGlobalFilter, setColumnWidths, setShowColumnFilters]);
+  }, [currentColumns, savePreferences, toast, setSort, setFilters, setGlobalFilter, setColumnWidths, setShowColumnFilters]);
 
   // Handle column resizing
   const handleResizeStart = useCallback((e: React.MouseEvent, columnKey: string) => {
@@ -588,6 +608,13 @@ export function SmartGrid({
     }
   }, [data, onDataFetch, setGridData]);
 
+  // Initialize columns in state when props change
+  useEffect(() => {
+    if (columns.length > 0) {
+      setColumns(columns);
+    }
+  }, [columns, setColumns]);
+
   // Initialize plugins
   useEffect(() => {
     plugins.forEach(plugin => {
@@ -636,12 +663,13 @@ export function SmartGrid({
         setViewMode={setViewMode}
         loading={loading}
         filters={filters}
-        columns={columns}
+        columns={currentColumns}
         preferences={preferences}
         onColumnVisibilityToggle={toggleColumnVisibility}
         onColumnHeaderChange={updateColumnHeader}
         onResetToDefaults={handleResetPreferences}
         onExport={handleExport}
+        onSubRowToggle={handleSubRowToggleInternal}
       />
 
       {/* Table Container with no horizontal scroll */}
