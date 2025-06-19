@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -81,7 +80,7 @@ export function ColumnVisibilityManager({
           <Settings2 className="h-4 w-4" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-80 p-4" align="end">
+      <PopoverContent className="w-96 p-4" align="end">
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <h4 className="text-sm font-medium">Manage Columns</h4>
