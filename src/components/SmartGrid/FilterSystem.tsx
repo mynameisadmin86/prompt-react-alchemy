@@ -1,15 +1,12 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { Button } from '@/components/ui/button';
-import { Star, Filter, X } from 'lucide-react';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { ColumnFilterInput } from './ColumnFilterInput';
+import { FilterControls } from './FilterControls';
+import { MainRowFilters } from './MainRowFilters';
+import { SubRowFilters } from './SubRowFilters';
 import { FilterSetModal } from './FilterSetModal';
-import { FilterSetDropdown } from './FilterSetDropdown';
 import { GridColumnConfig } from '@/types/smartgrid';
 import { FilterValue, FilterSet, FilterSystemAPI } from '@/types/filterSystem';
 import { useToast } from '@/hooks/use-toast';
-import { cn } from '@/lib/utils';
 
 interface FilterSystemProps {
   columns: GridColumnConfig[];
@@ -237,127 +234,42 @@ export function FilterSystem({
   };
 
   const activeFilterCount = Object.keys(activeFilters).length;
-  const filterableColumns = columns.filter(col => col.filterable !== false);
-  const filterableSubRowColumns = subRowColumns.filter(col => col.filterable !== false);
 
   return (
     <div className="space-y-2">
       {/* Filter Controls */}
-      <div className="flex items-center justify-between bg-gray-50 p-2 rounded border">
-        <div className="flex items-center space-x-2">
-          <Button
-            variant={showFilterRow ? "default" : "outline"}
-            size="sm"
-            onClick={onToggleFilterRow}
-            className={cn(
-              "transition-all",
-              showFilterRow && "bg-blue-600 hover:bg-blue-700 text-white"
-            )}
-          >
-            <Filter className="h-4 w-4 mr-1" />
-            Filters
-            {activeFilterCount > 0 && (
-              <span className="ml-1 text-xs bg-white text-blue-600 rounded-full px-1.5 py-0.5">
-                {activeFilterCount}
-              </span>
-            )}
-          </Button>
-
-          {activeFilterCount > 0 && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={clearAllFilters}
-              className="text-red-600 hover:bg-red-50"
-            >
-              <X className="h-4 w-4 mr-1" />
-              Clear All
-            </Button>
-          )}
-        </div>
-
-        <div className="flex items-center space-x-2">
-          {activeFilterCount > 0 && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setShowSaveModal(true)}
-              disabled={loading}
-              className="transition-all hover:bg-yellow-50 hover:border-yellow-300"
-            >
-              <Star className="h-4 w-4 mr-1" />
-              Save Set
-            </Button>
-          )}
-
-          <FilterSetDropdown
-            filterSets={filterSets}
-            onApply={applyFilterSet}
-            onSetDefault={handleSetDefault}
-            onRename={handleRename}
-            onDelete={handleDelete}
-          />
-        </div>
-      </div>
+      <FilterControls
+        showFilterRow={showFilterRow}
+        onToggleFilterRow={onToggleFilterRow}
+        activeFilterCount={activeFilterCount}
+        onClearAllFilters={clearAllFilters}
+        onShowSaveModal={() => setShowSaveModal(true)}
+        filterSets={filterSets}
+        onApplyFilterSet={applyFilterSet}
+        onSetDefault={handleSetDefault}
+        onRename={handleRename}
+        onDelete={handleDelete}
+        loading={loading}
+      />
 
       {/* Filter Panel - Only shown when showFilterRow is true */}
       {showFilterRow && (
         <div className="bg-white border rounded shadow-sm">
           {/* Main Row Filters */}
-          <div className="p-4 border-b">
-            <div className="text-sm font-medium text-gray-700 mb-3">Column Filters</div>
-            <div className="grid gap-3" style={{ gridTemplateColumns: `repeat(auto-fit, minmax(200px, 1fr))` }}>
-              {filterableColumns.map((column) => (
-                <div key={column.key} className="space-y-1">
-                  <div className="text-xs font-medium text-gray-600 truncate">
-                    {column.label}
-                  </div>
-                  <ColumnFilterInput
-                    column={column}
-                    value={activeFilters[column.key]}
-                    onChange={(value) => handleFilterChange(column.key, value)}
-                    onApply={handleApplyFilters}
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
+          <MainRowFilters
+            columns={columns}
+            activeFilters={activeFilters}
+            onFilterChange={handleFilterChange}
+            onApplyFilters={handleApplyFilters}
+          />
 
           {/* Sub-Row Filters - Collapsible Section */}
-          {filterableSubRowColumns.length > 0 && (
-            <Accordion type="single" collapsible className="w-full">
-              <AccordionItem value="sub-row-filters" className="border-0">
-                <AccordionTrigger className="px-4 py-3 hover:no-underline">
-                  <div className="flex items-center space-x-2">
-                    <span className="text-sm font-medium text-blue-700">Sub-row Filters</span>
-                    {Object.keys(activeFilters).some(key => key.startsWith('subrow-')) && (
-                      <span className="text-xs bg-blue-100 text-blue-600 rounded-full px-2 py-0.5">
-                        {Object.keys(activeFilters).filter(key => key.startsWith('subrow-')).length} active
-                      </span>
-                    )}
-                  </div>
-                </AccordionTrigger>
-                <AccordionContent className="px-4 pb-4">
-                  <div className="grid gap-3" style={{ gridTemplateColumns: `repeat(auto-fit, minmax(200px, 1fr))` }}>
-                    {filterableSubRowColumns.map((column) => (
-                      <div key={`subrow-${column.key}`} className="space-y-1">
-                        <div className="text-xs font-medium text-blue-600 truncate">
-                          {column.label}
-                        </div>
-                        <ColumnFilterInput
-                          column={column}
-                          value={activeFilters[`subrow-${column.key}`]}
-                          onChange={(value) => handleFilterChange(`subrow-${column.key}`, value)}
-                          onApply={handleApplyFilters}
-                          isSubRow={true}
-                        />
-                      </div>
-                    ))}
-                  </div>
-                </AccordionContent>
-              </AccordionItem>
-            </Accordion>
-          )}
+          <SubRowFilters
+            subRowColumns={subRowColumns}
+            activeFilters={activeFilters}
+            onFilterChange={handleFilterChange}
+            onApplyFilters={handleApplyFilters}
+          />
         </div>
       )}
 
