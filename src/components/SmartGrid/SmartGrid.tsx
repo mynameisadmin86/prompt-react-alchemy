@@ -667,6 +667,18 @@ export function SmartGrid({
 
   return (
     <div className="space-y-4 w-full">
+      {/* Advanced Filter System */}
+      <FilterSystem
+        columns={orderedColumns}
+        subRowColumns={subRowColumns}
+        showFilterRow={showFilterRow}
+        onToggleFilterRow={() => setShowFilterRow(!showFilterRow)}
+        onFiltersChange={handleFiltersChange}
+        gridId="smart-grid"
+        userId="demo-user"
+        api={mockFilterAPI}
+      />
+
       {/* Toolbar */}
       <GridToolbar
         globalFilter={globalFilter}
@@ -839,19 +851,46 @@ export function SmartGrid({
                 )}
               </TableRow>
               
-              {/* Enhanced Filter System - positioned below headers */}
-              {showColumnFilters && (
-                <>
-                  <FilterSystem
-                    columns={orderedColumns}
-                    subRowColumns={subRowColumns}
-                    showFilterRow={true}
-                    onFiltersChange={handleFiltersChange}
-                    gridId="smart-grid"
-                    userId="demo-user"
-                    api={mockFilterAPI}
-                  />
-                </>
+              {/* Column Filter Row - Legacy support, hidden when using FilterSystem */}
+              {showColumnFilters && !showFilterRow && (
+                <TableRow className="hover:bg-transparent border-b border-gray-200">
+                  {/* Checkbox column space */}
+                  {showCheckboxes && (
+                    <TableHead className="bg-gray-25 px-3 py-2 border-r border-gray-100 w-[50px]">
+                      {/* Empty space for checkbox column */}
+                    </TableHead>
+                  )}
+                  {orderedColumns.map((column) => {
+                    const currentFilter = filters.find(f => f.column === column.key);
+                    return (
+                      <TableHead 
+                        key={`filter-${column.key}`}
+                        className="bg-gray-25 px-2 py-2 border-r border-gray-100 last:border-r-0 relative"
+                        style={{ width: `${column.width}px` }}
+                      >
+                        {column.filterable && (
+                          <ColumnFilter
+                            column={column}
+                            currentFilter={currentFilter}
+                            onFilterChange={(filter) => {
+                              if (filter) {
+                                handleColumnFilterChange(filter);
+                              } else {
+                                handleClearColumnFilter(column.key);
+                              }
+                            }}
+                          />
+                        )}
+                      </TableHead>
+                    );
+                  })}
+                  {/* Plugin row actions column space */}
+                  {plugins.some(plugin => plugin.rowActions) && (
+                    <TableHead className="bg-gray-25 px-3 py-2 text-center w-[100px]">
+                      {/* Empty space for actions column */}
+                    </TableHead>
+                  )}
+                </TableRow>
               )}
             </TableHeader>
             <TableBody>

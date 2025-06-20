@@ -16,7 +16,6 @@ export interface GridColumnConfig {
   key: string;
   label: string;
   type: GridColumnType;
-  width?: number;
   sortable?: boolean;
   filterable?: boolean;
   editable?: boolean;
