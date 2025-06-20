@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { CalendarIcon, X, MoreHorizontal } from 'lucide-react';
+import { CalendarIcon, X } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { FilterValue } from '@/types/filterSystem';
@@ -190,17 +190,16 @@ export function ColumnFilterInput({
       "flex items-center gap-1 p-1 bg-white rounded border shadow-sm transition-all",
       isSubRow && "bg-blue-50 border-blue-200"
     )}>
-      {/* Operator indicator with dropdown */}
+      {/* Operator symbol with dropdown - shows on hover and click */}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button
             variant="ghost"
             size="sm"
-            className="h-6 w-8 p-0 text-xs text-gray-500 hover:bg-gray-100"
+            className="h-6 w-8 p-0 text-xs text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition-colors"
             title="Change filter operator"
           >
-            <span className="text-xs">{getCurrentOperatorSymbol()}</span>
-            <MoreHorizontal className="h-2 w-2 ml-0.5" />
+            <span className="text-xs font-medium">{getCurrentOperatorSymbol()}</span>
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="bg-white border shadow-lg z-50" align="start">
