@@ -672,6 +672,7 @@ export function SmartGrid({
         columns={orderedColumns}
         subRowColumns={subRowColumns}
         showFilterRow={showFilterRow}
+        onToggleFilterRow={() => setShowFilterRow(!showFilterRow)}
         onFiltersChange={handleFiltersChange}
         gridId="smart-grid"
         userId="demo-user"
