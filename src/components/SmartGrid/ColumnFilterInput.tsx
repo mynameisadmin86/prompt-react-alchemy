@@ -5,7 +5,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { CalendarIcon, X } from 'lucide-react';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { CalendarIcon, X, MoreHorizontal } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { FilterValue } from '@/types/filterSystem';
@@ -27,13 +28,23 @@ export function ColumnFilterInput({
   isSubRow = false 
 }: ColumnFilterInputProps) {
   const [localValue, setLocalValue] = useState<any>(value?.value || '');
-  const [operator, setOperator] = useState<string>(value?.operator || 'contains');
+  const [operator, setOperator] = useState<string>(value?.operator || getDefaultOperator());
   const [showDatePicker, setShowDatePicker] = useState(false);
 
   useEffect(() => {
     setLocalValue(value?.value || '');
-    setOperator(value?.operator || 'contains');
+    setOperator(value?.operator || getDefaultOperator());
   }, [value]);
+
+  function getDefaultOperator(): string {
+    switch (column.type) {
+      case 'Date':
+      case 'DateTimeRange':
+        return 'equals';
+      default:
+        return 'contains';
+    }
+  }
 
   const handleValueChange = (newValue: any) => {
     setLocalValue(newValue);
@@ -44,6 +55,17 @@ export function ColumnFilterInput({
       onChange({
         value: newValue,
         operator: operator as any,
+        type: getFilterType()
+      });
+    }
+  };
+
+  const handleOperatorChange = (newOperator: string) => {
+    setOperator(newOperator);
+    if (localValue !== '' && localValue != null) {
+      onChange({
+        value: localValue,
+        operator: newOperator as any,
         type: getFilterType()
       });
     }
@@ -73,45 +95,31 @@ export function ColumnFilterInput({
     onApply();
   };
 
-  const renderOperatorSelect = () => {
-    const operators = getAvailableOperators();
-    if (operators.length <= 1) return null;
-
-    return (
-      <Select value={operator} onValueChange={setOperator}>
-        <SelectTrigger className="w-20 h-7 text-xs">
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent className="bg-white border shadow-lg z-50">
-          {operators.map(op => (
-            <SelectItem key={op.value} value={op.value} className="text-xs">
-              {op.label}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-    );
-  };
-
   const getAvailableOperators = () => {
     switch (column.type) {
       case 'Date':
       case 'DateTimeRange':
         return [
-          { value: 'equals', label: '=' },
-          { value: 'gt', label: '>' },
-          { value: 'lt', label: '<' },
-          { value: 'gte', label: '>=' },
-          { value: 'lte', label: '<=' },
+          { value: 'equals', label: 'Equals (=)', symbol: '=' },
+          { value: 'gt', label: 'Greater than (>)', symbol: '>' },
+          { value: 'lt', label: 'Less than (<)', symbol: '<' },
+          { value: 'gte', label: 'Greater or equal (>=)', symbol: '>=' },
+          { value: 'lte', label: 'Less or equal (<=)', symbol: '<=' },
         ];
       default:
         return [
-          { value: 'contains', label: '⊃' },
-          { value: 'equals', label: '=' },
-          { value: 'startsWith', label: '⌐' },
-          { value: 'endsWith', label: '¬' },
+          { value: 'contains', label: 'Contains', symbol: '⊃' },
+          { value: 'equals', label: 'Equals', symbol: '=' },
+          { value: 'startsWith', label: 'Starts with', symbol: '⌐' },
+          { value: 'endsWith', label: 'Ends with', symbol: '¬' },
         ];
     }
+  };
+
+  const getCurrentOperatorSymbol = () => {
+    const operators = getAvailableOperators();
+    const current = operators.find(op => op.value === operator);
+    return current?.symbol || '⊃';
   };
 
   const renderFilterInput = () => {
@@ -182,10 +190,40 @@ export function ColumnFilterInput({
       "flex items-center gap-1 p-1 bg-white rounded border shadow-sm transition-all",
       isSubRow && "bg-blue-50 border-blue-200"
     )}>
-      {renderOperatorSelect()}
+      {/* Operator indicator with dropdown */}
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-6 w-8 p-0 text-xs text-gray-500 hover:bg-gray-100"
+            title="Change filter operator"
+          >
+            <span className="text-xs">{getCurrentOperatorSymbol()}</span>
+            <MoreHorizontal className="h-2 w-2 ml-0.5" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent className="bg-white border shadow-lg z-50" align="start">
+          {getAvailableOperators().map(op => (
+            <DropdownMenuItem
+              key={op.value}
+              onClick={() => handleOperatorChange(op.value)}
+              className={cn(
+                "text-xs cursor-pointer",
+                operator === op.value && "bg-blue-50 text-blue-700"
+              )}
+            >
+              <span className="mr-2">{op.symbol}</span>
+              {op.label}
+            </DropdownMenuItem>
+          ))}
+        </DropdownMenuContent>
+      </DropdownMenu>
+
       <div className="flex-1">
         {renderFilterInput()}
       </div>
+      
       {localValue && (
         <Button
           variant="ghost"
