@@ -354,6 +354,14 @@ const TripPlansSearchHub = () => {
     });
   };
 
+  const handleClear = () => {
+    setSearchData({});
+    toast({
+      title: "Cleared",
+      description: "Search filters have been cleared"
+    });
+  };
+
   const renderSubRow = (row: any, rowIndex: number) => {
     return (
       <DraggableSubRow
@@ -404,28 +412,76 @@ const TripPlansSearchHub = () => {
           </Button>
         </div>
 
-        {/* Search Panel using DynamicPanel */}
+        {/* Search Panel with Custom Footer */}
         <div className="grid grid-cols-12 gap-6">
-          <DynamicPanel
-            panelId="trip-search-filters"
-            panelTitle="Search Filters"
-            panelConfig={searchPanelConfig}
-            initialData={searchData}
-            onDataChange={handleSearchDataChange}
-            panelWidth="full"
-            collapsible={true}
-            userId="trip-search-user"
-          />
-        </div>
+          <div className="col-span-12">
+            <Card className="border border-gray-200 shadow-sm">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3 px-4 pt-4">
+                <div className="flex items-center gap-2">
+                  <div className="w-5 h-5 border-2 border-purple-500 rounded"></div>
+                  <CardTitle className="text-sm font-medium text-gray-700">Search Filters</CardTitle>
+                </div>
+              </CardHeader>
+              
+              <CardContent className="px-4 pb-4 space-y-4">
+                {/* Search Fields */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {Object.entries(searchPanelConfig)
+                    .filter(([_, config]) => config.visible)
+                    .sort(([_, a], [__, b]) => a.order - b.order)
+                    .map(([fieldId, fieldConfig]) => (
+                      <div key={fieldId} className="space-y-1">
+                        <label className="text-xs font-medium text-gray-600 block">
+                          {fieldConfig.label}
+                          {fieldConfig.mandatory && (
+                            <span className="text-red-500 ml-1">*</span>
+                          )}
+                        </label>
+                        {fieldConfig.fieldType === 'select' ? (
+                          <select
+                            value={searchData[fieldId] || ''}
+                            onChange={(e) => handleSearchDataChange({ ...searchData, [fieldId]: e.target.value })}
+                            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          >
+                            <option value="">Select {fieldConfig.label}</option>
+                            {fieldConfig.options?.map((option) => (
+                              <option key={option.value} value={option.value}>
+                                {option.label}
+                              </option>
+                            ))}
+                          </select>
+                        ) : fieldConfig.fieldType === 'date' ? (
+                          <input
+                            type="date"
+                            value={searchData[fieldId] || ''}
+                            onChange={(e) => handleSearchDataChange({ ...searchData, [fieldId]: e.target.value })}
+                            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          />
+                        ) : (
+                          <input
+                            type="text"
+                            placeholder={fieldConfig.placeholder}
+                            value={searchData[fieldId] || ''}
+                            onChange={(e) => handleSearchDataChange({ ...searchData, [fieldId]: e.target.value })}
+                            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          />
+                        )}
+                      </div>
+                    ))}
+                </div>
 
-        {/* Search Actions */}
-        <div className="flex justify-end space-x-2">
-          <Button variant="outline" onClick={() => setSearchData({})}>
-            Clear
-          </Button>
-          <Button onClick={handleSearch}>
-            Search
-          </Button>
+                {/* Action Buttons */}
+                <div className="flex justify-end space-x-2 pt-4 border-t border-gray-200">
+                  <Button variant="outline" onClick={handleClear}>
+                    Clear
+                  </Button>
+                  <Button onClick={handleSearch}>
+                    Search
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </div>
 
         {/* Grid Container */}
