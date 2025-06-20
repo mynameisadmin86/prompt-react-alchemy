@@ -20,12 +20,13 @@ export function MainRowFilters({
   const filterableColumns = columns.filter(col => col.filterable !== false);
 
   return (
-    <div className="flex items-center gap-2 p-2 bg-gray-50 border-b border-gray-200">
-      {filterableColumns.map((column) => (
-        <div key={column.key} className="flex-1 min-w-[120px]">
-          <div className="text-xs text-gray-500 mb-1 truncate">
-            {column.label}
-          </div>
+    <div className="flex items-stretch gap-0 bg-gray-25 border-b border-gray-200">
+      {filterableColumns.map((column, index) => (
+        <div 
+          key={column.key} 
+          className="flex-none border-r border-gray-100 last:border-r-0 p-2"
+          style={{ width: `${column.width || 150}px` }}
+        >
           <ColumnFilterInput
             column={column}
             value={activeFilters[column.key]}

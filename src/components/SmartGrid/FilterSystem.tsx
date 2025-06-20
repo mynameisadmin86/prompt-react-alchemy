@@ -12,6 +12,7 @@ interface FilterSystemProps {
   onFiltersChange: (filters: Record<string, FilterValue>) => void;
   gridId: string;
   userId: string;
+  showFilterRow: boolean;
   api?: FilterSystemAPI;
 }
 
@@ -21,6 +22,7 @@ export function FilterSystem({
   onFiltersChange,
   gridId,
   userId,
+  showFilterRow,
   api
 }: FilterSystemProps) {
   const [activeFilters, setActiveFilters] = useState<Record<string, FilterValue>>({});
@@ -97,6 +99,11 @@ export function FilterSystem({
       description: `Applied "${filterSet.name}" with ${Object.keys(filterSet.filters).length} filters`,
     });
   };
+
+  // Don't render anything if showFilterRow is false
+  if (!showFilterRow) {
+    return null;
+  }
 
   return (
     <div className="bg-white border-t border-gray-200">

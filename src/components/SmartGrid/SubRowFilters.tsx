@@ -1,6 +1,7 @@
 
-import React from 'react';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import React, { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { ChevronDown, ChevronUp } from 'lucide-react';
 import { ColumnFilterInput } from './ColumnFilterInput';
 import { GridColumnConfig } from '@/types/smartgrid';
 import { FilterValue } from '@/types/filterSystem';
@@ -18,6 +19,7 @@ export function SubRowFilters({
   onFilterChange,
   onApplyFilters
 }: SubRowFiltersProps) {
+  const [isExpanded, setIsExpanded] = useState(false);
   const filterableSubRowColumns = subRowColumns.filter(col => col.filterable !== false);
 
   if (filterableSubRowColumns.length === 0) {
@@ -27,23 +29,36 @@ export function SubRowFilters({
   const activeSubRowFilters = Object.keys(activeFilters).filter(key => key.startsWith('subrow-'));
 
   return (
-    <Accordion type="single" collapsible className="w-full border-0">
-      <AccordionItem value="sub-row-filters" className="border-0">
-        <AccordionTrigger className="px-4 py-2 hover:no-underline bg-blue-50 border-b border-blue-200">
-          <div className="flex items-center space-x-2">
-            <span className="text-sm font-medium text-blue-700">Sub-row Filters</span>
-            {activeSubRowFilters.length > 0 && (
-              <span className="text-xs bg-blue-600 text-white rounded-full px-2 py-0.5">
-                {activeSubRowFilters.length}
-              </span>
-            )}
-          </div>
-        </AccordionTrigger>
-        <AccordionContent className="px-4 py-2 bg-blue-25">
-          <div className="flex flex-wrap gap-2">
+    <div className="border-b border-gray-200">
+      {/* Toggle Header */}
+      <div className="flex items-center justify-between bg-blue-50 border-b border-blue-200 px-4 py-2">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => setIsExpanded(!isExpanded)}
+          className="flex items-center space-x-2 text-blue-700 hover:bg-blue-100"
+        >
+          {isExpanded ? (
+            <ChevronUp className="h-4 w-4" />
+          ) : (
+            <ChevronDown className="h-4 w-4" />
+          )}
+          <span className="text-sm font-medium">Sub-row Filters</span>
+          {activeSubRowFilters.length > 0 && (
+            <span className="text-xs bg-blue-600 text-white rounded-full px-2 py-0.5">
+              {activeSubRowFilters.length}
+            </span>
+          )}
+        </Button>
+      </div>
+
+      {/* Expandable Filter Content */}
+      {isExpanded && (
+        <div className="bg-blue-25 p-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {filterableSubRowColumns.map((column) => (
-              <div key={`subrow-${column.key}`} className="flex-1 min-w-[120px]">
-                <div className="text-xs text-blue-600 mb-1 truncate">
+              <div key={`subrow-${column.key}`} className="space-y-1">
+                <div className="text-xs text-blue-600 font-medium truncate">
                   {column.label}
                 </div>
                 <ColumnFilterInput
@@ -56,8 +71,8 @@ export function SubRowFilters({
               </div>
             ))}
           </div>
-        </AccordionContent>
-      </AccordionItem>
-    </Accordion>
+        </div>
+      )}
+    </div>
   );
 }
