@@ -1,10 +1,9 @@
-
 import React, { useState, useMemo, useEffect } from 'react';
 import { SmartGrid } from '@/components/SmartGrid';
 import { GridColumnConfig } from '@/types/smartgrid';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Plus, Settings } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useSmartGridState } from '@/hooks/useSmartGridState';
 import { DraggableSubRow } from '@/components/SmartGrid/DraggableSubRow';
@@ -412,73 +411,25 @@ const TripPlansSearchHub = () => {
           </Button>
         </div>
 
-        {/* Search Panel using DynamicPanel with integrated buttons */}
+        {/* Search Panel using DynamicPanel */}
         <div className="grid grid-cols-12 gap-6">
-          <Card className="col-span-12 border border-gray-200 shadow-sm">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3 px-4 pt-4">
-              <div className="flex items-center gap-2">
-                <div className="w-5 h-5 border-2 border-purple-500 rounded"></div>
-                <CardTitle className="text-sm font-medium text-gray-700">Search Filters</CardTitle>
-              </div>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-6 w-6 text-gray-400 hover:text-gray-600"
-              >
-                <Settings className="h-3 w-3" />
+          <DynamicPanel
+            panelId="trip-plans-search"
+            panelTitle="Search Filters"
+            panelConfig={searchPanelConfig}
+            initialData={searchData}
+            onDataChange={handleSearchDataChange}
+            panelWidth={12}
+          >
+            <div className="flex justify-end space-x-2 pt-4 border-t border-gray-200">
+              <Button variant="outline" onClick={handleClear}>
+                Clear
               </Button>
-            </CardHeader>
-            
-            <CardContent className="px-4 pb-4 space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {Object.entries(searchPanelConfig)
-                  .filter(([_, config]) => config.visible)
-                  .sort(([_, a], [__, b]) => a.order - b.order)
-                  .map(([fieldId, fieldConfig]) => (
-                    <div key={fieldId} className="space-y-1">
-                      <label className="text-xs font-medium text-gray-600 block">
-                        {fieldConfig.label}
-                        {fieldConfig.mandatory && (
-                          <span className="text-red-500 ml-1">*</span>
-                        )}
-                      </label>
-                      {fieldConfig.fieldType === 'select' ? (
-                        <select
-                          value={searchData[fieldId] || ''}
-                          onChange={(e) => handleSearchDataChange({ ...searchData, [fieldId]: e.target.value })}
-                          className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        >
-                          <option value="">Select {fieldConfig.label}</option>
-                          {fieldConfig.options?.map((option) => (
-                            <option key={option.value} value={option.value}>
-                              {option.label}
-                            </option>
-                          ))}
-                        </select>
-                      ) : (
-                        <input
-                          type={fieldConfig.fieldType}
-                          value={searchData[fieldId] || ''}
-                          onChange={(e) => handleSearchDataChange({ ...searchData, [fieldId]: e.target.value })}
-                          placeholder={fieldConfig.placeholder}
-                          className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        />
-                      )}
-                    </div>
-                  ))}
-              </div>
-              
-              {/* Search Actions inside the panel */}
-              <div className="flex justify-end space-x-2 pt-4 border-t border-gray-200">
-                <Button variant="outline" onClick={handleClear}>
-                  Clear
-                </Button>
-                <Button onClick={handleSearch}>
-                  Search
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+              <Button onClick={handleSearch}>
+                Search
+              </Button>
+            </div>
+          </DynamicPanel>
         </div>
 
         {/* Grid Container */}
