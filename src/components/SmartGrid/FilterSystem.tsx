@@ -302,7 +302,7 @@ export function FilterSystem({
         </div>
       </div>
 
-      {/* Main Row Filters */}
+      {/* Filter Panel - Only show when showFilterRow is true */}
       {showFilterRow && (
         <div className="bg-white border rounded shadow-sm">
           <div className="grid gap-2 p-3" style={{ gridTemplateColumns: `repeat(${filterableColumns.length}, 1fr)` }}>
