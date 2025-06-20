@@ -11,16 +11,19 @@ interface SubRowFiltersProps {
   activeFilters: Record<string, FilterValue>;
   onFilterChange: (columnKey: string, value: FilterValue | undefined) => void;
   onApplyFilters: () => void;
+  mainRowColumns: GridColumnConfig[];
 }
 
 export function SubRowFilters({
   subRowColumns,
   activeFilters,
   onFilterChange,
-  onApplyFilters
+  onApplyFilters,
+  mainRowColumns
 }: SubRowFiltersProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const filterableSubRowColumns = subRowColumns.filter(col => col.filterable !== false);
+  const filterableMainColumns = mainRowColumns.filter(col => col.filterable !== false);
 
   if (filterableSubRowColumns.length === 0) {
     return null;
@@ -54,23 +57,36 @@ export function SubRowFilters({
 
       {/* Expandable Filter Content */}
       {isExpanded && (
-        <div className="bg-blue-25 p-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {filterableSubRowColumns.map((column) => (
-              <div key={`subrow-${column.key}`} className="space-y-1">
-                <div className="text-xs text-blue-600 font-medium truncate">
-                  {column.label}
-                </div>
-                <ColumnFilterInput
-                  column={column}
-                  value={activeFilters[`subrow-${column.key}`]}
-                  onChange={(value) => onFilterChange(`subrow-${column.key}`, value)}
-                  onApply={onApplyFilters}
-                  isSubRow={true}
-                />
+        <div className="flex items-stretch gap-0 bg-blue-25 border-b border-gray-200">
+          {filterableMainColumns.map((mainColumn, index) => {
+            // Find corresponding sub-row column
+            const subRowColumn = filterableSubRowColumns.find(subCol => 
+              subCol.key === mainColumn.key || subCol.key.replace('subrow-', '') === mainColumn.key
+            );
+            
+            return (
+              <div 
+                key={`subrow-spacing-${mainColumn.key}`} 
+                className="flex-none border-r border-gray-100 last:border-r-0 p-2"
+                style={{ width: `${mainColumn.width || 150}px` }}
+              >
+                {subRowColumn && (
+                  <div className="space-y-1">
+                    <div className="text-xs text-blue-600 font-medium truncate">
+                      {subRowColumn.label}
+                    </div>
+                    <ColumnFilterInput
+                      column={subRowColumn}
+                      value={activeFilters[`subrow-${subRowColumn.key}`]}
+                      onChange={(value) => onFilterChange(`subrow-${subRowColumn.key}`, value)}
+                      onApply={onApplyFilters}
+                      isSubRow={true}
+                    />
+                  </div>
+                )}
               </div>
-            ))}
-          </div>
+            );
+          })}
         </div>
       )}
     </div>

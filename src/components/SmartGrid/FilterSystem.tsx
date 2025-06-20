@@ -121,6 +121,7 @@ export function FilterSystem({
         activeFilters={activeFilters}
         onFilterChange={handleFilterChange}
         onApplyFilters={handleApplyFilters}
+        mainRowColumns={columns}
       />
     </div>
   );
