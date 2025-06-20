@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -196,7 +195,7 @@ export function ColumnFilterInput({
           <Button
             variant="ghost"
             size="sm"
-            className="h-6 w-8 p-0 text-xs text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition-colors"
+            className="h-6 w-6 p-0 text-xs text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition-colors flex items-center justify-center"
             title="Change filter operator"
           >
             <span className="text-xs font-medium">{getCurrentOperatorSymbol()}</span>
