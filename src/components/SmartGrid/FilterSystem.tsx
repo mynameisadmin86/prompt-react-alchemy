@@ -242,19 +242,21 @@ export function FilterSystem({
   const filterableSubRowColumns = subRowColumns.filter(col => col.filterable !== false);
   const subRowFilterCount = Object.keys(activeFilters).filter(key => key.startsWith('subrow-')).length;
 
+  // Only render the filter system when showFilterRow is true
+  if (!showFilterRow) {
+    return null;
+  }
+
   return (
     <div className="space-y-2">
       {/* Filter Controls */}
       <div className="flex items-center justify-between bg-gray-50 p-2 rounded border">
         <div className="flex items-center space-x-2">
           <Button
-            variant={showFilterRow ? "default" : "outline"}
+            variant="default"
             size="sm"
             onClick={onToggleFilterRow}
-            className={cn(
-              "transition-all",
-              showFilterRow && "bg-blue-600 hover:bg-blue-700 text-white"
-            )}
+            className="bg-blue-600 hover:bg-blue-700 text-white"
           >
             <Filter className="h-4 w-4 mr-1" />
             Filters
@@ -302,75 +304,73 @@ export function FilterSystem({
         </div>
       </div>
 
-      {/* Filter Panel - Only show when showFilterRow is true */}
-      {showFilterRow && (
-        <div className="bg-white border rounded shadow-sm">
-          <div className="grid gap-2 p-3" style={{ gridTemplateColumns: `repeat(${filterableColumns.length}, 1fr)` }}>
-            {filterableColumns.map((column) => (
-              <div key={column.key} className="space-y-1">
-                <div className="text-xs font-medium text-gray-600 truncate">
-                  {column.label}
-                </div>
-                <ColumnFilterInput
-                  column={column}
-                  value={activeFilters[column.key]}
-                  onChange={(value) => handleFilterChange(column.key, value)}
-                  onApply={handleApplyFilters}
-                />
+      {/* Filter Panel */}
+      <div className="bg-white border rounded shadow-sm">
+        <div className="grid gap-2 p-3" style={{ gridTemplateColumns: `repeat(${filterableColumns.length}, 1fr)` }}>
+          {filterableColumns.map((column) => (
+            <div key={column.key} className="space-y-1">
+              <div className="text-xs font-medium text-gray-600 truncate">
+                {column.label}
               </div>
-            ))}
-          </div>
+              <ColumnFilterInput
+                column={column}
+                value={activeFilters[column.key]}
+                onChange={(value) => handleFilterChange(column.key, value)}
+                onApply={handleApplyFilters}
+              />
+            </div>
+          ))}
+        </div>
 
-          {/* Collapsible Sub-Row Filters */}
-          {filterableSubRowColumns.length > 0 && (
-            <div className="border-t">
-              <Collapsible open={isSubRowFiltersOpen} onOpenChange={setIsSubRowFiltersOpen}>
-                <CollapsibleTrigger asChild>
-                  <div className="bg-blue-50/50 px-3 py-2 cursor-pointer hover:bg-blue-50 transition-colors">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-2">
-                        <div className="text-xs font-medium text-blue-700">
-                          Sub-row Filters
-                        </div>
-                        {subRowFilterCount > 0 && (
-                          <span className="text-xs bg-blue-100 text-blue-700 rounded-full px-1.5 py-0.5">
-                            {subRowFilterCount}
-                          </span>
-                        )}
+        {/* Collapsible Sub-Row Filters */}
+        {filterableSubRowColumns.length > 0 && (
+          <div className="border-t">
+            <Collapsible open={isSubRowFiltersOpen} onOpenChange={setIsSubRowFiltersOpen}>
+              <CollapsibleTrigger asChild>
+                <div className="bg-blue-50/50 px-3 py-2 cursor-pointer hover:bg-blue-50 transition-colors">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      <div className="text-xs font-medium text-blue-700">
+                        Sub-row Filters
                       </div>
-                      {isSubRowFiltersOpen ? (
-                        <ChevronUp className="h-4 w-4 text-blue-600" />
-                      ) : (
-                        <ChevronDown className="h-4 w-4 text-blue-600" />
+                      {subRowFilterCount > 0 && (
+                        <span className="text-xs bg-blue-100 text-blue-700 rounded-full px-1.5 py-0.5">
+                          {subRowFilterCount}
+                        </span>
                       )}
                     </div>
+                    {isSubRowFiltersOpen ? (
+                      <ChevronUp className="h-4 w-4 text-blue-600" />
+                    ) : (
+                      <ChevronDown className="h-4 w-4 text-blue-600" />
+                    )}
                   </div>
-                </CollapsibleTrigger>
-                <CollapsibleContent>
-                  <div className="bg-blue-50/30 p-3">
-                    <div className="grid gap-2" style={{ gridTemplateColumns: `repeat(${filterableSubRowColumns.length}, 1fr)` }}>
-                      {filterableSubRowColumns.map((column) => (
-                        <div key={`subrow-${column.key}`} className="space-y-1">
-                          <div className="text-xs font-medium text-blue-600 truncate">
-                            {column.label}
-                          </div>
-                          <ColumnFilterInput
-                            column={column}
-                            value={activeFilters[`subrow-${column.key}`]}
-                            onChange={(value) => handleFilterChange(`subrow-${column.key}`, value)}
-                            onApply={handleApplyFilters}
-                            isSubRow={true}
-                          />
+                </div>
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <div className="bg-blue-50/30 p-3">
+                  <div className="grid gap-2" style={{ gridTemplateColumns: `repeat(${filterableSubRowColumns.length}, 1fr)` }}>
+                    {filterableSubRowColumns.map((column) => (
+                      <div key={`subrow-${column.key}`} className="space-y-1">
+                        <div className="text-xs font-medium text-blue-600 truncate">
+                          {column.label}
                         </div>
-                      ))}
-                    </div>
+                        <ColumnFilterInput
+                          column={column}
+                          value={activeFilters[`subrow-${column.key}`]}
+                          onChange={(value) => handleFilterChange(`subrow-${column.key}`, value)}
+                          onApply={handleApplyFilters}
+                          isSubRow={true}
+                        />
+                      </div>
+                    ))}
                   </div>
-                </CollapsibleContent>
-              </Collapsible>
-            </div>
-          )}
-        </div>
-      )}
+                </div>
+              </CollapsibleContent>
+            </Collapsible>
+          </div>
+        )}
+      </div>
 
       {/* Save Filter Set Modal */}
       <FilterSetModal
