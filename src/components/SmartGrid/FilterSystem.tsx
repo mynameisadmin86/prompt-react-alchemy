@@ -9,6 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 interface FilterSystemProps {
   columns: GridColumnConfig[];
   subRowColumns: GridColumnConfig[];
+  showFilterRow: boolean;
   onFiltersChange: (filters: Record<string, FilterValue>) => void;
   gridId: string;
   userId: string;
@@ -18,6 +19,7 @@ interface FilterSystemProps {
 export function FilterSystem({
   columns,
   subRowColumns,
+  showFilterRow,
   onFiltersChange,
   gridId,
   userId,
@@ -97,6 +99,11 @@ export function FilterSystem({
       description: `Applied "${filterSet.name}" with ${Object.keys(filterSet.filters).length} filters`,
     });
   };
+
+  // Only render if showFilterRow is true
+  if (!showFilterRow) {
+    return null;
+  }
 
   return (
     <div className="bg-white border-t border-gray-200">
