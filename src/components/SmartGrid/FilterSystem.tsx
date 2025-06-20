@@ -1,7 +1,6 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Star, Filter, X, ChevronDown, ChevronUp } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { ColumnFilterInput } from './ColumnFilterInput';
@@ -244,14 +243,18 @@ export function FilterSystem({
   const subRowFilterCount = Object.keys(activeFilters).filter(key => key.startsWith('subrow-')).length;
 
   return (
-    <div className="flex items-center space-x-2">
-      {/* Filter Button with Popover */}
-      <Popover open={showFilterRow} onOpenChange={onToggleFilterRow}>
-        <PopoverTrigger asChild>
+    <div className="space-y-2">
+      {/* Filter Controls */}
+      <div className="flex items-center justify-between bg-gray-50 p-2 rounded border">
+        <div className="flex items-center space-x-2">
           <Button
-            variant="default"
+            variant={showFilterRow ? "default" : "outline"}
             size="sm"
-            className="bg-blue-600 hover:bg-blue-700 text-white"
+            onClick={onToggleFilterRow}
+            className={cn(
+              "transition-all",
+              showFilterRow && "bg-blue-600 hover:bg-blue-700 text-white"
+            )}
           >
             <Filter className="h-4 w-4 mr-1" />
             Filters
@@ -261,118 +264,113 @@ export function FilterSystem({
               </span>
             )}
           </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-[800px] p-0 bg-white border shadow-lg" align="start">
-          {/* Filter Controls Header */}
-          <div className="flex items-center justify-between bg-gray-50 p-3 border-b">
-            <div className="flex items-center space-x-2">
-              <span className="text-sm font-medium text-gray-700">Active Filters</span>
-              {activeFilterCount > 0 && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={clearAllFilters}
-                  className="text-red-600 hover:bg-red-50 h-7"
-                >
-                  <X className="h-3 w-3 mr-1" />
-                  Clear All
-                </Button>
-              )}
-            </div>
 
-            <div className="flex items-center space-x-2">
-              {activeFilterCount > 0 && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setShowSaveModal(true)}
-                  disabled={loading}
-                  className="transition-all hover:bg-yellow-50 hover:border-yellow-300 h-7"
-                >
-                  <Star className="h-3 w-3 mr-1" />
-                  Save Set
-                </Button>
-              )}
+          {activeFilterCount > 0 && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={clearAllFilters}
+              className="text-red-600 hover:bg-red-50"
+            >
+              <X className="h-4 w-4 mr-1" />
+              Clear All
+            </Button>
+          )}
+        </div>
 
-              <FilterSetDropdown
-                filterSets={filterSets}
-                onApply={applyFilterSet}
-                onSetDefault={handleSetDefault}
-                onRename={handleRename}
-                onDelete={handleDelete}
-              />
-            </div>
+        <div className="flex items-center space-x-2">
+          {activeFilterCount > 0 && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowSaveModal(true)}
+              disabled={loading}
+              className="transition-all hover:bg-yellow-50 hover:border-yellow-300"
+            >
+              <Star className="h-4 w-4 mr-1" />
+              Save Set
+            </Button>
+          )}
+
+          <FilterSetDropdown
+            filterSets={filterSets}
+            onApply={applyFilterSet}
+            onSetDefault={handleSetDefault}
+            onRename={handleRename}
+            onDelete={handleDelete}
+          />
+        </div>
+      </div>
+
+      {/* Filter Panel - Only show when showFilterRow is true */}
+      {showFilterRow && (
+        <div className="bg-white border rounded shadow-sm">
+          <div className="grid gap-2 p-3" style={{ gridTemplateColumns: `repeat(${filterableColumns.length}, 1fr)` }}>
+            {filterableColumns.map((column) => (
+              <div key={column.key} className="space-y-1">
+                <div className="text-xs font-medium text-gray-600 truncate">
+                  {column.label}
+                </div>
+                <ColumnFilterInput
+                  column={column}
+                  value={activeFilters[column.key]}
+                  onChange={(value) => handleFilterChange(column.key, value)}
+                  onApply={handleApplyFilters}
+                />
+              </div>
+            ))}
           </div>
 
-          {/* Main Filter Panel */}
-          <div className="p-3">
-            <div className="grid gap-2" style={{ gridTemplateColumns: `repeat(${Math.min(filterableColumns.length, 4)}, 1fr)` }}>
-              {filterableColumns.map((column) => (
-                <div key={column.key} className="space-y-1">
-                  <div className="text-xs font-medium text-gray-600 truncate">
-                    {column.label}
-                  </div>
-                  <ColumnFilterInput
-                    column={column}
-                    value={activeFilters[column.key]}
-                    onChange={(value) => handleFilterChange(column.key, value)}
-                    onApply={handleApplyFilters}
-                  />
-                </div>
-              ))}
-            </div>
-
-            {/* Collapsible Sub-Row Filters */}
-            {filterableSubRowColumns.length > 0 && (
-              <div className="mt-3 border-t pt-3">
-                <Collapsible open={isSubRowFiltersOpen} onOpenChange={setIsSubRowFiltersOpen}>
-                  <CollapsibleTrigger asChild>
-                    <div className="bg-blue-50/50 px-3 py-2 rounded cursor-pointer hover:bg-blue-50 transition-colors">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-2">
-                          <div className="text-xs font-medium text-blue-700">
-                            Sub-row Filters
-                          </div>
-                          {subRowFilterCount > 0 && (
-                            <span className="text-xs bg-blue-100 text-blue-700 rounded-full px-1.5 py-0.5">
-                              {subRowFilterCount}
-                            </span>
-                          )}
+          {/* Collapsible Sub-Row Filters */}
+          {filterableSubRowColumns.length > 0 && (
+            <div className="border-t">
+              <Collapsible open={isSubRowFiltersOpen} onOpenChange={setIsSubRowFiltersOpen}>
+                <CollapsibleTrigger asChild>
+                  <div className="bg-blue-50/50 px-3 py-2 cursor-pointer hover:bg-blue-50 transition-colors">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-2">
+                        <div className="text-xs font-medium text-blue-700">
+                          Sub-row Filters
                         </div>
-                        {isSubRowFiltersOpen ? (
-                          <ChevronUp className="h-4 w-4 text-blue-600" />
-                        ) : (
-                          <ChevronDown className="h-4 w-4 text-blue-600" />
+                        {subRowFilterCount > 0 && (
+                          <span className="text-xs bg-blue-100 text-blue-700 rounded-full px-1.5 py-0.5">
+                            {subRowFilterCount}
+                          </span>
                         )}
                       </div>
+                      {isSubRowFiltersOpen ? (
+                        <ChevronUp className="h-4 w-4 text-blue-600" />
+                      ) : (
+                        <ChevronDown className="h-4 w-4 text-blue-600" />
+                      )}
                     </div>
-                  </CollapsibleTrigger>
-                  <CollapsibleContent>
-                    <div className="bg-blue-50/30 p-3 rounded-b">
-                      <div className="grid gap-2" style={{ gridTemplateColumns: `repeat(${Math.min(filterableSubRowColumns.length, 4)}, 1fr)` }}>
-                        {filterableSubRowColumns.map((column) => (
-                          <div key={`subrow-${column.key}`} className="space-y-1">
-                            <div className="text-xs font-medium text-blue-600 truncate">
-                              {column.label}
-                            </div>
-                            <ColumnFilterInput
-                              column={column}
-                              value={activeFilters[`subrow-${column.key}`]}
-                              onChange={(value) => handleFilterChange(`subrow-${column.key}`, value)}
-                              onApply={handleApplyFilters}
-                              isSubRow={true}
-                            />
+                  </div>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <div className="bg-blue-50/30 p-3">
+                    <div className="grid gap-2" style={{ gridTemplateColumns: `repeat(${filterableSubRowColumns.length}, 1fr)` }}>
+                      {filterableSubRowColumns.map((column) => (
+                        <div key={`subrow-${column.key}`} className="space-y-1">
+                          <div className="text-xs font-medium text-blue-600 truncate">
+                            {column.label}
                           </div>
-                        ))}
-                      </div>
+                          <ColumnFilterInput
+                            column={column}
+                            value={activeFilters[`subrow-${column.key}`]}
+                            onChange={(value) => handleFilterChange(`subrow-${column.key}`, value)}
+                            onApply={handleApplyFilters}
+                            isSubRow={true}
+                          />
+                        </div>
+                      ))}
                     </div>
-                  </CollapsibleContent>
-                </Collapsible>
-              </div>
-            )}
-          </div>
-        </PopoverContent>
-      </Popover>
+                  </div>
+                </CollapsibleContent>
+              </Collapsible>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Save Filter Set Modal */}
       <FilterSetModal
