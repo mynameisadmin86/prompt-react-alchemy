@@ -420,16 +420,17 @@ const TripPlansSearchHub = () => {
             initialData={searchData}
             onDataChange={handleSearchDataChange}
             panelWidth={12}
-          >
-            <div className="flex justify-end space-x-2 pt-4 border-t border-gray-200">
-              <Button variant="outline" onClick={handleClear}>
-                Clear
-              </Button>
-              <Button onClick={handleSearch}>
-                Search
-              </Button>
-            </div>
-          </DynamicPanel>
+          />
+        </div>
+
+        {/* Search Actions */}
+        <div className="flex justify-end space-x-2">
+          <Button variant="outline" onClick={handleClear}>
+            Clear
+          </Button>
+          <Button onClick={handleSearch}>
+            Search
+          </Button>
         </div>
 
         {/* Grid Container */}
