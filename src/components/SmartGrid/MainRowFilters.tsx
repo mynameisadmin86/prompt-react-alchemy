@@ -20,23 +20,20 @@ export function MainRowFilters({
   const filterableColumns = columns.filter(col => col.filterable !== false);
 
   return (
-    <div className="p-4 border-b">
-      <div className="text-sm font-medium text-gray-700 mb-3">Column Filters</div>
-      <div className="grid gap-3" style={{ gridTemplateColumns: `repeat(auto-fit, minmax(200px, 1fr))` }}>
-        {filterableColumns.map((column) => (
-          <div key={column.key} className="space-y-1">
-            <div className="text-xs font-medium text-gray-600 truncate">
-              {column.label}
-            </div>
-            <ColumnFilterInput
-              column={column}
-              value={activeFilters[column.key]}
-              onChange={(value) => onFilterChange(column.key, value)}
-              onApply={onApplyFilters}
-            />
+    <div className="flex items-center gap-2 p-2 bg-gray-50 border-b border-gray-200">
+      {filterableColumns.map((column) => (
+        <div key={column.key} className="flex-1 min-w-[120px]">
+          <div className="text-xs text-gray-500 mb-1 truncate">
+            {column.label}
           </div>
-        ))}
-      </div>
+          <ColumnFilterInput
+            column={column}
+            value={activeFilters[column.key]}
+            onChange={(value) => onFilterChange(column.key, value)}
+            onApply={onApplyFilters}
+          />
+        </div>
+      ))}
     </div>
   );
 }
