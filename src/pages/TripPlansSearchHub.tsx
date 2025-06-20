@@ -3,13 +3,13 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { SmartGrid } from '@/components/SmartGrid';
 import { GridColumnConfig } from '@/types/smartgrid';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { Search, ChevronDown, ChevronUp, Filter, Plus } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useSmartGridState } from '@/hooks/useSmartGridState';
 import { DraggableSubRow } from '@/components/SmartGrid/DraggableSubRow';
+import { DynamicPanel } from '@/components/DynamicPanel';
+import { PanelConfig } from '@/types/dynamicPanel';
 import {
   Breadcrumb,
   BreadcrumbList,
@@ -33,17 +33,96 @@ interface TripPlanData {
 
 const TripPlansSearchHub = () => {
   const [selectedRows, setSelectedRows] = useState<Set<number>>(new Set());
-  const [isSearchPanelOpen, setIsSearchPanelOpen] = useState(true);
-  const [searchFilters, setSearchFilters] = useState({
-    tripPlanNo: '',
-    status: '',
-    customer: '',
-    departurePoint: '',
-    arrivalPoint: ''
-  });
+  const [searchData, setSearchData] = useState<Record<string, any>>({});
   
   const gridState = useSmartGridState();
   const { toast } = useToast();
+
+  // Search Panel Configuration
+  const searchPanelConfig: PanelConfig = {
+    tripPlanNo: {
+      id: 'tripPlanNo',
+      label: 'Trip Plan No',
+      fieldType: 'text',
+      value: '',
+      mandatory: false,
+      visible: true,
+      editable: true,
+      order: 1,
+      placeholder: 'Enter trip plan number'
+    },
+    status: {
+      id: 'status',
+      label: 'Status',
+      fieldType: 'select',
+      value: '',
+      mandatory: false,
+      visible: true,
+      editable: true,
+      order: 2,
+      options: [
+        { label: 'Released', value: 'Released' },
+        { label: 'Under Execution', value: 'Under Execution' },
+        { label: 'Initiated', value: 'Initiated' },
+        { label: 'Cancelled', value: 'Cancelled' },
+        { label: 'Deleted', value: 'Deleted' },
+        { label: 'Confirmed', value: 'Confirmed' }
+      ]
+    },
+    customer: {
+      id: 'customer',
+      label: 'Customer',
+      fieldType: 'text',
+      value: '',
+      mandatory: false,
+      visible: true,
+      editable: true,
+      order: 3,
+      placeholder: 'Enter customer name'
+    },
+    departurePoint: {
+      id: 'departurePoint',
+      label: 'Departure Point',
+      fieldType: 'text',
+      value: '',
+      mandatory: false,
+      visible: true,
+      editable: true,
+      order: 4,
+      placeholder: 'Enter departure point'
+    },
+    arrivalPoint: {
+      id: 'arrivalPoint',
+      label: 'Arrival Point',
+      fieldType: 'text',
+      value: '',
+      mandatory: false,
+      visible: true,
+      editable: true,
+      order: 5,
+      placeholder: 'Enter arrival point'
+    },
+    plannedStartDate: {
+      id: 'plannedStartDate',
+      label: 'Planned Start Date',
+      fieldType: 'date',
+      value: '',
+      mandatory: false,
+      visible: true,
+      editable: true,
+      order: 6
+    },
+    plannedEndDate: {
+      id: 'plannedEndDate',
+      label: 'Planned End Date',
+      fieldType: 'date',
+      value: '',
+      mandatory: false,
+      visible: true,
+      editable: true,
+      order: 7
+    }
+  };
 
   const columns: GridColumnConfig[] = [
     {
@@ -262,28 +341,16 @@ const TripPlansSearchHub = () => {
     setSelectedRows(selectedRowIndices);
   };
 
-  const handleSearchFilterChange = (field: string, value: string) => {
-    setSearchFilters(prev => ({
-      ...prev,
-      [field]: value
-    }));
+  const handleSearchDataChange = (data: Record<string, any>) => {
+    setSearchData(data);
+    console.log('Search data changed:', data);
   };
 
   const handleSearch = () => {
-    console.log('Searching with filters:', searchFilters);
+    console.log('Searching with filters:', searchData);
     toast({
       title: "Search",
       description: "Search functionality would be implemented here"
-    });
-  };
-
-  const handleClearFilters = () => {
-    setSearchFilters({
-      tripPlanNo: '',
-      status: '',
-      customer: '',
-      departurePoint: '',
-      arrivalPoint: ''
     });
   };
 
@@ -337,81 +404,29 @@ const TripPlansSearchHub = () => {
           </Button>
         </div>
 
-        {/* Collapsible Search Panel */}
-        <Collapsible open={isSearchPanelOpen} onOpenChange={setIsSearchPanelOpen}>
-          <Card className="bg-white shadow-sm">
-            <CollapsibleTrigger asChild>
-              <CardHeader className="cursor-pointer hover:bg-gray-50 transition-colors">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-lg font-medium flex items-center gap-2">
-                    <Search className="h-5 w-5" />
-                    Search Filters
-                  </CardTitle>
-                  {isSearchPanelOpen ? (
-                    <ChevronUp className="h-5 w-5 text-gray-500" />
-                  ) : (
-                    <ChevronDown className="h-5 w-5 text-gray-500" />
-                  )}
-                </div>
-              </CardHeader>
-            </CollapsibleTrigger>
-            <CollapsibleContent>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-gray-700">Trip Plan No</label>
-                    <Input
-                      placeholder="Enter trip plan number"
-                      value={searchFilters.tripPlanNo}
-                      onChange={(e) => handleSearchFilterChange('tripPlanNo', e.target.value)}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-gray-700">Status</label>
-                    <Input
-                      placeholder="Enter status"
-                      value={searchFilters.status}
-                      onChange={(e) => handleSearchFilterChange('status', e.target.value)}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-gray-700">Customer</label>
-                    <Input
-                      placeholder="Enter customer"
-                      value={searchFilters.customer}
-                      onChange={(e) => handleSearchFilterChange('customer', e.target.value)}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-gray-700">Departure Point</label>
-                    <Input
-                      placeholder="Enter departure point"
-                      value={searchFilters.departurePoint}
-                      onChange={(e) => handleSearchFilterChange('departurePoint', e.target.value)}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-gray-700">Arrival Point</label>
-                    <Input
-                      placeholder="Enter arrival point"
-                      value={searchFilters.arrivalPoint}
-                      onChange={(e) => handleSearchFilterChange('arrivalPoint', e.target.value)}
-                    />
-                  </div>
-                </div>
-                <div className="flex justify-end space-x-2 pt-4 border-t">
-                  <Button variant="outline" onClick={handleClearFilters}>
-                    Clear
-                  </Button>
-                  <Button onClick={handleSearch}>
-                    <Search className="h-4 w-4 mr-2" />
-                    Search
-                  </Button>
-                </div>
-              </CardContent>
-            </CollapsibleContent>
-          </Card>
-        </Collapsible>
+        {/* Search Panel using DynamicPanel */}
+        <div className="grid grid-cols-12 gap-6">
+          <DynamicPanel
+            panelId="trip-search-filters"
+            panelTitle="Search Filters"
+            panelConfig={searchPanelConfig}
+            initialData={searchData}
+            onDataChange={handleSearchDataChange}
+            panelWidth="full"
+            collapsible={true}
+            userId="trip-search-user"
+          />
+        </div>
+
+        {/* Search Actions */}
+        <div className="flex justify-end space-x-2">
+          <Button variant="outline" onClick={() => setSearchData({})}>
+            Clear
+          </Button>
+          <Button onClick={handleSearch}>
+            Search
+          </Button>
+        </div>
 
         {/* Grid Container */}
         <div className="bg-white rounded-lg shadow-sm">
