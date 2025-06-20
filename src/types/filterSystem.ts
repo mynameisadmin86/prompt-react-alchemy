@@ -9,11 +9,11 @@ export interface FilterSet {
   id: string;
   name: string;
   userId: string;
-  gridId: string;
+  gridId?: string;
   filters: Record<string, FilterValue>;
   isDefault: boolean;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface FilterSystemState {
@@ -24,8 +24,8 @@ export interface FilterSystemState {
 }
 
 export interface FilterSystemAPI {
-  saveUserFilterSet: (userId: string, name: string, filters: Record<string, FilterValue>, isDefault: boolean) => Promise<FilterSet>;
-  getUserFilterSets: (userId: string, gridId: string) => Promise<FilterSet[]>;
+  saveUserFilterSet: (userId: string, name: string, filters: Record<string, FilterValue>, isDefault?: boolean, gridId?: string) => Promise<FilterSet>;
+  getUserFilterSets: (userId: string, gridId?: string) => Promise<FilterSet[]>;
   deleteFilterSet: (filterSetId: string) => Promise<void>;
   updateFilterSet: (filterSetId: string, updates: Partial<FilterSet>) => Promise<FilterSet>;
   applyGridFilters: (filters: Record<string, FilterValue>) => Promise<void>;
