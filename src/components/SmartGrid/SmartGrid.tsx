@@ -24,6 +24,8 @@ import { GridToolbar } from './GridToolbar';
 import { PluginRenderer, PluginRowActions } from './PluginRenderer';
 import { ColumnFilter } from './ColumnFilter';
 import { DraggableSubRow } from './DraggableSubRow';
+import { FilterSystem } from './FilterSystem';
+import { mockFilterAPI } from '@/utils/mockFilterAPI';
 import { cn } from '@/lib/utils';
 
 export function SmartGrid({
@@ -98,6 +100,8 @@ export function SmartGrid({
   } = useSmartGridState();
 
   const [pageSize] = useState(10);
+  const [showFilterRow, setShowFilterRow] = useState(false);
+  const [filterSystemFilters, setFilterSystemFilters] = useState<Record<string, any>>({});
   const { toast } = useToast();
 
   // Use external selectedRows if provided, otherwise use internal state
@@ -277,6 +281,18 @@ export function SmartGrid({
   const processedData = useMemo(() => {
     return processGridData(gridData, globalFilter, filters, sort, currentColumns, onDataFetch);
   }, [gridData, globalFilter, filters, sort, currentColumns, onDataFetch]);
+
+  // Handle filter system changes
+  const handleFiltersChange = useCallback((newFilters: Record<string, any>) => {
+    setFilterSystemFilters(newFilters);
+    // Convert filter system filters to legacy format if needed
+    const legacyFilters = Object.entries(newFilters).map(([column, filterValue]) => ({
+      column,
+      value: filterValue.value,
+      operator: filterValue.operator || 'contains'
+    }));
+    setFilters(legacyFilters);
+  }, [setFilters]);
 
   // Define handleExport and handleResetPreferences after processedData and orderedColumns
   const handleExport = useCallback((format: 'csv') => {
@@ -651,6 +667,18 @@ export function SmartGrid({
 
   return (
     <div className="space-y-4 w-full">
+      {/* Advanced Filter System */}
+      <FilterSystem
+        columns={orderedColumns}
+        subRowColumns={subRowColumns}
+        showFilterRow={showFilterRow}
+        onToggleFilterRow={() => setShowFilterRow(!showFilterRow)}
+        onFiltersChange={handleFiltersChange}
+        gridId="smart-grid"
+        userId="demo-user"
+        api={mockFilterAPI}
+      />
+
       {/* Toolbar */}
       <GridToolbar
         globalFilter={globalFilter}
@@ -823,8 +851,8 @@ export function SmartGrid({
                 )}
               </TableRow>
               
-              {/* Column Filter Row */}
-              {showColumnFilters && (
+              {/* Column Filter Row - Legacy support, hidden when using FilterSystem */}
+              {showColumnFilters && !showFilterRow && (
                 <TableRow className="hover:bg-transparent border-b border-gray-200">
                   {/* Checkbox column space */}
                   {showCheckboxes && (
