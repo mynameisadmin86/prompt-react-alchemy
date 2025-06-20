@@ -1,9 +1,10 @@
+
 import React, { useState, useMemo, useEffect } from 'react';
 import { SmartGrid } from '@/components/SmartGrid';
 import { GridColumnConfig } from '@/types/smartgrid';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Plus } from 'lucide-react';
+import { Plus, Settings } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useSmartGridState } from '@/hooks/useSmartGridState';
 import { DraggableSubRow } from '@/components/SmartGrid/DraggableSubRow';
@@ -419,6 +420,13 @@ const TripPlansSearchHub = () => {
                 <div className="w-5 h-5 border-2 border-purple-500 rounded"></div>
                 <CardTitle className="text-sm font-medium text-gray-700">Search Filters</CardTitle>
               </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-6 w-6 text-gray-400 hover:text-gray-600"
+              >
+                <Settings className="h-3 w-3" />
+              </Button>
             </CardHeader>
             
             <CardContent className="px-4 pb-4 space-y-4">
