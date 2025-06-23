@@ -385,7 +385,7 @@ const TripPlansSearchHub = () => {
       label: "+ Create Trip",
       tooltipTitle: "Create a new trip or upload in bulk",
       showDropdown: true,
-      tooltipPosition: 'top',
+      tooltipPosition: 'top' as const,
       dropdownItems: [
         {
           label: "Create Trip",
