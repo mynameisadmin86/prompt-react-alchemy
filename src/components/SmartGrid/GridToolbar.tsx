@@ -10,6 +10,7 @@ import {
   CheckSquare,
   Grid2x2,
   List,
+  Plus
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ColumnVisibilityManager } from './ColumnVisibilityManager';
@@ -35,6 +36,8 @@ interface GridToolbarProps {
   onExport: (format: 'csv') => void;
   onSubRowToggle?: (columnKey: string) => void;
   configurableButtons?: ConfigurableButtonConfig[];
+  showDefaultConfigurableButton?: boolean;
+  defaultConfigurableButtonLabel?: string;
 }
 
 export function GridToolbar({
@@ -55,8 +58,20 @@ export function GridToolbar({
   onResetToDefaults,
   onExport,
   onSubRowToggle,
-  configurableButtons
+  configurableButtons,
+  showDefaultConfigurableButton = true,
+  defaultConfigurableButtonLabel = "Add"
 }: GridToolbarProps) {
+  // Default configurable button configuration
+  const defaultConfigurableButton: ConfigurableButtonConfig = {
+    label: defaultConfigurableButtonLabel,
+    tooltipTitle: "Add new item",
+    showDropdown: false
+  };
+
+  // Use provided buttons or default button if none provided and showDefault is true
+  const buttonsToShow = configurableButtons || (showDefaultConfigurableButton ? [defaultConfigurableButton] : []);
+
   return (
     <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between bg-white p-4 rounded-lg border shadow-sm">
       <div className="flex items-center space-x-2">
@@ -68,7 +83,7 @@ export function GridToolbar({
         )}
 
         {/* Configurable Buttons */}
-        {configurableButtons && configurableButtons.map((buttonConfig, index) => (
+        {buttonsToShow.map((buttonConfig, index) => (
           <ConfigurableButton
             key={index}
             config={buttonConfig}

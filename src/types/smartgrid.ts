@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { ConfigurableButtonConfig } from '@/components/ui/configurable-button';
 
@@ -124,6 +125,8 @@ export interface SmartGridProps {
   onSelectionChange?(selectedRows: Set<number>): void;
   rowClassName?: (row: any, index: number) => string;
   configurableButtons?: ConfigurableButtonConfig[];
+  showDefaultConfigurableButton?: boolean; // New property to control default button visibility
+  defaultConfigurableButtonLabel?: string; // New property for default button label
 }
 
 // Legacy interface for backward compatibility
