@@ -48,7 +48,9 @@ export function SmartGrid({
   rowClassName,
   configurableButtons,
   showDefaultConfigurableButton,
-  defaultConfigurableButtonLabel
+  defaultConfigurableButtonLabel,
+  gridTitle,
+  recordCount
 }: SmartGridProps) {
   const {
     gridData,
@@ -704,6 +706,8 @@ export function SmartGrid({
         configurableButtons={configurableButtons}
         showDefaultConfigurableButton={showDefaultConfigurableButton}
         defaultConfigurableButtonLabel={defaultConfigurableButtonLabel}
+        gridTitle={gridTitle}
+        recordCount={recordCount}
       />
 
       {/* Table Container with no horizontal scroll */}
