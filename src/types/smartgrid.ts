@@ -127,6 +127,8 @@ export interface SmartGridProps {
   configurableButtons?: ConfigurableButtonConfig[];
   showDefaultConfigurableButton?: boolean; // New property to control default button visibility
   defaultConfigurableButtonLabel?: string; // New property for default button label
+  gridTitle?: string; // New property for grid title
+  recordCount?: number; // New property for record count
 }
 
 // Legacy interface for backward compatibility
@@ -159,7 +161,7 @@ export interface SmartGridPropsLegacy<T = any> {
   onDataFetch?: (params: { page?: number; limit?: number; sort?: SortConfig; filters?: FilterConfig[] }) => Promise<{ data: T[]; total?: number }>;
   onUpdate?: (id: any, field: string, value: any) => Promise<boolean>;
   onBulkUpdate?: (updates: Array<{ id: any; data: Partial<T> }>) => Promise<boolean>;
-  onPreferenceSave?: (preferences: GridPreferences) => Promise<void>;
+  onPreferenceSave?: (preferences: GridPreferences) => Promise<void>;		
   onPreferenceLoad?: () => Promise<GridPreferences | null>;
   
   // Events

@@ -9,7 +9,7 @@ import { useSmartGridState } from '@/hooks/useSmartGridState';
 import { DraggableSubRow } from '@/components/SmartGrid/DraggableSubRow';
 import { DynamicPanel } from '@/components/DynamicPanel';
 import { PanelConfig } from '@/types/dynamicPanel';
-import { ConfigurableButton, ConfigurableButtonConfig } from '@/components/ui/configurable-button';;
+import { ConfigurableButton, ConfigurableButtonConfig } from '@/components/ui/configurable-button';
 import {
   Breadcrumb,
   BreadcrumbList,
@@ -474,6 +474,8 @@ const TripPlansSearchHub = () => {
             nestedRowRenderer={renderSubRow}
             configurableButtons={gridConfigurableButtons}
             showDefaultConfigurableButton={false}
+            gridTitle="Trip Plans"
+            recordCount={gridState.gridData.length > 0 ? gridState.gridData.length : processedData.length}
           />
         </div>
       </div>

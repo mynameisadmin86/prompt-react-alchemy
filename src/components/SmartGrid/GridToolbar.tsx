@@ -38,6 +38,8 @@ interface GridToolbarProps {
   configurableButtons?: ConfigurableButtonConfig[];
   showDefaultConfigurableButton?: boolean;
   defaultConfigurableButtonLabel?: string;
+  gridTitle?: string;
+  recordCount?: number;
 }
 
 export function GridToolbar({
@@ -60,7 +62,9 @@ export function GridToolbar({
   onSubRowToggle,
   configurableButtons,
   showDefaultConfigurableButton = true,
-  defaultConfigurableButtonLabel = "Add"
+  defaultConfigurableButtonLabel = "Add",
+  gridTitle,
+  recordCount
 }: GridToolbarProps) {
   // Default configurable button configuration
   const defaultConfigurableButton: ConfigurableButtonConfig = {
@@ -77,6 +81,23 @@ export function GridToolbar({
   return (
     <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between bg-white p-4 rounded-lg border shadow-sm">
       <div className="flex items-center space-x-2">
+        {/* Grid Title and Count */}
+        {gridTitle && (
+          <div className="flex items-center">
+            <span className="text-gray-900 font-semibold text-sm">
+              {gridTitle}
+            </span>
+            {recordCount !== undefined && (
+              <span 
+                className="rounded-full bg-blue-50 text-blue-500 text-xs px-2 py-0.5 ml-1 inline-flex items-center"
+                aria-label={`${gridTitle} count ${recordCount}`}
+              >
+                {recordCount}
+              </span>
+            )}
+          </div>
+        )}
+
         {/* Show active filters count */}
         {filters.length > 0 && (
           <div className="text-sm text-blue-600 bg-blue-50 px-2 py-1 rounded">
