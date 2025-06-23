@@ -45,7 +45,10 @@ export function SmartGrid({
   plugins = [],
   selectedRows,
   onSelectionChange,
-  rowClassName
+  rowClassName,
+  configurableButtons,
+  showDefaultConfigurableButton,
+  defaultConfigurableButtonLabel
 }: SmartGridProps) {
   const {
     gridData,
@@ -698,6 +701,9 @@ export function SmartGrid({
         onResetToDefaults={handleResetPreferences}
         onExport={handleExport}
         onSubRowToggle={handleSubRowToggleInternal}
+        configurableButtons={configurableButtons}
+        showDefaultConfigurableButton={showDefaultConfigurableButton}
+        defaultConfigurableButtonLabel={defaultConfigurableButtonLabel}
       />
 
       {/* Table Container with no horizontal scroll */}
