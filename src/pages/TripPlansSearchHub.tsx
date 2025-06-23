@@ -412,7 +412,7 @@ const TripPlansSearchHub = () => {
         </div>
 
         {/* Search Panel using DynamicPanel */}
-        <div className="grid grid-cols-12 gap-6">
+        {/*<div className="grid grid-cols-12 gap-6">
           <DynamicPanel
             panelId="trip-plans-search"
             panelTitle="Search Filters"
@@ -421,17 +421,17 @@ const TripPlansSearchHub = () => {
             onDataChange={handleSearchDataChange}
             panelWidth={12}
           />
-        </div>
+        </div>*/}
 
         {/* Search Actions */}
-        <div className="flex justify-end space-x-2">
+        {/*<div className="flex justify-end space-x-2">
           <Button variant="outline" onClick={handleClear}>
             Clear
           </Button>
           <Button onClick={handleSearch}>
             Search
           </Button>
-        </div>
+        </div>*/}
 
         {/* Grid Container */}
         <div className="bg-white rounded-lg shadow-sm">
