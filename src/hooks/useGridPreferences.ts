@@ -1,21 +1,21 @@
 
 import { useState, useCallback, useEffect } from 'react';
-import { GridPreferences, Column } from '@/types/smartgrid';
+import { GridPreferences, GridColumnConfig } from '@/types/smartgrid';
 
-export function useGridPreferences<T>(
-  columns: Column<T>[],
+export function useGridPreferences(
+  columns: GridColumnConfig[],
   persistPreferences?: boolean,
   preferencesKey?: string,
   onPreferenceSave?: (preferences: GridPreferences) => Promise<void>,
   onPreferenceLoad?: () => Promise<GridPreferences | null>
 ) {
   const defaultPreferences: GridPreferences = {
-    columnOrder: columns.map(col => col.id),
+    columnOrder: columns.map(col => col.key),
     hiddenColumns: [],
     columnWidths: {},
     columnHeaders: {},
-    subRowColumns: [], // Initialize empty sub-row columns array
-    subRowColumnOrder: [], // Initialize empty sub-row column order array
+    subRowColumns: [],
+    subRowColumnOrder: [],
     filters: []
   };
 
@@ -53,16 +53,15 @@ export function useGridPreferences<T>(
       }
 
       if (loadedPreferences) {
-        // Merge with defaults to handle new columns and properties
         const mergedPreferences: GridPreferences = {
           ...defaultPreferences,
           ...loadedPreferences,
           columnOrder: [
-            ...loadedPreferences.columnOrder.filter(id => columns.some(col => col.id === id)),
-            ...columns.filter(col => !loadedPreferences.columnOrder.includes(col.id)).map(col => col.id)
+            ...loadedPreferences.columnOrder.filter(id => columns.some(col => col.key === id)),
+            ...columns.filter(col => !loadedPreferences.columnOrder.includes(col.key)).map(col => col.key)
           ],
-          subRowColumns: loadedPreferences.subRowColumns || [], // Ensure subRowColumns is initialized
-          subRowColumnOrder: loadedPreferences.subRowColumnOrder || [] // Ensure subRowColumnOrder is initialized
+          subRowColumns: loadedPreferences.subRowColumns || [],
+          subRowColumnOrder: loadedPreferences.subRowColumnOrder || []
         };
         setPreferences(mergedPreferences);
       }
@@ -76,14 +75,23 @@ export function useGridPreferences<T>(
     loadPreferences();
   }, [loadPreferences]);
 
+  const updatePreferences = useCallback((updates: Partial<GridPreferences>) => {
+    const newPreferences = { ...preferences, ...updates };
+    savePreferences(newPreferences);
+  }, [preferences, savePreferences]);
+
+  const resetPreferences = useCallback(() => {
+    savePreferences(defaultPreferences);
+  }, [savePreferences, defaultPreferences]);
+
   const updateColumnOrder = useCallback((newOrder: string[]) => {
     const newPreferences = { ...preferences, columnOrder: newOrder };
     savePreferences(newPreferences);
   }, [preferences, savePreferences]);
 
   const toggleColumnVisibility = useCallback((columnId: string) => {
-    const column = columns.find(col => col.id === columnId);
-    if (column?.mandatory) return; // Can't hide mandatory columns
+    const column = columns.find(col => col.key === columnId);
+    if (column?.mandatory) return;
 
     const hiddenColumns = preferences.hiddenColumns.includes(columnId)
       ? preferences.hiddenColumns.filter(id => id !== columnId)
@@ -125,12 +133,14 @@ export function useGridPreferences<T>(
 
   return {
     preferences,
+    updatePreferences,
+    resetPreferences,
     updateColumnOrder,
     toggleColumnVisibility,
     updateColumnWidth,
     updateColumnHeader,
-    toggleSubRow, // Function for toggling sub-row at column level
-    updateSubRowColumnOrder, // New function for updating sub-row column order
+    toggleSubRow,
+    updateSubRowColumnOrder,
     savePreferences
   };
 }
