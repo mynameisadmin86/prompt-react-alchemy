@@ -3,12 +3,18 @@ import { SmartGrid } from '@/components/SmartGrid';
 import { GridColumnConfig } from '@/types/smartgrid';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Plus } from 'lucide-react';
+import { Plus, ChevronDown, Upload } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useSmartGridState } from '@/hooks/useSmartGridState';
 import { DraggableSubRow } from '@/components/SmartGrid/DraggableSubRow';
 import { DynamicPanel } from '@/components/DynamicPanel';
 import { PanelConfig } from '@/types/dynamicPanel';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   Breadcrumb,
   BreadcrumbList,
@@ -361,6 +367,22 @@ const TripPlansSearchHub = () => {
     });
   };
 
+  const handleCreateTrip = () => {
+    console.log('Creating new trip');
+    toast({
+      title: "Create Trip",
+      description: "Create trip functionality would be implemented here"
+    });
+  };
+
+  const handleBulkUpload = () => {
+    console.log('Bulk upload');
+    toast({
+      title: "Bulk Upload",
+      description: "Bulk upload functionality would be implemented here"
+    });
+  };
+
   const renderSubRow = (row: any, rowIndex: number) => {
     return (
       <DraggableSubRow
@@ -405,10 +427,27 @@ const TripPlansSearchHub = () => {
               {sampleData.length}
             </span>
           </div>
-          <Button className="bg-blue-600 hover:bg-blue-700 text-white">
-            <Plus className="h-4 w-4 mr-2" />
-            Create Trip
-          </Button>
+          
+          {/* Create Trip Dropdown Button */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button className="bg-blue-600 hover:bg-blue-700 text-white">
+                <Plus className="h-4 w-4 mr-2" />
+                Create Trip
+                <ChevronDown className="h-4 w-4 ml-2" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-40">
+              <DropdownMenuItem onClick={handleCreateTrip}>
+                <Plus className="h-4 w-4 mr-2" />
+                Create Trip
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleBulkUpload}>
+                <Upload className="h-4 w-4 mr-2" />
+                Bulk Upload
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
 
         {/* Search Panel using DynamicPanel */}
