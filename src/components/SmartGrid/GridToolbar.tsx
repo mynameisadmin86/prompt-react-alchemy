@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -82,7 +83,7 @@ export function GridToolbar({
     : (showDefaultConfigurableButton ? [defaultConfigurableButton] : []);
 
   return (
-    <div className="flex items-center justify-between w-full py-2 bg-gray-50">
+    <div className="flex items-center justify-between w-full py-2">
       {/* Left side - Grid Title and Count */}
       <div className="flex items-center">
         {gridTitle && (
