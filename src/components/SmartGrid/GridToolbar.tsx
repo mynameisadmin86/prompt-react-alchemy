@@ -68,7 +68,7 @@ export function GridToolbar({
     tooltipTitle: "Add new item",
     showDropdown: false
   };
-console.log("2=",configurableButtons);
+
   // Determine which buttons to show
   const buttonsToShow = configurableButtons && configurableButtons.length > 0 
     ? configurableButtons 
