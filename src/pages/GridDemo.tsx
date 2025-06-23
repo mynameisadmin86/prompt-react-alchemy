@@ -1,8 +1,9 @@
+
 import React, { useState, useMemo, useEffect } from 'react';
 import { SmartGrid } from '@/components/SmartGrid';
 import { GridColumnConfig } from '@/types/smartgrid';
 import { Button } from '@/components/ui/button';
-import { Printer, MoreHorizontal, User, Train, UserCheck, Container } from 'lucide-react';
+import { Printer, MoreHorizontal, User, Train, UserCheck, Container, Filter } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useSmartGridState } from '@/hooks/useSmartGridState';
 import { DraggableSubRow } from '@/components/SmartGrid/DraggableSubRow';
@@ -41,6 +42,7 @@ interface SampleData {
 
 const GridDemo = () => {
   const [selectedRows, setSelectedRows] = useState<Set<number>>(new Set());
+  const [showFilters, setShowFilters] = useState(false);
   const gridState = useSmartGridState();
   
   const initialColumns: GridColumnConfig[] = [
@@ -445,6 +447,62 @@ const GridDemo = () => {
           </div>
         </div>
 
+        {/* Filter Panel - Only show when showFilters is true */}
+        {showFilters && (
+          <div className="bg-white p-4 rounded-lg border shadow-sm">
+            <div className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-3">
+              <Filter className="h-4 w-4" />
+              Filters
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                <select className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm">
+                  <option value="">All Status</option>
+                  <option value="released">Released</option>
+                  <option value="under-execution">Under Execution</option>
+                  <option value="initiated">Initiated</option>
+                  <option value="cancelled">Cancelled</option>
+                  <option value="deleted">Deleted</option>
+                  <option value="confirmed">Confirmed</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Customer</label>
+                <input 
+                  type="text" 
+                  placeholder="Enter customer name"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Departure Point</label>
+                <input 
+                  type="text" 
+                  placeholder="Enter departure point"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Arrival Point</label>
+                <input 
+                  type="text" 
+                  placeholder="Enter arrival point"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                />
+              </div>
+            </div>
+            <div className="flex justify-end space-x-2 mt-4">
+              <Button variant="outline" size="sm">
+                Clear
+              </Button>
+              <Button size="sm">
+                Apply Filters
+              </Button>
+            </div>
+          </div>
+        )}
+
         {/* Debug info */}
         <div className="text-sm text-gray-600">
           Selected rows: {Array.from(selectedRows).join(', ') || 'None'}
@@ -454,6 +512,8 @@ const GridDemo = () => {
           Force update counter: {gridState.forceUpdate}
           <br />
           Expanded rows: {Array.from(gridState.expandedRows).join(', ') || 'None'}
+          <br />
+          Show filters: {showFilters.toString()}
         </div>
 
         {/* Grid Container */}
@@ -482,6 +542,8 @@ const GridDemo = () => {
               selectedRows.has(index) ? 'smart-grid-row-selected' : ''
             }
             nestedRowRenderer={renderSubRow}
+            showFilters={showFilters}
+            onToggleFilters={() => setShowFilters(!showFilters)}
           />
           
           {/* Footer with action buttons matching the screenshot style */}
