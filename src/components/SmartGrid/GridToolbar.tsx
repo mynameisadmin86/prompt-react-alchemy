@@ -81,7 +81,9 @@ export function GridToolbar({
             {filters.length} filter{filters.length > 1 ? 's' : ''} active
           </div>
         )}
+      </div>
 
+      <div className="flex items-center space-x-2">
         {/* Configurable Buttons */}
         {buttonsToShow.map((buttonConfig, index) => (
           <ConfigurableButton
@@ -90,9 +92,7 @@ export function GridToolbar({
             className="mr-2"
           />
         ))}
-      </div>
 
-      <div className="flex items-center space-x-2">
         {/* Search box - first */}
         <div className="relative w-64">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
