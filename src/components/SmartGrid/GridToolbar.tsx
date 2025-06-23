@@ -84,14 +84,7 @@ export function GridToolbar({
       </div>
 
       <div className="flex items-center space-x-2">
-        {/* Configurable Buttons */}
-        {buttonsToShow.map((buttonConfig, index) => (
-          <ConfigurableButton
-            key={index}
-            config={buttonConfig}
-            className="mr-2"
-          />
-        ))}
+        
 
         {/* Search box - first */}
         <div className="relative w-64">
@@ -188,6 +181,14 @@ export function GridToolbar({
         >
           <Download className="h-4 w-4" />
         </Button>
+        {/* Configurable Buttons */}
+        {buttonsToShow.map((buttonConfig, index) => (
+          <ConfigurableButton
+            key={index}
+            config={buttonConfig}
+            className="mr-2"
+          />
+        ))}
       </div>
     </div>
   );
