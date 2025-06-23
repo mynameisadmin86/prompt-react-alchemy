@@ -42,6 +42,7 @@ interface SampleData {
 
 const GridDemo = () => {
   const [selectedRows, setSelectedRows] = useState<Set<number>>(new Set());
+  const [filterSystemActive, setFilterSystemActive] = useState(false);
   const gridState = useSmartGridState();
   
   const initialColumns: GridColumnConfig[] = [
@@ -431,6 +432,14 @@ const GridDemo = () => {
     setSelectedRows(selectedRowIndices);
   };
 
+  const handleToggleFilterSystem = () => {
+    setFilterSystemActive(!filterSystemActive);
+    toast({
+      title: filterSystemActive ? "Filter System Disabled" : "Filter System Enabled",
+      description: filterSystemActive ? "Filter panel is now hidden" : "Filter panel is now visible"
+    });
+  };
+
   const renderSubRow = (row: any, rowIndex: number) => {
     return (
       <DraggableSubRow
@@ -499,6 +508,9 @@ const GridDemo = () => {
             recordCount={gridState.gridData.length > 0 ? gridState.gridData.length : processedData.length}
             showCreateButton={true}
             searchPlaceholder="Search all columns..."
+            showFilterSystemButton={true}
+            onToggleFilterSystem={handleToggleFilterSystem}
+            filterSystemActive={filterSystemActive}
           />
           
           {/* Footer with action buttons matching the screenshot style */}
