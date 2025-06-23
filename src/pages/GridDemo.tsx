@@ -478,7 +478,7 @@ const GridDemo = () => {
         </div>*/}
 
         {/* Debug info */}
-        <div className="text-sm text-gray-600">
+        {/*<div className="text-sm text-gray-600">
           Selected rows: {Array.from(selectedRows).join(', ') || 'None'}
           <br />
           Sub-row columns: {gridState.columns.filter(col => col.subRow).map(col => col.key).join(', ') || 'None'}
@@ -486,7 +486,7 @@ const GridDemo = () => {
           Force update counter: {gridState.forceUpdate}
           <br />
           Expanded rows: {Array.from(gridState.expandedRows).join(', ') || 'None'}
-        </div>
+        </div>*/}
 
         {/* Grid Container */}
         <div className="bg-white rounded-lg shadow-sm">
