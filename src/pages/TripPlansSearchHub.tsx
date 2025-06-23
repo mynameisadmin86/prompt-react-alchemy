@@ -473,6 +473,7 @@ const TripPlansSearchHub = () => {
             }
             nestedRowRenderer={renderSubRow}
             configurableButtons={gridConfigurableButtons}
+            showDefaultConfigurableButton={false}
           />
         </div>
       </div>
