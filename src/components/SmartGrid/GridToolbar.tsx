@@ -59,7 +59,7 @@ export function GridToolbar({
   onExport,
   onSubRowToggle,
   configurableButtons,
-  showDefaultConfigurableButton = true,
+  showDefaultConfigurableButton = false,
   defaultConfigurableButtonLabel = "Add"
 }: GridToolbarProps) {
   // Default configurable button configuration
