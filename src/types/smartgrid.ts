@@ -1,5 +1,5 @@
-
 import React from 'react';
+import { ConfigurableButtonConfig } from '@/components/ui/configurable-button';
 
 export type GridColumnType =
   | 'Link'                 // Clickable cell with optional onClick or URL
@@ -123,6 +123,7 @@ export interface SmartGridProps {
   selectedRows?: Set<number>;
   onSelectionChange?(selectedRows: Set<number>): void;
   rowClassName?: (row: any, index: number) => string;
+  configurableButtons?: ConfigurableButtonConfig[];
 }
 
 // Legacy interface for backward compatibility

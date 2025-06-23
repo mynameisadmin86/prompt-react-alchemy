@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -13,6 +14,7 @@ import {
 import { cn } from '@/lib/utils';
 import { ColumnVisibilityManager } from './ColumnVisibilityManager';
 import { GridColumnConfig, GridPreferences } from '@/types/smartgrid';
+import { ConfigurableButton, ConfigurableButtonConfig } from '@/components/ui/configurable-button';
 
 interface GridToolbarProps {
   globalFilter: string;
@@ -32,6 +34,7 @@ interface GridToolbarProps {
   onResetToDefaults: () => void;
   onExport: (format: 'csv') => void;
   onSubRowToggle?: (columnKey: string) => void;
+  configurableButtons?: ConfigurableButtonConfig[];
 }
 
 export function GridToolbar({
@@ -51,7 +54,8 @@ export function GridToolbar({
   onColumnHeaderChange,
   onResetToDefaults,
   onExport,
-  onSubRowToggle
+  onSubRowToggle,
+  configurableButtons
 }: GridToolbarProps) {
   return (
     <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between bg-white p-4 rounded-lg border shadow-sm">
@@ -62,6 +66,15 @@ export function GridToolbar({
             {filters.length} filter{filters.length > 1 ? 's' : ''} active
           </div>
         )}
+
+        {/* Configurable Buttons */}
+        {configurableButtons && configurableButtons.map((buttonConfig, index) => (
+          <ConfigurableButton
+            key={index}
+            config={buttonConfig}
+            className="mr-2"
+          />
+        ))}
       </div>
 
       <div className="flex items-center space-x-2">

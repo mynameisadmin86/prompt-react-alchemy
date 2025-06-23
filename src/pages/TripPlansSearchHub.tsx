@@ -9,7 +9,7 @@ import { useSmartGridState } from '@/hooks/useSmartGridState';
 import { DraggableSubRow } from '@/components/SmartGrid/DraggableSubRow';
 import { DynamicPanel } from '@/components/DynamicPanel';
 import { PanelConfig } from '@/types/dynamicPanel';
-import { ConfigurableButton, ConfigurableButtonConfig } from '@/components/ui/configurable-button';
+import { ConfigurableButtonConfig } from '@/components/ui/configurable-button';
 import {
   Breadcrumb,
   BreadcrumbList,
@@ -379,25 +379,27 @@ const TripPlansSearchHub = () => {
     });
   };
 
-  // Configure the Create Trip button
-  const createTripButtonConfig: ConfigurableButtonConfig = {
-    label: "+ Create Trip",
-    tooltipTitle: "Create a new trip or upload in bulk",
-    showDropdown: true,
-    tooltipPosition: 'top',
-    dropdownItems: [
-      {
-        label: "Create Trip",
-        icon: <Plus className="h-4 w-4" />,
-        onClick: handleCreateTrip
-      },
-      {
-        label: "Bulk Upload",
-        icon: <Upload className="h-4 w-4" />,
-        onClick: handleBulkUpload
-      }
-    ]
-  };
+  // Configure the Create Trip button for the grid toolbar
+  const gridConfigurableButtons: ConfigurableButtonConfig[] = [
+    {
+      label: "+ Create Trip",
+      tooltipTitle: "Create a new trip or upload in bulk",
+      showDropdown: true,
+      tooltipPosition: 'top',
+      dropdownItems: [
+        {
+          label: "Create Trip",
+          icon: <Plus className="h-4 w-4" />,
+          onClick: handleCreateTrip
+        },
+        {
+          label: "Bulk Upload",
+          icon: <Upload className="h-4 w-4" />,
+          onClick: handleBulkUpload
+        }
+      ]
+    }
+  ];
 
   const renderSubRow = (row: any, rowIndex: number) => {
     return (
@@ -443,32 +445,7 @@ const TripPlansSearchHub = () => {
               {sampleData.length}
             </span>
           </div>
-          
-          {/* Create Trip Button */}
-          <ConfigurableButton config={createTripButtonConfig} />
         </div>
-
-        {/* Search Panel using DynamicPanel */}
-        {/*<div className="grid grid-cols-12 gap-6">
-          <DynamicPanel
-            panelId="trip-plans-search"
-            panelTitle="Search Filters"
-            panelConfig={searchPanelConfig}
-            initialData={searchData}
-            onDataChange={handleSearchDataChange}
-            panelWidth={12}
-          />
-        </div>*/}
-
-        {/* Search Actions */}
-        {/*<div className="flex justify-end space-x-2">
-          <Button variant="outline" onClick={handleClear}>
-            Clear
-          </Button>
-          <Button onClick={handleSearch}>
-            Search
-          </Button>
-        </div>*/}
 
         {/* Grid Container */}
         <div className="bg-white rounded-lg shadow-sm">
@@ -495,6 +472,7 @@ const TripPlansSearchHub = () => {
               selectedRows.has(index) ? 'smart-grid-row-selected' : ''
             }
             nestedRowRenderer={renderSubRow}
+            configurableButtons={gridConfigurableButtons}
           />
         </div>
       </div>
