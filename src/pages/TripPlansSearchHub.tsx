@@ -1,9 +1,11 @@
+
 import React, { useState, useMemo, useEffect } from 'react';
 import { SmartGrid } from '@/components/SmartGrid';
 import { GridColumnConfig } from '@/types/smartgrid';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Plus } from 'lucide-react';
+import { Plus, Search, Filter, Download } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useSmartGridState } from '@/hooks/useSmartGridState';
 import { DraggableSubRow } from '@/components/SmartGrid/DraggableSubRow';
@@ -33,6 +35,7 @@ interface TripPlanData {
 const TripPlansSearchHub = () => {
   const [selectedRows, setSelectedRows] = useState<Set<number>>(new Set());
   const [searchData, setSearchData] = useState<Record<string, any>>({});
+  const [globalSearch, setGlobalSearch] = useState('');
   
   const gridState = useSmartGridState();
   const { toast } = useToast();
@@ -355,6 +358,7 @@ const TripPlansSearchHub = () => {
 
   const handleClear = () => {
     setSearchData({});
+    setGlobalSearch('');
     toast({
       title: "Cleared",
       description: "Search filters have been cleared"
@@ -391,47 +395,74 @@ const TripPlansSearchHub = () => {
             <BreadcrumbSeparator />
             <BreadcrumbItem>
               <BreadcrumbPage className="text-gray-600">
-                Trip Plans Search Hub
+                Trip Execution Management
               </BreadcrumbPage>
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
 
-        {/* Title Section */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <h1 className="text-2xl font-semibold text-gray-900">Trip Plans</h1>
-            <span className="inline-flex items-center justify-center w-6 h-6 text-xs font-medium text-blue-600 bg-blue-100 rounded-full">
-              {sampleData.length}
-            </span>
+        {/* Header Section with integrated search and actions */}
+        <div className="bg-white rounded-lg shadow-sm border p-4">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center space-x-3">
+              <h1 className="text-xl font-semibold text-gray-900">Trip Plans</h1>
+              <span className="inline-flex items-center justify-center px-2 py-1 text-xs font-medium text-blue-600 bg-blue-100 rounded-full">
+                {sampleData.length}
+              </span>
+            </div>
+            <Button className="bg-blue-600 hover:bg-blue-700 text-white">
+              <Plus className="h-4 w-4 mr-2" />
+              Create Trip
+            </Button>
           </div>
-          <Button className="bg-blue-600 hover:bg-blue-700 text-white">
-            <Plus className="h-4 w-4 mr-2" />
-            Create Trip
-          </Button>
+          
+          {/* Search and Action Bar */}
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center space-x-2 flex-1">
+              <div className="relative flex-1 max-w-md">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Input
+                  placeholder="Search..."
+                  value={globalSearch}
+                  onChange={(e) => setGlobalSearch(e.target.value)}
+                  className="pl-9"
+                />
+              </div>
+            </div>
+            
+            <div className="flex items-center space-x-2">
+              <Button variant="outline" size="sm">
+                <Filter className="h-4 w-4 mr-2" />
+                Filter
+              </Button>
+              <Button variant="outline" size="sm">
+                <Download className="h-4 w-4 mr-2" />
+                Export
+              </Button>
+            </div>
+          </div>
         </div>
 
-        {/* Search Panel using DynamicPanel */}
-        {/*<div className="grid grid-cols-12 gap-6">
+        {/* Search Panel using DynamicPanel - Hidden by default, can be toggled */}
+        <div className="hidden">
           <DynamicPanel
             panelId="trip-plans-search"
-            panelTitle="Search Filters"
+            panelTitle="Advanced Search Filters"
             panelConfig={searchPanelConfig}
             initialData={searchData}
             onDataChange={handleSearchDataChange}
             panelWidth={12}
           />
-        </div>*/}
-
-        {/* Search Actions */}
-        {/*<div className="flex justify-end space-x-2">
-          <Button variant="outline" onClick={handleClear}>
-            Clear
-          </Button>
-          <Button onClick={handleSearch}>
-            Search
-          </Button>
-        </div>*/}
+          
+          <div className="flex justify-end space-x-2 mt-4">
+            <Button variant="outline" onClick={handleClear}>
+              Clear
+            </Button>
+            <Button onClick={handleSearch}>
+              Search
+            </Button>
+          </div>
+        </div>
 
         {/* Grid Container */}
         <div className="bg-white rounded-lg shadow-sm">

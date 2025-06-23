@@ -123,8 +123,6 @@ export interface SmartGridProps {
   selectedRows?: Set<number>;
   onSelectionChange?(selectedRows: Set<number>): void;
   rowClassName?: (row: any, index: number) => string;
-  showFilters?: boolean;
-  onToggleFilters?: () => void;
 }
 
 // Legacy interface for backward compatibility
