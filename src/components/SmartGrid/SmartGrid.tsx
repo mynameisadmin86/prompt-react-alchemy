@@ -672,17 +672,7 @@ export function SmartGrid({
 
   return (
     <div className="space-y-4 w-full">
-      {/* Advanced Filter System */}
-      <FilterSystem
-        columns={orderedColumns}
-        subRowColumns={subRowColumns}
-        showFilterRow={showFilterRow}
-        onToggleFilterRow={() => setShowFilterRow(!showFilterRow)}
-        onFiltersChange={handleFiltersChange}
-        gridId="smart-grid"
-        userId="demo-user"
-        api={mockFilterAPI}
-      />
+     
 
       {/* Toolbar */}
       <GridToolbar
@@ -710,6 +700,18 @@ export function SmartGrid({
         recordCount={recordCount}
       />
 
+       {/* Advanced Filter System */}
+      <FilterSystem
+        columns={orderedColumns}
+        subRowColumns={subRowColumns}
+        showFilterRow={showFilterRow}
+        onToggleFilterRow={() => setShowFilterRow(!showFilterRow)}
+        onFiltersChange={handleFiltersChange}
+        gridId="smart-grid"
+        userId="demo-user"
+        api={mockFilterAPI}
+      />
+      
       {/* Table Container with no horizontal scroll */}
       <div className="bg-white rounded-lg border shadow-sm overflow-hidden">
         <div className="w-full">
