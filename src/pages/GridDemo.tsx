@@ -1,10 +1,8 @@
-
 import React, { useState, useMemo, useEffect } from 'react';
 import { SmartGrid } from '@/components/SmartGrid';
 import { GridColumnConfig } from '@/types/smartgrid';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Printer, MoreHorizontal, User, Train, UserCheck, Container, Search, Filter, Download, BarChart3, Grid3x3, List, Plus, ChevronDown } from 'lucide-react';
+import { Printer, MoreHorizontal, User, Train, UserCheck, Container } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useSmartGridState } from '@/hooks/useSmartGridState';
 import { DraggableSubRow } from '@/components/SmartGrid/DraggableSubRow';
@@ -16,12 +14,6 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 
 interface SampleData {
   id: string;
@@ -49,7 +41,6 @@ interface SampleData {
 
 const GridDemo = () => {
   const [selectedRows, setSelectedRows] = useState<Set<number>>(new Set());
-  const [globalSearch, setGlobalSearch] = useState('');
   const gridState = useSmartGridState();
   
   const initialColumns: GridColumnConfig[] = [
@@ -444,74 +435,14 @@ const GridDemo = () => {
           </BreadcrumbList>
         </Breadcrumb>
 
-        {/* Title and Count */}
-        <div className="flex items-center space-x-3">
-          <h1 className="text-2xl font-semibold text-gray-900">Trip Plans</h1>
-          <span className="inline-flex items-center justify-center px-2 py-1 text-xs font-medium text-blue-600 bg-blue-100 rounded-full">
-            {sampleData.length}
-          </span>
-        </div>
-
-        {/* Action Bar */}
-        <div className="flex items-center justify-between bg-white p-4 rounded-lg border shadow-sm">
-          <div className="flex items-center space-x-2">
-            {/* Search Input */}
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-              <Input
-                placeholder="Search"
-                value={globalSearch}
-                onChange={(e) => setGlobalSearch(e.target.value)}
-                className="pl-9 w-64 h-9"
-              />
-            </div>
-
-            {/* Action Buttons */}
-            <Button variant="outline" size="sm" className="h-9 px-3">
-              <BarChart3 className="h-4 w-4" />
-            </Button>
-            
-            <Button variant="outline" size="sm" className="h-9 px-3">
-              <Search className="h-4 w-4" />
-            </Button>
-            
-            <Button variant="outline" size="sm" className="h-9 px-3">
-              <Filter className="h-4 w-4" />
-            </Button>
-            
-            <Button variant="outline" size="sm" className="h-9 px-3">
-              <Download className="h-4 w-4" />
-            </Button>
-            
-            <Button variant="outline" size="sm" className="h-9 px-3">
-              <Grid3x3 className="h-4 w-4" />
-            </Button>
-            
-            <Button variant="outline" size="sm" className="h-9 px-3">
-              <List className="h-4 w-4" />
-            </Button>
+        {/* Title Section */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            <h1 className="text-2xl font-semibold text-gray-900">Trip Plans</h1>
+            <span className="inline-flex items-center justify-center w-6 h-6 text-xs font-medium text-blue-600 bg-blue-100 rounded-full">
+              9
+            </span>
           </div>
-
-          {/* Create Trip Button with Dropdown */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button className="bg-blue-600 hover:bg-blue-700 text-white h-9 px-4">
-                <Plus className="h-4 w-4 mr-2" />
-                Create Trip
-                <ChevronDown className="h-4 w-4 ml-2" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48 bg-white border shadow-lg">
-              <DropdownMenuItem>
-                <Plus className="h-4 w-4 mr-2" />
-                New Trip Plan
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Plus className="h-4 w-4 mr-2" />
-                Import Trip
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
         </div>
 
         {/* Debug info */}

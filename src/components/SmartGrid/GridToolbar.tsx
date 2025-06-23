@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -33,8 +32,6 @@ interface GridToolbarProps {
   onResetToDefaults: () => void;
   onExport: (format: 'csv') => void;
   onSubRowToggle?: (columnKey: string) => void;
-  showFilters?: boolean;
-  onToggleFilters?: () => void;
 }
 
 export function GridToolbar({
@@ -54,9 +51,7 @@ export function GridToolbar({
   onColumnHeaderChange,
   onResetToDefaults,
   onExport,
-  onSubRowToggle,
-  showFilters = false,
-  onToggleFilters
+  onSubRowToggle
 }: GridToolbarProps) {
   return (
     <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between bg-white p-4 rounded-lg border shadow-sm">
@@ -82,28 +77,6 @@ export function GridToolbar({
           />
         </div>
 
-        {/* Filter Toggle Button - New */}
-        {onToggleFilters && (
-          <Button
-            variant={showFilters ? "default" : "outline"}
-            size="sm"
-            onClick={onToggleFilters}
-            disabled={loading}
-            title="Toggle Filters Panel"
-            className={cn(
-              "transition-colors",
-              showFilters && "bg-blue-600 hover:bg-blue-700 text-white border-blue-600"
-            )}
-          >
-            <Filter className="h-4 w-4" />
-            {filters.length > 0 && (
-              <span className="ml-1 text-xs bg-blue-100 text-blue-600 rounded-full px-1.5 py-0.5">
-                {filters.length}
-              </span>
-            )}
-          </Button>
-        )}
-
         {/* Common Filter Button - Updated to toggle column filters */}
         <Button
           variant={showColumnFilters ? "default" : "outline"}
@@ -117,6 +90,11 @@ export function GridToolbar({
           )}
         >
           <Filter className="h-4 w-4" />
+          {filters.length > 0 && (
+            <span className="ml-1 text-xs bg-blue-100 text-blue-600 rounded-full px-1.5 py-0.5">
+              {filters.length}
+            </span>
+          )}
         </Button>
 
         {/* Toggle Checkboxes Button - Updated with blue selection state */}
