@@ -6,6 +6,7 @@ import { Printer, MoreHorizontal, User, Train, UserCheck, Container, Plus, Uploa
 import { useToast } from '@/hooks/use-toast';
 import { useSmartGridState } from '@/hooks/useSmartGridState';
 import { DraggableSubRow } from '@/components/SmartGrid/DraggableSubRow';
+import { ConfigurableButtonConfig } from '@/components/ui/configurable-button';
 import {
   Breadcrumb,
   BreadcrumbList,
@@ -373,7 +374,7 @@ const GridDemo = () => {
   }, []);
 
   // Configurable buttons for the grid toolbar
-  const configurableButtons = [
+  const configurableButtons: ConfigurableButtonConfig[] = [
     {
       label: "+ Create Trip",
       tooltipTitle: "Create a new trip or upload in bulk",
@@ -514,6 +515,7 @@ const GridDemo = () => {
             }
             nestedRowRenderer={renderSubRow}
             configurableButtons={configurableButtons}
+            showDefaultConfigurableButton={false}
           />
           
           {/* Footer with action buttons matching the screenshot style */}
