@@ -69,8 +69,10 @@ export function GridToolbar({
     showDropdown: false
   };
 
-  // Use provided buttons or default button if none provided and showDefault is true
-  const buttonsToShow = configurableButtons || (showDefaultConfigurableButton ? [defaultConfigurableButton] : []);
+  // Determine which buttons to show
+  const buttonsToShow = configurableButtons && configurableButtons.length > 0 
+    ? configurableButtons 
+    : (showDefaultConfigurableButton ? [defaultConfigurableButton] : []);
 
   return (
     <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between bg-white p-4 rounded-lg border shadow-sm">
@@ -84,8 +86,6 @@ export function GridToolbar({
       </div>
 
       <div className="flex items-center space-x-2">
-        
-
         {/* Search box - first */}
         <div className="relative w-64">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -181,12 +181,12 @@ export function GridToolbar({
         >
           <Download className="h-4 w-4" />
         </Button>
+        
         {/* Configurable Buttons */}
         {buttonsToShow.map((buttonConfig, index) => (
           <ConfigurableButton
             key={index}
             config={buttonConfig}
-            className="mr-2"
           />
         ))}
       </div>
