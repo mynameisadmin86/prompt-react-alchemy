@@ -376,9 +376,9 @@ const GridDemo = () => {
   // Configurable buttons for the grid toolbar
   const configurableButtons: ConfigurableButtonConfig[] = [
     {
-      label: "+ Create Trip",
-      tooltipTitle: "Create a new trip or upload in bulk",
-      showDropdown: true,
+      label: "+ Create button",
+      tooltipTitle: "Create button",
+      showDropdown: false,
       dropdownItems: [
         {
           label: "Create Trip",
