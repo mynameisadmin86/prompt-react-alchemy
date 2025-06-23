@@ -362,6 +362,23 @@ const TripPlansSearchHub = () => {
     });
   };
 
+  // Move function declarations before they are used
+  const handleCreateTrip = () => {
+    console.log('Creating new trip');
+    toast({
+      title: "Create Trip",
+      description: "Create trip functionality would be implemented here"
+    });
+  };
+
+  const handleBulkUpload = () => {
+    console.log('Bulk upload');
+    toast({
+      title: "Bulk Upload",
+      description: "Bulk upload functionality would be implemented here"
+    });
+  };
+
   // Configure the Create Trip button
   const createTripButtonConfig: ConfigurableButtonConfig = {
     label: "+ Create Trip",
@@ -380,22 +397,6 @@ const TripPlansSearchHub = () => {
         onClick: handleBulkUpload
       }
     ]
-  };
-
-  const handleCreateTrip = () => {
-    console.log('Creating new trip');
-    toast({
-      title: "Create Trip",
-      description: "Create trip functionality would be implemented here"
-    });
-  };
-
-  const handleBulkUpload = () => {
-    console.log('Bulk upload');
-    toast({
-      title: "Bulk Upload",
-      description: "Bulk upload functionality would be implemented here"
-    });
   };
 
   const renderSubRow = (row: any, rowIndex: number) => {
