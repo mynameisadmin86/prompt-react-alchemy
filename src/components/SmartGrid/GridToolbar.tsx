@@ -41,6 +41,9 @@ interface GridToolbarProps {
   recordCount?: number;
   showCreateButton?: boolean;
   searchPlaceholder?: string;
+  showFilterSystemButton?: boolean;
+  onToggleFilterSystem?: () => void;
+  filterSystemActive?: boolean;
 }
 
 export function GridToolbar({
@@ -67,7 +70,10 @@ export function GridToolbar({
   gridTitle,
   recordCount,
   showCreateButton = false,
-  searchPlaceholder = "Search all columns..."
+  searchPlaceholder = "Search all columns...",
+  showFilterSystemButton = false,
+  onToggleFilterSystem,
+  filterSystemActive = false
 }: GridToolbarProps) {
   // Default configurable button configuration
   const defaultConfigurableButton: ConfigurableButtonConfig = {
@@ -82,7 +88,7 @@ export function GridToolbar({
     : (showDefaultConfigurableButton ? [defaultConfigurableButton] : []);
 
   return (
-    <div className="flex items-center justify-between w-full py-2 bg-gray-50">
+    <div className="flex items-center justify-between w-full py-2 bg-transparent">
       {/* Left side - Grid Title and Count */}
       <div className="flex items-center">
         {gridTitle && (
@@ -122,6 +128,24 @@ export function GridToolbar({
             disabled={loading}
           />
         </div>
+
+        {/* FilterSystem Toggle Button */}
+        {showFilterSystemButton && onToggleFilterSystem && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onToggleFilterSystem}
+            disabled={loading}
+            title="Toggle Filter System"
+            aria-pressed={filterSystemActive}
+            className={cn(
+              "w-8 h-8 flex items-center justify-center rounded hover:bg-gray-100 border border-gray-300 p-0",
+              filterSystemActive && "bg-blue-50 border-blue-300 text-blue-600"
+            )}
+          >
+            <Filter className="h-4 w-4" />
+          </Button>
+        )}
 
         {/* Icon buttons */}
         <Button

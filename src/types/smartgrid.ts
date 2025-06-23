@@ -130,6 +130,9 @@ export interface SmartGridProps {
   recordCount?: number;
   showCreateButton?: boolean;
   searchPlaceholder?: string;
+  showFilterSystemButton?: boolean;
+  onToggleFilterSystem?: () => void;
+  filterSystemActive?: boolean;
 }
 
 // Legacy interface for backward compatibility
