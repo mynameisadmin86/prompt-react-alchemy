@@ -123,6 +123,12 @@ const TripPlansSearchHub = () => {
     }
   };
 
+  // Initialize columns and data
+  useEffect(() => {
+    gridState.setColumns(columns);
+    gridState.setGridData(processedData);
+  }, []);
+
   const columns: GridColumnConfig[] = [
     {
       key: 'id',
@@ -198,12 +204,6 @@ const TripPlansSearchHub = () => {
       subRow: false
     }
   ];
-
-  // Initialize columns and data
-  useEffect(() => {
-    gridState.setColumns(columns);
-    gridState.setGridData(processedData);
-  }, []);
 
   const sampleData: TripPlanData[] = [
     {
@@ -412,7 +412,7 @@ const TripPlansSearchHub = () => {
         </div>
 
         {/* Search Panel using DynamicPanel */}
-        <!--<div className="grid grid-cols-12 gap-6">
+        <div className="grid grid-cols-12 gap-6">
           <DynamicPanel
             panelId="trip-plans-search"
             panelTitle="Search Filters"
@@ -421,7 +421,7 @@ const TripPlansSearchHub = () => {
             onDataChange={handleSearchDataChange}
             panelWidth={12}
           />
-        </div>-->
+        </div>
 
         {/* Search Actions */}
         <div className="flex justify-end space-x-2">
