@@ -516,6 +516,8 @@ const GridDemo = () => {
             nestedRowRenderer={renderSubRow}
             configurableButtons={configurableButtons}
             showDefaultConfigurableButton={false}
+            gridTitle="Trip Plans"
+            recordCount={gridState.gridData.length > 0 ? gridState.gridData.length : processedData.length}
           />
           
           {/* Footer with action buttons matching the screenshot style */}
