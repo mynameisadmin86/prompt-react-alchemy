@@ -2,7 +2,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { SmartGrid } from '@/components/SmartGrid';
 import { GridColumnConfig } from '@/types/smartgrid';
 import { Button } from '@/components/ui/button';
-import { Printer, MoreHorizontal, User, Train, UserCheck, Container } from 'lucide-react';
+import { Printer, MoreHorizontal, User, Train, UserCheck, Container, Plus, Upload } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useSmartGridState } from '@/hooks/useSmartGridState';
 import { DraggableSubRow } from '@/components/SmartGrid/DraggableSubRow';
@@ -372,6 +372,37 @@ const GridDemo = () => {
     }));
   }, []);
 
+  // Configurable buttons for the grid toolbar
+  const configurableButtons = [
+    {
+      label: "+ Create Trip",
+      tooltipTitle: "Create a new trip or upload in bulk",
+      showDropdown: true,
+      dropdownItems: [
+        {
+          label: "Create Trip",
+          icon: <Plus className="h-4 w-4" />,
+          onClick: () => {
+            toast({
+              title: "Create Trip",
+              description: "Opening trip creation form..."
+            });
+          }
+        },
+        {
+          label: "Bulk Upload",
+          icon: <Upload className="h-4 w-4" />,
+          onClick: () => {
+            toast({
+              title: "Bulk Upload",
+              description: "Opening bulk upload dialog..."
+            });
+          }
+        }
+      ]
+    }
+  ];
+
   const handleLinkClick = (value: any, row: any) => {
     console.log('Link clicked:', value, row);
   };
@@ -482,6 +513,7 @@ const GridDemo = () => {
               selectedRows.has(index) ? 'smart-grid-row-selected' : ''
             }
             nestedRowRenderer={renderSubRow}
+            configurableButtons={configurableButtons}
           />
           
           {/* Footer with action buttons matching the screenshot style */}
