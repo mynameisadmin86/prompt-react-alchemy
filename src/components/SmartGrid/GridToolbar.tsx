@@ -40,6 +40,8 @@ interface GridToolbarProps {
   defaultConfigurableButtonLabel?: string;
   gridTitle?: string;
   recordCount?: number;
+  showCreateButton?: boolean;
+  searchPlaceholder?: string;
 }
 
 export function GridToolbar({
@@ -64,7 +66,9 @@ export function GridToolbar({
   showDefaultConfigurableButton = true,
   defaultConfigurableButtonLabel = "Add",
   gridTitle,
-  recordCount
+  recordCount,
+  showCreateButton = false,
+  searchPlaceholder = "Search all columns..."
 }: GridToolbarProps) {
   // Default configurable button configuration
   const defaultConfigurableButton: ConfigurableButtonConfig = {
@@ -79,17 +83,17 @@ export function GridToolbar({
     : (showDefaultConfigurableButton ? [defaultConfigurableButton] : []);
 
   return (
-    <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between bg-white p-4 rounded-lg border shadow-sm">
-      <div className="flex items-center space-x-2">
-        {/* Grid Title and Count */}
+    <div className="flex items-center justify-between w-full py-2 bg-transparent">
+      {/* Left side - Grid Title and Count */}
+      <div className="flex items-center">
         {gridTitle && (
           <div className="flex items-center">
-            <span className="text-gray-900 font-semibold text-gray-900">
+            <span className="text-gray-900 font-semibold text-sm">
               {gridTitle}
             </span>
             {recordCount !== undefined && (
               <span 
-                className="rounded-full bg-blue-50 text-blue-500 text-xs px-2 py-0.5 ml-1 inline-flex items-center"
+                className="inline-flex items-center justify-center rounded-full bg-blue-50 text-blue-500 text-xs px-2 py-0.5 ml-1"
                 aria-label={`${gridTitle} count ${recordCount}`}
               >
                 {recordCount}
@@ -100,70 +104,69 @@ export function GridToolbar({
 
         {/* Show active filters count */}
         {filters.length > 0 && (
-          <div className="text-sm text-blue-600 bg-blue-50 px-2 py-1 rounded">
+          <div className="text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded ml-3">
             {filters.length} filter{filters.length > 1 ? 's' : ''} active
           </div>
         )}
       </div>
 
-      <div className="flex items-center space-x-2">
-        {/* Search box - first */}
-        <div className="relative w-64">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+      {/* Right side - Controls */}
+      <div className="flex items-center space-x-1">
+        {/* Search box */}
+        <div className="relative">
+          <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
           <Input
-            placeholder="Search all columns..."
+            placeholder={searchPlaceholder}
             value={globalFilter}
             onChange={(e) => setGlobalFilter(e.target.value)}
-            className="pl-9 w-full"
+            className="border border-gray-300 rounded text-sm placeholder-gray-400 px-2 py-1 pl-8 w-64 h-8"
             disabled={loading}
           />
         </div>
 
-        {/* Common Filter Button - Updated to toggle column filters */}
+        {/* Icon buttons */}
         <Button
-          variant={showColumnFilters ? "default" : "outline"}
+          variant="ghost"
           size="sm"
           onClick={() => setShowColumnFilters(!showColumnFilters)}
           disabled={loading}
           title="Toggle Column Filters"
           className={cn(
-            "transition-colors",
-            showColumnFilters && "bg-blue-600 hover:bg-blue-700 text-white border-blue-600"
+            "w-8 h-8 flex items-center justify-center rounded hover:bg-gray-100 p-0",
+            showColumnFilters && "bg-blue-50 text-blue-600"
           )}
         >
           <Filter className="h-4 w-4" />
           {filters.length > 0 && (
-            <span className="ml-1 text-xs bg-blue-100 text-blue-600 rounded-full px-1.5 py-0.5">
+            <span className="absolute -top-1 -right-1 text-xs bg-blue-500 text-white rounded-full w-4 h-4 flex items-center justify-center">
               {filters.length}
             </span>
           )}
         </Button>
 
-        {/* Toggle Checkboxes Button - Updated with blue selection state */}
         <Button 
-          variant={showCheckboxes ? "default" : "outline"}
+          variant="ghost"
           size="sm" 
           onClick={() => setShowCheckboxes(!showCheckboxes)}
           disabled={loading}
           title="Toggle Checkboxes"
           className={cn(
-            "transition-colors",
-            showCheckboxes && "bg-blue-600 hover:bg-blue-700 text-white border-blue-600"
+            "w-8 h-8 flex items-center justify-center rounded hover:bg-gray-100 p-0",
+            showCheckboxes && "bg-blue-50 text-blue-600"
           )}
         >
           <CheckSquare className="h-4 w-4" />
         </Button>
 
-        {/* Toggle View Mode Button - Updated with better visual states */}
         <Button 
-          variant="outline"
+          variant="ghost"
           size="sm" 
           onClick={() => setViewMode(viewMode === 'table' ? 'card' : 'table')}
           disabled={loading}
           title={`Switch to ${viewMode === 'table' ? 'Card' : 'Table'} View`}
           className={cn(
-            "transition-colors",
-            viewMode === 'card' && "bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100"
+            "w-8 h-8 flex items-center justify-center rounded hover:bg-gray-100 p-0",
+            viewMode === 'card' && "bg-blue-50 text-blue-600"
           )}
         >
           {viewMode === 'table' ? (
@@ -184,24 +187,38 @@ export function GridToolbar({
         />
 
         <Button 
-          variant="outline" 
+          variant="ghost"
           size="sm" 
           onClick={onResetToDefaults} 
           disabled={loading}
           title="Reset All"
+          className="w-8 h-8 flex items-center justify-center rounded hover:bg-gray-100 p-0"
         >
           <RotateCcw className="h-4 w-4" />
         </Button>
         
         <Button 
-          variant="outline" 
+          variant="ghost"
           size="sm" 
           onClick={() => onExport('csv')} 
           disabled={loading}
           title="Download CSV"
+          className="w-8 h-8 flex items-center justify-center rounded hover:bg-gray-100 p-0"
         >
           <Download className="h-4 w-4" />
         </Button>
+
+        {/* Create Button */}
+        {showCreateButton && (
+          <Button
+            variant="outline"
+            size="sm"
+            className="border border-blue-500 text-blue-500 rounded px-3 py-1 text-sm hover:bg-blue-50 h-8 ml-2"
+          >
+            <Plus className="h-4 w-4 mr-1" />
+            Create Trip
+          </Button>
+        )}
         
         {/* Configurable Buttons */}
         {buttonsToShow.map((buttonConfig, index) => (

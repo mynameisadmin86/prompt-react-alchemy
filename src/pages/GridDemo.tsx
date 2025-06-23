@@ -467,27 +467,6 @@ const GridDemo = () => {
           </BreadcrumbList>
         </Breadcrumb>
 
-        {/* Title Section */}
-        {/*<div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <h1 className="text-2xl font-semibold text-gray-900">Trip Plans</h1>
-            <span className="inline-flex items-center justify-center w-6 h-6 text-xs font-medium text-blue-600 bg-blue-100 rounded-full">
-              9
-            </span>
-          </div>
-        </div>*/}
-
-        {/* Debug info */}
-        {/*<div className="text-sm text-gray-600">
-          Selected rows: {Array.from(selectedRows).join(', ') || 'None'}
-          <br />
-          Sub-row columns: {gridState.columns.filter(col => col.subRow).map(col => col.key).join(', ') || 'None'}
-          <br />
-          Force update counter: {gridState.forceUpdate}
-          <br />
-          Expanded rows: {Array.from(gridState.expandedRows).join(', ') || 'None'}
-        </div>*/}
-
         {/* Grid Container */}
         <div className="bg-white rounded-lg shadow-sm">
           <style>{`
@@ -518,6 +497,8 @@ const GridDemo = () => {
             showDefaultConfigurableButton={false}
             gridTitle="Trip Plans"
             recordCount={gridState.gridData.length > 0 ? gridState.gridData.length : processedData.length}
+            showCreateButton={true}
+            searchPlaceholder="Search all columns..."
           />
           
           {/* Footer with action buttons matching the screenshot style */}
