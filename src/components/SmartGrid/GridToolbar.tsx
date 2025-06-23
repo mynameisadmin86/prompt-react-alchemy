@@ -84,7 +84,7 @@ export function GridToolbar({
         {/* Grid Title and Count */}
         {gridTitle && (
           <div className="flex items-center">
-            <span className="text-gray-900 font-semibold text-sm">
+            <span className="text-gray-900 font-semibold text-gray-900">
               {gridTitle}
             </span>
             {recordCount !== undefined && (
