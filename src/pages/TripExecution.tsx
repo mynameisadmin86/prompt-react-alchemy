@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { FlexGridLayout } from '@/components/FlexGridLayout';
 import { DynamicPanel } from '@/components/DynamicPanel';
@@ -50,103 +49,6 @@ const tripExecutionPanelConfig: PanelConfig = {
     visible: true,
     editable: false,
     order: 4
-  },
-  'origin': {
-    id: 'origin',
-    label: 'Origin',
-    fieldType: 'text',
-    value: '53-202705, Voila',
-    mandatory: true,
-    visible: true,
-    editable: true,
-    order: 5
-  },
-  'destination': {
-    id: 'destination',
-    label: 'Destination',
-    fieldType: 'text',
-    value: '53-21925-3, Curtici',
-    mandatory: true,
-    visible: true,
-    editable: true,
-    order: 6
-  },
-  'trip-type': {
-    id: 'trip-type',
-    label: 'Trip Type',
-    fieldType: 'radio',
-    value: 'one-way',
-    mandatory: true,
-    visible: true,
-    editable: true,
-    order: 7,
-    options: [
-      { label: 'One Way', value: 'one-way' },
-      { label: 'Round Trip', value: 'round-trip' }
-    ]
-  },
-  'train-no': {
-    id: 'train-no',
-    label: 'Train No.',
-    fieldType: 'text',
-    value: '',
-    mandatory: false,
-    visible: true,
-    editable: true,
-    order: 8,
-    placeholder: 'Enter Train No.'
-  },
-  'cluster': {
-    id: 'cluster',
-    label: 'Cluster',
-    fieldType: 'select',
-    value: '10000406',
-    mandatory: false,
-    visible: true,
-    editable: true,
-    order: 9,
-    options: [
-      { label: '10000406', value: '10000406' },
-      { label: '10000407', value: '10000407' },
-      { label: '10000408', value: '10000408' }
-    ]
-  },
-  'supplier-ref': {
-    id: 'supplier-ref',
-    label: 'Supplier Ref. No.',
-    fieldType: 'text',
-    value: '',
-    mandatory: false,
-    visible: true,
-    editable: true,
-    order: 10,
-    placeholder: 'Enter Supplier Ref. No.'
-  },
-  'qc-user': {
-    id: 'qc-user',
-    label: 'QC Userdefined 1',
-    fieldType: 'select',
-    value: 'QC',
-    mandatory: false,
-    visible: true,
-    editable: true,
-    order: 11,
-    options: [
-      { label: 'QC', value: 'QC' },
-      { label: 'QA', value: 'QA' },
-      { label: 'Other', value: 'Other' }
-    ]
-  },
-  'remarks': {
-    id: 'remarks',
-    label: 'Remarks 1',
-    fieldType: 'textarea',
-    value: '',
-    mandatory: false,
-    visible: true,
-    editable: true,
-    order: 12,
-    placeholder: 'Enter Remarks'
   }
 };
 
@@ -302,7 +204,7 @@ const CustomerOrdersSection = () => (
         <h3 className="text-lg font-semibold text-gray-800">Resources</h3>
       </div>
       <div className="space-y-2">
-        <div className="flex justify-between text-sm">
+        <div className="flex justify-between text-small">
           <span className="text-gray-600">No. of Resource</span>
           <span className="font-medium">4</span>
         </div>
@@ -315,7 +217,7 @@ const CustomerOrdersSection = () => (
   </div>
 );
 
-// Footer Actions Component matching image-4
+// Footer Actions Component
 const TripExecutionFooterActions = () => (
   <div className="flex items-center justify-between p-4 bg-white border-t">
     <div className="flex items-center space-x-2">
@@ -365,7 +267,48 @@ const TripExecution = () => {
             <DynamicPanel
               panelId="trip-execution-panel"
               panelTitle="Trip Execution Details"
-              panelConfig={tripExecutionPanelConfig}
+              panelConfig={{
+                'trip-id': {
+                  id: 'trip-id',
+                  label: 'Trip ID',
+                  fieldType: 'text',
+                  value: 'TRIP00000001',
+                  mandatory: true,
+                  visible: true,
+                  editable: false,
+                  order: 1
+                },
+                'customer-id': {
+                  id: 'customer-id',
+                  label: 'Customer ID',
+                  fieldType: 'text',
+                  value: 'CUS0009173',
+                  mandatory: true,
+                  visible: true,
+                  editable: false,
+                  order: 2
+                },
+                'price': {
+                  id: 'price',
+                  label: 'Price',
+                  fieldType: 'currency',
+                  value: '45595.00',
+                  mandatory: true,
+                  visible: true,
+                  editable: true,
+                  order: 3
+                },
+                'rail-info': {
+                  id: 'rail-info',
+                  label: 'Rail Information',
+                  fieldType: 'text',
+                  value: 'Railtrax NV - 46798333',
+                  mandatory: true,
+                  visible: true,
+                  editable: false,
+                  order: 4
+                }
+              }}
               initialData={{}}
               onDataChange={(data) => console.log('Trip execution data changed:', data)}
             />
@@ -381,14 +324,50 @@ const TripExecution = () => {
         content: (
           <div className="h-full flex flex-col">
             <div className="flex-1">
-              <SmartGrid
-                columns={activitiesGridColumns}
-                data={activitiesGridData}
-                gridTitle="Activities & Consignment"
-                recordCount={activitiesGridData.length}
-                showCreateButton={false}
-                searchPlaceholder="Search activities..."
-              />
+              <div className="p-4 border-b">
+                <h2 className="text-lg font-semibold text-gray-800">Activities & Consignment</h2>
+              </div>
+              <div className="p-4">
+                <div className="bg-white rounded-lg border">
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead className="bg-gray-50">
+                        <tr>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Leg</th>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Behaviour</th>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Location</th>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Planned/Actual</th>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-200">
+                        <tr>
+                          <td className="px-4 py-3 text-sm">Leg: 1</td>
+                          <td className="px-4 py-3">
+                            <span className="inline-flex px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded">Pick</span>
+                          </td>
+                          <td className="px-4 py-3 text-sm">CHN-MUM</td>
+                          <td className="px-4 py-3 text-sm">20/20</td>
+                          <td className="px-4 py-3">
+                            <span className="inline-flex px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded">Completed</span>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td className="px-4 py-3 text-sm">Leg: 2</td>
+                          <td className="px-4 py-3">
+                            <span className="inline-flex px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded">Drvy</span>
+                          </td>
+                          <td className="px-4 py-3 text-sm">CHN-DEL</td>
+                          <td className="px-4 py-3 text-sm">20/20</td>
+                          <td className="px-4 py-3">
+                            <span className="inline-flex px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded">Completed</span>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
             </div>
             <CustomerOrdersSection />
           </div>
