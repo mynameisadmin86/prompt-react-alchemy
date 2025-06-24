@@ -22,8 +22,9 @@ const FlexGridDemo: React.FC = () => {
       {
         id: 'rightPanel',
         title: 'Main Grid',
-        collapsible: false,
+        collapsible: true,
         defaultCollapsed: false,
+        hasPullHandle: true,
         fillOnCollapseOf: 'leftPanel',
         hasConfigGear: true,
         content: TripGridDashboard
@@ -36,7 +37,7 @@ const FlexGridDemo: React.FC = () => {
       <div className="bg-white border-b px-6 py-4">
         <h1 className="text-2xl font-bold text-gray-900">Flex Grid Layout Demo</h1>
         <p className="text-gray-600 mt-1">
-          Dynamic layout with collapsible panels, pull handles, and configurable settings
+          Dynamic layout with collapsible panels, pull handles, and configurable settings - Every panel can expand/collapse
         </p>
       </div>
       

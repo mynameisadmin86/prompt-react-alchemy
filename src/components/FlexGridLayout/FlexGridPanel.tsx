@@ -1,5 +1,5 @@
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, ComponentType } from 'react';
 import { Settings } from 'lucide-react';
 import { PanelConfig, PanelSettings } from './types';
 import { Button } from '@/components/ui/button';
