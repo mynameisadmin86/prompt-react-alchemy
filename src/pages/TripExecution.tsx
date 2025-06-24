@@ -198,7 +198,7 @@ const TripExecution = () => {
         width: '350px',
         collapsible: true,
         collapsed: false,
-        minWidth: '0',
+        minWidth: '40px',
         content: (
           <div className="space-y-4">
             <div className="flex items-center gap-2 mb-4">
@@ -305,52 +305,7 @@ const TripExecution = () => {
     }
     
     setLayoutConfig(newConfig);
-    // Save to localStorage with a serializable version (without React components)
-    try {
-      const serializableConfig = {
-        ...newConfig,
-        sections: Object.keys(newConfig.sections).reduce((acc, key) => {
-          const section = newConfig.sections[key as keyof typeof newConfig.sections];
-          acc[key as keyof typeof acc] = {
-            ...section,
-            content: undefined // Remove React components before serializing
-          };
-          return acc;
-        }, {} as any)
-      };
-      localStorage.setItem('tripExecutionLayout', JSON.stringify(serializableConfig));
-    } catch (error) {
-      console.warn('Error saving layout config to localStorage:', error);
-    }
   };
-
-  // Load from localStorage on mount
-  React.useEffect(() => {
-    const saved = localStorage.getItem('tripExecutionLayout');
-    if (saved) {
-      try {
-        const parsedConfig = JSON.parse(saved);
-        // Only apply the structural properties, keep the content as is
-        setLayoutConfig(prev => ({
-          ...prev,
-          sections: {
-            ...prev.sections,
-            left: {
-              ...prev.sections.left,
-              collapsed: parsedConfig.sections.left?.collapsed ?? false,
-              width: parsedConfig.sections.left?.width ?? '350px'
-            },
-            center: {
-              ...prev.sections.center,
-              width: parsedConfig.sections.center?.width ?? 'calc(100% - 350px)'
-            }
-          }
-        }));
-      } catch (error) {
-        console.warn('Error loading layout config from localStorage:', error);
-      }
-    }
-  }, []);
 
   return (
     <div className="h-screen bg-gray-50">
