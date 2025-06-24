@@ -140,34 +140,11 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
     }
   };
 
-  // Get field width class
-  const getFieldWidthClass = (width?: 'full' | 'half' | 'third' | 'quarter' | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12) => {
-    if (!width) return 'col-span-1'; // Default to single column
-
-    if (typeof width === 'number') {
-      const colSpan = Math.min(Math.max(width, 1), 12);
-      return `col-span-${colSpan}`;
-    }
-    
-    switch (width) {
-      case 'half':
-        return 'col-span-6';
-      case 'third':
-        return 'col-span-4';
-      case 'quarter':
-        return 'col-span-3';
-      case 'full':
-        return 'col-span-12';
-      default:
-        return 'col-span-1';
-    }
-  };
-
   const PanelContent = () => (
     <>
-      <div className="grid grid-cols-12 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {visibleFields.map(([fieldId, fieldConfig]) => (
-          <div key={fieldId} className={`space-y-1 ${getFieldWidthClass(fieldConfig.width)}`}>
+          <div key={fieldId} className="space-y-1">
             <label className="text-xs font-medium text-gray-600 block">
               {fieldConfig.label}
               {fieldConfig.mandatory && (
