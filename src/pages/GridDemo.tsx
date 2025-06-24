@@ -63,7 +63,7 @@ const GridDemo = () => {
       subRow: false
     },
     {
-      key: 'tripBillingStatus',
+      key: 'status',
       label: 'Trip Billing Status',
       type: 'Badge',
       sortable: true,
