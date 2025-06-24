@@ -24,6 +24,7 @@ const App = () => (
           <Route path="/grid-demo" element={<GridDemo />} />
           <Route path="/trip-plans-search-hub" element={<TripPlansSearchHub />} />
           <Route path="/dynamic-panel-demo" element={<DynamicPanelDemo />} />
+          <Route path="/flex-grid-demo" element={<FlexGridDemo />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
