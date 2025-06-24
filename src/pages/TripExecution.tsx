@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { FlexGridLayout } from '@/components/FlexGridLayout';
 import { DynamicPanel } from '@/components/DynamicPanel';
@@ -6,7 +7,7 @@ import { ChevronDown } from 'lucide-react';
 import { LayoutConfig } from '@/components/FlexGridLayout/types';
 import { PanelConfig } from '@/types/dynamicPanel';
 
-// Trip Execution form configuration matching image-2
+// Trip Execution form configuration matching the uploaded image
 const tripExecutionPanelConfig: PanelConfig = {
   'trip-id': {
     id: 'trip-id',
@@ -38,15 +39,122 @@ const tripExecutionPanelConfig: PanelConfig = {
     editable: true,
     order: 3
   },
-  'rail-info': {
-    id: 'rail-info',
-    label: 'Rail Information',
+  'rail-company': {
+    id: 'rail-company',
+    label: 'Rail Company',
     fieldType: 'text',
     value: 'Railtrax NV - 46798333',
     mandatory: true,
     visible: true,
     editable: false,
     order: 4
+  },
+  'transport-mode': {
+    id: 'transport-mode',
+    label: 'Transport Mode',
+    fieldType: 'text',
+    value: 'Rail',
+    mandatory: true,
+    visible: true,
+    editable: false,
+    order: 5
+  },
+  'from-location': {
+    id: 'from-location',
+    label: 'From',
+    fieldType: 'text',
+    value: '53-202705, Voila',
+    mandatory: true,
+    visible: true,
+    editable: true,
+    order: 6
+  },
+  'to-location': {
+    id: 'to-location',
+    label: 'To',
+    fieldType: 'text',
+    value: '53-21925-3, Curtici',
+    mandatory: true,
+    visible: true,
+    editable: true,
+    order: 7
+  },
+  'trip-type': {
+    id: 'trip-type',
+    label: 'Trip Type',
+    fieldType: 'radio',
+    value: 'One Way',
+    mandatory: true,
+    visible: true,
+    editable: true,
+    order: 8,
+    options: [
+      { label: 'One Way', value: 'One Way' },
+      { label: 'Round Trip', value: 'Round Trip' }
+    ]
+  },
+  'train-no': {
+    id: 'train-no',
+    label: 'Train No.',
+    fieldType: 'text',
+    value: '',
+    mandatory: false,
+    visible: true,
+    editable: true,
+    order: 9,
+    placeholder: 'Enter Train No.'
+  },
+  'cluster': {
+    id: 'cluster',
+    label: 'Cluster',
+    fieldType: 'select',
+    value: '10000406',
+    mandatory: false,
+    visible: true,
+    editable: true,
+    order: 10,
+    options: [
+      { label: '10000406', value: '10000406' },
+      { label: '10000407', value: '10000407' },
+      { label: '10000408', value: '10000408' }
+    ]
+  },
+  'supplier-ref-no': {
+    id: 'supplier-ref-no',
+    label: 'Supplier Ref. No.',
+    fieldType: 'text',
+    value: '',
+    mandatory: false,
+    visible: true,
+    editable: true,
+    order: 11,
+    placeholder: 'Enter Supplier Ref. No.'
+  },
+  'oc-userdefined-1': {
+    id: 'oc-userdefined-1',
+    label: 'OC Userdefined 1',
+    fieldType: 'select',
+    value: 'GC',
+    mandatory: false,
+    visible: true,
+    editable: true,
+    order: 12,
+    options: [
+      { label: 'GC', value: 'GC' },
+      { label: 'FC', value: 'FC' },
+      { label: 'LC', value: 'LC' }
+    ]
+  },
+  'remarks-1': {
+    id: 'remarks-1',
+    label: 'Remarks 1',
+    fieldType: 'textarea',
+    value: '',
+    mandatory: false,
+    visible: true,
+    editable: true,
+    order: 13,
+    placeholder: 'Enter Remarks'
   }
 };
 
@@ -195,7 +303,7 @@ const TripExecution = () => {
       left: {
         id: 'left',
         visible: true,
-        width: '350px',
+        width: '400px',
         collapsible: true,
         collapsed: false,
         minWidth: '40px',
@@ -209,7 +317,18 @@ const TripExecution = () => {
               panelId="trip-execution-panel"
               panelTitle="Trip Execution Details"
               panelConfig={tripExecutionPanelConfig}
-              initialData={{}}
+              initialData={{
+                'trip-id': 'TRIP00000001',
+                'customer-id': 'CUS0009173',
+                'price': '45595.00',
+                'rail-company': 'Railtrax NV - 46798333',
+                'transport-mode': 'Rail',
+                'from-location': '53-202705, Voila',
+                'to-location': '53-21925-3, Curtici',
+                'trip-type': 'One Way',
+                'cluster': '10000406',
+                'oc-userdefined-1': 'GC'
+              }}
               onDataChange={(data) => console.log('Trip execution data changed:', data)}
             />
           </div>
@@ -218,7 +337,7 @@ const TripExecution = () => {
       center: {
         id: 'center',
         visible: true,
-        width: 'calc(100% - 350px)',
+        width: 'calc(100% - 400px)',
         collapsible: false,
         content: (
           <div className="h-full flex flex-col">
@@ -301,7 +420,7 @@ const TripExecution = () => {
     if (newConfig.sections.left.collapsed) {
       newConfig.sections.center.width = '100%';
     } else {
-      newConfig.sections.center.width = 'calc(100% - 350px)';
+      newConfig.sections.center.width = 'calc(100% - 400px)';
     }
     
     setLayoutConfig(newConfig);
