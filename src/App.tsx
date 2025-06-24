@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -8,7 +9,6 @@ import GridDemo from "./pages/GridDemo";
 import TripPlansSearchHub from "./pages/TripPlansSearchHub";
 import DynamicPanelDemo from "./pages/DynamicPanelDemo";
 import FlexGridDemo from "./pages/FlexGridDemo";
-import FlexGridLayoutPage from "./pages/FlexGridLayoutPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -25,7 +25,6 @@ const App = () => (
           <Route path="/trip-plans-search-hub" element={<TripPlansSearchHub />} />
           <Route path="/dynamic-panel-demo" element={<DynamicPanelDemo />} />
           <Route path="/flex-grid-demo" element={<FlexGridDemo />} />
-          <Route path="/flex-grid-layout-page" element={<FlexGridLayoutPage />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
