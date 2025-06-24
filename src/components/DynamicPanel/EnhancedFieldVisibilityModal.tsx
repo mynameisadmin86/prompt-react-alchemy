@@ -21,12 +21,14 @@ interface EnhancedFieldVisibilityModalProps {
   panelWidth: 'full' | 'half' | 'third' | 'quarter' | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12;
   collapsible?: boolean;
   panelVisible?: boolean;
+  showHeader?: boolean;
   onSave: (
     updatedConfig: PanelConfig, 
     newTitle?: string, 
     newWidth?: 'full' | 'half' | 'third' | 'quarter' | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12,
     newCollapsible?: boolean,
-    newPanelVisible?: boolean
+    newPanelVisible?: boolean,
+    newShowHeader?: boolean
   ) => void;
 }
 
@@ -38,6 +40,7 @@ export const EnhancedFieldVisibilityModal: React.FC<EnhancedFieldVisibilityModal
   panelWidth,
   collapsible = false,
   panelVisible = true,
+  showHeader = true,
   onSave
 }) => {
   const [fieldConfigs, setFieldConfigs] = useState<EnhancedFieldVisibilityConfig[]>([]);
@@ -49,6 +52,7 @@ export const EnhancedFieldVisibilityModal: React.FC<EnhancedFieldVisibilityModal
   );
   const [currentCollapsible, setCurrentCollapsible] = useState(collapsible);
   const [currentPanelVisible, setCurrentPanelVisible] = useState(panelVisible);
+  const [currentShowHeader, setCurrentShowHeader] = useState(showHeader);
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
 
   useEffect(() => {
@@ -71,7 +75,8 @@ export const EnhancedFieldVisibilityModal: React.FC<EnhancedFieldVisibilityModal
     );
     setCurrentCollapsible(collapsible);
     setCurrentPanelVisible(panelVisible);
-  }, [panelConfig, panelTitle, panelWidth, collapsible, panelVisible]);
+    setCurrentShowHeader(showHeader);
+  }, [panelConfig, panelTitle, panelWidth, collapsible, panelVisible, showHeader]);
 
   const handleVisibilityChange = (fieldId: string, visible: boolean) => {
     setFieldConfigs(prev => 
@@ -139,7 +144,7 @@ export const EnhancedFieldVisibilityModal: React.FC<EnhancedFieldVisibilityModal
       }
     });
 
-    onSave(updatedConfig, currentTitle, currentWidth, currentCollapsible, currentPanelVisible);
+    onSave(updatedConfig, currentTitle, currentWidth, currentCollapsible, currentPanelVisible, currentShowHeader);
     onClose();
   };
 
@@ -158,6 +163,7 @@ export const EnhancedFieldVisibilityModal: React.FC<EnhancedFieldVisibilityModal
     setCurrentWidth('full');
     setCurrentCollapsible(false);
     setCurrentPanelVisible(true);
+    setCurrentShowHeader(true);
   };
 
   const formatWidthValue = (value: 'full' | 'half' | 'third' | 'quarter' | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12) => {
@@ -251,6 +257,15 @@ export const EnhancedFieldVisibilityModal: React.FC<EnhancedFieldVisibilityModal
                   onCheckedChange={(checked) => setCurrentCollapsible(checked as boolean)}
                 />
                 <Label htmlFor="collapsible">Make panel collapsible</Label>
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="show-header"
+                  checked={currentShowHeader}
+                  onCheckedChange={(checked) => setCurrentShowHeader(checked as boolean)}
+                />
+                <Label htmlFor="show-header">Show header section</Label>
               </div>
             </AccordionContent>
           </AccordionItem>
