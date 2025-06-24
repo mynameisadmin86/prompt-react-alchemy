@@ -1,7 +1,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Grid, Search, Settings, Database } from "lucide-react";
+import { Grid, Search, Settings, Layout, Database } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const Index = () => {
@@ -83,6 +83,30 @@ const Index = () => {
                 A flexible panel component with customizable fields, validation, and dynamic layout capabilities.
               </p>
               <Link to="/dynamic-panel-demo">
+                <Button className="w-full">
+                  View Demo
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
+
+          <Card className="hover:shadow-lg transition-shadow duration-300">
+            <CardHeader>
+              <div className="flex items-center space-x-3">
+                <div className="p-2 bg-orange-100 rounded-lg">
+                  <Layout className="h-6 w-6 text-orange-600" />
+                </div>
+                <div>
+                  <CardTitle>Flex Grid Layout</CardTitle>
+                  <CardDescription>5-section configurable layout</CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <p className="text-gray-600 mb-4">
+                A dynamic layout system with Top, Left, Center, Right, and Bottom sections. Each section is configurable with collapse/expand functionality.
+              </p>
+              <Link to="/flex-grid-demo">
                 <Button className="w-full">
                   View Demo
                 </Button>

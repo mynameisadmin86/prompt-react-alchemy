@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import GridDemo from "./pages/GridDemo";
 import TripPlansSearchHub from "./pages/TripPlansSearchHub";
 import DynamicPanelDemo from "./pages/DynamicPanelDemo";
+import FlexGridDemo from "./pages/FlexGridDemo";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
