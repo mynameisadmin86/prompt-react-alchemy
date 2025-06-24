@@ -1,6 +1,7 @@
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Grid, Search, Settings, Layout, Database } from "lucide-react";
+import { Grid, Search, Settings, Layout, Database, Truck } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const Index = () => {
@@ -130,6 +131,30 @@ const Index = () => {
                 A complete page layout with dynamic panel on the left, smart grid in center, and action footer - matching real application designs.
               </p>
               <Link to="/flex-grid-layout-page">
+                <Button className="w-full">
+                  View Demo
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
+
+          <Card className="hover:shadow-lg transition-shadow duration-300">
+            <CardHeader>
+              <div className="flex items-center space-x-3">
+                <div className="p-2 bg-teal-100 rounded-lg">
+                  <Truck className="h-6 w-6 text-teal-600" />
+                </div>
+                <div>
+                  <CardTitle>Trip Execution</CardTitle>
+                  <CardDescription>Logistics management interface</CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <p className="text-gray-600 mb-4">
+                A comprehensive trip execution interface with trip details, activities tracking, and logistics management.
+              </p>
+              <Link to="/trip-execution">
                 <Button className="w-full">
                   View Demo
                 </Button>
