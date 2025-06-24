@@ -1,7 +1,8 @@
-
 import React from 'react';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Label } from '@/components/ui/label';
 import { Search, Calendar, Clock } from 'lucide-react';
 import { FieldConfig } from '@/types/dynamicPanel';
 
@@ -48,6 +49,24 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
           placeholder={placeholder}
           className="min-h-[60px] text-xs border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
         />
+      );
+
+    case 'radio':
+      return (
+        <RadioGroup
+          value={value || ''}
+          onValueChange={onChange}
+          className="flex gap-4"
+        >
+          {options?.map((option) => (
+            <div key={option.value} className="flex items-center space-x-2">
+              <RadioGroupItem value={option.value} id={`${config.id}-${option.value}`} />
+              <Label htmlFor={`${config.id}-${option.value}`} className="text-xs">
+                {option.label}
+              </Label>
+            </div>
+          ))}
+        </RadioGroup>
       );
 
     case 'select':

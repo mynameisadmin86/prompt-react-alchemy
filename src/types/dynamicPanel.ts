@@ -2,13 +2,13 @@
 export interface FieldConfig {
   id: string;
   label: string;
-  fieldType: 'text' | 'select' | 'search' | 'currency' | 'date' | 'time' | 'textarea';
+  fieldType: 'text' | 'select' | 'search' | 'currency' | 'date' | 'time' | 'textarea' | 'radio';
   value: any;
   mandatory: boolean;
   visible: boolean;
   editable: boolean;
   order: number;
-  options?: { label: string; value: string }[]; // For select fields
+  options?: { label: string; value: string }[]; // For select and radio fields
   placeholder?: string;
 }
 
