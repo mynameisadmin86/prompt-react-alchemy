@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -35,6 +34,7 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
   const [isOpen, setIsOpen] = useState(true);
   const [formData, setFormData] = useState(initialData);
   const [isConfigModalOpen, setIsConfigModalOpen] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
 
   // Load user configuration on mount
   useEffect(() => {
@@ -208,7 +208,7 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
   }
 
   const SettingsButton = () => (
-    !showPreview && (
+    !showPreview && isHovered && (
       <Button
         variant="ghost"
         size="icon"
@@ -225,7 +225,13 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
 
   if (isCollapsible) {
     return (
-      <Collapsible open={isOpen} onOpenChange={setIsOpen} className={`${getWidthClass()}`}>
+      <Collapsible 
+        open={isOpen} 
+        onOpenChange={setIsOpen} 
+        className={`${getWidthClass()}`}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+      >
         <Card className="border border-gray-200 shadow-sm">
           {showHeader ? (
             <CollapsibleTrigger asChild>
@@ -283,7 +289,11 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
   }
 
   return (
-    <Card className={`${getWidthClass()} border border-gray-200 shadow-sm relative`}>
+    <Card 
+      className={`${getWidthClass()} border border-gray-200 shadow-sm relative`}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
       {showHeader ? (
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3 px-4 pt-4">
           <div className="flex items-center gap-2">

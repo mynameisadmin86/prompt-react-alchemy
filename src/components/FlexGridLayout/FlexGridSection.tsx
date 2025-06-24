@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Settings, ChevronLeft, ChevronRight, ChevronUp, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -65,8 +66,8 @@ const FlexGridSection: React.FC<SectionProps> = ({
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {/* Gear icon - positioned in top-right corner, only show when not collapsed */}
-      {!section.collapsed && (
+      {/* Gear icon - positioned in top-right corner, only show when not collapsed and on hover */}
+      {!section.collapsed && isHovered && (
         <div className="absolute top-2 right-2 z-20">
           <Popover>
             <PopoverTrigger asChild>
