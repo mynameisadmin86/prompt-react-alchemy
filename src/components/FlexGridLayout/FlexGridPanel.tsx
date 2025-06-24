@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { ComponentType } from 'react';
 import { ChevronLeft, ChevronRight, ChevronDown, ChevronUp } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { FlexGridPanelProps } from './types';
