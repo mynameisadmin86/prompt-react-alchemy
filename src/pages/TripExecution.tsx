@@ -1,12 +1,10 @@
 import React, { useState } from 'react';
 import { FlexGridLayout } from '@/components/FlexGridLayout';
 import { DynamicPanel } from '@/components/DynamicPanel';
-import { SmartGrid } from '@/components/SmartGrid';
 import { Button } from '@/components/ui/button';
 import { ChevronDown } from 'lucide-react';
 import { LayoutConfig } from '@/components/FlexGridLayout/types';
 import { PanelConfig } from '@/types/dynamicPanel';
-import { GridColumnConfig } from '@/types/smartgrid';
 
 // Trip Execution form configuration matching image-2
 const tripExecutionPanelConfig: PanelConfig = {
@@ -51,62 +49,6 @@ const tripExecutionPanelConfig: PanelConfig = {
     order: 4
   }
 };
-
-// Activities & Consignment grid configuration matching image-3
-const activitiesGridColumns: GridColumnConfig[] = [
-  {
-    key: 'leg',
-    label: 'Leg',
-    type: 'Text',
-    sortable: true,
-    filterable: true
-  },
-  {
-    key: 'behaviour',
-    label: 'Behaviour',
-    type: 'Badge',
-    statusMap: {
-      'Pick': 'bg-blue-100 text-blue-800',
-      'Drvy': 'bg-green-100 text-green-800',
-      'CHA-Import': 'bg-cyan-100 text-cyan-800',
-      'PUD': 'bg-emerald-100 text-emerald-800',
-      'GTIN': 'bg-pink-100 text-pink-800',
-      'GTOUT': 'bg-orange-100 text-orange-800',
-      'LHTA': 'bg-purple-100 text-purple-800'
-    }
-  },
-  {
-    key: 'location',
-    label: 'Location',
-    type: 'Text',
-    filterable: true
-  },
-  {
-    key: 'plannedActual',
-    label: 'Planned/Actual',
-    type: 'Text',
-    sortable: true
-  },
-  {
-    key: 'consignment',
-    label: 'Consignment',
-    type: 'Text'
-  },
-  {
-    key: 'status',
-    label: 'Status',
-    type: 'Badge',
-    statusMap: {
-      'completed': 'bg-green-100 text-green-800',
-      'pending': 'bg-gray-100 text-gray-800'
-    }
-  },
-  {
-    key: 'action',
-    label: 'Action',
-    type: 'Text'
-  }
-];
 
 const activitiesGridData = [
   {
@@ -204,7 +146,7 @@ const CustomerOrdersSection = () => (
         <h3 className="text-lg font-semibold text-gray-800">Resources</h3>
       </div>
       <div className="space-y-2">
-        <div className="flex justify-between text-small">
+        <div className="flex justify-between text-sm">
           <span className="text-gray-600">No. of Resource</span>
           <span className="font-medium">4</span>
         </div>
@@ -257,7 +199,6 @@ const TripExecution = () => {
         collapsible: true,
         collapsed: false,
         minWidth: '0',
-        title: 'Trip Details',
         content: (
           <div className="space-y-4">
             <div className="flex items-center gap-2 mb-4">
@@ -267,48 +208,7 @@ const TripExecution = () => {
             <DynamicPanel
               panelId="trip-execution-panel"
               panelTitle="Trip Execution Details"
-              panelConfig={{
-                'trip-id': {
-                  id: 'trip-id',
-                  label: 'Trip ID',
-                  fieldType: 'text',
-                  value: 'TRIP00000001',
-                  mandatory: true,
-                  visible: true,
-                  editable: false,
-                  order: 1
-                },
-                'customer-id': {
-                  id: 'customer-id',
-                  label: 'Customer ID',
-                  fieldType: 'text',
-                  value: 'CUS0009173',
-                  mandatory: true,
-                  visible: true,
-                  editable: false,
-                  order: 2
-                },
-                'price': {
-                  id: 'price',
-                  label: 'Price',
-                  fieldType: 'currency',
-                  value: '45595.00',
-                  mandatory: true,
-                  visible: true,
-                  editable: true,
-                  order: 3
-                },
-                'rail-info': {
-                  id: 'rail-info',
-                  label: 'Rail Information',
-                  fieldType: 'text',
-                  value: 'Railtrax NV - 46798333',
-                  mandatory: true,
-                  visible: true,
-                  editable: false,
-                  order: 4
-                }
-              }}
+              panelConfig={tripExecutionPanelConfig}
               initialData={{}}
               onDataChange={(data) => console.log('Trip execution data changed:', data)}
             />
@@ -320,7 +220,6 @@ const TripExecution = () => {
         visible: true,
         width: 'calc(100% - 350px)',
         collapsible: false,
-        title: 'Activities & Consignment',
         content: (
           <div className="h-full flex flex-col">
             <div className="flex-1">
@@ -341,28 +240,34 @@ const TripExecution = () => {
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-200">
-                        <tr>
-                          <td className="px-4 py-3 text-sm">Leg: 1</td>
-                          <td className="px-4 py-3">
-                            <span className="inline-flex px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded">Pick</span>
-                          </td>
-                          <td className="px-4 py-3 text-sm">CHN-MUM</td>
-                          <td className="px-4 py-3 text-sm">20/20</td>
-                          <td className="px-4 py-3">
-                            <span className="inline-flex px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded">Completed</span>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td className="px-4 py-3 text-sm">Leg: 2</td>
-                          <td className="px-4 py-3">
-                            <span className="inline-flex px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded">Drvy</span>
-                          </td>
-                          <td className="px-4 py-3 text-sm">CHN-DEL</td>
-                          <td className="px-4 py-3 text-sm">20/20</td>
-                          <td className="px-4 py-3">
-                            <span className="inline-flex px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded">Completed</span>
-                          </td>
-                        </tr>
+                        {activitiesGridData.map((row, index) => (
+                          <tr key={index}>
+                            <td className="px-4 py-3 text-sm">{row.leg}</td>
+                            <td className="px-4 py-3">
+                              <span className={`inline-flex px-2 py-1 text-xs font-medium rounded ${
+                                row.behaviour === 'Pick' ? 'bg-blue-100 text-blue-800' :
+                                row.behaviour === 'Drvy' ? 'bg-green-100 text-green-800' :
+                                row.behaviour === 'CHA-Import' ? 'bg-cyan-100 text-cyan-800' :
+                                row.behaviour === 'PUD' ? 'bg-emerald-100 text-emerald-800' :
+                                row.behaviour === 'GTIN' ? 'bg-pink-100 text-pink-800' :
+                                row.behaviour === 'GTOUT' ? 'bg-orange-100 text-orange-800' :
+                                row.behaviour === 'LHTA' ? 'bg-purple-100 text-purple-800' :
+                                'bg-gray-100 text-gray-800'
+                              }`}>
+                                {row.behaviour}
+                              </span>
+                            </td>
+                            <td className="px-4 py-3 text-sm">{row.location}</td>
+                            <td className="px-4 py-3 text-sm">{row.plannedActual}</td>
+                            <td className="px-4 py-3">
+                              <span className={`inline-flex px-2 py-1 text-xs font-medium rounded ${
+                                row.status === 'completed' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+                              }`}>
+                                {row.status === 'completed' ? 'Completed' : 'Pending'}
+                              </span>
+                            </td>
+                          </tr>
+                        ))}
                       </tbody>
                     </table>
                   </div>
@@ -386,7 +291,6 @@ const TripExecution = () => {
         visible: true,
         height: 'auto',
         collapsible: false,
-        title: 'Actions',
         content: <TripExecutionFooterActions />
       }
     }
@@ -401,8 +305,23 @@ const TripExecution = () => {
     }
     
     setLayoutConfig(newConfig);
-    // Save to localStorage
-    localStorage.setItem('tripExecutionLayout', JSON.stringify(newConfig));
+    // Save to localStorage with a serializable version (without React components)
+    try {
+      const serializableConfig = {
+        ...newConfig,
+        sections: Object.keys(newConfig.sections).reduce((acc, key) => {
+          const section = newConfig.sections[key as keyof typeof newConfig.sections];
+          acc[key as keyof typeof acc] = {
+            ...section,
+            content: undefined // Remove React components before serializing
+          };
+          return acc;
+        }, {} as any)
+      };
+      localStorage.setItem('tripExecutionLayout', JSON.stringify(serializableConfig));
+    } catch (error) {
+      console.warn('Error saving layout config to localStorage:', error);
+    }
   };
 
   // Load from localStorage on mount
@@ -411,7 +330,22 @@ const TripExecution = () => {
     if (saved) {
       try {
         const parsedConfig = JSON.parse(saved);
-        setLayoutConfig(parsedConfig);
+        // Only apply the structural properties, keep the content as is
+        setLayoutConfig(prev => ({
+          ...prev,
+          sections: {
+            ...prev.sections,
+            left: {
+              ...prev.sections.left,
+              collapsed: parsedConfig.sections.left?.collapsed ?? false,
+              width: parsedConfig.sections.left?.width ?? '350px'
+            },
+            center: {
+              ...prev.sections.center,
+              width: parsedConfig.sections.center?.width ?? 'calc(100% - 350px)'
+            }
+          }
+        }));
       } catch (error) {
         console.warn('Error loading layout config from localStorage:', error);
       }
