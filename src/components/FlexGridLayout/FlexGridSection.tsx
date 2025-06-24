@@ -66,18 +66,14 @@ const FlexGridSection: React.FC<SectionProps> = ({
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {/* Header with gear icon */}
-      <div className="flex items-center justify-between p-2 border-b bg-gray-50">
-        <h3 className="text-sm font-medium text-gray-700 truncate">
-          {section.title || `${section.id.charAt(0).toUpperCase() + section.id.slice(1)} Panel`}
-        </h3>
-        
+      {/* Gear icon - positioned in top-right corner */}
+      <div className="absolute top-2 right-2 z-20">
         <Popover>
           <PopoverTrigger asChild>
             <Button
               variant="ghost"
               size="sm"
-              className="h-6 w-6 p-0 hover:bg-gray-200"
+              className="h-6 w-6 p-0 hover:bg-gray-200 opacity-70 hover:opacity-100"
               aria-label={`Configure ${section.id} panel`}
             >
               <Settings className="h-3 w-3" />
@@ -147,7 +143,7 @@ const FlexGridSection: React.FC<SectionProps> = ({
         </Popover>
       </div>
 
-      {/* Content area */}
+      {/* Content area - full height */}
       <div className={cn('p-4 h-full overflow-auto', section.collapsed && 'hidden')}>
         {children || section.content || (
           <div className="text-gray-500 text-sm">
