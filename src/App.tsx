@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import GridDemo from "./pages/GridDemo";
 import TripPlansSearchHub from "./pages/TripPlansSearchHub";
 import DynamicPanelDemo from "./pages/DynamicPanelDemo";
+import FlexGridDemo from "./pages/FlexGridDemo";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -23,6 +24,7 @@ const App = () => (
           <Route path="/grid-demo" element={<GridDemo />} />
           <Route path="/trip-plans-search-hub" element={<TripPlansSearchHub />} />
           <Route path="/dynamic-panel-demo" element={<DynamicPanelDemo />} />
+          <Route path="/flex-grid-demo" element={<FlexGridDemo />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
