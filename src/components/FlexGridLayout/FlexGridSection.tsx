@@ -51,109 +51,113 @@ const FlexGridSection: React.FC<SectionProps> = ({
   };
 
   const sectionStyle = {
-    width: section.collapsed ? (section.minWidth || '0') : (section.width || 'auto'),
-    height: section.collapsed ? (section.minHeight || '0') : (section.height || 'auto'),
+    width: section.collapsed ? (section.minWidth || '40px') : (section.width || 'auto'),
+    height: section.collapsed ? (section.minHeight || 'auto') : (section.height || 'auto'),
   };
 
   return (
     <div
       className={cn(
-        'relative bg-white border shadow-sm transition-all duration-300 ease-in-out overflow-hidden',
-        section.collapsed && 'min-w-0',
+        'relative bg-white border shadow-sm transition-all duration-300 ease-in-out',
+        section.collapsed ? 'overflow-visible' : 'overflow-hidden',
         className
       )}
       style={sectionStyle}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {/* Gear icon - positioned in top-right corner */}
-      <div className="absolute top-2 right-2 z-20">
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-6 w-6 p-0 hover:bg-gray-200 opacity-70 hover:opacity-100"
-              aria-label={`Configure ${section.id} panel`}
-            >
-              <Settings className="h-3 w-3" />
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-80" align="end">
-            <div className="space-y-4">
-              <h4 className="font-medium text-sm">Panel Configuration</h4>
-              
-              <div className="flex items-center justify-between">
-                <Label htmlFor={`visible-${section.id}`} className="text-sm">Visible</Label>
-                <Switch
-                  id={`visible-${section.id}`}
-                  checked={section.visible}
-                  onCheckedChange={(checked) => onConfigChange(section.id, { visible: checked })}
-                />
-              </div>
-
-              {section.collapsible && (
+      {/* Gear icon - positioned in top-right corner, only show when not collapsed */}
+      {!section.collapsed && (
+        <div className="absolute top-2 right-2 z-20">
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-6 w-6 p-0 hover:bg-gray-200 opacity-70 hover:opacity-100"
+                aria-label={`Configure ${section.id} panel`}
+              >
+                <Settings className="h-3 w-3" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-80" align="end">
+              <div className="space-y-4">
+                <h4 className="font-medium text-sm">Panel Configuration</h4>
+                
                 <div className="flex items-center justify-between">
-                  <Label htmlFor={`collapsible-${section.id}`} className="text-sm">Collapsible</Label>
+                  <Label htmlFor={`visible-${section.id}`} className="text-sm">Visible</Label>
                   <Switch
-                    id={`collapsible-${section.id}`}
-                    checked={section.collapsible}
-                    onCheckedChange={(checked) => onConfigChange(section.id, { collapsible: checked })}
+                    id={`visible-${section.id}`}
+                    checked={section.visible}
+                    onCheckedChange={(checked) => onConfigChange(section.id, { visible: checked })}
                   />
                 </div>
-              )}
 
-              <div className="space-y-2">
-                <Label className="text-sm">Width</Label>
-                <Select
-                  value={section.width || '100%'}
-                  onValueChange={(value) => onConfigChange(section.id, { width: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="25%">25%</SelectItem>
-                    <SelectItem value="50%">50%</SelectItem>
-                    <SelectItem value="75%">75%</SelectItem>
-                    <SelectItem value="100%">100%</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+                {section.collapsible && (
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor={`collapsible-${section.id}`} className="text-sm">Collapsible</Label>
+                    <Switch
+                      id={`collapsible-${section.id}`}
+                      checked={section.collapsible}
+                      onCheckedChange={(checked) => onConfigChange(section.id, { collapsible: checked })}
+                    />
+                  </div>
+                )}
 
-              <div className="space-y-2">
-                <Label className="text-sm">Height</Label>
-                <Select
-                  value={section.height || '100%'}
-                  onValueChange={(value) => onConfigChange(section.id, { height: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="25%">25%</SelectItem>
-                    <SelectItem value="50%">50%</SelectItem>
-                    <SelectItem value="75%">75%</SelectItem>
-                    <SelectItem value="100%">100%</SelectItem>
-                  </SelectContent>
-                </Select>
+                <div className="space-y-2">
+                  <Label className="text-sm">Width</Label>
+                  <Select
+                    value={section.width || '100%'}
+                    onValueChange={(value) => onConfigChange(section.id, { width: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="25%">25%</SelectItem>
+                      <SelectItem value="50%">50%</SelectItem>
+                      <SelectItem value="75%">75%</SelectItem>
+                      <SelectItem value="100%">100%</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-sm">Height</Label>
+                  <Select
+                    value={section.height || '100%'}
+                    onValueChange={(value) => onConfigChange(section.id, { height: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="25%">25%</SelectItem>
+                      <SelectItem value="50%">50%</SelectItem>
+                      <SelectItem value="75%">75%</SelectItem>
+                      <SelectItem value="100%">100%</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
+            </PopoverContent>
+          </Popover>
+        </div>
+      )}
+
+      {/* Content area - hide when collapsed */}
+      {!section.collapsed && (
+        <div className="p-4 h-full overflow-auto">
+          {children || section.content || (
+            <div className="text-gray-500 text-sm">
+              {section.id.charAt(0).toUpperCase() + section.id.slice(1)} content area
             </div>
-          </PopoverContent>
-        </Popover>
-      </div>
+          )}
+        </div>
+      )}
 
-      {/* Content area - full height */}
-      <div className={cn('p-4 h-full overflow-auto', section.collapsed && 'hidden')}>
-        {children || section.content || (
-          <div className="text-gray-500 text-sm">
-            {section.id.charAt(0).toUpperCase() + section.id.slice(1)} content area
-          </div>
-        )}
-      </div>
-
-      {/* Toggle handle */}
-      {section.collapsible && (isHovered || section.collapsed) && (
+      {/* Toggle handle - always show for collapsible sections */}
+      {section.collapsible && (
         <Button
           variant="outline"
           size="sm"
@@ -167,6 +171,15 @@ const FlexGridSection: React.FC<SectionProps> = ({
         >
           {getToggleIcon()}
         </Button>
+      )}
+
+      {/* Collapsed content - show a minimal indicator when collapsed */}
+      {section.collapsed && (
+        <div className="h-full flex items-center justify-center p-2">
+          <div className="transform -rotate-90 text-xs text-gray-500 whitespace-nowrap">
+            {section.id.charAt(0).toUpperCase() + section.id.slice(1)}
+          </div>
+        </div>
       )}
     </div>
   );
