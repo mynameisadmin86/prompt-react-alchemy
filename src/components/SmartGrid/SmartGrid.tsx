@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { 
   ArrowUpDown, 
   ArrowUp, 
@@ -672,8 +673,6 @@ export function SmartGrid({
 
   return (
     <div className="space-y-4 w-full">
-     
-
       {/* Toolbar */}
       <GridToolbar
         globalFilter={globalFilter}
@@ -712,296 +711,314 @@ export function SmartGrid({
         api={mockFilterAPI}
       />
       
-      {/* Table Container with no horizontal scroll */}
-      <div className="bg-white rounded-lg border shadow-sm overflow-hidden">
-        <div className="w-full">
-          <Table className="w-full table-fixed">
-            <TableHeader className="sticky top-0 z-20 bg-white shadow-sm border-b-2 border-gray-100">
-              <TableRow className="hover:bg-transparent">
-                {/* Checkbox header */}
-                {showCheckboxes && (
-                  <TableHead className="bg-gray-50/80 backdrop-blur-sm font-semibold text-gray-900 px-3 py-3 border-r border-gray-100 w-[50px] flex-shrink-0">
-                    <input 
-                      type="checkbox" 
-                      className="rounded" 
-                      onChange={(e) => {
-                        const target = e.target as HTMLInputElement;
-                        if (target.checked) {
-                          handleSelectionChange(new Set(Array.from({ length: paginatedData.length }, (_, i) => i)));
-                        } else {
-                          handleSelectionChange(new Set());
-                        }
-                      }}
-                      checked={currentSelectedRows.size === paginatedData.length && paginatedData.length > 0}
-                    />
-                  </TableHead>
-                )}
-                {orderedColumns.map((column, index) => {
-                  const shouldHideIcons = resizeHoverColumn === column.key || resizingColumn === column.key;
-                  const currentFilter = filters.find(f => f.column === column.key);
-                  return (
-                    <TableHead 
-                      key={column.key}
-                      className={cn(
-                        "relative group bg-gray-50/80 backdrop-blur-sm font-semibold text-gray-900 px-2 py-3 border-r border-gray-100 last:border-r-0",
-                        draggedColumn === column.key && "opacity-50",
-                        dragOverColumn === column.key && "bg-blue-100 border-blue-300",
-                        resizingColumn === column.key && "bg-blue-50",
-                        !resizingColumn && "cursor-move"
-                      )}
-                      style={{ width: `${column.width}px`, minWidth: `${Math.max(120, column.width)}px` }}
-                      draggable={!editingHeader && !resizingColumn}
-                      onDragStart={(e) => handleColumnDragStart(e, column.key)}
-                      onDragOver={(e) => handleColumnDragOver(e, column.key)}
-                      onDragLeave={handleColumnDragLeave}
-                      onDrop={(e) => handleColumnDrop(e, column.key)}
-                      onDragEnd={handleColumnDragEnd}
-                    >
-                      <div className="flex items-center justify-between gap-1 min-w-0">
-                        <div className="flex items-center gap-1 min-w-0 flex-1">
-                          {!shouldHideIcons && (
-                            <GripVertical className="h-3 w-3 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
-                          )}
-                          {editingHeader === column.key ? (
-                            <Input
-                              defaultValue={column.label}
-                              onBlur={(e) => handleHeaderEdit(column.key, e.target.value)}
-                              onKeyDown={(e) => {
-                                if (e.key === 'Enter') {
-                                  handleHeaderEdit(column.key, e.currentTarget.value);
-                                } else if (e.key === 'Escape') {
-                                  setEditingHeader(null);
-                                }
-                              }}
-                              className="h-5 px-1 text-sm font-semibold bg-white border-blue-300 focus:border-blue-500 min-w-0"
-                              autoFocus
-                              onFocus={(e) => e.target.select()}
-                              onClick={(e) => e.stopPropagation()}
-                              onDragStart={(e) => e.preventDefault()}
-                            />
-                          ) : (
-                            <div 
-                              className={cn(
-                                "flex items-center gap-1 rounded px-1 py-0.5 -mx-1 -my-0.5 transition-colors group/header flex-1 min-w-0",
-                                !resizingColumn && "cursor-pointer hover:bg-gray-100/50"
-                              )}
-                              onClick={(e) => {
-                                if (resizingColumn) return;
-                                e.stopPropagation();
-                                handleHeaderClick(column.key);
-                              }}
-                              onDragStart={(e) => e.preventDefault()}
-                            >
-                              <span 
-                                className="select-none text-sm font-semibold flex-1 min-w-0" 
-                                style={{ 
-                                  whiteSpace: 'nowrap',
-                                  overflow: 'visible',
-                                  textOverflow: 'clip'
-                                }}
-                                title={column.label}
-                              >
-                                {column.label}
-                              </span>
-                              {column.editable && !shouldHideIcons && (
-                                <Edit2 className="h-3 w-3 text-gray-400 opacity-0 group-hover/header:opacity-100 transition-opacity flex-shrink-0" />
-                              )}
-                            </div>
-                          )}
-                        </div>
-                        
-                        <div className="flex items-center gap-1">
-                          {column.sortable && !shouldHideIcons && (
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={(e) => {
-                                if (resizingColumn) return;
-                                e.stopPropagation();
-                                handleSort(column.key);
-                              }}
-                              className="h-5 w-5 p-0 hover:bg-transparent transition-opacity flex-shrink-0"
-                              disabled={loading || !!resizingColumn}
-                              onDragStart={(e) => e.preventDefault()}
-                            >
-                              {sort?.column === column.key ? (
-                                sort.direction === 'asc' ? (
-                                  <ArrowUp className="h-3 w-3 text-blue-600" />
-                                ) : (
-                                  <ArrowDown className="h-3 w-3 text-blue-600" />
-                                )
-                              ) : (
-                                <ArrowUpDown className="h-3 w-3 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" />
-                              )}
-                            </Button>
-                          )}
-                        </div>
-                      </div>
-                      
-                      {/* Resize Handle - Modified to only show on hover */}
-                      <div
-                        className="absolute top-0 right-0 w-2 h-full cursor-col-resize bg-transparent hover:bg-blue-300/50 transition-colors flex items-center justify-center group/resize z-30"
-                        onMouseDown={(e) => handleResizeStart(e, column.key)}
-                        onMouseEnter={() => setResizeHoverColumn(column.key)}
-                        onMouseLeave={() => setResizeHoverColumn(null)}
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                        }}
-                        onDragStart={(e) => e.preventDefault()}
-                      >
-                        <div className="w-0.5 h-4 bg-gray-300 opacity-0 group-hover/resize:opacity-100 transition-opacity" />
-                      </div>
-                    </TableHead>
-                  );
-                })}
-                {/* Plugin row actions header */}
-                {plugins.some(plugin => plugin.rowActions) && (
-                  <TableHead className="bg-gray-50/80 backdrop-blur-sm font-semibold text-gray-900 px-3 py-3 text-center w-[100px] flex-shrink-0">
-                    Actions
-                  </TableHead>
-                )}
-              </TableRow>
-              
-              {/* Column Filter Row - Legacy support, hidden when using FilterSystem */}
-              {showColumnFilters && !showFilterRow && (
-                <TableRow className="hover:bg-transparent border-b border-gray-200">
-                  {/* Checkbox column space */}
+      {/* Table Container with horizontal scroll prevention */}
+      <div className="bg-white rounded-lg border shadow-sm">
+        <ScrollArea className="w-full">
+          <div className="min-w-full">
+            <Table className="w-full">
+              <TableHeader className="sticky top-0 z-20 bg-white shadow-sm border-b-2 border-gray-100">
+                <TableRow className="hover:bg-transparent">
+                  {/* Checkbox header */}
                   {showCheckboxes && (
-                    <TableHead className="bg-gray-25 px-3 py-2 border-r border-gray-100 w-[50px]">
-                      {/* Empty space for checkbox column */}
+                    <TableHead className="bg-gray-50/80 backdrop-blur-sm font-semibold text-gray-900 px-3 py-3 border-r border-gray-100 w-[50px] flex-shrink-0">
+                      <input 
+                        type="checkbox" 
+                        className="rounded" 
+                        onChange={(e) => {
+                          const target = e.target as HTMLInputElement;
+                          if (target.checked) {
+                            handleSelectionChange(new Set(Array.from({ length: paginatedData.length }, (_, i) => i)));
+                          } else {
+                            handleSelectionChange(new Set());
+                          }
+                        }}
+                        checked={currentSelectedRows.size === paginatedData.length && paginatedData.length > 0}
+                      />
                     </TableHead>
                   )}
-                  {orderedColumns.map((column) => {
+                  {orderedColumns.map((column, index) => {
+                    const shouldHideIcons = resizeHoverColumn === column.key || resizingColumn === column.key;
                     const currentFilter = filters.find(f => f.column === column.key);
+                    const widthPercentage = (column.width / orderedColumns.reduce((total, col) => total + col.width, 0)) * 100;
+                    
                     return (
                       <TableHead 
-                        key={`filter-${column.key}`}
-                        className="bg-gray-25 px-2 py-2 border-r border-gray-100 last:border-r-0 relative"
-                        style={{ width: `${column.width}px` }}
-                      >
-                        {column.filterable && (
-                          <ColumnFilter
-                            column={column}
-                            currentFilter={currentFilter}
-                            onFilterChange={(filter) => {
-                              if (filter) {
-                                handleColumnFilterChange(filter);
-                              } else {
-                                handleClearColumnFilter(column.key);
-                              }
-                            }}
-                          />
+                        key={column.key}
+                        className={cn(
+                          "relative group bg-gray-50/80 backdrop-blur-sm font-semibold text-gray-900 px-2 py-3 border-r border-gray-100 last:border-r-0",
+                          draggedColumn === column.key && "opacity-50",
+                          dragOverColumn === column.key && "bg-blue-100 border-blue-300",
+                          resizingColumn === column.key && "bg-blue-50",
+                          !resizingColumn && "cursor-move"
                         )}
+                        style={{ 
+                          width: `${widthPercentage}%`,
+                          minWidth: `${Math.max(80, column.width * 0.8)}px`,
+                          maxWidth: `${column.width * 1.5}px`
+                        }}
+                        draggable={!editingHeader && !resizingColumn}
+                        onDragStart={(e) => handleColumnDragStart(e, column.key)}
+                        onDragOver={(e) => handleColumnDragOver(e, column.key)}
+                        onDragLeave={handleColumnDragLeave}
+                        onDrop={(e) => handleColumnDrop(e, column.key)}
+                        onDragEnd={handleColumnDragEnd}
+                      >
+                        <div className="flex items-center justify-between gap-1 min-w-0">
+                          <div className="flex items-center gap-1 min-w-0 flex-1">
+                            {!shouldHideIcons && (
+                              <GripVertical className="h-3 w-3 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
+                            )}
+                            {editingHeader === column.key ? (
+                              <Input
+                                defaultValue={column.label}
+                                onBlur={(e) => handleHeaderEdit(column.key, e.target.value)}
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter') {
+                                    handleHeaderEdit(column.key, e.currentTarget.value);
+                                  } else if (e.key === 'Escape') {
+                                    setEditingHeader(null);
+                                  }
+                                }}
+                                className="h-5 px-1 text-sm font-semibold bg-white border-blue-300 focus:border-blue-500 min-w-0"
+                                autoFocus
+                                onFocus={(e) => e.target.select()}
+                                onClick={(e) => e.stopPropagation()}
+                                onDragStart={(e) => e.preventDefault()}
+                              />
+                            ) : (
+                              <div 
+                                className={cn(
+                                  "flex items-center gap-1 rounded px-1 py-0.5 -mx-1 -my-0.5 transition-colors group/header flex-1 min-w-0",
+                                  !resizingColumn && "cursor-pointer hover:bg-gray-100/50"
+                                )}
+                                onClick={(e) => {
+                                  if (resizingColumn) return;
+                                  e.stopPropagation();
+                                  handleHeaderClick(column.key);
+                                }}
+                                onDragStart={(e) => e.preventDefault()}
+                              >
+                                <span 
+                                  className="select-none text-sm font-semibold flex-1 min-w-0 truncate" 
+                                  title={column.label}
+                                >
+                                  {column.label}
+                                </span>
+                                {column.editable && !shouldHideIcons && (
+                                  <Edit2 className="h-3 w-3 text-gray-400 opacity-0 group-hover/header:opacity-100 transition-opacity flex-shrink-0" />
+                                )}
+                              </div>
+                            )}
+                          </div>
+                          
+                          <div className="flex items-center gap-1">
+                            {column.sortable && !shouldHideIcons && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={(e) => {
+                                  if (resizingColumn) return;
+                                  e.stopPropagation();
+                                  handleSort(column.key);
+                                }}
+                                className="h-5 w-5 p-0 hover:bg-transparent transition-opacity flex-shrink-0"
+                                disabled={loading || !!resizingColumn}
+                                onDragStart={(e) => e.preventDefault()}
+                              >
+                                {sort?.column === column.key ? (
+                                  sort.direction === 'asc' ? (
+                                    <ArrowUp className="h-3 w-3 text-blue-600" />
+                                  ) : (
+                                    <ArrowDown className="h-3 w-3 text-blue-600" />
+                                  )
+                                ) : (
+                                  <ArrowUpDown className="h-3 w-3 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+                                )}
+                              </Button>
+                            )}
+                          </div>
+                        </div>
+                        
+                        {/* Resize Handle - Modified to only show on hover */}
+                        <div
+                          className="absolute top-0 right-0 w-2 h-full cursor-col-resize bg-transparent hover:bg-blue-300/50 transition-colors flex items-center justify-center group/resize z-30"
+                          onMouseDown={(e) => handleResizeStart(e, column.key)}
+                          onMouseEnter={() => setResizeHoverColumn(column.key)}
+                          onMouseLeave={() => setResizeHoverColumn(null)}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                          }}
+                          onDragStart={(e) => e.preventDefault()}
+                        >
+                          <div className="w-0.5 h-4 bg-gray-300 opacity-0 group-hover/resize:opacity-100 transition-opacity" />
+                        </div>
                       </TableHead>
                     );
                   })}
-                  {/* Plugin row actions column space */}
+                  {/* Plugin row actions header */}
                   {plugins.some(plugin => plugin.rowActions) && (
-                    <TableHead className="bg-gray-25 px-3 py-2 text-center w-[100px]">
-                      {/* Empty space for actions column */}
+                    <TableHead className="bg-gray-50/80 backdrop-blur-sm font-semibold text-gray-900 px-3 py-3 text-center w-[100px] flex-shrink-0">
+                      Actions
                     </TableHead>
                   )}
                 </TableRow>
-              )}
-            </TableHeader>
-            <TableBody>
-              {loading ? (
-                <TableRow>
-                  <TableCell 
-                    colSpan={orderedColumns.length + (showCheckboxes ? 1 : 0) + (plugins.some(plugin => plugin.rowActions) ? 1 : 0)} 
-                    className="text-center py-12"
-                  >
-                    <div className="flex items-center justify-center">
-                      <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
-                      <span className="ml-2 text-gray-600">Loading...</span>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ) : paginatedData.length === 0 ? (
-                <TableRow>
-                  <TableCell 
-                    colSpan={orderedColumns.length + (showCheckboxes ? 1 : 0) + (plugins.some(plugin => plugin.rowActions) ? 1 : 0)} 
-                    className="text-center py-12 text-gray-500"
-                  >
-                    <div className="space-y-2">
-                      <div className="text-lg font-medium">No data available</div>
-                      <div className="text-sm">Try adjusting your search or filters</div>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ) : (
-                paginatedData.map((row, rowIndex) => (
-                  <React.Fragment key={rowIndex}>
-                    <TableRow 
-                      className={cn(
-                        "hover:bg-gray-50/50 transition-colors duration-150 border-b border-gray-100",
-                        rowClassName ? rowClassName(row, rowIndex) : ''
-                      )}
-                    >
-                      {/* Checkbox cell */}
-                      {showCheckboxes && (
-                        <TableCell className="px-3 py-3 border-r border-gray-50 w-[50px]">
-                          <input 
-                            type="checkbox" 
-                            className="rounded" 
-                            checked={currentSelectedRows.has(rowIndex)}
-                            onChange={() => {
-                              const newSet = new Set(currentSelectedRows);
-                              if (newSet.has(rowIndex)) {
-                                newSet.delete(rowIndex);
-                              } else {
-                                newSet.add(rowIndex);
-                              }
-                              handleSelectionChange(newSet);
-                            }}
-                          />
-                        </TableCell>
-                      )}
-                      {orderedColumns.map((column, columnIndex) => (
-                        <TableCell 
-                          key={column.key} 
-                          className="relative px-3 py-3 border-r border-gray-50 last:border-r-0 align-top overflow-hidden"
-                          style={{ width: `${column.width}px` }}
-                        >
-                          {renderCell(row, column, rowIndex, columnIndex)}
-                        </TableCell>
-                      ))}
-                      {/* Plugin row actions */}
-                      {plugins.some(plugin => plugin.rowActions) && (
-                        <TableCell className="px-3 py-3 text-center align-top w-[100px]">
-                          <div className="flex items-center justify-center space-x-1">
-                            <PluginRowActions
-                              plugins={plugins}
-                              gridAPI={gridAPI}
-                              row={row}
-                              rowIndex={rowIndex}
-                            />
-                          </div>
-                        </TableCell>
-                      )}
-                    </TableRow>
-                    {/* Nested row content */}
-                    {effectiveNestedRowRenderer && expandedRows.has(rowIndex) && (
-                      <TableRow className="bg-gray-50/30">
-                        <TableCell 
-                          colSpan={orderedColumns.length + (showCheckboxes ? 1 : 0) + (plugins.some(plugin => plugin.rowActions) ? 1 : 0)} 
-                          className="p-0 border-b border-gray-200"
-                        >
-                          <div className="bg-gradient-to-r from-gray-50/50 to-white border-l-4 border-blue-500">
-                            <div className="p-6 pl-12">
-                              {effectiveNestedRowRenderer(row, rowIndex)}
-                            </div>
-                          </div>
-                        </TableCell>
-                      </TableRow>
+                
+                {/* Column Filter Row - Legacy support, hidden when using FilterSystem */}
+                {showColumnFilters && !showFilterRow && (
+                  <TableRow className="hover:bg-transparent border-b border-gray-200">
+                    {/* Checkbox column space */}
+                    {showCheckboxes && (
+                      <TableHead className="bg-gray-25 px-3 py-2 border-r border-gray-100 w-[50px]">
+                        {/* Empty space for checkbox column */}
+                      </TableHead>
                     )}
-                  </React.Fragment>
-                ))
-              )}
-            </TableBody>
-          </Table>
-        </div>
+                    {orderedColumns.map((column) => {
+                      const currentFilter = filters.find(f => f.column === column.key);
+                      const widthPercentage = (column.width / orderedColumns.reduce((total, col) => total + col.width, 0)) * 100;
+                      
+                      return (
+                        <TableHead 
+                          key={`filter-${column.key}`}
+                          className="bg-gray-25 px-2 py-2 border-r border-gray-100 last:border-r-0 relative"
+                          style={{ 
+                            width: `${widthPercentage}%`,
+                            minWidth: `${Math.max(80, column.width * 0.8)}px`
+                          }}
+                        >
+                          {column.filterable && (
+                            <ColumnFilter
+                              column={column}
+                              currentFilter={currentFilter}
+                              onFilterChange={(filter) => {
+                                if (filter) {
+                                  handleColumnFilterChange(filter);
+                                } else {
+                                  handleClearColumnFilter(column.key);
+                                }
+                              }}
+                            />
+                          )}
+                        </TableHead>
+                      );
+                    })}
+                    {/* Plugin row actions column space */}
+                    {plugins.some(plugin => plugin.rowActions) && (
+                      <TableHead className="bg-gray-25 px-3 py-2 text-center w-[100px]">
+                        {/* Empty space for actions column */}
+                      </TableHead>
+                    )}
+                  </TableRow>
+                )}
+              </TableHeader>
+              <TableBody>
+                {loading ? (
+                  <TableRow>
+                    <TableCell 
+                      colSpan={orderedColumns.length + (showCheckboxes ? 1 : 0) + (plugins.some(plugin => plugin.rowActions) ? 1 : 0)} 
+                      className="text-center py-12"
+                    >
+                      <div className="flex items-center justify-center">
+                        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+                        <span className="ml-2 text-gray-600">Loading...</span>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ) : paginatedData.length === 0 ? (
+                  <TableRow>
+                    <TableCell 
+                      colSpan={orderedColumns.length + (showCheckboxes ? 1 : 0) + (plugins.some(plugin => plugin.rowActions) ? 1 : 0)} 
+                      className="text-center py-12 text-gray-500"
+                    >
+                      <div className="space-y-2">
+                        <div className="text-lg font-medium">No data available</div>
+                        <div className="text-sm">Try adjusting your search or filters</div>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  paginatedData.map((row, rowIndex) => (
+                    <React.Fragment key={rowIndex}>
+                      <TableRow 
+                        className={cn(
+                          "hover:bg-gray-50/50 transition-colors duration-150 border-b border-gray-100",
+                          rowClassName ? rowClassName(row, rowIndex) : ''
+                        )}
+                      >
+                        {/* Checkbox cell */}
+                        {showCheckboxes && (
+                          <TableCell className="px-3 py-3 border-r border-gray-50 w-[50px]">
+                            <input 
+                              type="checkbox" 
+                              className="rounded" 
+                              checked={currentSelectedRows.has(rowIndex)}
+                              onChange={() => {
+                                const newSet = new Set(currentSelectedRows);
+                                if (newSet.has(rowIndex)) {
+                                  newSet.delete(rowIndex);
+                                } else {
+                                  newSet.add(rowIndex);
+                                }
+                                handleSelectionChange(newSet);
+                              }}
+                            />
+                          </TableCell>
+                        )}
+                        {orderedColumns.map((column, columnIndex) => {
+                          const widthPercentage = (column.width / orderedColumns.reduce((total, col) => total + col.width, 0)) * 100;
+                          
+                          return (
+                            <TableCell 
+                              key={column.key} 
+                              className="relative px-3 py-3 border-r border-gray-50 last:border-r-0 align-top"
+                              style={{ 
+                                width: `${widthPercentage}%`,
+                                minWidth: `${Math.max(80, column.width * 0.8)}px`,
+                                maxWidth: `${column.width * 1.5}px`
+                              }}
+                            >
+                              <div className="overflow-hidden">
+                                {renderCell(row, column, rowIndex, columnIndex)}
+                              </div>
+                            </TableCell>
+                          );
+                        })}
+                        {/* Plugin row actions */}
+                        {plugins.some(plugin => plugin.rowActions) && (
+                          <TableCell className="px-3 py-3 text-center align-top w-[100px]">
+                            <div className="flex items-center justify-center space-x-1">
+                              <PluginRowActions
+                                plugins={plugins}
+                                gridAPI={gridAPI}
+                                row={row}
+                                rowIndex={rowIndex}
+                              />
+                            </div>
+                          </TableCell>
+                        )}
+                      </TableRow>
+                      {/* Nested row content */}
+                      {effectiveNestedRowRenderer && expandedRows.has(rowIndex) && (
+                        <TableRow className="bg-gray-50/30">
+                          <TableCell 
+                            colSpan={orderedColumns.length + (showCheckboxes ? 1 : 0) + (plugins.some(plugin => plugin.rowActions) ? 1 : 0)} 
+                            className="p-0 border-b border-gray-200"
+                          >
+                            <div className="bg-gradient-to-r from-gray-50/50 to-white border-l-4 border-blue-500">
+                              <div className="p-6 pl-12">
+                                {effectiveNestedRowRenderer(row, rowIndex)}
+                              </div>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </React.Fragment>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        </ScrollArea>
       </div>
 
       {/* Pagination */}
