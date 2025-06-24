@@ -2,82 +2,12 @@ import React, { useState } from 'react';
 import { FlexGridLayout } from '@/components/FlexGridLayout';
 import { DynamicPanel } from '@/components/DynamicPanel';
 import { Button } from '@/components/ui/button';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, User, Euro, MapPin } from 'lucide-react';
 import { LayoutConfig } from '@/components/FlexGridLayout/types';
 import { PanelConfig } from '@/types/dynamicPanel';
 
-// Trip Execution form configuration matching the uploaded image
+// Trip Execution form configuration for editable fields only
 const tripExecutionPanelConfig: PanelConfig = {
-  'trip-id': {
-    id: 'trip-id',
-    label: 'Trip ID',
-    fieldType: 'text',
-    value: 'TRIP00000001',
-    mandatory: true,
-    visible: true,
-    editable: false,
-    order: 1
-  },
-  'customer-id': {
-    id: 'customer-id',
-    label: 'Customer ID',
-    fieldType: 'text',
-    value: 'CUS0009173',
-    mandatory: true,
-    visible: true,
-    editable: false,
-    order: 2
-  },
-  'price': {
-    id: 'price',
-    label: 'Price',
-    fieldType: 'currency',
-    value: '45595.00',
-    mandatory: true,
-    visible: true,
-    editable: false,
-    order: 3
-  },
-  'rail-company': {
-    id: 'rail-company',
-    label: 'Rail Company',
-    fieldType: 'text',
-    value: 'Railtrax NV - 46798333',
-    mandatory: true,
-    visible: true,
-    editable: false,
-    order: 4
-  },
-  'transport-mode': {
-    id: 'transport-mode',
-    label: 'Transport Mode',
-    fieldType: 'text',
-    value: 'Rail',
-    mandatory: true,
-    visible: true,
-    editable: false,
-    order: 5
-  },
-  'from-location': {
-    id: 'from-location',
-    label: 'From',
-    fieldType: 'text',
-    value: '53-202705, Voila',
-    mandatory: true,
-    visible: true,
-    editable: false,
-    order: 6
-  },
-  'to-location': {
-    id: 'to-location',
-    label: 'To',
-    fieldType: 'text',
-    value: '53-21925-3, Curtici',
-    mandatory: true,
-    visible: true,
-    editable: false,
-    order: 7
-  },
   'trip-type': {
     id: 'trip-type',
     label: 'Trip Type',
@@ -86,7 +16,7 @@ const tripExecutionPanelConfig: PanelConfig = {
     mandatory: true,
     visible: true,
     editable: true,
-    order: 8,
+    order: 1,
     options: [
       { label: 'One Way', value: 'One Way' },
       { label: 'Round Trip', value: 'Round Trip' }
@@ -100,7 +30,7 @@ const tripExecutionPanelConfig: PanelConfig = {
     mandatory: false,
     visible: true,
     editable: true,
-    order: 9,
+    order: 2,
     placeholder: 'Enter Train No.'
   },
   'cluster': {
@@ -111,7 +41,7 @@ const tripExecutionPanelConfig: PanelConfig = {
     mandatory: false,
     visible: true,
     editable: true,
-    order: 10,
+    order: 3,
     options: [
       { label: '10000406', value: '10000406' },
       { label: '10000407', value: '10000407' },
@@ -126,7 +56,7 @@ const tripExecutionPanelConfig: PanelConfig = {
     mandatory: false,
     visible: true,
     editable: true,
-    order: 11,
+    order: 4,
     placeholder: 'Enter Supplier Ref. No.'
   },
   'oc-userdefined-1': {
@@ -137,7 +67,7 @@ const tripExecutionPanelConfig: PanelConfig = {
     mandatory: false,
     visible: true,
     editable: true,
-    order: 12,
+    order: 5,
     options: [
       { label: 'GC', value: 'GC' },
       { label: 'FC', value: 'FC' },
@@ -152,10 +82,70 @@ const tripExecutionPanelConfig: PanelConfig = {
     mandatory: false,
     visible: true,
     editable: true,
-    order: 13,
+    order: 6,
     placeholder: 'Enter Remarks'
   }
 };
+
+// Non-editable trip information component
+const TripInfoSection = () => (
+  <div className="space-y-4 mb-6">
+    <div className="flex items-center gap-2 mb-4">
+      <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded">Released</span>
+      <span className="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded">Draft Bill Raised</span>
+    </div>
+    
+    <div className="grid grid-cols-2 gap-4">
+      <div className="flex items-center gap-2">
+        <User className="h-4 w-4 text-gray-500" />
+        <div>
+          <div className="text-xs text-gray-500">Customer ID</div>
+          <div className="text-sm font-medium">CUS0009173</div>
+        </div>
+      </div>
+      
+      <div className="flex items-center gap-2">
+        <div className="h-4 w-4 text-gray-500 flex items-center justify-center">🚂</div>
+        <div>
+          <div className="text-xs text-gray-500">Rail Company</div>
+          <div className="text-sm font-medium">Railtrax NV - 46798333</div>
+        </div>
+      </div>
+      
+      <div className="flex items-center gap-2">
+        <Euro className="h-4 w-4 text-gray-500" />
+        <div>
+          <div className="text-xs text-gray-500">Price</div>
+          <div className="text-sm font-medium">€ 45595.00</div>
+        </div>
+      </div>
+      
+      <div className="flex items-center gap-2">
+        <div className="h-4 w-4 text-gray-500 flex items-center justify-center">🚆</div>
+        <div>
+          <div className="text-xs text-gray-500">Transport Mode</div>
+          <div className="text-sm font-medium">Rail</div>
+        </div>
+      </div>
+      
+      <div className="flex items-center gap-2">
+        <MapPin className="h-4 w-4 text-gray-500" />
+        <div>
+          <div className="text-xs text-gray-500">From</div>
+          <div className="text-sm font-medium">53-202705, Voila</div>
+        </div>
+      </div>
+      
+      <div className="flex items-center gap-2">
+        <MapPin className="h-4 w-4 text-red-500" />
+        <div>
+          <div className="text-xs text-gray-500">To</div>
+          <div className="text-sm font-medium">53-21925-3, Curtici</div>
+        </div>
+      </div>
+    </div>
+  </div>
+);
 
 const activitiesGridData = [
   {
@@ -223,7 +213,6 @@ const activitiesGridData = [
   }
 ];
 
-// Customer Orders and Resources sections
 const CustomerOrdersSection = () => (
   <div className="grid grid-cols-2 gap-8 p-4">
     <div className="space-y-4">
@@ -266,7 +255,6 @@ const CustomerOrdersSection = () => (
   </div>
 );
 
-// Footer Actions Component
 const TripExecutionFooterActions = () => (
   <div className="flex items-center justify-between p-4 bg-white border-t">
     <div className="flex items-center space-x-2">
@@ -307,23 +295,14 @@ const TripExecution = () => {
         collapsed: false,
         minWidth: '40px',
         content: (
-          <div className="space-y-4">
-            <div className="flex items-center gap-2 mb-4">
-              <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded">Released</span>
-              <span className="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded">Draft Bill Raised</span>
-            </div>
+          <div className="p-4 space-y-4">
+            <h2 className="text-lg font-semibold text-gray-800">TRIP00000001</h2>
+            <TripInfoSection />
             <DynamicPanel
               panelId="trip-execution-panel"
-              panelTitle="TRIP00000001"
+              panelTitle="Trip Details"
               panelConfig={tripExecutionPanelConfig}
               initialData={{
-                'trip-id': 'TRIP00000001',
-                'customer-id': 'CUS0009173',
-                'price': '45595.00',
-                'rail-company': 'Railtrax NV - 46798333',
-                'transport-mode': 'Rail',
-                'from-location': '53-202705, Voila',
-                'to-location': '53-21925-3, Curtici',
                 'trip-type': 'One Way',
                 'cluster': '10000406',
                 'oc-userdefined-1': 'GC'
