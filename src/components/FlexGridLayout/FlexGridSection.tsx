@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Settings, ChevronLeft, ChevronRight, ChevronUp, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -58,7 +57,7 @@ const FlexGridSection: React.FC<SectionProps> = ({
   return (
     <div
       className={cn(
-        'relative bg-white border shadow-sm transition-all duration-300 ease-in-out',
+        'relative bg-white transition-all duration-300 ease-in-out',
         section.collapsed ? 'overflow-visible' : 'overflow-hidden',
         className
       )}
