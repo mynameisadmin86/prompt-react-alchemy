@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -9,6 +8,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { GripVertical, Eye, EyeOff } from 'lucide-react';
 import { PanelConfig, FieldVisibilityConfig } from '@/types/dynamicPanel';
+
+interface EnhancedFieldVisibilityConfig extends FieldVisibilityConfig {
+  width?: 'third' | 'two-thirds' | 'full';
+}
 
 interface EnhancedFieldVisibilityModalProps {
   open: boolean;
@@ -37,7 +40,7 @@ export const EnhancedFieldVisibilityModal: React.FC<EnhancedFieldVisibilityModal
   panelVisible = true,
   onSave
 }) => {
-  const [fieldConfigs, setFieldConfigs] = useState<FieldVisibilityConfig[]>([]);
+  const [fieldConfigs, setFieldConfigs] = useState<EnhancedFieldVisibilityConfig[]>([]);
   const [currentTitle, setCurrentTitle] = useState(panelTitle);
   const [currentWidth, setCurrentWidth] = useState<'full' | 'half' | 'third' | 'quarter'>(
     panelWidth === 'half' || panelWidth === 6 ? 'half' :
@@ -54,7 +57,8 @@ export const EnhancedFieldVisibilityModal: React.FC<EnhancedFieldVisibilityModal
         fieldId,
         visible: config.visible,
         order: config.order,
-        label: config.label
+        label: config.label,
+        width: config.width || 'full'
       }))
       .sort((a, b) => a.order - b.order);
     
@@ -112,6 +116,14 @@ export const EnhancedFieldVisibilityModal: React.FC<EnhancedFieldVisibilityModal
     setDraggedIndex(null);
   };
 
+  const handleWidthChange = (fieldId: string, width: 'third' | 'two-thirds' | 'full') => {
+    setFieldConfigs(prev => 
+      prev.map(config => 
+        config.fieldId === fieldId ? { ...config, width } : config
+      )
+    );
+  };
+
   const handleSave = () => {
     const updatedConfig: PanelConfig = { ...panelConfig };
     
@@ -121,7 +133,8 @@ export const EnhancedFieldVisibilityModal: React.FC<EnhancedFieldVisibilityModal
           ...updatedConfig[fieldConfig.fieldId],
           visible: fieldConfig.visible,
           order: fieldConfig.order,
-          label: fieldConfig.label
+          label: fieldConfig.label,
+          width: fieldConfig.width
         };
       }
     });
@@ -243,7 +256,7 @@ export const EnhancedFieldVisibilityModal: React.FC<EnhancedFieldVisibilityModal
           </AccordionItem>
 
           <AccordionItem value="field-visibility">
-            <AccordionTrigger>Field Visibility & Order</AccordionTrigger>
+            <AccordionTrigger>Field Visibility & Configuration</AccordionTrigger>
             <AccordionContent>
               <div className="space-y-4 max-h-96 overflow-y-auto">
                 {fieldConfigs.map((fieldConfig, index) => {
@@ -254,7 +267,7 @@ export const EnhancedFieldVisibilityModal: React.FC<EnhancedFieldVisibilityModal
                   return (
                     <div
                       key={fieldConfig.fieldId}
-                      className="flex items-center space-x-3 p-3 border rounded-lg bg-gray-50"
+                      className="flex flex-col space-y-3 p-3 border rounded-lg bg-gray-50"
                       draggable
                       onDragStart={() => setDraggedIndex(index)}
                       onDragOver={(e) => {
@@ -277,50 +290,71 @@ export const EnhancedFieldVisibilityModal: React.FC<EnhancedFieldVisibilityModal
                       }}
                       onDragEnd={() => setDraggedIndex(null)}
                     >
-                      <GripVertical className="h-4 w-4 text-gray-400 cursor-grab" />
-                      
-                      <Checkbox
-                        checked={isVisible}
-                        onCheckedChange={(checked) => 
-                          setFieldConfigs(prev => 
-                            prev.map(config => 
-                              config.fieldId === fieldConfig.fieldId ? { ...config, visible: checked as boolean } : config
+                      <div className="flex items-center space-x-3">
+                        <GripVertical className="h-4 w-4 text-gray-400 cursor-grab" />
+                        
+                        <Checkbox
+                          checked={isVisible}
+                          onCheckedChange={(checked) => 
+                            setFieldConfigs(prev => 
+                              prev.map(config => 
+                                config.fieldId === fieldConfig.fieldId ? { ...config, visible: checked as boolean } : config
+                              )
                             )
-                          )
-                        }
-                        disabled={isMandatory}
-                      />
+                          }
+                          disabled={isMandatory}
+                        />
 
-                      <div className="flex items-center space-x-2 flex-shrink-0">
-                        {isVisible ? (
-                          <Eye className="h-4 w-4 text-green-600" />
-                        ) : (
-                          <EyeOff className="h-4 w-4 text-gray-400" />
-                        )}
+                        <div className="flex items-center space-x-2 flex-shrink-0">
+                          {isVisible ? (
+                            <Eye className="h-4 w-4 text-green-600" />
+                          ) : (
+                            <EyeOff className="h-4 w-4 text-gray-400" />
+                          )}
+                        </div>
+                        
+                        <div className="flex-1">
+                          <Input
+                            value={fieldConfig.label}
+                            onChange={(e) => setFieldConfigs(prev => 
+                              prev.map(config => 
+                                config.fieldId === fieldConfig.fieldId ? { ...config, label: e.target.value } : config
+                              )
+                            )}
+                            className="text-sm"
+                            placeholder="Field label"
+                          />
+                          <div className="flex items-center justify-between mt-1">
+                            <span className="text-xs text-gray-500">
+                              {fieldConfig.fieldId}
+                            </span>
+                            <span className="text-xs text-blue-600 font-medium">
+                              {getFieldTypeDisplay(fieldType)}
+                            </span>
+                          </div>
+                          {isMandatory && (
+                            <span className="text-xs text-red-600 mt-1">Mandatory field</span>
+                          )}
+                        </div>
                       </div>
                       
-                      <div className="flex-1">
-                        <Input
-                          value={fieldConfig.label}
-                          onChange={(e) => setFieldConfigs(prev => 
-                            prev.map(config => 
-                              config.fieldId === fieldConfig.fieldId ? { ...config, label: e.target.value } : config
-                            )
-                          )}
-                          className="text-sm"
-                          placeholder="Field label"
-                        />
-                        <div className="flex items-center justify-between mt-1">
-                          <span className="text-xs text-gray-500">
-                            {fieldConfig.fieldId}
-                          </span>
-                          <span className="text-xs text-blue-600 font-medium">
-                            {getFieldTypeDisplay(fieldType)}
-                          </span>
-                        </div>
-                        {isMandatory && (
-                          <span className="text-xs text-red-600 mt-1">Mandatory field</span>
-                        )}
+                      <div className="flex items-center space-x-2">
+                        <Label className="text-xs text-gray-600">Field Width:</Label>
+                        <Select 
+                          value={fieldConfig.width || 'full'} 
+                          onValueChange={(value: 'third' | 'two-thirds' | 'full') => 
+                            handleWidthChange(fieldConfig.fieldId, value)
+                          }
+                        >
+                          <SelectTrigger className="w-32 h-7 text-xs">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="third">1/3 Width</SelectItem>
+                            <SelectItem value="two-thirds">2/3 Width</SelectItem>
+                            <SelectItem value="full">Full Width</SelectItem>
+                          </SelectContent>
+                        </Select>
                       </div>
                     </div>
                   );

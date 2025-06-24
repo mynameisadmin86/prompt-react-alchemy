@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -140,11 +139,23 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
     }
   };
 
+  const getFieldWidthClass = (fieldWidth?: 'third' | 'two-thirds' | 'full') => {
+    switch (fieldWidth) {
+      case 'third':
+        return 'col-span-1 md:col-span-1';
+      case 'two-thirds':
+        return 'col-span-2 md:col-span-2';
+      case 'full':
+      default:
+        return 'col-span-3 md:col-span-3';
+    }
+  };
+
   const PanelContent = () => (
     <>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-3 gap-4">
         {visibleFields.map(([fieldId, fieldConfig]) => (
-          <div key={fieldId} className="space-y-1">
+          <div key={fieldId} className={`space-y-1 ${getFieldWidthClass(fieldConfig.width)}`}>
             <label className="text-xs font-medium text-gray-600 block">
               {fieldConfig.label}
               {fieldConfig.mandatory && (

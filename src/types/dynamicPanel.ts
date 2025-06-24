@@ -8,6 +8,7 @@ export interface FieldConfig {
   visible: boolean;
   editable: boolean;
   order: number;
+  width?: 'third' | 'two-thirds' | 'full'; // Field width configuration
   options?: { label: string; value: string }[]; // For select and radio fields
   placeholder?: string;
 }
