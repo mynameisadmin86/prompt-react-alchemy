@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -110,6 +109,22 @@ export const EnhancedFieldVisibilityModal: React.FC<EnhancedFieldVisibilityModal
 
   const handleDragEnd = () => {
     setDraggedIndex(null);
+  };
+
+  const handleFieldWidthChange = (fieldId: string, width: 'full' | 'half' | 'third' | 'quarter') => {
+    const updatedConfig = { ...panelConfig };
+    if (updatedConfig[fieldId]) {
+      updatedConfig[fieldId] = {
+        ...updatedConfig[fieldId],
+        width: width
+      };
+    }
+    // Update the working copy as well for immediate UI feedback
+    setFieldConfigs(prev => 
+      prev.map(config => 
+        config.fieldId === fieldId ? { ...config } : config
+      )
+    );
   };
 
   const handleSave = () => {
@@ -243,18 +258,19 @@ export const EnhancedFieldVisibilityModal: React.FC<EnhancedFieldVisibilityModal
           </AccordionItem>
 
           <AccordionItem value="field-visibility">
-            <AccordionTrigger>Field Visibility & Order</AccordionTrigger>
+            <AccordionTrigger>Field Visibility & Configuration</AccordionTrigger>
             <AccordionContent>
               <div className="space-y-4 max-h-96 overflow-y-auto">
                 {fieldConfigs.map((fieldConfig, index) => {
                   const isMandatory = panelConfig[fieldConfig.fieldId]?.mandatory;
                   const isVisible = fieldConfig.visible;
                   const fieldType = panelConfig[fieldConfig.fieldId]?.fieldType;
+                  const currentFieldWidth = panelConfig[fieldConfig.fieldId]?.width || 'full';
                   
                   return (
                     <div
                       key={fieldConfig.fieldId}
-                      className="flex items-center space-x-3 p-3 border rounded-lg bg-gray-50"
+                      className="flex flex-col space-y-3 p-3 border rounded-lg bg-gray-50"
                       draggable
                       onDragStart={() => setDraggedIndex(index)}
                       onDragOver={(e) => {
@@ -277,50 +293,75 @@ export const EnhancedFieldVisibilityModal: React.FC<EnhancedFieldVisibilityModal
                       }}
                       onDragEnd={() => setDraggedIndex(null)}
                     >
-                      <GripVertical className="h-4 w-4 text-gray-400 cursor-grab" />
-                      
-                      <Checkbox
-                        checked={isVisible}
-                        onCheckedChange={(checked) => 
-                          setFieldConfigs(prev => 
-                            prev.map(config => 
-                              config.fieldId === fieldConfig.fieldId ? { ...config, visible: checked as boolean } : config
+                      <div className="flex items-center space-x-3">
+                        <GripVertical className="h-4 w-4 text-gray-400 cursor-grab" />
+                        
+                        <Checkbox
+                          checked={isVisible}
+                          onCheckedChange={(checked) => 
+                            setFieldConfigs(prev => 
+                              prev.map(config => 
+                                config.fieldId === fieldConfig.fieldId ? { ...config, visible: checked as boolean } : config
+                              )
                             )
-                          )
-                        }
-                        disabled={isMandatory}
-                      />
-
-                      <div className="flex items-center space-x-2 flex-shrink-0">
-                        {isVisible ? (
-                          <Eye className="h-4 w-4 text-green-600" />
-                        ) : (
-                          <EyeOff className="h-4 w-4 text-gray-400" />
-                        )}
-                      </div>
-                      
-                      <div className="flex-1">
-                        <Input
-                          value={fieldConfig.label}
-                          onChange={(e) => setFieldConfigs(prev => 
-                            prev.map(config => 
-                              config.fieldId === fieldConfig.fieldId ? { ...config, label: e.target.value } : config
-                            )
-                          )}
-                          className="text-sm"
-                          placeholder="Field label"
+                          }
+                          disabled={isMandatory}
                         />
-                        <div className="flex items-center justify-between mt-1">
-                          <span className="text-xs text-gray-500">
-                            {fieldConfig.fieldId}
-                          </span>
-                          <span className="text-xs text-blue-600 font-medium">
-                            {getFieldTypeDisplay(fieldType)}
-                          </span>
+
+                        <div className="flex items-center space-x-2 flex-shrink-0">
+                          {isVisible ? (
+                            <Eye className="h-4 w-4 text-green-600" />
+                          ) : (
+                            <EyeOff className="h-4 w-4 text-gray-400" />
+                          )}
                         </div>
-                        {isMandatory && (
-                          <span className="text-xs text-red-600 mt-1">Mandatory field</span>
-                        )}
+                        
+                        <div className="flex-1">
+                          <Input
+                            value={fieldConfig.label}
+                            onChange={(e) => setFieldConfigs(prev => 
+                              prev.map(config => 
+                                config.fieldId === fieldConfig.fieldId ? { ...config, label: e.target.value } : config
+                              )
+                            )}
+                            className="text-sm"
+                            placeholder="Field label"
+                          />
+                          <div className="flex items-center justify-between mt-1">
+                            <span className="text-xs text-gray-500">
+                              {fieldConfig.fieldId}
+                            </span>
+                            <span className="text-xs text-blue-600 font-medium">
+                              {getFieldTypeDisplay(fieldType)}
+                            </span>
+                          </div>
+                          {isMandatory && (
+                            <span className="text-xs text-red-600 mt-1">Mandatory field</span>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="ml-11 space-y-2">
+                        <Label className="text-xs text-gray-600">Field Width</Label>
+                        <Select 
+                          value={typeof currentFieldWidth === 'number' ? currentFieldWidth.toString() : currentFieldWidth} 
+                          onValueChange={(value) => {
+                            const width = ['full', 'half', 'third', 'quarter'].includes(value) ? 
+                              value as 'full' | 'half' | 'third' | 'quarter' : 
+                              'full';
+                            handleFieldWidthChange(fieldConfig.fieldId, width);
+                          }}
+                        >
+                          <SelectTrigger className="h-8 text-xs">
+                            <SelectValue placeholder="Select width" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="full">Full (12 columns)</SelectItem>
+                            <SelectItem value="half">Half (6 columns)</SelectItem>
+                            <SelectItem value="third">Third (4 columns)</SelectItem>
+                            <SelectItem value="quarter">Quarter (3 columns)</SelectItem>
+                          </SelectContent>
+                        </Select>
                       </div>
                     </div>
                   );
