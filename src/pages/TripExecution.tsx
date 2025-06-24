@@ -89,12 +89,13 @@ const tripExecutionPanelConfig: PanelConfig = {
   }
 };
 
-// Smart Grid configuration for Activities & Consignment
+// Smart Grid configuration for Activities & Consignment with configured widths
 const activitiesColumns: GridColumnConfig[] = [
   {
     key: 'leg',
     label: 'Leg',
     type: 'Text',
+    width: 100,
     sortable: true,
     filterable: true,
     editable: false
@@ -103,6 +104,7 @@ const activitiesColumns: GridColumnConfig[] = [
     key: 'behaviour',
     label: 'Behaviour',
     type: 'Badge',
+    width: 130,
     sortable: true,
     filterable: true,
     editable: false,
@@ -120,6 +122,7 @@ const activitiesColumns: GridColumnConfig[] = [
     key: 'location',
     label: 'Location',
     type: 'Text',
+    width: 120,
     sortable: true,
     filterable: true,
     editable: false
@@ -128,6 +131,7 @@ const activitiesColumns: GridColumnConfig[] = [
     key: 'plannedActual',
     label: 'Planned/Actual',
     type: 'Text',
+    width: 140,
     sortable: true,
     filterable: true,
     editable: false
@@ -136,6 +140,7 @@ const activitiesColumns: GridColumnConfig[] = [
     key: 'consignment',
     label: 'Consignment',
     type: 'Text',
+    width: 150,
     sortable: false,
     filterable: false,
     editable: false
@@ -144,6 +149,7 @@ const activitiesColumns: GridColumnConfig[] = [
     key: 'status',
     label: 'Status',
     type: 'Badge',
+    width: 110,
     sortable: true,
     filterable: true,
     editable: false,
@@ -156,6 +162,7 @@ const activitiesColumns: GridColumnConfig[] = [
     key: 'action',
     label: 'Action',
     type: 'Text',
+    width: 100,
     sortable: false,
     filterable: false,
     editable: false
@@ -164,6 +171,7 @@ const activitiesColumns: GridColumnConfig[] = [
     key: 'actualDateTime',
     label: 'Actual date and time',
     type: 'Date',
+    width: 180,
     sortable: true,
     filterable: true,
     editable: true,

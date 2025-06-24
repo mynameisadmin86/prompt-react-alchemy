@@ -13,52 +13,64 @@ export function calculateColumnWidths(
   const actionsWidth = plugins.some(plugin => plugin.rowActions) ? 100 : 0;
   const availableWidth = containerWidth - checkboxWidth - actionsWidth;
   
-  const totalColumns = visibleColumns.length;
-  let remainingWidth = availableWidth;
   const calculatedWidths: Record<string, number> = {};
+  let totalConfiguredWidth = 0;
+  let columnsWithoutWidth = 0;
   
-  // First pass: assign minimum widths based on content type with extra space for headers
+  // First pass: use configured widths where available
   visibleColumns.forEach(col => {
-    let minWidth = 120; // Increased minimum width for header content
-    
-    switch (col.type) {
-      case 'Badge':
-        minWidth = 100;
-        break;
-      case 'Date':
-        minWidth = 140;
-        break;
-      case 'DateTimeRange':
-        minWidth = 200;
-        break;
-      case 'Link':
-        minWidth = 150;
-        break;
-      case 'ExpandableCount':
-        minWidth = 90;
-        break;
-      case 'Text':
-      case 'EditableText':
-      default:
-        minWidth = 120;
-        break;
-    }
-    
-    // Use stored preference, custom width, or calculated minimum
     const customWidth = columnWidths[col.key];
     const preferredWidth = preferences.columnWidths[col.key];
-    calculatedWidths[col.key] = customWidth || (preferredWidth ? Math.max(minWidth, preferredWidth) : minWidth);
-    remainingWidth -= calculatedWidths[col.key];
+    const configuredWidth = col.width;
+    
+    if (customWidth) {
+      calculatedWidths[col.key] = customWidth;
+      totalConfiguredWidth += customWidth;
+    } else if (preferredWidth) {
+      calculatedWidths[col.key] = preferredWidth;
+      totalConfiguredWidth += preferredWidth;
+    } else if (configuredWidth) {
+      calculatedWidths[col.key] = configuredWidth;
+      totalConfiguredWidth += configuredWidth;
+    } else {
+      columnsWithoutWidth++;
+    }
   });
   
-  // Second pass: distribute remaining width proportionally
-  if (remainingWidth > 0) {
-    const totalCurrentWidth = Object.values(calculatedWidths).reduce((sum, width) => sum + width, 0);
-    visibleColumns.forEach(col => {
-      const proportion = calculatedWidths[col.key] / totalCurrentWidth;
-      calculatedWidths[col.key] += remainingWidth * proportion;
-    });
-  }
+  // Second pass: calculate widths for columns without configured width
+  const remainingWidth = Math.max(0, availableWidth - totalConfiguredWidth);
+  const defaultWidthPerColumn = columnsWithoutWidth > 0 ? Math.max(120, remainingWidth / columnsWithoutWidth) : 120;
+  
+  visibleColumns.forEach(col => {
+    if (!calculatedWidths[col.key]) {
+      let minWidth = 120;
+      
+      switch (col.type) {
+        case 'Badge':
+          minWidth = 100;
+          break;
+        case 'Date':
+          minWidth = 140;
+          break;
+        case 'DateTimeRange':
+          minWidth = 200;
+          break;
+        case 'Link':
+          minWidth = 150;
+          break;
+        case 'ExpandableCount':
+          minWidth = 90;
+          break;
+        case 'Text':
+        case 'EditableText':
+        default:
+          minWidth = 120;
+          break;
+      }
+      
+      calculatedWidths[col.key] = Math.max(minWidth, defaultWidthPerColumn);
+    }
+  });
   
   return calculatedWidths;
 }

@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { ConfigurableButtonConfig } from '@/components/ui/configurable-button';
 
@@ -16,6 +17,7 @@ export interface GridColumnConfig {
   key: string;
   label: string;
   type: GridColumnType;
+  width?: number;          // Column width in pixels
   sortable?: boolean;
   filterable?: boolean;
   editable?: boolean;
