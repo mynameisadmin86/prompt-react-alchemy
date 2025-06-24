@@ -1,10 +1,13 @@
+
 import React, { useState } from 'react';
 import { FlexGridLayout } from '@/components/FlexGridLayout';
 import { DynamicPanel } from '@/components/DynamicPanel';
+import { SmartGrid } from '@/components/SmartGrid';
 import { Button } from '@/components/ui/button';
 import { ChevronDown, User, Euro, MapPin } from 'lucide-react';
 import { LayoutConfig } from '@/components/FlexGridLayout/types';
 import { PanelConfig } from '@/types/dynamicPanel';
+import { GridColumnConfig } from '@/types/smartgrid';
 
 // Trip Execution form configuration for editable fields only
 const tripExecutionPanelConfig: PanelConfig = {
@@ -87,65 +90,78 @@ const tripExecutionPanelConfig: PanelConfig = {
   }
 };
 
-// Non-editable trip information component
-const TripInfoSection = () => (
-  <div className="space-y-4 mb-6">
-    <div className="flex items-center gap-2 mb-4">
-      <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded">Released</span>
-      <span className="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded">Draft Bill Raised</span>
-    </div>
-    
-    <div className="grid grid-cols-2 gap-4">
-      <div className="flex items-center gap-2">
-        <User className="h-4 w-4 text-gray-500" />
-        <div>
-          <div className="text-xs text-gray-500">Customer ID</div>
-          <div className="text-sm font-medium">CUS0009173</div>
-        </div>
-      </div>
-      
-      <div className="flex items-center gap-2">
-        <div className="h-4 w-4 text-gray-500 flex items-center justify-center">🚂</div>
-        <div>
-          <div className="text-xs text-gray-500">Rail Company</div>
-          <div className="text-sm font-medium">Railtrax NV - 46798333</div>
-        </div>
-      </div>
-      
-      <div className="flex items-center gap-2">
-        <Euro className="h-4 w-4 text-gray-500" />
-        <div>
-          <div className="text-xs text-gray-500">Price</div>
-          <div className="text-sm font-medium">€ 45595.00</div>
-        </div>
-      </div>
-      
-      <div className="flex items-center gap-2">
-        <div className="h-4 w-4 text-gray-500 flex items-center justify-center">🚆</div>
-        <div>
-          <div className="text-xs text-gray-500">Transport Mode</div>
-          <div className="text-sm font-medium">Rail</div>
-        </div>
-      </div>
-      
-      <div className="flex items-center gap-2">
-        <MapPin className="h-4 w-4 text-gray-500" />
-        <div>
-          <div className="text-xs text-gray-500">From</div>
-          <div className="text-sm font-medium">53-202705, Voila</div>
-        </div>
-      </div>
-      
-      <div className="flex items-center gap-2">
-        <MapPin className="h-4 w-4 text-red-500" />
-        <div>
-          <div className="text-xs text-gray-500">To</div>
-          <div className="text-sm font-medium">53-21925-3, Curtici</div>
-        </div>
-      </div>
-    </div>
-  </div>
-);
+// Smart Grid configuration for Activities & Consignment
+const activitiesColumns: GridColumnConfig[] = [
+  {
+    key: 'leg',
+    label: 'Leg',
+    type: 'Text',
+    sortable: true,
+    filterable: true,
+    editable: false
+  },
+  {
+    key: 'behaviour',
+    label: 'Behaviour',
+    type: 'Badge',
+    sortable: true,
+    filterable: true,
+    editable: false,
+    statusMap: {
+      'Pick': 'bg-blue-100 text-blue-800',
+      'Drvy': 'bg-green-100 text-green-800',
+      'CHA-Import': 'bg-cyan-100 text-cyan-800',
+      'PUD': 'bg-emerald-100 text-emerald-800',
+      'GTIN': 'bg-pink-100 text-pink-800',
+      'GTOUT': 'bg-orange-100 text-orange-800',
+      'LHTA': 'bg-purple-100 text-purple-800'
+    }
+  },
+  {
+    key: 'location',
+    label: 'Location',
+    type: 'Text',
+    sortable: true,
+    filterable: true,
+    editable: false
+  },
+  {
+    key: 'plannedActual',
+    label: 'Planned/Actual',
+    type: 'Text',
+    sortable: true,
+    filterable: true,
+    editable: false
+  },
+  {
+    key: 'consignment',
+    label: 'Consignment',
+    type: 'Text',
+    sortable: false,
+    filterable: false,
+    editable: false
+  },
+  {
+    key: 'status',
+    label: 'Status',
+    type: 'Badge',
+    sortable: true,
+    filterable: true,
+    editable: false,
+    statusMap: {
+      'completed': 'bg-green-100 text-green-800',
+      'pending': 'bg-gray-100 text-gray-800'
+    }
+  },
+  {
+    key: 'action',
+    label: 'Action',
+    type: 'Text',
+    sortable: false,
+    filterable: false,
+    editable: false
+  }
+];
 
 const activitiesGridData = [
   {
@@ -212,6 +228,66 @@ const activitiesGridData = [
     action: ''
   }
 ];
+
+// Non-editable trip information component
+const TripInfoSection = () => (
+  <div className="space-y-4 mb-6">
+    <div className="flex items-center gap-2 mb-4">
+      <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded">Released</span>
+      <span className="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded">Draft Bill Raised</span>
+    </div>
+    
+    <div className="grid grid-cols-2 gap-4">
+      <div className="flex items-center gap-2">
+        <User className="h-4 w-4 text-gray-500" />
+        <div>
+          <div className="text-xs text-gray-500">Customer ID</div>
+          <div className="text-sm font-medium">CUS0009173</div>
+        </div>
+      </div>
+      
+      <div className="flex items-center gap-2">
+        <div className="h-4 w-4 text-gray-500 flex items-center justify-center">🚂</div>
+        <div>
+          <div className="text-xs text-gray-500">Rail Company</div>
+          <div className="text-sm font-medium">Railtrax NV - 46798333</div>
+        </div>
+      </div>
+      
+      <div className="flex items-center gap-2">
+        <Euro className="h-4 w-4 text-gray-500" />
+        <div>
+          <div className="text-xs text-gray-500">Price</div>
+          <div className="text-sm font-medium">€ 45595.00</div>
+        </div>
+      </div>
+      
+      <div className="flex items-center gap-2">
+        <div className="h-4 w-4 text-gray-500 flex items-center justify-center">🚆</div>
+        <div>
+          <div className="text-xs text-gray-500">Transport Mode</div>
+          <div className="text-sm font-medium">Rail</div>
+        </div>
+      </div>
+      
+      <div className="flex items-center gap-2">
+        <MapPin className="h-4 w-4 text-gray-500" />
+        <div>
+          <div className="text-xs text-gray-500">From</div>
+          <div className="text-sm font-medium">53-202705, Voila</div>
+        </div>
+      </div>
+      
+      <div className="flex items-center gap-2">
+        <MapPin className="h-4 w-4 text-red-500" />
+        <div>
+          <div className="text-xs text-gray-500">To</div>
+          <div className="text-sm font-medium">53-21925-3, Curtici</div>
+        </div>
+      </div>
+    </div>
+  </div>
+);
 
 const CustomerOrdersSection = () => (
   <div className="grid grid-cols-2 gap-8 p-4">
@@ -319,57 +395,17 @@ const TripExecution = () => {
         collapsible: false,
         content: (
           <div className="h-full flex flex-col">
-            <div className="flex-1">
-              <div className="p-4 border-b">
-                <h2 className="text-lg font-semibold text-gray-800">Activities & Consignment</h2>
-              </div>
-              <div className="p-4">
-                <div className="bg-white rounded-lg border">
-                  <div className="overflow-x-auto">
-                    <table className="w-full">
-                      <thead className="bg-gray-50">
-                        <tr>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Leg</th>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Behaviour</th>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Location</th>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Planned/Actual</th>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-gray-200">
-                        {activitiesGridData.map((row, index) => (
-                          <tr key={index}>
-                            <td className="px-4 py-3 text-sm">{row.leg}</td>
-                            <td className="px-4 py-3">
-                              <span className={`inline-flex px-2 py-1 text-xs font-medium rounded ${
-                                row.behaviour === 'Pick' ? 'bg-blue-100 text-blue-800' :
-                                row.behaviour === 'Drvy' ? 'bg-green-100 text-green-800' :
-                                row.behaviour === 'CHA-Import' ? 'bg-cyan-100 text-cyan-800' :
-                                row.behaviour === 'PUD' ? 'bg-emerald-100 text-emerald-800' :
-                                row.behaviour === 'GTIN' ? 'bg-pink-100 text-pink-800' :
-                                row.behaviour === 'GTOUT' ? 'bg-orange-100 text-orange-800' :
-                                row.behaviour === 'LHTA' ? 'bg-purple-100 text-purple-800' :
-                                'bg-gray-100 text-gray-800'
-                              }`}>
-                                {row.behaviour}
-                              </span>
-                            </td>
-                            <td className="px-4 py-3 text-sm">{row.location}</td>
-                            <td className="px-4 py-3 text-sm">{row.plannedActual}</td>
-                            <td className="px-4 py-3">
-                              <span className={`inline-flex px-2 py-1 text-xs font-medium rounded ${
-                                row.status === 'completed' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
-                              }`}>
-                                {row.status === 'completed' ? 'Completed' : 'Pending'}
-                              </span>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              </div>
+            <div className="flex-1 p-4">
+              <SmartGrid
+                columns={activitiesColumns}
+                data={activitiesGridData}
+                gridTitle="Activities & Consignment"
+                recordCount={7}
+                searchPlaceholder="Search activities..."
+                showCreateButton={false}
+                editableColumns={false}
+                paginationMode="pagination"
+              />
             </div>
             <CustomerOrdersSection />
           </div>
