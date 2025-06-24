@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { FlexGridLayout } from '@/components/FlexGridLayout';
 import { DynamicPanel } from '@/components/DynamicPanel';
@@ -160,6 +159,15 @@ const activitiesColumns: GridColumnConfig[] = [
     sortable: false,
     filterable: false,
     editable: false
+  },
+  {
+    key: 'actualDateTime',
+    label: 'Actual date and time',
+    type: 'Date',
+    sortable: true,
+    filterable: true,
+    editable: true,
+    subRow: true
   }
 ];
 
@@ -171,7 +179,8 @@ const activitiesGridData = [
     plannedActual: '20/20',
     consignment: '',
     status: 'completed',
-    action: ''
+    action: '',
+    actualDateTime: '2024-01-15T10:30:00'
   },
   {
     leg: 'Leg: 2',
@@ -180,7 +189,8 @@ const activitiesGridData = [
     plannedActual: '20/20',
     consignment: '',
     status: 'completed',
-    action: ''
+    action: '',
+    actualDateTime: '2024-01-16T14:15:00'
   },
   {
     leg: 'Leg: 3',
@@ -189,7 +199,8 @@ const activitiesGridData = [
     plannedActual: '20/20',
     consignment: '',
     status: 'completed',
-    action: ''
+    action: '',
+    actualDateTime: '2024-01-17T08:45:00'
   },
   {
     leg: 'Leg: 4',
@@ -198,7 +209,8 @@ const activitiesGridData = [
     plannedActual: '20/20',
     consignment: '',
     status: 'completed',
-    action: ''
+    action: '',
+    actualDateTime: '2024-01-18T16:20:00'
   },
   {
     leg: 'Leg: 5',
@@ -207,7 +219,8 @@ const activitiesGridData = [
     plannedActual: '---',
     consignment: '',
     status: 'pending',
-    action: ''
+    action: '',
+    actualDateTime: ''
   },
   {
     leg: 'Leg: 6',
@@ -216,7 +229,8 @@ const activitiesGridData = [
     plannedActual: '---',
     consignment: '',
     status: 'pending',
-    action: ''
+    action: '',
+    actualDateTime: ''
   },
   {
     leg: 'Leg: 7',
@@ -225,7 +239,8 @@ const activitiesGridData = [
     plannedActual: '---',
     consignment: '',
     status: 'pending',
-    action: ''
+    action: '',
+    actualDateTime: ''
   }
 ];
 
