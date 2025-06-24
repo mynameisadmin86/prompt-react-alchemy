@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { FlexGridLayout } from '@/components/FlexGridLayout';
 import { DynamicPanel } from '@/components/DynamicPanel';
@@ -36,7 +35,7 @@ const tripExecutionPanelConfig: PanelConfig = {
     value: '45595.00',
     mandatory: true,
     visible: true,
-    editable: true,
+    editable: false,
     order: 3
   },
   'rail-company': {
@@ -66,7 +65,7 @@ const tripExecutionPanelConfig: PanelConfig = {
     value: '53-202705, Voila',
     mandatory: true,
     visible: true,
-    editable: true,
+    editable: false,
     order: 6
   },
   'to-location': {
@@ -76,7 +75,7 @@ const tripExecutionPanelConfig: PanelConfig = {
     value: '53-21925-3, Curtici',
     mandatory: true,
     visible: true,
-    editable: true,
+    editable: false,
     order: 7
   },
   'trip-type': {
@@ -315,7 +314,7 @@ const TripExecution = () => {
             </div>
             <DynamicPanel
               panelId="trip-execution-panel"
-              panelTitle="Trip Execution Details"
+              panelTitle="TRIP00000001"
               panelConfig={tripExecutionPanelConfig}
               initialData={{
                 'trip-id': 'TRIP00000001',
