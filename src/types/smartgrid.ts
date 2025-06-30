@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { ConfigurableButtonConfig } from '@/components/ui/configurable-button';
 
@@ -132,6 +131,11 @@ export interface SmartGridProps {
   recordCount?: number;
   showCreateButton?: boolean;
   searchPlaceholder?: string;
+  // FilterSystem props
+  onFiltersChange?: (filters: Record<string, any>) => void;
+  gridId?: string;
+  userId?: string;
+  filterSystemAPI?: import('@/types/filterSystem').FilterSystemAPI;
 }
 
 // Legacy interface for backward compatibility
