@@ -25,7 +25,6 @@ import { GridToolbar } from './GridToolbar';
 import { PluginRenderer, PluginRowActions } from './PluginRenderer';
 import { ColumnFilter } from './ColumnFilter';
 import { DraggableSubRow } from './DraggableSubRow';
-import { FilterSystem } from './FilterSystem';
 import { mockFilterAPI } from '@/utils/mockFilterAPI';
 import { cn } from '@/lib/utils';
 
@@ -51,7 +50,13 @@ export function SmartGrid({
   showDefaultConfigurableButton,
   defaultConfigurableButtonLabel,
   gridTitle,
-  recordCount
+  recordCount,
+  showCreateButton,
+  searchPlaceholder,
+  onFiltersChange,
+  gridId,
+  userId,
+  filterSystemAPI
 }: SmartGridProps) {
   const {
     gridData,
@@ -106,7 +111,6 @@ export function SmartGrid({
   } = useSmartGridState();
 
   const [pageSize] = useState(10);
-  const [showFilterRow, setShowFilterRow] = useState(false);
   const [filterSystemFilters, setFilterSystemFilters] = useState<Record<string, any>>({});
   const { toast } = useToast();
 
@@ -673,7 +677,7 @@ export function SmartGrid({
 
   return (
     <div className="space-y-4 w-full">
-      {/* Toolbar */}
+      {/* Toolbar - now includes FilterSystem */}
       <GridToolbar
         globalFilter={globalFilter}
         setGlobalFilter={setGlobalFilter}
@@ -697,18 +701,12 @@ export function SmartGrid({
         defaultConfigurableButtonLabel={defaultConfigurableButtonLabel}
         gridTitle={gridTitle}
         recordCount={recordCount}
-      />
-
-       {/* Advanced Filter System */}
-      <FilterSystem
-        columns={orderedColumns}
-        subRowColumns={subRowColumns}
-        showFilterRow={showFilterRow}
-        onToggleFilterRow={() => setShowFilterRow(!showFilterRow)}
-        onFiltersChange={handleFiltersChange}
-        gridId="smart-grid"
-        userId="demo-user"
-        api={mockFilterAPI}
+        showCreateButton={showCreateButton}
+        searchPlaceholder={searchPlaceholder}
+        onFiltersChange={onFiltersChange}
+        gridId={gridId || 'smart-grid'}
+        userId={userId || 'demo-user'}
+        filterSystemAPI={filterSystemAPI || mockFilterAPI}
       />
       
       {/* Table Container with horizontal scroll prevention */}
@@ -865,7 +863,7 @@ export function SmartGrid({
                 </TableRow>
                 
                 {/* Column Filter Row - Legacy support, hidden when using FilterSystem */}
-                {showColumnFilters && !showFilterRow && (
+                {showColumnFilters && (
                   <TableRow className="hover:bg-transparent border-b border-gray-200">
                     {/* Checkbox column space */}
                     {showCheckboxes && (
