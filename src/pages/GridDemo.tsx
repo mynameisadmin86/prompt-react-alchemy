@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo, useEffect } from 'react';
 import { SmartGrid } from '@/components/SmartGrid';
 import { GridColumnConfig } from '@/types/smartgrid';
@@ -8,7 +7,6 @@ import { useToast } from '@/hooks/use-toast';
 import { useSmartGridState } from '@/hooks/useSmartGridState';
 import { DraggableSubRow } from '@/components/SmartGrid/DraggableSubRow';
 import { ConfigurableButtonConfig } from '@/components/ui/configurable-button';
-import { mockFilterAPI } from '@/utils/mockFilterAPI';
 import {
   Breadcrumb,
   BreadcrumbList,
@@ -433,15 +431,6 @@ const GridDemo = () => {
     setSelectedRows(selectedRowIndices);
   };
 
-  const handleFiltersChange = (filters: Record<string, any>) => {
-    console.log('Filters changed:', filters);
-    // Handle filter changes here - you can update your data fetching logic
-    toast({
-      title: "Filters Applied",
-      description: `Applied ${Object.keys(filters).length} filters`,
-    });
-  };
-
   const renderSubRow = (row: any, rowIndex: number) => {
     return (
       <DraggableSubRow
@@ -510,10 +499,6 @@ const GridDemo = () => {
             recordCount={gridState.gridData.length > 0 ? gridState.gridData.length : processedData.length}
             showCreateButton={true}
             searchPlaceholder="Search all columns..."
-            onFiltersChange={handleFiltersChange}
-            gridId="trip-plans-grid"
-            userId="demo-user"
-            filterSystemAPI={mockFilterAPI}
           />
           
           {/* Footer with action buttons matching the screenshot style */}
