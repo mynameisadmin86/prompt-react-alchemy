@@ -100,9 +100,9 @@ export function SmartGrid({
   userId,
   filterSystemAPI
 }: SmartGridProps) {
-  const [sorting, setSorting] = useState<SortingState>([]);
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
+  const [sorting, setSorting] = useState<{ column: string; direction: 'asc' | 'desc' }[]>([]);
+  const [columnFilters, setColumnFilters] = useState<Record<string, any>>({});
+  const [columnVisibility, setColumnVisibility] = useState<Record<string, boolean>>({});
   const [rowSelection, setRowSelection] = useState({});
   const [globalFilter, setGlobalFilter] = useState("");
   const debouncedGlobalFilter = useDebounce(globalFilter, 500);
@@ -112,6 +112,7 @@ export function SmartGrid({
   const [filters, setFilters] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [pageSize, setPageSize] = useState(10);
+  const [currentPage, setCurrentPage] = useState(0);
 
   // Preference Management
   const [preferences, setPreferences] = useLocalStorage<GridPreferences>(
@@ -121,7 +122,7 @@ export function SmartGrid({
       hiddenColumns: [],
       columnWidths: {},
       columnHeaders: {},
-	  subRowColumns: [],
+      subRowColumns: [],
       subRowColumnOrder: [],
       enableSubRowConfig: true,
       sort: null,
@@ -153,30 +154,38 @@ export function SmartGrid({
     });
   }, [initialColumns, preferences.hiddenColumns, preferences.columnHeaders, forceUpdate]);
 
-  const table = useReactTable({
-    data,
-    columns: processedColumns as ColumnDef<any, any>[],
-    getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    onColumnFiltersChange: setColumnFilters,
-    getFilteredRowModel: getFilteredRowModel(),
-    onGlobalFilterChange: setGlobalFilter,
-    getSortedRowModel: getSortedRowModel(),
-    onSortingChange: setSorting,
-    onColumnVisibilityChange: setColumnVisibility,
-    columnVisibility,
-    state: {
-      sorting,
-      columnFilters,
-      globalFilter: debouncedGlobalFilter,
-    },
-    // Pass preferences to the table
-    initialState: {
-      columnVisibility: Object.fromEntries(
-        processedColumns.filter(col => col.hidden).map(col => [col.key, false])
-      ),
-    },
-  });
+  // Filter data based on global filter
+  const filteredData = useMemo(() => {
+    if (!debouncedGlobalFilter) return data;
+    
+    return data.filter(row => 
+      Object.values(row).some(value => 
+        String(value).toLowerCase().includes(debouncedGlobalFilter.toLowerCase())
+      )
+    );
+  }, [data, debouncedGlobalFilter]);
+
+  // Sort data
+  const sortedData = useMemo(() => {
+    if (sorting.length === 0) return filteredData;
+    
+    return [...filteredData].sort((a, b) => {
+      for (const sort of sorting) {
+        const aValue = a[sort.column];
+        const bValue = b[sort.column];
+        
+        if (aValue < bValue) return sort.direction === 'asc' ? -1 : 1;
+        if (aValue > bValue) return sort.direction === 'asc' ? 1 : -1;
+      }
+      return 0;
+    });
+  }, [filteredData, sorting]);
+
+  // Paginate data
+  const paginatedData = useMemo(() => {
+    const startIndex = currentPage * pageSize;
+    return sortedData.slice(startIndex, startIndex + pageSize);
+  }, [sortedData, currentPage, pageSize]);
 
   // Handlers
   const handleColumnVisibilityToggle = (columnId: string) => {
@@ -206,7 +215,7 @@ export function SmartGrid({
       hiddenColumns: [],
       columnWidths: {},
       columnHeaders: {},
-	  subRowColumns: [],
+      subRowColumns: [],
       subRowColumnOrder: [],
       enableSubRowConfig: true,
       sort: null,
@@ -222,6 +231,26 @@ export function SmartGrid({
       title: "Exporting data",
       description: `Exporting data in ${format} format.`,
     });
+  };
+
+  const handleSort = (columnKey: string) => {
+    setSorting(prev => {
+      const existing = prev.find(s => s.column === columnKey);
+      if (existing) {
+        if (existing.direction === 'asc') {
+          return prev.map(s => s.column === columnKey ? { ...s, direction: 'desc' as const } : s);
+        } else {
+          return prev.filter(s => s.column !== columnKey);
+        }
+      } else {
+        return [...prev, { column: columnKey, direction: 'asc' as const }];
+      }
+    });
+  };
+
+  const getSortDirection = (columnKey: string) => {
+    const sort = sorting.find(s => s.column === columnKey);
+    return sort?.direction;
   };
 
   const handleInlineEdit = (rowIndex: number, columnId: string, value: any) => {
@@ -289,7 +318,7 @@ export function SmartGrid({
 
   const api = useMemo(() => ({
     data,
-    filteredData: table.getFilteredRowModel().rows.map(row => row.original),
+    filteredData: sortedData,
     selectedRows: Array.from(selectedRows).map(rowIndex => data[rowIndex]),
     columns: processedColumns,
     preferences,
@@ -300,7 +329,9 @@ export function SmartGrid({
       selectAllRows: selectAllRows,
       clearSelection: clearSelection,
     }
-  }), [data, table.getFilteredRowModel().rows, selectedRows, processedColumns, preferences]);
+  }), [data, sortedData, selectedRows, processedColumns, preferences]);
+
+  const totalPages = Math.ceil(sortedData.length / pageSize);
 
   return (
     <div className="smart-grid bg-white">
@@ -338,54 +369,48 @@ export function SmartGrid({
       <div className="rounded-md border">
         <Table>
           <TableHeader>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
-                {showCheckboxes && (
-                  <TableHead className="w-[50px]">
-                    <Checkbox
-                      checked={table.getIsAllPageRowsSelected()}
-                      onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-                      aria-label="Select all"
-                    />
-                  </TableHead>
-                )}
-                {headerGroup.headers.map((header) => {
-                  return (
-                    <TableHead key={header.id} className="text-left">
-                      {header.isPlaceholder ? null : (
-                        <div
-                          {...{
-                            className: header.column.getCanSort()
-                              ? "cursor-pointer select-none"
-                              : "",
-                            onClick: header.column.getToggleSortingHandler(),
-                          }}
-                        >
-                          {flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
-                          {
-                            {
-                              asc: <ArrowUp className="ml-2 h-4 w-4" />,
-                              desc: <ArrowDown className="ml-2 h-4 w-4" />,
-                            }[header.column.getIsSorted() as string]
-                          }
-                        </div>
-                      )}
-                    </TableHead>
-                  )
-                })}
-              </TableRow>
-            ))}
+            <TableRow>
+              {showCheckboxes && (
+                <TableHead className="w-[50px]">
+                  <Checkbox
+                    checked={selectedRows.size === paginatedData.length && paginatedData.length > 0}
+                    onCheckedChange={(value) => {
+                      if (value) {
+                        selectAllRows();
+                      } else {
+                        clearSelection();
+                      }
+                    }}
+                    aria-label="Select all"
+                  />
+                </TableHead>
+              )}
+              {processedColumns.filter(col => !col.hidden).map((column) => (
+                <TableHead key={column.key} className="text-left">
+                  <div
+                    className={column.sortable ? "cursor-pointer select-none flex items-center" : ""}
+                    onClick={() => column.sortable && handleSort(column.key)}
+                  >
+                    {column.header}
+                    {column.sortable && (
+                      <>
+                        {getSortDirection(column.key) === 'asc' && <ArrowUp className="ml-2 h-4 w-4" />}
+                        {getSortDirection(column.key) === 'desc' && <ArrowDown className="ml-2 h-4 w-4" />}
+                        {!getSortDirection(column.key) && <ChevronsUpDown className="ml-2 h-4 w-4 opacity-50" />}
+                      </>
+                    )}
+                  </div>
+                </TableHead>
+              ))}
+            </TableRow>
           </TableHeader>
           <TableBody>
-            {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row, index) => (
+            {paginatedData.length ? (
+              paginatedData.map((row, index) => (
                 <TableRow
-                  key={row.id}
+                  key={index}
                   data-index={index}
-                  className={rowClassName ? rowClassName(row.original, index) : ''}
+                  className={rowClassName ? rowClassName(row, index) : ''}
                   onClick={() => {
                     if (showCheckboxes) {
                       toggleRowSelection(index);
@@ -401,9 +426,12 @@ export function SmartGrid({
                       />
                     </TableCell>
                   )}
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  {processedColumns.filter(col => !col.hidden).map((column) => (
+                    <TableCell key={column.key}>
+                      {/* Simple cell rendering - you can enhance this with CellRenderer */}
+                      {typeof row[column.key] === 'object' && row[column.key]?.value 
+                        ? row[column.key].value 
+                        : row[column.key]}
                     </TableCell>
                   ))}
                 </TableRow>
@@ -425,16 +453,16 @@ export function SmartGrid({
             <Button
               variant="outline"
               size="sm"
-              onClick={() => table.previousPage()}
-              disabled={!table.getCanPreviousPage()}
+              onClick={() => setCurrentPage(prev => Math.max(0, prev - 1))}
+              disabled={currentPage === 0}
             >
               Previous
             </Button>
             <Button
               variant="outline"
               size="sm"
-              onClick={() => table.nextPage()}
-              disabled={!table.getCanNextPage()}
+              onClick={() => setCurrentPage(prev => Math.min(totalPages - 1, prev + 1))}
+              disabled={currentPage >= totalPages - 1}
             >
               Next
             </Button>
