@@ -1,6 +1,6 @@
+
 import React from 'react';
 import { ConfigurableButtonConfig } from '@/components/ui/configurable-button';
-import { FilterSystemAPI } from '@/types/filterSystem';
 
 export type GridColumnType =
   | 'Link'                 // Clickable cell with optional onClick or URL
@@ -132,11 +132,6 @@ export interface SmartGridProps {
   recordCount?: number;
   showCreateButton?: boolean;
   searchPlaceholder?: string;
-  // FilterSystem props
-  onFiltersChange?: (filters: Record<string, any>) => void;
-  gridId?: string;
-  userId?: string;
-  filterSystemAPI?: FilterSystemAPI;
 }
 
 // Legacy interface for backward compatibility

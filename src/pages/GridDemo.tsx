@@ -447,12 +447,6 @@ const GridDemo = () => {
     );
   };
 
-  const handleFiltersChange = (filters: Record<string, any>) => {
-    console.log('Filters changed:', filters);
-    // Here you would typically apply the filters to your data
-    // For now, we'll just log them
-  };
-
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto p-6 space-y-6">
@@ -505,9 +499,6 @@ const GridDemo = () => {
             recordCount={gridState.gridData.length > 0 ? gridState.gridData.length : processedData.length}
             showCreateButton={true}
             searchPlaceholder="Search all columns..."
-            onFiltersChange={handleFiltersChange}
-            gridId="trip-plans-grid"
-            userId="demo-user"
           />
           
           {/* Footer with action buttons matching the screenshot style */}
