@@ -4,7 +4,7 @@ import { CellRenderer } from './CellRenderer';
 import { CellEditor } from './CellEditor';
 import { ColumnFilter } from './ColumnFilter';
 import { PluginRenderer, PluginRowActions } from './PluginRenderer';
-import { SmartGridProps, GridColumnConfig, SortConfig, FilterConfig } from '@/types/smartgrid';
+import { SmartGridProps, GridColumnConfig, SortConfig, FilterConfig, GridAPI } from '@/types/smartgrid';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -155,10 +155,38 @@ export function SmartGrid({
     setGlobalFilter('');
   };
 
-  const handleExport = (format: 'csv') => {
+  const handleExport = (format: 'csv' | 'excel' | 'json') => {
     // Export logic here
     console.log('Exporting to', format);
   };
+
+  const gridAPI: GridAPI = useMemo(() => ({
+    data,
+    filteredData,
+    selectedRows: Array.from(selectedRows).map(index => paginatedData[index]).filter(Boolean),
+    columns,
+    preferences,
+    actions: {
+      exportData: (format: 'csv' | 'excel' | 'json') => handleExport(format),
+      resetPreferences: handleResetToDefaults,
+      toggleRowSelection: (rowIndex: number) => {
+        const newSelection = new Set(selectedRows);
+        if (newSelection.has(rowIndex)) {
+          newSelection.delete(rowIndex);
+        } else {
+          newSelection.add(rowIndex);
+        }
+        onSelectionChange?.(newSelection);
+      },
+      selectAllRows: () => {
+        const newSelection = new Set(Array.from({ length: paginatedData.length }, (_, i) => i));
+        onSelectionChange?.(newSelection);
+      },
+      clearSelection: () => {
+        onSelectionChange?.(new Set());
+      }
+    }
+  }), [data, filteredData, selectedRows, columns, preferences, paginatedData, onSelectionChange]);
 
   return (
     <div className="w-full bg-white">
@@ -202,12 +230,12 @@ export function SmartGrid({
                 <div key={column.key} className="p-2 border-r border-gray-200 last:border-r-0">
                   <ColumnFilter
                     column={column}
-                    value={filters.find(f => f.column === column.key)?.value || ''}
-                    onChange={(value) => {
+                    currentFilter={filters.find(f => f.column === column.key)}
+                    onFilterChange={(filter) => {
                       setFilters(prev => {
                         const newFilters = prev.filter(f => f.column !== column.key);
-                        if (value) {
-                          newFilters.push({ column: column.key, value, operator: 'contains' });
+                        if (filter) {
+                          newFilters.push(filter);
                         }
                         return newFilters;
                       });
@@ -294,12 +322,20 @@ export function SmartGrid({
                   )}
                   {columns
                     .filter(col => !preferences.hiddenColumns.includes(col.key))
-                    .map(column => (
+                    .map((column, columnIndex) => (
                       <td key={column.key} className="px-3 py-2">
                         {editingCell?.rowIndex === rowIndex && editingCell?.columnKey === column.key ? (
                           <CellEditor
                             value={row[column.key]}
-                            column={column}
+                            column={{
+                              id: column.key,
+                              header: column.label,
+                              accessor: column.key,
+                              type: column.type === 'EditableText' ? 'text' : 'text',
+                              validator: column.type === 'Dropdown' && column.options ? 
+                                () => true : undefined,
+                              options: column.options?.map(opt => ({ label: opt, value: opt }))
+                            }}
                             onSave={(value) => {
                               const updatedRow = { ...row, [column.key]: value };
                               onUpdate?.(updatedRow);
@@ -312,12 +348,20 @@ export function SmartGrid({
                             value={row[column.key]}
                             column={column}
                             row={row}
-                            onEdit={() => {
-                              if (column.editable) {
-                                setEditingCell({ rowIndex, columnKey: column.key });
-                              }
+                            rowIndex={rowIndex}
+                            columnIndex={columnIndex}
+                            isEditing={false}
+                            isEditable={column.editable || false}
+                            onEdit={(rowIdx, columnKey, value) => {
+                              const updatedRow = { ...row, [columnKey]: value };
+                              onUpdate?.(updatedRow);
                             }}
+                            onEditStart={(rowIdx, columnKey) => {
+                              setEditingCell({ rowIndex, columnKey });
+                            }}
+                            onEditCancel={() => setEditingCell(null)}
                             onLinkClick={onLinkClick}
+                            loading={loading}
                           />
                         )}
                       </td>
@@ -379,7 +423,7 @@ export function SmartGrid({
       )}
 
       {/* Plugin renderers */}
-      <PluginRenderer plugins={plugins} />
+      <PluginRenderer plugins={plugins} gridAPI={gridAPI} type="footer" />
     </div>
   );
 }
