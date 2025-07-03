@@ -1,7 +1,6 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { SideDrawer } from '@/components/ui/side-drawer';
+import { SideDrawer } from '@/components/SideDrawer';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -12,6 +11,8 @@ const SideDrawerDemo = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [transitionDuration, setTransitionDuration] = useState(300);
   const [drawerWidth, setDrawerWidth] = useState('400px');
+  const [slideDirection, setSlideDirection] = useState<'left' | 'right' | 'top' | 'bottom'>('left');
+  const [smoothness, setSmoothness] = useState<'ease-in-out' | 'ease-in' | 'ease-out' | 'linear' | 'bounce'>('ease-in-out');
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -143,14 +144,14 @@ const SideDrawerDemo = () => {
         <div className="bg-white rounded-lg shadow p-6">
           <h2 className="text-xl font-semibold mb-4">Examples</h2>
           <p className="text-gray-600 mb-6">
-            Configure the transition duration, width, and test the side drawer functionality.
+            Configure the transition duration, width, sliding direction, and smoothness of the side drawer.
           </p>
           
           <div className="flex flex-wrap items-center gap-4 mb-6">
             <div className="flex items-center space-x-2">
-              <Label htmlFor="transition-duration">Transition Duration:</Label>
+              <Label htmlFor="transition-duration">Duration:</Label>
               <Select value={transitionDuration.toString()} onValueChange={(value) => setTransitionDuration(Number(value))}>
-                <SelectTrigger className="w-32">
+                <SelectTrigger className="w-24">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -164,9 +165,9 @@ const SideDrawerDemo = () => {
             </div>
 
             <div className="flex items-center space-x-2">
-              <Label htmlFor="drawer-width">Drawer Width:</Label>
+              <Label htmlFor="drawer-width">Width:</Label>
               <Select value={drawerWidth} onValueChange={setDrawerWidth}>
-                <SelectTrigger className="w-32">
+                <SelectTrigger className="w-24">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -180,6 +181,37 @@ const SideDrawerDemo = () => {
                 </SelectContent>
               </Select>
             </div>
+
+            <div className="flex items-center space-x-2">
+              <Label htmlFor="slide-direction">Direction:</Label>
+              <Select value={slideDirection} onValueChange={(value: 'left' | 'right' | 'top' | 'bottom') => setSlideDirection(value)}>
+                <SelectTrigger className="w-24">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="left">Left</SelectItem>
+                  <SelectItem value="right">Right</SelectItem>
+                  <SelectItem value="top">Top</SelectItem>
+                  <SelectItem value="bottom">Bottom</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="flex items-center space-x-2">
+              <Label htmlFor="smoothness">Smoothness:</Label>
+              <Select value={smoothness} onValueChange={(value: 'ease-in-out' | 'ease-in' | 'ease-out' | 'linear' | 'bounce') => setSmoothness(value)}>
+                <SelectTrigger className="w-32">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="ease-in-out">Ease In-Out</SelectItem>
+                  <SelectItem value="ease-in">Ease In</SelectItem>
+                  <SelectItem value="ease-out">Ease Out</SelectItem>
+                  <SelectItem value="linear">Linear</SelectItem>
+                  <SelectItem value="bounce">Bounce</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
             
             <Button onClick={handleOpenDrawer}>
               Open Side Drawer
@@ -190,8 +222,9 @@ const SideDrawerDemo = () => {
             <div className="bg-gray-50 p-4 rounded">
               <h3 className="font-medium mb-2">Features Demonstrated:</h3>
               <ul className="text-sm text-gray-600 space-y-1">
-                <li>• Slides in from the left</li>
+                <li>• Configurable slide direction (left, right, top, bottom)</li>
                 <li>• Configurable transition duration</li>
+                <li>• Configurable smoothness curves</li>
                 <li>• Configurable width (% or px)</li>
                 <li>• Back button navigation</li>
                 <li>• Close button and ESC key</li>
@@ -212,6 +245,8 @@ const SideDrawerDemo = () => {
                 <li>• Outside click behavior</li>
                 <li>• Custom transition duration</li>
                 <li>• Custom width (percentage or pixels)</li>
+                <li>• Slide direction (left, right, top, bottom)</li>
+                <li>• Smoothness curves (ease-in-out, ease-in, ease-out, linear, bounce)</li>
                 <li>• Custom styling support</li>
               </ul>
             </div>
@@ -232,6 +267,8 @@ const SideDrawerDemo = () => {
         closeOnOutsideClick={true}
         transitionDuration={transitionDuration}
         width={drawerWidth}
+        slideDirection={slideDirection}
+        smoothness={smoothness}
       >
         {renderStepContent()}
       </SideDrawer>
