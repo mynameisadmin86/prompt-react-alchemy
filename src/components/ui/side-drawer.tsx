@@ -22,6 +22,7 @@ interface SideDrawerProps {
   footerButtons?: FooterButton[];
   closeOnOutsideClick?: boolean;
   transitionDuration?: number; // in milliseconds
+  width?: string; // width as percentage (e.g., "30%", "40%") or px (e.g., "400px")
   children: React.ReactNode;
   className?: string;
 }
@@ -37,6 +38,7 @@ export const SideDrawer: React.FC<SideDrawerProps> = ({
   footerButtons = [],
   closeOnOutsideClick = true,
   transitionDuration = 300,
+  width = "400px",
   children,
   className
 }) => {
@@ -73,6 +75,14 @@ export const SideDrawer: React.FC<SideDrawerProps> = ({
     transitionDuration: `${transitionDuration}ms`
   };
 
+  // Determine width based on screen size and prop
+  const getDrawerWidth = () => {
+    if (window.innerWidth < 640) {
+      return '100%'; // Full width on mobile
+    }
+    return width;
+  };
+
   return (
     <>
       {/* Overlay */}
@@ -86,14 +96,13 @@ export const SideDrawer: React.FC<SideDrawerProps> = ({
       <div
         className={cn(
           "fixed top-0 left-0 h-full bg-white shadow-xl z-50",
-          "w-[400px] max-w-full sm:max-w-[400px]",
           "transform transition-transform ease-in-out",
           "flex flex-col",
           isOpen ? "translate-x-0" : "-translate-x-full",
           className
         )}
         style={{ 
-          width: window.innerWidth < 640 ? '100%' : '400px',
+          width: getDrawerWidth(),
           ...transitionStyle
         }}
       >

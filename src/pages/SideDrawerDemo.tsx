@@ -11,6 +11,7 @@ const SideDrawerDemo = () => {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
   const [transitionDuration, setTransitionDuration] = useState(300);
+  const [drawerWidth, setDrawerWidth] = useState('400px');
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -142,10 +143,10 @@ const SideDrawerDemo = () => {
         <div className="bg-white rounded-lg shadow p-6">
           <h2 className="text-xl font-semibold mb-4">Examples</h2>
           <p className="text-gray-600 mb-6">
-            Configure the transition duration and test the side drawer functionality.
+            Configure the transition duration, width, and test the side drawer functionality.
           </p>
           
-          <div className="flex items-center space-x-4 mb-6">
+          <div className="flex flex-wrap items-center gap-4 mb-6">
             <div className="flex items-center space-x-2">
               <Label htmlFor="transition-duration">Transition Duration:</Label>
               <Select value={transitionDuration.toString()} onValueChange={(value) => setTransitionDuration(Number(value))}>
@@ -161,6 +162,24 @@ const SideDrawerDemo = () => {
                 </SelectContent>
               </Select>
             </div>
+
+            <div className="flex items-center space-x-2">
+              <Label htmlFor="drawer-width">Drawer Width:</Label>
+              <Select value={drawerWidth} onValueChange={setDrawerWidth}>
+                <SelectTrigger className="w-32">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="25%">25%</SelectItem>
+                  <SelectItem value="30%">30%</SelectItem>
+                  <SelectItem value="40%">40%</SelectItem>
+                  <SelectItem value="50%">50%</SelectItem>
+                  <SelectItem value="60%">60%</SelectItem>
+                  <SelectItem value="400px">400px</SelectItem>
+                  <SelectItem value="500px">500px</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
             
             <Button onClick={handleOpenDrawer}>
               Open Side Drawer
@@ -173,6 +192,7 @@ const SideDrawerDemo = () => {
               <ul className="text-sm text-gray-600 space-y-1">
                 <li>• Slides in from the left</li>
                 <li>• Configurable transition duration</li>
+                <li>• Configurable width (% or px)</li>
                 <li>• Back button navigation</li>
                 <li>• Close button and ESC key</li>
                 <li>• Outside click to close</li>
@@ -191,6 +211,7 @@ const SideDrawerDemo = () => {
                 <li>• Custom button variants</li>
                 <li>• Outside click behavior</li>
                 <li>• Custom transition duration</li>
+                <li>• Custom width (percentage or pixels)</li>
                 <li>• Custom styling support</li>
               </ul>
             </div>
@@ -210,6 +231,7 @@ const SideDrawerDemo = () => {
         footerButtons={getFooterButtons()}
         closeOnOutsideClick={true}
         transitionDuration={transitionDuration}
+        width={drawerWidth}
       >
         {renderStepContent()}
       </SideDrawer>
