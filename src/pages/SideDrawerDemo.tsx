@@ -5,10 +5,12 @@ import { SideDrawer } from '@/components/ui/side-drawer';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const SideDrawerDemo = () => {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
+  const [transitionDuration, setTransitionDuration] = useState(300);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -140,19 +142,37 @@ const SideDrawerDemo = () => {
         <div className="bg-white rounded-lg shadow p-6">
           <h2 className="text-xl font-semibold mb-4">Examples</h2>
           <p className="text-gray-600 mb-6">
-            Click the button below to open a side drawer with a multi-step form.
+            Configure the transition duration and test the side drawer functionality.
           </p>
           
-          <Button onClick={handleOpenDrawer}>
-            Open Side Drawer
-          </Button>
+          <div className="flex items-center space-x-4 mb-6">
+            <div className="flex items-center space-x-2">
+              <Label htmlFor="transition-duration">Transition Duration:</Label>
+              <Select value={transitionDuration.toString()} onValueChange={(value) => setTransitionDuration(Number(value))}>
+                <SelectTrigger className="w-32">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="150">150ms</SelectItem>
+                  <SelectItem value="300">300ms</SelectItem>
+                  <SelectItem value="500">500ms</SelectItem>
+                  <SelectItem value="700">700ms</SelectItem>
+                  <SelectItem value="1000">1000ms</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <Button onClick={handleOpenDrawer}>
+              Open Side Drawer
+            </Button>
+          </div>
           
           <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="bg-gray-50 p-4 rounded">
               <h3 className="font-medium mb-2">Features Demonstrated:</h3>
               <ul className="text-sm text-gray-600 space-y-1">
                 <li>• Slides in from the left</li>
-                <li>• Smooth 300ms transition</li>
+                <li>• Configurable transition duration</li>
                 <li>• Back button navigation</li>
                 <li>• Close button and ESC key</li>
                 <li>• Outside click to close</li>
@@ -170,6 +190,7 @@ const SideDrawerDemo = () => {
                 <li>• Configurable footer buttons</li>
                 <li>• Custom button variants</li>
                 <li>• Outside click behavior</li>
+                <li>• Custom transition duration</li>
                 <li>• Custom styling support</li>
               </ul>
             </div>
@@ -188,6 +209,7 @@ const SideDrawerDemo = () => {
         showFooter={true}
         footerButtons={getFooterButtons()}
         closeOnOutsideClick={true}
+        transitionDuration={transitionDuration}
       >
         {renderStepContent()}
       </SideDrawer>

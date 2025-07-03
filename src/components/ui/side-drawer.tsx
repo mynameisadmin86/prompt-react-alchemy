@@ -21,6 +21,7 @@ interface SideDrawerProps {
   showFooter?: boolean;
   footerButtons?: FooterButton[];
   closeOnOutsideClick?: boolean;
+  transitionDuration?: number; // in milliseconds
   children: React.ReactNode;
   className?: string;
 }
@@ -35,6 +36,7 @@ export const SideDrawer: React.FC<SideDrawerProps> = ({
   showFooter = false,
   footerButtons = [],
   closeOnOutsideClick = true,
+  transitionDuration = 300,
   children,
   className
 }) => {
@@ -67,11 +69,16 @@ export const SideDrawer: React.FC<SideDrawerProps> = ({
 
   if (!isOpen) return null;
 
+  const transitionStyle = {
+    transitionDuration: `${transitionDuration}ms`
+  };
+
   return (
     <>
       {/* Overlay */}
       <div
-        className="fixed inset-0 bg-black/50 z-40 transition-opacity duration-300"
+        className="fixed inset-0 bg-black/50 z-40 transition-opacity"
+        style={transitionStyle}
         onClick={handleOverlayClick}
       />
       
@@ -80,12 +87,15 @@ export const SideDrawer: React.FC<SideDrawerProps> = ({
         className={cn(
           "fixed top-0 left-0 h-full bg-white shadow-xl z-50",
           "w-[400px] max-w-full sm:max-w-[400px]",
-          "transform transition-transform duration-300 ease-in-out",
+          "transform transition-transform ease-in-out",
           "flex flex-col",
           isOpen ? "translate-x-0" : "-translate-x-full",
           className
         )}
-        style={{ width: window.innerWidth < 640 ? '100%' : '400px' }}
+        style={{ 
+          width: window.innerWidth < 640 ? '100%' : '400px',
+          ...transitionStyle
+        }}
       >
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-gray-200 flex-shrink-0">
