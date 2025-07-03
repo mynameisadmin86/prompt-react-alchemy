@@ -171,11 +171,17 @@ const SideDrawerDemo = () => {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="10%">10%</SelectItem>
+                  <SelectItem value="20%">20%</SelectItem>
                   <SelectItem value="25%">25%</SelectItem>
                   <SelectItem value="30%">30%</SelectItem>
                   <SelectItem value="40%">40%</SelectItem>
                   <SelectItem value="50%">50%</SelectItem>
                   <SelectItem value="60%">60%</SelectItem>
+                  <SelectItem value="70%">70%</SelectItem>
+                  <SelectItem value="80%">80%</SelectItem>
+                  <SelectItem value="90%">90%</SelectItem>
+                  <SelectItem value="100%">100%</SelectItem>
                   <SelectItem value="400px">400px</SelectItem>
                   <SelectItem value="500px">500px</SelectItem>
                 </SelectContent>
