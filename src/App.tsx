@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import GridDemo from "./pages/GridDemo";
 import TripPlansSearchHub from "./pages/TripPlansSearchHub";
+import TripPlansSearchHubAPI from "./pages/TripPlansSearchHubAPI";
 import DynamicPanelDemo from "./pages/DynamicPanelDemo";
 import FlexGridDemo from "./pages/FlexGridDemo";
 import FlexGridLayoutPage from "./pages/FlexGridLayoutPage";
@@ -26,6 +27,7 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/grid-demo" element={<GridDemo />} />
           <Route path="/trip-plans-search-hub" element={<TripPlansSearchHub />} />
+          <Route path="/trip-plans-search-hub-api" element={<TripPlansSearchHubAPI />} />
           <Route path="/dynamic-panel-demo" element={<DynamicPanelDemo />} />
           <Route path="/flex-grid-demo" element={<FlexGridDemo />} />
           <Route path="/flex-grid-layout-page" element={<FlexGridLayoutPage />} />

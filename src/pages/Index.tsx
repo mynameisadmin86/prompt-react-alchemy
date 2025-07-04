@@ -1,100 +1,115 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { ArrowRight, Grid3x3, Layout, Search, Workflow, PanelLeft, Layers } from "lucide-react";
 import { Link } from "react-router-dom";
-import { Grid, PanelTop, Layout, Route, SidebarOpen } from "lucide-react";
 
 const Index = () => {
   const demos = [
     {
-      title: "Smart Grid Demo",
-      description: "Advanced data grid with filtering, sorting, and column management",
-      icon: Grid,
+      title: "Grid Demo",
+      description: "Interactive data grid with sorting, filtering, and editing capabilities",
+      icon: Grid3x3,
       path: "/grid-demo",
-      color: "bg-blue-500"
+      color: "text-blue-600"
     },
     {
       title: "Trip Plans Search Hub",
-      description: "Search and manage trip plans with advanced filtering",
-      icon: Route,
+      description: "Comprehensive trip management interface with advanced search and filtering",
+      icon: Search,
       path: "/trip-plans-search-hub",
-      color: "bg-green-500"
+      color: "text-green-600"
+    },
+    {
+      title: "Trip Plans Search Hub (API)",
+      description: "API-integrated version with real data fetching and server-side operations",
+      icon: Search,
+      path: "/trip-plans-search-hub-api",
+      color: "text-purple-600"
     },
     {
       title: "Dynamic Panel Demo",
-      description: "Configurable panels with dynamic field visibility",
-      icon: PanelTop,
+      description: "Configurable form panels with dynamic field visibility and validation",
+      icon: PanelLeft,
       path: "/dynamic-panel-demo",
-      color: "bg-purple-500"
+      color: "text-orange-600"
     },
     {
-      title: "Flex Grid Demo",
-      description: "Flexible grid layouts with responsive design",
+      title: "FlexGrid Demo",
+      description: "Flexible grid layouts with drag-and-drop and responsive design",
       icon: Layout,
       path: "/flex-grid-demo",
-      color: "bg-orange-500"
+      color: "text-indigo-600"
     },
     {
-      title: "Flex Grid Layout Page",
-      description: "Advanced flex grid layout system",
-      icon: Layout,
+      title: "FlexGrid Layout Page",
+      description: "Advanced layout compositions using the FlexGrid system",
+      icon: Layers,
       path: "/flex-grid-layout-page",
-      color: "bg-teal-500"
+      color: "text-pink-600"
     },
     {
       title: "Trip Execution",
-      description: "Trip execution and management interface",
-      icon: Route,
+      description: "Trip execution workflow with status tracking and approval processes",
+      icon: Workflow,
       path: "/trip-execution",
-      color: "bg-indigo-500"
+      color: "text-cyan-600"
     },
     {
       title: "Side Drawer Demo",
-      description: "Reusable left-side drawer component with smooth animations",
-      icon: SidebarOpen,
+      description: "Configurable side drawer with various width options and content",
+      icon: PanelLeft,
       path: "/side-drawer-demo",
-      color: "bg-pink-500"
+      color: "text-teal-600"
     }
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-8">
-      <div className="max-w-6xl mx-auto">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+      <div className="container mx-auto px-4 py-12">
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            Component Demo Gallery
+            Enterprise ERP Demo Suite
           </h1>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Explore our collection of reusable components and advanced UI patterns
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            Explore our comprehensive collection of enterprise-grade components and features
+            designed for modern ERP applications.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
           {demos.map((demo) => {
-            const IconComponent = demo.icon;
+            const Icon = demo.icon;
             return (
-              <Card key={demo.path} className="hover:shadow-lg transition-shadow duration-200">
-                <CardHeader>
+              <Card key={demo.path} className="group hover:shadow-lg transition-all duration-200 border-0 shadow-md">
+                <CardHeader className="pb-3">
                   <div className="flex items-center space-x-3">
-                    <div className={`p-2 rounded-lg ${demo.color}`}>
-                      <IconComponent className="h-6 w-6 text-white" />
+                    <div className={`p-2 rounded-lg bg-gray-50 group-hover:bg-white transition-colors ${demo.color}`}>
+                      <Icon className="h-6 w-6" />
                     </div>
                     <CardTitle className="text-lg">{demo.title}</CardTitle>
                   </div>
                 </CardHeader>
-                <CardContent>
-                  <CardDescription className="mb-4 text-gray-600">
+                <CardContent className="pt-0">
+                  <CardDescription className="text-gray-600 mb-4 min-h-[3rem]">
                     {demo.description}
                   </CardDescription>
                   <Link to={demo.path}>
-                    <Button className="w-full">
+                    <Button className="w-full group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
                       View Demo
+                      <ArrowRight className="ml-2 h-4 w-4" />
                     </Button>
                   </Link>
                 </CardContent>
               </Card>
             );
           })}
+        </div>
+
+        <div className="text-center mt-12">
+          <p className="text-gray-500">
+            Built with React, TypeScript, Tailwind CSS, and modern enterprise patterns
+          </p>
         </div>
       </div>
     </div>
