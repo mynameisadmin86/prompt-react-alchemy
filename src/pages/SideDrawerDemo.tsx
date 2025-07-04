@@ -12,7 +12,7 @@ const SideDrawerDemo = () => {
   const [transitionDuration, setTransitionDuration] = useState(300);
   const [drawerWidth, setDrawerWidth] = useState('400px');
   const [slideDirection, setSlideDirection] = useState<'left' | 'right' | 'top' | 'bottom'>('left');
-  const [smoothness, setSmoothness] = useState<'ease-in-out' | 'ease-in' | 'ease-out' | 'linear' | 'bounce'>('ease-in-out');
+  const [smoothness, setSmoothness] = useState<'ease-in-out' | 'ease-in' | 'ease-out' | 'linear' | 'bounce' | 'spring' | 'smooth'>('ease-in-out');
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -205,7 +205,7 @@ const SideDrawerDemo = () => {
 
             <div className="flex items-center space-x-2">
               <Label htmlFor="smoothness">Smoothness:</Label>
-              <Select value={smoothness} onValueChange={(value: 'ease-in-out' | 'ease-in' | 'ease-out' | 'linear' | 'bounce') => setSmoothness(value)}>
+              <Select value={smoothness} onValueChange={(value: 'ease-in-out' | 'ease-in' | 'ease-out' | 'linear' | 'bounce' | 'spring' | 'smooth') => setSmoothness(value)}>
                 <SelectTrigger className="w-32">
                   <SelectValue />
                 </SelectTrigger>
@@ -215,6 +215,8 @@ const SideDrawerDemo = () => {
                   <SelectItem value="ease-out">Ease Out</SelectItem>
                   <SelectItem value="linear">Linear</SelectItem>
                   <SelectItem value="bounce">Bounce</SelectItem>
+                  <SelectItem value="spring">Spring</SelectItem>
+                  <SelectItem value="smooth">Smooth</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -230,7 +232,7 @@ const SideDrawerDemo = () => {
               <ul className="text-sm text-gray-600 space-y-1">
                 <li>• Configurable slide direction (left, right, top, bottom)</li>
                 <li>• Configurable transition duration</li>
-                <li>• Configurable smoothness curves</li>
+                <li>• Enhanced smoothness curves (7 options)</li>
                 <li>• Configurable width (% or px)</li>
                 <li>• Back button navigation</li>
                 <li>• Close button and ESC key</li>
@@ -252,7 +254,7 @@ const SideDrawerDemo = () => {
                 <li>• Custom transition duration</li>
                 <li>• Custom width (percentage or pixels)</li>
                 <li>• Slide direction (left, right, top, bottom)</li>
-                <li>• Smoothness curves (ease-in-out, ease-in, ease-out, linear, bounce)</li>
+                <li>• Smoothness curves (ease-in-out, ease-in, ease-out, linear, bounce, spring, smooth)</li>
                 <li>• Custom styling support</li>
               </ul>
             </div>

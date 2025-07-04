@@ -12,7 +12,7 @@ interface FooterButton {
 }
 
 type SlideDirection = 'left' | 'right' | 'top' | 'bottom';
-type SmoothnessCurve = 'ease-in-out' | 'ease-in' | 'ease-out' | 'linear' | 'bounce';
+type SmoothnessCurve = 'ease-in-out' | 'ease-in' | 'ease-out' | 'linear' | 'bounce' | 'spring' | 'smooth';
 
 interface SideDrawerProps {
   isOpen: boolean;
@@ -76,11 +76,30 @@ export const SideDrawer: React.FC<SideDrawerProps> = ({
     };
   }, [isOpen, onClose]);
 
-  if (!isOpen) return null;
+  // Get smoothness curve
+  const getSmoothnessCurve = (curve: SmoothnessCurve): string => {
+    const curves = {
+      'ease-in-out': 'ease-in-out',
+      'ease-in': 'ease-in',
+      'ease-out': 'ease-out',
+      'linear': 'linear',
+      'bounce': 'cubic-bezier(0.68, -0.55, 0.265, 1.55)',
+      'spring': 'cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+      'smooth': 'cubic-bezier(0.4, 0, 0.2, 1)'
+    };
+    return curves[curve] || curves['ease-in-out'];
+  };
 
   const transitionStyle = {
     transitionDuration: `${transitionDuration}ms`,
-    transitionTimingFunction: smoothness === 'bounce' ? 'cubic-bezier(0.68, -0.55, 0.265, 1.55)' : smoothness
+    transitionTimingFunction: getSmoothnessCurve(smoothness),
+    transitionProperty: 'transform, opacity'
+  };
+
+  const overlayTransitionStyle = {
+    transitionDuration: `${Math.min(transitionDuration, 200)}ms`,
+    transitionTimingFunction: 'ease-out',
+    transitionProperty: 'opacity'
   };
 
   // Determine width based on screen size and prop
@@ -137,12 +156,17 @@ export const SideDrawer: React.FC<SideDrawerProps> = ({
 
   const { position, transform } = getPositionClasses();
 
+  if (!isOpen) return null;
+
   return (
     <>
       {/* Overlay */}
       <div
-        className="fixed inset-0 bg-black/50 z-40 transition-opacity"
-        style={transitionStyle}
+        className={cn(
+          "fixed inset-0 bg-black/50 z-40 transition-opacity",
+          isOpen ? "opacity-100" : "opacity-0"
+        )}
+        style={overlayTransitionStyle}
         onClick={handleOverlayClick}
       />
       
@@ -151,7 +175,7 @@ export const SideDrawer: React.FC<SideDrawerProps> = ({
         className={cn(
           position,
           "bg-white shadow-xl z-50",
-          "transform transition-transform",
+          "transform transition-transform will-change-transform",
           "flex flex-col",
           transform,
           className
@@ -170,7 +194,7 @@ export const SideDrawer: React.FC<SideDrawerProps> = ({
                 variant="ghost"
                 size="sm"
                 onClick={onBack}
-                className="p-1 h-8 w-8"
+                className="p-1 h-8 w-8 transition-colors duration-200 hover:bg-gray-100"
               >
                 <ArrowLeft className="h-4 w-4" />
               </Button>
@@ -187,7 +211,7 @@ export const SideDrawer: React.FC<SideDrawerProps> = ({
               variant="ghost"
               size="sm"
               onClick={onClose}
-              className="p-1 h-8 w-8"
+              className="p-1 h-8 w-8 transition-colors duration-200 hover:bg-gray-100"
             >
               <X className="h-4 w-4" />
             </Button>
@@ -209,6 +233,7 @@ export const SideDrawer: React.FC<SideDrawerProps> = ({
                   variant={button.variant}
                   onClick={button.action}
                   disabled={button.disabled}
+                  className="transition-all duration-200"
                 >
                   {button.label}
                 </Button>
