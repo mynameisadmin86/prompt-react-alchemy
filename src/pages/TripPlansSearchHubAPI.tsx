@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo, useEffect } from 'react';
 import { SmartGrid } from '@/components/SmartGrid';
 import { GridColumnConfig } from '@/types/smartgrid';
@@ -367,10 +366,11 @@ const TripPlansSearchHubAPI = () => {
             </div>
           </div>
           <DynamicPanel
-            config={searchPanelConfig}
-            data={searchData}
+            panelId="trip-search-filters"
+            panelTitle="Search Filters"
+            panelConfig={searchPanelConfig}
+            initialData={searchData}
             onDataChange={handleSearchDataChange}
-            mode="edit"
           />
         </div>
 
