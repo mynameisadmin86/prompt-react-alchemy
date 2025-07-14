@@ -36,7 +36,11 @@ export function processGridData(
   if (filters.length > 0) {
     result = result.filter(row => {
       return filters.every(filter => {
-        let value = row[filter.column];
+        // Handle sub-row filters (prefixed with 'subrow-')
+        const isSubRowFilter = filter.column.startsWith('subrow-');
+        const actualColumnKey = isSubRowFilter ? filter.column.replace('subrow-', '') : filter.column;
+        
+        let value = row[actualColumnKey];
         
         // Handle status fields that are objects with value property
         if (value && typeof value === 'object' && 'value' in value) {
