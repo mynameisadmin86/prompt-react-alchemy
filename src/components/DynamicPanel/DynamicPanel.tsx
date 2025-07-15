@@ -150,10 +150,12 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
     }
   };
 
-  const getFieldWidthClass = (fieldWidth?: 'third' | 'two-thirds' | 'full') => {
+  const getFieldWidthClass = (fieldWidth?: 'third' | 'half' | 'two-thirds' | 'full') => {
     switch (fieldWidth) {
       case 'third':
         return 'col-span-1 md:col-span-1';
+      case 'half':
+        return 'col-span-2 md:col-span-2'; // Taking 2/3 space which is closest to 1/2 in a 3-column grid
       case 'two-thirds':
         return 'col-span-2 md:col-span-2';
       case 'full':
