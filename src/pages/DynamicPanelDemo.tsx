@@ -301,19 +301,19 @@ const DynamicPanelDemo = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="container mx-auto p-6 space-y-6">
+    <div className="min-vh-100 bg-light">
+      <div className="container py-4">
         {/* Breadcrumbs */}
         <Breadcrumb>
           <BreadcrumbList>
             <BreadcrumbItem>
-              <BreadcrumbLink href="/" className="text-blue-600 hover:text-blue-800">
+              <BreadcrumbLink href="/" className="text-primary">
                 Home
               </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
-              <BreadcrumbPage className="text-gray-600">
+              <BreadcrumbPage className="text-muted">
                 Dynamic Panel Demo
               </BreadcrumbPage>
             </BreadcrumbItem>
@@ -321,10 +321,10 @@ const DynamicPanelDemo = () => {
         </Breadcrumb>
 
         {/* Title and Controls */}
-        <div className="flex items-center justify-between">
+        <div className="d-flex justify-content-between align-items-start mb-4">
           <div>
-            <h1 className="text-2xl font-semibold text-gray-900">Dynamic Panel Configuration</h1>
-            <p className="text-gray-600 mt-1">
+            <h1 className="h2 text-dark mb-1">Dynamic Panel Configuration</h1>
+            <p className="text-muted">
               Configure field visibility, ordering, and labels for each panel
             </p>
           </div>
@@ -334,8 +334,8 @@ const DynamicPanelDemo = () => {
           />
         </div>
 
-        {/* Dynamic Panels in 12-column grid */}
-        <div className="grid grid-cols-12 gap-6">
+        {/* Dynamic Panels in Bootstrap 4 grid */}
+        <div className="row">
           {basicDetailsVisible && (
             <DynamicPanel
               panelId="basic-details"
@@ -387,38 +387,38 @@ const DynamicPanelDemo = () => {
 
         {/* Show message when all panels are hidden */}
         {!basicDetailsVisible && !operationalDetailsVisible && !billingDetailsVisible && (
-          <div className="bg-white p-8 rounded-lg shadow-sm text-center">
-            <EyeOff className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-gray-700 mb-2">All panels are hidden</h3>
-            <p className="text-gray-500 mb-4">Use the "Manage Panels" button above to show panels.</p>
+          <div className="bg-white p-5 rounded shadow-sm text-center">
+            <EyeOff size={48} className="text-muted mx-auto mb-3" />
+            <h3 className="h5 text-muted mb-2">All panels are hidden</h3>
+            <p className="text-muted mb-3">Use the "Manage Panels" button above to show panels.</p>
           </div>
         )}
 
         {/* Debug Data Display */}
         {(basicDetailsVisible || operationalDetailsVisible || billingDetailsVisible) && (
-          <div className="bg-white p-6 rounded-lg shadow-sm">
-            <h3 className="text-lg font-semibold mb-4">Current Form Data</h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="bg-white p-4 rounded shadow-sm mt-4">
+            <h3 className="h5 mb-3">Current Form Data</h3>
+            <div className="row">
               {basicDetailsVisible && (
-                <div>
-                  <h4 className="font-medium text-gray-700 mb-2">{basicDetailsTitle}</h4>
-                  <pre className="text-xs bg-gray-100 p-3 rounded overflow-auto">
+                <div className="col-12 col-md-4 mb-3">
+                  <h4 className="h6 text-muted mb-2">{basicDetailsTitle}</h4>
+                  <pre className="bg-light p-3 rounded small overflow-auto">
                     {JSON.stringify(basicDetailsData, null, 2)}
                   </pre>
                 </div>
               )}
               {operationalDetailsVisible && (
-                <div>
-                  <h4 className="font-medium text-gray-700 mb-2">{operationalDetailsTitle}</h4>
-                  <pre className="text-xs bg-gray-100 p-3 rounded overflow-auto">
+                <div className="col-12 col-md-4 mb-3">
+                  <h4 className="h6 text-muted mb-2">{operationalDetailsTitle}</h4>
+                  <pre className="bg-light p-3 rounded small overflow-auto">
                     {JSON.stringify(operationalDetailsData, null, 2)}
                   </pre>
                 </div>
               )}
               {billingDetailsVisible && (
-                <div>
-                  <h4 className="font-medium text-gray-700 mb-2">{billingDetailsTitle}</h4>
-                  <pre className="text-xs bg-gray-100 p-3 rounded overflow-auto">
+                <div className="col-12 col-md-4 mb-3">
+                  <h4 className="h6 text-muted mb-2">{billingDetailsTitle}</h4>
+                  <pre className="bg-light p-3 rounded small overflow-auto">
                     {JSON.stringify(billingDetailsData, null, 2)}
                   </pre>
                 </div>
