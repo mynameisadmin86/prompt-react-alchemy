@@ -273,7 +273,7 @@ export const EnhancedFieldVisibilityModal: React.FC<EnhancedFieldVisibilityModal
           <AccordionItem value="field-visibility">
             <AccordionTrigger>Field Visibility & Configuration</AccordionTrigger>
             <AccordionContent>
-              <div className="overflow-auto" style={{ maxHeight: '24rem' }}>
+              <div className="space-y-4 max-h-96 overflow-y-auto">
                 {fieldConfigs.map((fieldConfig, index) => {
                   const isMandatory = panelConfig[fieldConfig.fieldId]?.mandatory;
                   const isVisible = fieldConfig.visible;
@@ -282,7 +282,7 @@ export const EnhancedFieldVisibilityModal: React.FC<EnhancedFieldVisibilityModal
                   return (
                     <div
                       key={fieldConfig.fieldId}
-                      className="border rounded p-3 mb-3 bg-light"
+                      className="flex flex-col space-y-3 p-3 border rounded-lg bg-gray-50"
                       draggable
                       onDragStart={() => setDraggedIndex(index)}
                       onDragOver={(e) => {
@@ -305,8 +305,8 @@ export const EnhancedFieldVisibilityModal: React.FC<EnhancedFieldVisibilityModal
                       }}
                       onDragEnd={() => setDraggedIndex(null)}
                     >
-                      <div className="d-flex align-items-center mb-3">
-                        <GripVertical size={16} className="text-muted mr-2" style={{ cursor: 'grab' }} />
+                      <div className="flex items-center space-x-3">
+                        <GripVertical className="h-4 w-4 text-gray-400 cursor-grab" />
                         
                         <Checkbox
                           checked={isVisible}
@@ -320,15 +320,15 @@ export const EnhancedFieldVisibilityModal: React.FC<EnhancedFieldVisibilityModal
                           disabled={isMandatory}
                         />
 
-                        <div className="d-flex align-items-center ml-2 mr-2">
+                        <div className="flex items-center space-x-2 flex-shrink-0">
                           {isVisible ? (
-                            <Eye size={16} className="text-success" />
+                            <Eye className="h-4 w-4 text-green-600" />
                           ) : (
-                            <EyeOff size={16} className="text-muted" />
+                            <EyeOff className="h-4 w-4 text-gray-400" />
                           )}
                         </div>
                         
-                        <div className="flex-fill">
+                        <div className="flex-1">
                           <Input
                             value={fieldConfig.label}
                             onChange={(e) => setFieldConfigs(prev => 
@@ -336,34 +336,32 @@ export const EnhancedFieldVisibilityModal: React.FC<EnhancedFieldVisibilityModal
                                 config.fieldId === fieldConfig.fieldId ? { ...config, label: e.target.value } : config
                               )
                             )}
-                            className="form-control form-control-sm"
+                            className="text-sm"
                             placeholder="Field label"
                           />
-                          <div className="d-flex justify-content-between mt-1">
-                            <small className="text-muted">
+                          <div className="flex items-center justify-between mt-1">
+                            <span className="text-xs text-gray-500">
                               {fieldConfig.fieldId}
-                            </small>
-                            <small className="text-primary font-weight-bold">
+                            </span>
+                            <span className="text-xs text-blue-600 font-medium">
                               {getFieldTypeDisplay(fieldType)}
-                            </small>
+                            </span>
                           </div>
                           {isMandatory && (
-                            <small className="text-danger">Mandatory field</small>
+                            <span className="text-xs text-red-600 mt-1">Mandatory field</span>
                           )}
                         </div>
                       </div>
                       
-                      <div className="d-flex align-items-center">
-                        <Label className="text-muted mr-2">
-                          <small>Field Width:</small>
-                        </Label>
+                      <div className="flex items-center space-x-2">
+                        <Label className="text-xs text-gray-600">Field Width:</Label>
                         <Select 
                           value={fieldConfig.width || 'full'} 
                           onValueChange={(value: 'third' | 'half' | 'two-thirds' | 'full') => 
                             handleWidthChange(fieldConfig.fieldId, value)
                           }
                         >
-                          <SelectTrigger className="form-control form-control-sm" style={{ width: '8rem' }}>
+                          <SelectTrigger className="w-32 h-7 text-xs">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>

@@ -130,49 +130,49 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
     }
   };
 
-  // Determine panel width class based on Bootstrap 4 grid system
+  // Determine panel width class based on 12-column grid system
   const getWidthClass = () => {
     if (typeof currentPanelWidth === 'number') {
-      const colSize = Math.min(Math.max(currentPanelWidth, 1), 12); // Clamp between 1-12
-      return `col-${colSize}`;
+      const colSpan = Math.min(Math.max(currentPanelWidth, 1), 12); // Clamp between 1-12
+      return `col-span-${colSpan}`;
     }
     
     switch (currentPanelWidth) {
       case 'half':
-        return 'col-6'; // 6/12 = 50%
+        return 'col-span-6'; // 6/12 = 50%
       case 'third':
-        return 'col-4'; // 4/12 = 33.33%
+        return 'col-span-4'; // 4/12 = 33.33%
       case 'quarter':
-        return 'col-3'; // 3/12 = 25%
+        return 'col-span-3'; // 3/12 = 25%
       case 'full':
       default:
-        return 'col-12'; // Full width
+        return 'col-span-12'; // Full width
     }
   };
 
   const getFieldWidthClass = (fieldWidth?: 'third' | 'half' | 'two-thirds' | 'full') => {
     switch (fieldWidth) {
       case 'third':
-        return 'col-4'; // 4/12 = 1/3
+        return 'col-span-4'; // 4/12 = 1/3
       case 'half':
-        return 'col-6'; // 6/12 = 1/2 (50%)
+        return 'col-span-6'; // 6/12 = 1/2 (50%)
       case 'two-thirds':
-        return 'col-8'; // 8/12 = 2/3
+        return 'col-span-8'; // 8/12 = 2/3
       case 'full':
       default:
-        return 'col-12'; // 12/12 = 100%
+        return 'col-span-12'; // 12/12 = 100%
     }
   };
 
   const PanelContent = () => (
     <>
-      <div className="row">
+      <div className="grid grid-cols-12 gap-4">
         {visibleFields.map(([fieldId, fieldConfig]) => (
-          <div key={fieldId} className={`mb-3 ${getFieldWidthClass(fieldConfig.width)}`}>
-            <label className="form-label small text-muted">
+          <div key={fieldId} className={`space-y-1 ${getFieldWidthClass(fieldConfig.width)}`}>
+            <label className="text-xs font-medium text-gray-600 block">
               {fieldConfig.label}
               {fieldConfig.mandatory && (
-                <span className="text-danger ml-1">*</span>
+                <span className="text-red-500 ml-1">*</span>
               )}
             </label>
             <FieldRenderer
@@ -185,8 +185,8 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
       </div>
       
       {visibleFields.length === 0 && !showPreview && (
-        <div className="text-center text-muted py-4">
-          <small>No visible fields configured. Click the settings icon to configure fields.</small>
+        <div className="text-center text-gray-500 py-8 text-sm">
+          No visible fields configured. Click the settings icon to configure fields.
         </div>
       )}
     </>
@@ -218,10 +218,9 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
           e.stopPropagation();
           setIsConfigModalOpen(true);
         }}
-        className="btn btn-sm btn-outline-secondary border-0 p-1"
-        style={{ width: '24px', height: '24px' }}
+        className="h-6 w-6 text-gray-400 hover:text-gray-600"
       >
-        <Settings size={12} />
+        <Settings className="h-3 w-3" />
       </Button>
     )
   );
@@ -235,40 +234,40 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
-        <Card className="card border shadow-sm">
+        <Card className="border border-gray-200 shadow-sm">
           {showHeader ? (
             <CollapsibleTrigger asChild>
-              <CardHeader className="card-header d-flex flex-row justify-content-between align-items-center py-3 px-3 cursor-pointer">
-                <div className="d-flex align-items-center">
-                  <div className="border border-primary rounded mr-2" style={{ width: '20px', height: '20px' }}></div>
-                  <CardTitle className="h6 mb-0 text-muted">{panelTitle}</CardTitle>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3 px-4 pt-4 cursor-pointer hover:bg-gray-50">
+                <div className="flex items-center gap-2">
+                  <div className="w-5 h-5 border-2 border-purple-500 rounded"></div>
+                  <CardTitle className="text-sm font-medium text-gray-700">{panelTitle}</CardTitle>
                   <PanelStatusIndicator 
                     panelConfig={panelConfig}
                     formData={formData}
                     showStatus={showStatusIndicator}
                   />
                   {showPreview && (
-                    <span className="badge badge-primary ml-2">DB000023/42</span>
+                    <span className="text-xs text-blue-600 font-medium">DB000023/42</span>
                   )}
                 </div>
-                <div className="d-flex align-items-center">
+                <div className="flex items-center gap-2">
                   <SettingsButton />
                   {isOpen ? (
-                    <ChevronUp size={16} className="text-muted ml-2" />
+                    <ChevronUp className="h-4 w-4 text-gray-400" />
                   ) : (
-                    <ChevronDown size={16} className="text-muted ml-2" />
+                    <ChevronDown className="h-4 w-4 text-gray-400" />
                   )}
                 </div>
               </CardHeader>
             </CollapsibleTrigger>
           ) : (
-            <div className="position-absolute" style={{ top: '8px', right: '8px', zIndex: 10 }}>
+            <div className="absolute top-2 right-2 z-10">
               <SettingsButton />
             </div>
           )}
           
           <CollapsibleContent>
-            <CardContent className={`card-body px-3 pb-3 ${!showHeader ? 'pt-5' : ''}`}>
+            <CardContent className={`px-4 pb-4 ${!showHeader ? 'pt-8' : ''}`}>
               <PanelContent />
             </CardContent>
           </CollapsibleContent>
@@ -293,33 +292,33 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
 
   return (
     <Card 
-      className={`${getWidthClass()} card border shadow-sm position-relative`}
+      className={`${getWidthClass()} border border-gray-200 shadow-sm relative`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
       {showHeader ? (
-        <CardHeader className="card-header d-flex flex-row justify-content-between align-items-center py-3 px-3">
-          <div className="d-flex align-items-center">
-            <div className="border border-primary rounded mr-2" style={{ width: '20px', height: '20px' }}></div>
-            <CardTitle className="h6 mb-0 text-muted">{panelTitle}</CardTitle>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3 px-4 pt-4">
+          <div className="flex items-center gap-2">
+            <div className="w-5 h-5 border-2 border-purple-500 rounded"></div>
+            <CardTitle className="text-sm font-medium text-gray-700">{panelTitle}</CardTitle>
             <PanelStatusIndicator 
               panelConfig={panelConfig}
               formData={formData}
               showStatus={showStatusIndicator}
             />
             {showPreview && (
-              <span className="badge badge-primary ml-2">DB000023/42</span>
+              <span className="text-xs text-blue-600 font-medium">DB000023/42</span>
             )}
           </div>
           <SettingsButton />
         </CardHeader>
       ) : (
-        <div className="position-absolute" style={{ top: '8px', right: '8px', zIndex: 10 }}>
+        <div className="absolute top-2 right-2 z-10">
           <SettingsButton />
         </div>
       )}
       
-      <CardContent className={`card-body px-3 pb-3 ${!showHeader ? 'pt-5' : ''}`}>
+      <CardContent className={`px-4 pb-4 ${!showHeader ? 'pt-8' : ''}`}>
         <PanelContent />
       </CardContent>
 

@@ -65,52 +65,50 @@ const Index = () => {
   ];
 
   return (
-    <div className="min-vh-100" style={{ background: 'linear-gradient(135deg, #f8f9fa 0%, #e3f2fd 100%)' }}>
-      <div className="container py-5">
-        <div className="text-center mb-5">
-          <h1 className="display-4 font-weight-bold text-dark mb-4">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+      <div className="container mx-auto px-4 py-12">
+        <div className="text-center mb-12">
+          <h1 className="text-4xl font-bold text-gray-900 mb-4">
             Enterprise ERP Demo Suite
           </h1>
-          <p className="lead text-muted mx-auto" style={{ maxWidth: '48rem' }}>
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
             Explore our comprehensive collection of enterprise-grade components and features
             designed for modern ERP applications.
           </p>
         </div>
 
-        <div className="row">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
           {demos.map((demo) => {
             const Icon = demo.icon;
             return (
-              <div key={demo.path} className="col-12 col-md-6 col-lg-4 mb-4">
-                <Card className="h-100 border-0 shadow-sm hover:shadow-lg transition-all duration-200">
-                  <CardHeader className="pb-3">
-                    <div className="d-flex align-items-center">
-                      <div className={`p-2 rounded bg-light mr-3 ${demo.color}`} style={{ transition: 'background-color 0.2s' }}>
-                        <Icon className="h-6 w-6" />
-                      </div>
-                      <CardTitle className="h5 mb-0">{demo.title}</CardTitle>
+              <Card key={demo.path} className="group hover:shadow-lg transition-all duration-200 border-0 shadow-md">
+                <CardHeader className="pb-3">
+                  <div className="flex items-center space-x-3">
+                    <div className={`p-2 rounded-lg bg-gray-50 group-hover:bg-white transition-colors ${demo.color}`}>
+                      <Icon className="h-6 w-6" />
                     </div>
-                  </CardHeader>
-                  <CardContent className="pt-0 d-flex flex-column">
-                    <CardDescription className="text-muted mb-4 flex-grow-1" style={{ minHeight: '3rem' }}>
-                      {demo.description}
-                    </CardDescription>
-                    <Link to={demo.path} className="mt-auto">
-                      <Button className="btn btn-block">
-                        View Demo
-                        <ArrowRight className="ml-2 h-4 w-4" />
-                      </Button>
-                    </Link>
-                  </CardContent>
-                </Card>
-              </div>
+                    <CardTitle className="text-lg">{demo.title}</CardTitle>
+                  </div>
+                </CardHeader>
+                <CardContent className="pt-0">
+                  <CardDescription className="text-gray-600 mb-4 min-h-[3rem]">
+                    {demo.description}
+                  </CardDescription>
+                  <Link to={demo.path}>
+                    <Button className="w-full group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
+                      View Demo
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </Button>
+                  </Link>
+                </CardContent>
+              </Card>
             );
           })}
         </div>
 
-        <div className="text-center mt-5">
-          <p className="text-muted">
-            Built with React, TypeScript, Bootstrap 4, and modern enterprise patterns
+        <div className="text-center mt-12">
+          <p className="text-gray-500">
+            Built with React, TypeScript, Tailwind CSS, and modern enterprise patterns
           </p>
         </div>
       </div>
