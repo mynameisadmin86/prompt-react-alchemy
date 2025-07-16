@@ -1,7 +1,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowRight, Grid3x3, Layout, Search, Workflow, PanelLeft, Layers, Receipt } from "lucide-react";
+import { ArrowRight, Grid3x3, Layout, Search, Workflow, PanelLeft, Layers } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const Index = () => {
@@ -61,13 +61,6 @@ const Index = () => {
       icon: PanelLeft,
       path: "/side-drawer-demo",
       color: "text-teal-600"
-    },
-    {
-      title: "Billing Demo",
-      description: "Billing form with dynamic panel components and advanced field types",
-      icon: Receipt,
-      path: "/billing-demo",
-      color: "text-amber-600"
     }
   ];
 

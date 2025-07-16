@@ -3,9 +3,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
-import { Search, Calendar, Clock, ChevronDown, FileText } from 'lucide-react';
+import { Search, Calendar, Clock } from 'lucide-react';
 import { FieldConfig } from '@/types/dynamicPanel';
 
 interface FieldRendererProps {
@@ -19,7 +17,7 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
   value,
   onChange
 }) => {
-  const { fieldType, editable, placeholder, options, currencySymbol = '€', step = 0.01, min, max, searchable, summaryConfig, cardConfig } = config;
+  const { fieldType, editable, placeholder, options } = config;
 
   if (!editable) {
     return (
@@ -149,175 +147,6 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
           />
           <Search className="absolute right-2 top-1/2 transform -translate-y-1/2 w-3 h-3 text-gray-400 pointer-events-none" />
         </div>
-      );
-
-    case 'number':
-      return (
-        <Input
-          type="number"
-          value={value || ''}
-          onChange={(e) => onChange(parseFloat(e.target.value) || 0)}
-          placeholder={placeholder}
-          className={baseInputClasses}
-          step={step}
-          min={min}
-          max={max}
-        />
-      );
-
-    case 'currency-with-select':
-      return (
-        <div className="flex gap-1">
-          <Select value={currencySymbol} onValueChange={() => {}}>
-            <SelectTrigger className="w-12 h-8 text-xs">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="€">€</SelectItem>
-              <SelectItem value="$">$</SelectItem>
-              <SelectItem value="£">£</SelectItem>
-            </SelectContent>
-          </Select>
-          <Input
-            type="number"
-            value={value || ''}
-            onChange={(e) => onChange(parseFloat(e.target.value) || 0)}
-            placeholder="0.00"
-            className={`${baseInputClasses} flex-1`}
-            step={step}
-          />
-        </div>
-      );
-
-    case 'search-with-icon':
-      return (
-        <div className="relative">
-          <Input
-            type="text"
-            value={value || ''}
-            onChange={(e) => onChange(e.target.value)}
-            placeholder={placeholder || 'Search...'}
-            className={`${baseInputClasses} pr-8`}
-          />
-          <Search className="absolute right-2 top-1/2 transform -translate-y-1/2 w-3 h-3 text-gray-400 cursor-pointer hover:text-gray-600" />
-        </div>
-      );
-
-    case 'dropdown-with-search':
-      return (
-        <Select value={value || ''} onValueChange={onChange}>
-          <SelectTrigger className={`${baseInputClasses} text-left`}>
-            <SelectValue placeholder={placeholder || "Select..."} />
-          </SelectTrigger>
-          <SelectContent>
-            {options?.map((option) => (
-              <SelectItem key={option.value} value={option.value}>
-                {option.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      );
-
-    case 'summary-card':
-      return (
-        <div className={`grid grid-cols-2 gap-4 p-3 rounded-lg ${summaryConfig?.backgroundColor || 'bg-muted/50'}`}>
-          <div>
-            <div className="text-xs text-muted-foreground mb-1">
-              {summaryConfig?.mainLabel || 'Contract Price'}
-            </div>
-            <div className="font-medium text-sm">
-              {summaryConfig?.mainValue || value?.main || '€ 0.00'}
-            </div>
-          </div>
-          <div>
-            <div className="text-xs text-muted-foreground mb-1">
-              {summaryConfig?.subLabel || 'Net Amount'}
-            </div>
-            <div className="font-medium text-sm">
-              {summaryConfig?.subValue || value?.sub || '€ 0.00'}
-            </div>
-          </div>
-        </div>
-      );
-
-    case 'card':
-      const badgeVariant = cardConfig?.variant || 'default';
-      const badgeSize = cardConfig?.size || 'md';
-      const IconComponent = FileText;
-      
-      // For summary cards with label and value
-      if (typeof value === 'object' && value?.label && value?.amount) {
-        return (
-          <div className={`p-4 rounded-lg ${cardConfig?.color || 'bg-muted/30'} border`}>
-            <div className="space-y-1">
-              {editable ? (
-                <input
-                  type="text"
-                  value={value.label || ''}
-                  onChange={(e) => onChange({ ...value, label: e.target.value })}
-                  className="bg-transparent border-none outline-none text-sm text-muted-foreground font-medium w-full p-0"
-                  placeholder="Label"
-                />
-              ) : (
-                <div className="text-sm text-muted-foreground font-medium">
-                  {value.label}
-                </div>
-              )}
-              {editable ? (
-                <input
-                  type="text"
-                  value={value.amount || ''}
-                  onChange={(e) => onChange({ ...value, amount: e.target.value })}
-                  className="bg-transparent border-none outline-none text-lg font-semibold w-full p-0"
-                  placeholder="Amount"
-                />
-              ) : (
-                <div className="text-lg font-semibold">
-                  {value.amount}
-                </div>
-              )}
-            </div>
-          </div>
-        );
-      }
-      
-      // For simple badge cards
-      if (cardConfig?.editable !== false && editable) {
-        return (
-          <div className="flex items-center gap-2">
-            <Badge 
-              variant={badgeVariant as any}
-              className={`
-                ${badgeSize === 'sm' ? 'px-2 py-1 text-xs' : 
-                  badgeSize === 'lg' ? 'px-4 py-2 text-sm' : 'px-3 py-1.5 text-xs'}
-                cursor-pointer hover:opacity-80 transition-opacity
-              `}
-            >
-              <IconComponent className="w-3 h-3 mr-1" />
-              <input
-                type="text"
-                value={value || ''}
-                onChange={(e) => onChange(e.target.value)}
-                className="bg-transparent border-none outline-none min-w-0 flex-1"
-                placeholder={placeholder || 'Enter text'}
-              />
-            </Badge>
-          </div>
-        );
-      }
-      
-      return (
-        <Badge 
-          variant={badgeVariant as any}
-          className={`
-            ${badgeSize === 'sm' ? 'px-2 py-1 text-xs' : 
-              badgeSize === 'lg' ? 'px-4 py-2 text-sm' : 'px-3 py-1.5 text-xs'}
-          `}
-        >
-          <IconComponent className="w-3 h-3 mr-1" />
-          {value || placeholder || 'Badge'}
-        </Badge>
       );
 
     default:

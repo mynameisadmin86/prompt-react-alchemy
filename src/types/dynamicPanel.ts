@@ -2,7 +2,7 @@
 export interface FieldConfig {
   id: string;
   label: string;
-  fieldType: 'text' | 'select' | 'search' | 'currency' | 'date' | 'time' | 'textarea' | 'radio' | 'number' | 'currency-with-select' | 'search-with-icon' | 'dropdown-with-search' | 'summary-card' | 'card';
+  fieldType: 'text' | 'select' | 'search' | 'currency' | 'date' | 'time' | 'textarea' | 'radio';
   value: any;
   mandatory: boolean;
   visible: boolean;
@@ -11,25 +11,6 @@ export interface FieldConfig {
   width?: 'third' | 'half' | 'two-thirds' | 'full'; // Field width configuration
   options?: { label: string; value: string }[]; // For select and radio fields
   placeholder?: string;
-  currencySymbol?: string; // For currency fields
-  step?: number; // For number fields
-  min?: number; // For number fields
-  max?: number; // For number fields
-  searchable?: boolean; // For dropdown fields
-  summaryConfig?: { // For summary card fields
-    mainValue?: string;
-    subValue?: string;
-    mainLabel?: string;
-    subLabel?: string;
-    backgroundColor?: string;
-  };
-  cardConfig?: { // For card/badge fields
-    variant?: 'default' | 'secondary' | 'outline' | 'destructive';
-    size?: 'sm' | 'md' | 'lg';
-    icon?: string;
-    color?: string;
-    editable?: boolean;
-  };
 }
 
 export interface PanelConfig {
