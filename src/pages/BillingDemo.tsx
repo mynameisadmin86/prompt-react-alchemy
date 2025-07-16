@@ -17,6 +17,40 @@ const BillingDemo = () => {
   });
 
   const billingPanelConfig: PanelConfig = {
+    titleCard: {
+      id: 'titleCard',
+      label: '',
+      fieldType: 'card',
+      value: 'Billing Details',
+      mandatory: false,
+      visible: true,
+      editable: true,
+      order: 0,
+      width: 'half',
+      cardConfig: {
+        variant: 'outline',
+        size: 'md',
+        editable: true
+      },
+      placeholder: 'Panel Title'
+    },
+    referenceCard: {
+      id: 'referenceCard',
+      label: '',
+      fieldType: 'card',
+      value: 'DB00023/42',
+      mandatory: false,
+      visible: true,
+      editable: true,
+      order: 0.5,
+      width: 'half',
+      cardConfig: {
+        variant: 'secondary',
+        size: 'md',
+        editable: true
+      },
+      placeholder: 'Reference ID'
+    },
     summary: {
       id: 'summary',
       label: 'Price Summary',
@@ -165,11 +199,8 @@ const BillingDemo = () => {
           </BreadcrumbList>
         </Breadcrumb>
 
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between mb-6">
           <h1 className="text-3xl font-bold">Billing Demo</h1>
-          <div className="text-sm text-muted-foreground font-mono">
-            DB00023/42
-          </div>
         </div>
       </div>
 

@@ -4,7 +4,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search, Calendar, Clock, ChevronDown } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Search, Calendar, Clock, ChevronDown, FileText } from 'lucide-react';
 import { FieldConfig } from '@/types/dynamicPanel';
 
 interface FieldRendererProps {
@@ -18,7 +19,7 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
   value,
   onChange
 }) => {
-  const { fieldType, editable, placeholder, options, currencySymbol = '€', step = 0.01, min, max, searchable, summaryConfig } = config;
+  const { fieldType, editable, placeholder, options, currencySymbol = '€', step = 0.01, min, max, searchable, summaryConfig, cardConfig } = config;
 
   if (!editable) {
     return (
@@ -238,6 +239,48 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
             </div>
           </div>
         </div>
+      );
+
+    case 'card':
+      const badgeVariant = cardConfig?.variant || 'default';
+      const badgeSize = cardConfig?.size || 'md';
+      const IconComponent = FileText; // Default icon, could be dynamic based on cardConfig.icon
+      
+      if (cardConfig?.editable !== false && editable) {
+        return (
+          <div className="flex items-center gap-2">
+            <Badge 
+              variant={badgeVariant as any}
+              className={`
+                ${badgeSize === 'sm' ? 'px-2 py-1 text-xs' : 
+                  badgeSize === 'lg' ? 'px-4 py-2 text-sm' : 'px-3 py-1.5 text-xs'}
+                cursor-pointer hover:opacity-80 transition-opacity
+              `}
+            >
+              <IconComponent className="w-3 h-3 mr-1" />
+              <input
+                type="text"
+                value={value || ''}
+                onChange={(e) => onChange(e.target.value)}
+                className="bg-transparent border-none outline-none min-w-0 flex-1"
+                placeholder={placeholder || 'Enter text'}
+              />
+            </Badge>
+          </div>
+        );
+      }
+      
+      return (
+        <Badge 
+          variant={badgeVariant as any}
+          className={`
+            ${badgeSize === 'sm' ? 'px-2 py-1 text-xs' : 
+              badgeSize === 'lg' ? 'px-4 py-2 text-sm' : 'px-3 py-1.5 text-xs'}
+          `}
+        >
+          <IconComponent className="w-3 h-3 mr-1" />
+          {value || placeholder || 'Badge'}
+        </Badge>
       );
 
     default:

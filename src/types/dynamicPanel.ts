@@ -2,7 +2,7 @@
 export interface FieldConfig {
   id: string;
   label: string;
-  fieldType: 'text' | 'select' | 'search' | 'currency' | 'date' | 'time' | 'textarea' | 'radio' | 'number' | 'currency-with-select' | 'search-with-icon' | 'dropdown-with-search' | 'summary-card';
+  fieldType: 'text' | 'select' | 'search' | 'currency' | 'date' | 'time' | 'textarea' | 'radio' | 'number' | 'currency-with-select' | 'search-with-icon' | 'dropdown-with-search' | 'summary-card' | 'card';
   value: any;
   mandatory: boolean;
   visible: boolean;
@@ -22,6 +22,13 @@ export interface FieldConfig {
     mainLabel?: string;
     subLabel?: string;
     backgroundColor?: string;
+  };
+  cardConfig?: { // For card/badge fields
+    variant?: 'default' | 'secondary' | 'outline' | 'destructive';
+    size?: 'sm' | 'md' | 'lg';
+    icon?: string;
+    color?: string;
+    editable?: boolean;
   };
 }
 
