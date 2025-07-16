@@ -19,7 +19,8 @@ const BillingDemo = () => {
       editable: true,
       order: 1,
       width: 'half',
-      color: '#10b981' // Emerald green
+      color: '#10b981', // Emerald green background
+      fieldColour: '#047857' // Dark emerald text
     },
     netAmount: {
       id: 'netAmount',
@@ -31,7 +32,8 @@ const BillingDemo = () => {
       editable: true,
       order: 2,
       width: 'half',
-      color: '#8b5cf6' // Purple
+      color: '#8b5cf6', // Purple background
+      fieldColour: '#6d28d9' // Dark purple text
     }
   };
 

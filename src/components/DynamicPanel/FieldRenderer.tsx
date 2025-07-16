@@ -17,7 +17,7 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
   value,
   onChange
 }) => {
-  const { fieldType, editable, placeholder, options, color } = config;
+  const { fieldType, editable, placeholder, options, color, fieldColour } = config;
 
   if (!editable) {
     return (
@@ -163,7 +163,10 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
           <div className="text-sm font-medium text-muted-foreground mb-2">
             {config.label}
           </div>
-          <div className="text-lg font-bold text-foreground">
+          <div 
+            className="text-lg font-bold"
+            style={{ color: fieldColour || 'inherit' }}
+          >
             {value || '€ 0.00'}
           </div>
         </div>

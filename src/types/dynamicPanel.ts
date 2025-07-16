@@ -12,6 +12,7 @@ export interface FieldConfig {
   options?: { label: string; value: string }[]; // For select and radio fields
   placeholder?: string;
   color?: string; // For card field type background color
+  fieldColour?: string; // For card field type color
 }
 
 export interface PanelConfig {
