@@ -149,6 +149,18 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
         </div>
       );
 
+    case 'card':
+      return (
+        <div className="bg-gradient-to-br from-blue-50 to-purple-50 border border-blue-200 rounded-lg p-4 shadow-sm">
+          <div className="text-sm font-medium text-gray-700 mb-2">
+            {config.label}
+          </div>
+          <div className="text-lg font-bold text-gray-900">
+            {value || '€ 0.00'}
+          </div>
+        </div>
+      );
+
     default:
       return (
         <Input
