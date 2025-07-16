@@ -214,8 +214,8 @@ export function SmartGrid({
       case 'Badge':
         return (
           <span className={cn(
-            "badge badge-pill",
-            column.statusMap?.[value] || "badge-light"
+            "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium",
+            column.statusMap?.[value] || "bg-gray-100 text-gray-800"
           )}>
             {value}
           </span>
@@ -224,7 +224,7 @@ export function SmartGrid({
         return new Date(value).toLocaleDateString();
       case 'Link':
         return (
-          <span className="text-primary cursor-pointer" style={{ cursor: 'pointer' }}>
+          <span className="text-blue-600 hover:text-blue-800 cursor-pointer">
             {value}
           </span>
         );
@@ -240,18 +240,16 @@ export function SmartGrid({
     }
 
     return (
-      <div className="row">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {collapsibleColumns.map((column) => {
           const value = row[column.key];
           return (
-            <div key={column.key} className="col-md-6 col-lg-4 mb-3">
-              <div className="p-3 bg-light rounded">
-                <div className="text-uppercase text-muted small mb-1" style={{ fontSize: '0.75rem', letterSpacing: '0.05em' }}>
-                  {column.label}
-                </div>
-                <div className="text-dark font-weight-medium small">
-                  {renderCollapsibleCellValue(value, column)}
-                </div>
+            <div key={column.key} className="p-3 bg-gray-50 rounded-lg">
+              <div className="text-xs text-gray-500 uppercase tracking-wide mb-1">
+                {column.label}
+              </div>
+              <div className="text-sm text-gray-900 font-medium">
+                {renderCollapsibleCellValue(value, column)}
               </div>
             </div>
           );

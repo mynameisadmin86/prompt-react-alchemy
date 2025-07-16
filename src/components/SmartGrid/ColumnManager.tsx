@@ -97,28 +97,28 @@ export function ColumnManager<T>({
         variant="outline"
         size="sm"
         onClick={() => setIsOpen(true)}
-        className="btn btn-sm btn-outline-secondary d-flex align-items-center mr-1"
+        className="flex items-center space-x-2"
       >
-        <Settings className="mr-2" style={{ width: '16px', height: '16px' }} />
+        <Settings className="h-4 w-4" />
         <span>Columns</span>
       </Button>
     );
   }
 
   return (
-    <div className="position-absolute bg-white border rounded shadow-lg" style={{ top: '100%', right: 0, marginTop: '8px', width: '384px', zIndex: 50, padding: '16px' }}>
-      <div className="d-flex align-items-center justify-content-between mb-4">
-        <h3 className="font-weight-semibold">Manage Columns</h3>
-        <Button size="sm" variant="ghost" onClick={() => setIsOpen(false)} className="btn btn-sm btn-link p-0">
+    <div className="absolute top-full right-0 mt-2 w-96 bg-white border rounded-lg shadow-lg z-50 p-4">
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="font-semibold">Manage Columns</h3>
+        <Button size="sm" variant="ghost" onClick={() => setIsOpen(false)}>
           ×
         </Button>
       </div>
 
       {/* Sub-row Configuration Toggle */}
-      <div className="d-flex align-items-center justify-content-between p-3 mb-4 bg-light rounded">
-        <div className="d-flex flex-column">
-          <span className="small font-weight-medium text-dark">Enable Sub-row Configuration</span>
-          <span className="text-muted" style={{ fontSize: '0.75rem' }}>Allow columns to be displayed in expandable sub-rows</span>
+      <div className="flex items-center justify-between p-3 mb-4 bg-gray-50 rounded-lg">
+        <div className="flex flex-col">
+          <span className="text-sm font-medium text-gray-900">Enable Sub-row Configuration</span>
+          <span className="text-xs text-gray-500">Allow columns to be displayed in expandable sub-rows</span>
         </div>
         <Switch
           checked={preferences.enableSubRowConfig || false}
@@ -128,20 +128,19 @@ export function ColumnManager<T>({
 
       {/* Sub-row bulk actions */}
       {preferences.enableSubRowConfig && (
-        <div className="mb-4 p-3 border rounded" style={{ backgroundColor: '#f8f9fa', borderColor: '#6f42c1' }}>
-          <div className="d-flex align-items-center justify-content-between mb-3">
-            <span className="small font-weight-medium" style={{ color: '#6f42c1' }}>Sub-row Actions</span>
-            <span className="text-muted" style={{ fontSize: '0.75rem', color: '#6f42c1' }}>
+        <div className="mb-4 p-3 bg-purple-50 rounded-lg border border-purple-200">
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-sm font-medium text-purple-800">Sub-row Actions</span>
+            <span className="text-xs text-purple-600">
               {preferences.subRowColumns?.length || 0} selected
             </span>
           </div>
-          <div className="d-flex">
+          <div className="flex space-x-2">
             <Button
               variant="outline"
               size="sm"
               onClick={handleSelectAllSubRows}
-              className="btn btn-sm btn-outline-secondary flex-fill mr-2"
-              style={{ fontSize: '0.75rem' }}
+              className="flex-1 text-xs"
             >
               Select All
             </Button>
@@ -149,8 +148,7 @@ export function ColumnManager<T>({
               variant="outline"
               size="sm"
               onClick={handleDeselectAllSubRows}
-              className="btn btn-sm btn-outline-secondary flex-fill"
-              style={{ fontSize: '0.75rem' }}
+              className="flex-1 text-xs"
             >
               Deselect All
             </Button>
@@ -158,7 +156,7 @@ export function ColumnManager<T>({
         </div>
       )}
       
-      <div style={{ maxHeight: '288px', overflowY: 'auto' }}>
+      <div className="space-y-2 max-h-72 overflow-y-auto">
         {orderedColumns.map((column) => {
           const isHidden = preferences.hiddenColumns.includes(column.id);
           const isSubRow = preferences.subRowColumns?.includes(column.id) || false;
@@ -168,36 +166,33 @@ export function ColumnManager<T>({
           return (
             <div
               key={column.id}
-              className="border rounded p-3 mb-2"
-              style={{ cursor: 'move' }}
+              className="border rounded p-3 hover:bg-gray-50"
               draggable
               onDragStart={() => handleDragStart(column.id)}
               onDragOver={(e) => handleDragOver(e, column.id)}
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f8f9fa'}
-              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'white'}
             >
-              <div className="d-flex align-items-center">
-                <GripVertical className="text-muted mr-2" style={{ width: '16px', height: '16px', cursor: 'move' }} />
+              <div className="flex items-center space-x-2">
+                <GripVertical className="h-4 w-4 text-gray-400 cursor-move" />
                 
                 <Checkbox
                   checked={!isHidden}
                   onCheckedChange={() => onColumnVisibilityToggle(column.id)}
                   disabled={column.mandatory}
-                  className="mr-2"
+                  className="shrink-0"
                 />
 
                 {isHidden ? (
-                  <EyeOff className="text-muted mr-2" style={{ width: '16px', height: '16px' }} />
+                  <EyeOff className="h-4 w-4 text-gray-400" />
                 ) : (
-                  <Eye className="text-success mr-2" style={{ width: '16px', height: '16px' }} />
+                  <Eye className="h-4 w-4 text-green-600" />
                 )}
 
                 {/* Sub-row icon indicator */}
                 {isSubRow && (
-                  <ChevronDown className="mr-2" style={{ width: '16px', height: '16px', color: '#6f42c1' }} />
+                  <ChevronDown className="h-4 w-4 text-purple-600" />
                 )}
 
-                <div className="flex-fill" style={{ minWidth: 0 }}>
+                <div className="flex-1 min-w-0">
                   {editingHeader === column.id ? (
                     <Input
                       defaultValue={displayHeader}
@@ -209,42 +204,40 @@ export function ColumnManager<T>({
                           setEditingHeader(null);
                         }
                       }}
-                      className="form-control form-control-sm"
-                      style={{ height: '24px', padding: '2px 4px', fontSize: '0.875rem' }}
+                      className="h-6 px-1 text-sm"
                       autoFocus
                     />
                   ) : (
-                    <div className="d-flex align-items-center">
-                      <span className="small text-truncate">{displayHeader}</span>
+                    <div className="flex items-center space-x-1">
+                      <span className="text-sm truncate">{displayHeader}</span>
                       <Button
                         size="sm"
                         variant="ghost"
                         onClick={() => setEditingHeader(column.id)}
-                        className="btn btn-sm btn-link p-0 ml-1"
-                        style={{ width: '16px', height: '16px' }}
+                        className="h-4 w-4 p-0"
                       >
-                        <Edit2 style={{ width: '12px', height: '12px' }} />
+                        <Edit2 className="h-3 w-3" />
                       </Button>
                     </div>
                   )}
                 </div>
 
-                <div className="d-flex align-items-center">
+                <div className="flex items-center space-x-2">
                   {column.mandatory && (
-                    <span className="badge badge-warning mr-2" style={{ fontSize: '0.75rem' }}>
+                    <span className="text-xs text-orange-600 font-medium bg-orange-50 px-2 py-1 rounded">
                       Required
                     </span>
                   )}
 
                   {/* Sub-row checkbox moved to the end */}
                   {preferences.enableSubRowConfig && (
-                    <div className="d-flex align-items-center">
+                    <div className="flex items-center space-x-1">
                       <Checkbox
                         checked={isSubRow}
                         onCheckedChange={() => handleSubRowToggle(column.id)}
-                        className="mr-1"
+                        className="shrink-0"
                       />
-                      <span className="text-muted" style={{ fontSize: '0.75rem' }}>Sub-row</span>
+                      <span className="text-xs text-gray-600">Sub-row</span>
                     </div>
                   )}
                 </div>
@@ -255,15 +248,15 @@ export function ColumnManager<T>({
       </div>
 
       {/* Summary section */}
-      <div className="mt-4 pt-3 border-top small text-muted">
-        <div className="d-flex justify-content-between">
+      <div className="mt-4 pt-3 border-t text-sm text-gray-600">
+        <div className="flex justify-between">
           <span>Visible columns:</span>
-          <span className="font-weight-medium">{orderedColumns.length - preferences.hiddenColumns.length}</span>
+          <span className="font-medium">{orderedColumns.length - preferences.hiddenColumns.length}</span>
         </div>
         {preferences.enableSubRowConfig && (
-          <div className="d-flex justify-content-between">
+          <div className="flex justify-between">
             <span>Sub-row columns:</span>
-            <span className="font-weight-medium">{preferences.subRowColumns?.length || 0}</span>
+            <span className="font-medium">{preferences.subRowColumns?.length || 0}</span>
           </div>
         )}
       </div>

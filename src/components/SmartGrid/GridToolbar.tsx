@@ -82,19 +82,18 @@ export function GridToolbar({
     : (showDefaultConfigurableButton ? [defaultConfigurableButton] : []);
 
   return (
-    <div className="d-flex align-items-center justify-content-between w-100 py-2 bg-light">
+    <div className="flex items-center justify-between w-full py-2 bg-gray-50">
       {/* Left side - Grid Title and Count */}
-      <div className="d-flex align-items-center">
+      <div className="flex items-center">
         {gridTitle && (
-          <div className="d-flex align-items-center">
-            <span className="text-dark font-weight-semibold small">
+          <div className="flex items-center">
+            <span className="text-gray-900 font-semibold text-sm">
               {gridTitle}
             </span>
             {recordCount !== undefined && (
               <span 
-                className="badge badge-primary badge-pill ml-1"
+                className="inline-flex items-center justify-center rounded-full bg-blue-50 text-blue-500 text-xs px-2 py-0.5 ml-1"
                 aria-label={`${gridTitle} count ${recordCount}`}
-                style={{ fontSize: '0.75rem' }}
               >
                 {recordCount}
               </span>
@@ -104,23 +103,22 @@ export function GridToolbar({
 
         {/* Show active filters count */}
         {filters.length > 0 && (
-          <div className="badge badge-info ml-3" style={{ fontSize: '0.75rem' }}>
+          <div className="text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded ml-3">
             {filters.length} filter{filters.length > 1 ? 's' : ''} active
           </div>
         )}
       </div>
 
       {/* Right side - Controls */}
-      <div className="d-flex align-items-center">
+      <div className="flex items-center space-x-1">
         {/* Search box */}
-        <div className="position-relative mr-2">
-          <Search className="position-absolute" style={{ left: '8px', top: '50%', transform: 'translateY(-50%)', width: '16px', height: '16px', color: '#6c757d' }} />
+        <div className="relative">
+          <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
           <Input
             placeholder={searchPlaceholder}
             value={globalFilter}
             onChange={(e) => setGlobalFilter(e.target.value)}
-            className="form-control form-control-sm pl-4"
-            style={{ paddingLeft: '32px', width: '256px' }}
+            className="border border-gray-300 rounded text-sm placeholder-gray-400 px-2 py-1 pl-8 w-64 h-8"
             disabled={loading}
           />
         </div>
@@ -133,14 +131,13 @@ export function GridToolbar({
           disabled={loading}
           title="Toggle Column Filters"
           className={cn(
-            "btn btn-sm btn-outline-secondary d-flex align-items-center justify-content-center position-relative mr-1",
-            showColumnFilters && "btn-primary"
+            "w-8 h-8 flex items-center justify-center rounded hover:bg-gray-100 p-0",
+            showColumnFilters && "bg-blue-50 text-blue-600"
           )}
-          style={{ width: '32px', height: '32px', padding: 0 }}
         >
-          <Filter className="" style={{ width: '16px', height: '16px' }} />
+          <Filter className="h-4 w-4" />
           {filters.length > 0 && (
-            <span className="badge badge-primary badge-pill position-absolute" style={{ top: '-4px', right: '-4px', fontSize: '0.6rem', minWidth: '16px', height: '16px', lineHeight: '16px' }}>
+            <span className="absolute -top-1 -right-1 text-xs bg-blue-500 text-white rounded-full w-4 h-4 flex items-center justify-center">
               {filters.length}
             </span>
           )}
@@ -153,12 +150,11 @@ export function GridToolbar({
           disabled={loading}
           title="Toggle Checkboxes"
           className={cn(
-            "btn btn-sm btn-outline-secondary d-flex align-items-center justify-content-center mr-1",
-            showCheckboxes && "btn-primary"
+            "w-8 h-8 flex items-center justify-center rounded hover:bg-gray-100 p-0",
+            showCheckboxes && "bg-blue-50 text-blue-600"
           )}
-          style={{ width: '32px', height: '32px', padding: 0 }}
         >
-          <CheckSquare style={{ width: '16px', height: '16px' }} />
+          <CheckSquare className="h-4 w-4" />
         </Button>
 
         <Button 
@@ -168,15 +164,14 @@ export function GridToolbar({
           disabled={loading}
           title={`Switch to ${viewMode === 'table' ? 'Card' : 'Table'} View`}
           className={cn(
-            "btn btn-sm btn-outline-secondary d-flex align-items-center justify-content-center mr-1",
-            viewMode === 'card' && "btn-primary"
+            "w-8 h-8 flex items-center justify-center rounded hover:bg-gray-100 p-0",
+            viewMode === 'card' && "bg-blue-50 text-blue-600"
           )}
-          style={{ width: '32px', height: '32px', padding: 0 }}
         >
           {viewMode === 'table' ? (
-            <Grid2x2 style={{ width: '16px', height: '16px' }} />
+            <Grid2x2 className="h-4 w-4" />
           ) : (
-            <List style={{ width: '16px', height: '16px' }} />
+            <List className="h-4 w-4" />
           )}
         </Button>
 
@@ -196,10 +191,9 @@ export function GridToolbar({
           onClick={onResetToDefaults} 
           disabled={loading}
           title="Reset All"
-          className="btn btn-sm btn-outline-secondary d-flex align-items-center justify-content-center mr-1"
-          style={{ width: '32px', height: '32px', padding: 0 }}
+          className="w-8 h-8 flex items-center justify-center rounded hover:bg-gray-100 p-0"
         >
-          <RotateCcw style={{ width: '16px', height: '16px' }} />
+          <RotateCcw className="h-4 w-4" />
         </Button>
         
         <Button 
@@ -208,10 +202,9 @@ export function GridToolbar({
           onClick={() => onExport('csv')} 
           disabled={loading}
           title="Download CSV"
-          className="btn btn-sm btn-outline-secondary d-flex align-items-center justify-content-center mr-1"
-          style={{ width: '32px', height: '32px', padding: 0 }}
+          className="w-8 h-8 flex items-center justify-center rounded hover:bg-gray-100 p-0"
         >
-          <Download style={{ width: '16px', height: '16px' }} />
+          <Download className="h-4 w-4" />
         </Button>
 
         {/* Create Button */}
@@ -219,9 +212,9 @@ export function GridToolbar({
           <Button
             variant="outline"
             size="sm"
-            className="btn btn-sm btn-outline-primary ml-2"
+            className="border border-blue-500 text-blue-500 rounded px-3 py-1 text-sm hover:bg-blue-50 h-8 ml-2"
           >
-            <Plus className="mr-1" style={{ width: '16px', height: '16px' }} />
+            <Plus className="h-4 w-4 mr-1" />
             Create Trip
           </Button>
         )}

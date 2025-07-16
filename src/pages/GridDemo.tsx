@@ -111,19 +111,19 @@ const GridDemo = () => {
       sortable: true,
       editable: false,
       renderExpandedContent: (row: SampleData) => (
-        <div>
-          <div className="d-flex align-items-center mb-4 small font-weight-medium text-secondary">
-            <User className="mr-2" style={{ width: '16px', height: '16px' }} />
+        <div className="space-y-3">
+          <div className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-4">
+            <User className="h-4 w-4" />
             Customer Details
           </div>
           {row.customerDetails?.map((customer, index) => (
-            <div key={index} className="d-flex align-items-center p-3 bg-light rounded mb-3">
-              <div className="bg-primary rounded-circle d-flex align-items-center justify-content-center mr-3" style={{ width: '32px', height: '32px', backgroundColor: '#e3f2fd' }}>
-                <User style={{ width: '16px', height: '16px', color: '#1976d2' }} />
+            <div key={index} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+              <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                <User className="h-4 w-4 text-blue-600" />
               </div>
               <div>
-                <div className="font-weight-medium text-dark">{customer.name}</div>
-                <div className="small text-muted">{customer.id}</div>
+                <div className="font-medium text-gray-900">{customer.name}</div>
+                <div className="text-sm text-gray-500">{customer.id}</div>
               </div>
             </div>
           ))}
@@ -137,21 +137,21 @@ const GridDemo = () => {
       sortable: true,
       editable: false,
       renderExpandedContent: (row: SampleData) => (
-        <div>
-          <div className="d-flex align-items-center mb-4 small font-weight-medium text-secondary">
-            <Container className="mr-2" style={{ width: '16px', height: '16px' }} />
+        <div className="space-y-3">
+          <div className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-4">
+            <Container className="h-4 w-4" />
             Resource Details
           </div>
           {row.resourceDetails?.map((resource, index) => (
-            <div key={index} className="d-flex align-items-center p-3 bg-light rounded mb-3">
-              <div className="bg-success rounded-circle d-flex align-items-center justify-content-center mr-3" style={{ width: '32px', height: '32px', backgroundColor: '#e8f5e8' }}>
-                {resource.type === 'train' && <Train style={{ width: '16px', height: '16px', color: '#388e3c' }} />}
-                {resource.type === 'agent' && <UserCheck style={{ width: '16px', height: '16px', color: '#388e3c' }} />}
-                {resource.type === 'container' && <Container style={{ width: '16px', height: '16px', color: '#388e3c' }} />}
+            <div key={index} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+              <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                {resource.type === 'train' && <Train className="h-4 w-4 text-green-600" />}
+                {resource.type === 'agent' && <UserCheck className="h-4 w-4 text-green-600" />}
+                {resource.type === 'container' && <Container className="h-4 w-4 text-green-600" />}
               </div>
               <div>
-                <div className="font-weight-medium text-dark">{resource.name}</div>
-                <div className="small text-muted">{resource.id}</div>
+                <div className="font-medium text-gray-900">{resource.name}</div>
+                <div className="text-sm text-gray-500">{resource.id}</div>
               </div>
             </div>
           ))}
@@ -448,8 +448,8 @@ const GridDemo = () => {
   };
 
   return (
-    <div className="min-vh-100 bg-light">
-      <div className="container py-4">
+    <div className="min-h-screen bg-gray-50">
+      <div className="container mx-auto p-6 space-y-6">
         {/* Breadcrumbs */}
         <Breadcrumb>
           <BreadcrumbList>
@@ -468,7 +468,7 @@ const GridDemo = () => {
         </Breadcrumb>
 
         {/* Grid Container */}
-        <div className="bg-white rounded shadow-sm mb-4">
+        <div className="bg-white rounded-lg shadow-sm">
           <style>{`
             .smart-grid-row-selected {
               background-color: #eff6ff !important;
@@ -501,44 +501,32 @@ const GridDemo = () => {
             searchPlaceholder="Search all columns..."
           />
           
-          {/* Footer with action buttons */}
-          <div className="d-flex justify-content-between align-items-center p-4 border-top bg-light">
-            <div className="d-flex align-items-center">
+          {/* Footer with action buttons matching the screenshot style */}
+          <div className="flex items-center justify-between p-4 border-t bg-gray-50/50">
+            <div className="flex items-center space-x-3">
               <Button 
                 variant="outline" 
                 size="sm"
-                className="btn btn-sm btn-outline-secondary d-flex align-items-center mr-3"
-                onClick={() => {
-                  toast({
-                    title: "Print",
-                    description: "Printing functionality would be implemented here"
-                  });
-                }}
+                className="h-8 px-3 text-gray-700 border-gray-300 hover:bg-gray-100"
               >
-                <Printer className="mr-2" style={{ width: '16px', height: '16px' }} />
+                <Printer className="h-4 w-4 mr-2" />
                 Print
               </Button>
               
               <Button 
                 variant="outline" 
                 size="sm"
-                className="btn btn-sm btn-outline-secondary d-flex align-items-center"
-                onClick={() => {
-                  toast({
-                    title: "More Actions",
-                    description: "Additional actions menu would appear here"
-                  });
-                }}
+                className="h-8 px-3 text-gray-700 border-gray-300 hover:bg-gray-100"
               >
-                <MoreHorizontal className="mr-2" style={{ width: '16px', height: '16px' }} />
-                More Actions
+                <MoreHorizontal className="h-4 w-4 mr-2" />
+                More
               </Button>
             </div>
             
             <Button 
               variant="outline" 
               size="sm"
-              className="btn btn-sm btn-outline-danger"
+              className="h-8 px-4 text-red-600 border-red-300 hover:bg-red-50 hover:border-red-400"
             >
               Cancel
             </Button>
