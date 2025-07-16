@@ -16,6 +16,17 @@ const BillingDemo = () => {
     remarks: ''
   });
 
+  const [snippetsData, setSnippetsData] = useState({
+    contractPriceSnippet: {
+      label: 'Contract Price',
+      amount: '€ 1200.00'
+    },
+    netAmountSnippet: {
+      label: 'Net Amount',
+      amount: '€ 5580.00'
+    }
+  });
+
   const billingPanelConfig: PanelConfig = {
     titleCard: {
       id: 'titleCard',
@@ -177,11 +188,55 @@ const BillingDemo = () => {
     }
   };
 
+  // Snippets panel configuration
+  const snippetsPanelConfig: PanelConfig = {
+    contractPriceSnippet: {
+      id: 'contractPriceSnippet',
+      label: '',
+      fieldType: 'card',
+      value: {
+        label: 'Contract Price',
+        amount: '€ 1200.00'
+      },
+      mandatory: false,
+      visible: true,
+      editable: true,
+      order: 1,
+      width: 'half',
+      cardConfig: {
+        color: 'bg-emerald-50',
+        editable: true
+      }
+    },
+    netAmountSnippet: {
+      id: 'netAmountSnippet',
+      label: '',
+      fieldType: 'card',
+      value: {
+        label: 'Net Amount',
+        amount: '€ 5580.00'
+      },
+      mandatory: false,
+      visible: true,
+      editable: true,
+      order: 2,
+      width: 'half',
+      cardConfig: {
+        color: 'bg-blue-50',
+        editable: true
+      }
+    }
+  };
+
   const handleBillingDataChange = (updatedData: Record<string, any>) => {
     setBillingData(prev => ({ ...prev, ...updatedData }));
   };
 
-  // Mock functions for user configuration
+  const handleSnippetsDataChange = (updatedData: Record<string, any>) => {
+    setSnippetsData(prev => ({ ...prev, ...updatedData }));
+  };
+
+  // Mock functions for user configuration - billing panel
   const getUserPanelConfig = async (userId: string, panelId: string): Promise<PanelSettings> => {
     const stored = localStorage.getItem(`panel_${userId}_${panelId}`);
     if (stored) {
@@ -199,6 +254,26 @@ const BillingDemo = () => {
 
   const saveUserPanelConfig = async (userId: string, panelId: string, settings: PanelSettings) => {
     localStorage.setItem(`panel_${userId}_${panelId}`, JSON.stringify(settings));
+  };
+
+  // Mock functions for snippets panel
+  const getUserSnippetsConfig = async (userId: string, panelId: string): Promise<PanelSettings> => {
+    const stored = localStorage.getItem(`snippets_${userId}_${panelId}`);
+    if (stored) {
+      return JSON.parse(stored);
+    }
+    return {
+      title: 'Snippets',
+      width: 'full',
+      collapsible: true,
+      showStatusIndicator: false,
+      showHeader: true,
+      fields: snippetsPanelConfig
+    };
+  };
+
+  const saveUserSnippetsConfig = async (userId: string, panelId: string, settings: PanelSettings) => {
+    localStorage.setItem(`snippets_${userId}_${panelId}`, JSON.stringify(settings));
   };
 
   return (
@@ -223,18 +298,35 @@ const BillingDemo = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
-          <DynamicPanel
-            panelId="billing-panel"
-            panelTitle="Billing Details"
-            panelConfig={billingPanelConfig}
-            initialData={billingData}
-            onDataChange={handleBillingDataChange}
-            getUserPanelConfig={getUserPanelConfig}
-            saveUserPanelConfig={saveUserPanelConfig}
-            userId="demo-user"
-            panelWidth="full"
-            collapsible={false}
-          />
+          <div className="space-y-6">
+            {/* Snippets Panel */}
+            <DynamicPanel
+              panelId="snippets-panel"
+              panelTitle="Snippets"
+              panelConfig={snippetsPanelConfig}
+              initialData={snippetsData}
+              onDataChange={handleSnippetsDataChange}
+              getUserPanelConfig={getUserSnippetsConfig}
+              saveUserPanelConfig={saveUserSnippetsConfig}
+              userId="demo-user"
+              panelWidth="full"
+              collapsible={true}
+            />
+
+            {/* Main Billing Panel */}
+            <DynamicPanel
+              panelId="billing-panel"
+              panelTitle="Billing Details"
+              panelConfig={billingPanelConfig}
+              initialData={billingData}
+              onDataChange={handleBillingDataChange}
+              getUserPanelConfig={getUserPanelConfig}
+              saveUserPanelConfig={saveUserPanelConfig}
+              userId="demo-user"
+              panelWidth="full"
+              collapsible={false}
+            />
+          </div>
         </div>
 
         <div className="space-y-4">
@@ -264,7 +356,18 @@ const BillingDemo = () => {
 
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">Current Values</CardTitle>
+              <CardTitle className="text-lg">Snippets Data</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <pre className="text-xs bg-muted p-3 rounded-md overflow-auto">
+                {JSON.stringify(snippetsData, null, 2)}
+              </pre>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Billing Data</CardTitle>
             </CardHeader>
             <CardContent>
               <pre className="text-xs bg-muted p-3 rounded-md overflow-auto">
