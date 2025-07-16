@@ -17,7 +17,7 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
   value,
   onChange
 }) => {
-  const { fieldType, editable, placeholder, options } = config;
+  const { fieldType, editable, placeholder, options, color } = config;
 
   if (!editable) {
     return (
@@ -150,12 +150,20 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
       );
 
     case 'card':
+      const cardStyle = color ? {
+        background: `linear-gradient(135deg, ${color}20, ${color}10)`,
+        borderColor: `${color}40`
+      } : {};
+      
       return (
-        <div className="bg-gradient-to-br from-blue-50 to-purple-50 border border-blue-200 rounded-lg p-4 shadow-sm">
-          <div className="text-sm font-medium text-gray-700 mb-2">
+        <div 
+          className="border rounded-lg p-4 shadow-sm transition-all duration-200 hover:shadow-md"
+          style={color ? cardStyle : {}}
+        >
+          <div className="text-sm font-medium text-muted-foreground mb-2">
             {config.label}
           </div>
-          <div className="text-lg font-bold text-gray-900">
+          <div className="text-lg font-bold text-foreground">
             {value || '€ 0.00'}
           </div>
         </div>

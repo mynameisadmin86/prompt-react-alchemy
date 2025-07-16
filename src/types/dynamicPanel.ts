@@ -11,6 +11,7 @@ export interface FieldConfig {
   width?: 'third' | 'half' | 'two-thirds' | 'full'; // Field width configuration
   options?: { label: string; value: string }[]; // For select and radio fields
   placeholder?: string;
+  color?: string; // For card field type background color
 }
 
 export interface PanelConfig {

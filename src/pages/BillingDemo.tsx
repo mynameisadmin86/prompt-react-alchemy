@@ -18,7 +18,8 @@ const BillingDemo = () => {
       visible: true,
       editable: true,
       order: 1,
-      width: 'half'
+      width: 'half',
+      color: '#10b981' // Emerald green
     },
     netAmount: {
       id: 'netAmount',
@@ -29,7 +30,8 @@ const BillingDemo = () => {
       visible: true,
       editable: true,
       order: 2,
-      width: 'half'
+      width: 'half',
+      color: '#8b5cf6' // Purple
     }
   };
 
