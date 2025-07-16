@@ -51,23 +51,40 @@ const BillingDemo = () => {
       },
       placeholder: 'Reference ID'
     },
-    summary: {
-      id: 'summary',
-      label: 'Price Summary',
-      fieldType: 'summary-card',
+    contractPriceCard: {
+      id: 'contractPriceCard',
+      label: '',
+      fieldType: 'card',
       value: {
-        main: '€ 1200.00',
-        sub: '€ 5580.00'
+        label: 'Contract Price',
+        amount: '€ 1200.00'
       },
       mandatory: false,
       visible: true,
-      editable: false,
+      editable: true,
       order: 1,
-      width: 'full',
-      summaryConfig: {
-        mainLabel: 'Contract Price',
-        subLabel: 'Net Amount',
-        backgroundColor: 'bg-gradient-to-r from-emerald-50 to-blue-50'
+      width: 'half',
+      cardConfig: {
+        color: 'bg-emerald-50',
+        editable: true
+      }
+    },
+    netAmountCard: {
+      id: 'netAmountCard',
+      label: '',
+      fieldType: 'card',
+      value: {
+        label: 'Net Amount',
+        amount: '€ 5580.00'
+      },
+      mandatory: false,
+      visible: true,
+      editable: true,
+      order: 2,
+      width: 'half',
+      cardConfig: {
+        color: 'bg-blue-50',
+        editable: true
       }
     },
     billingType: {
@@ -78,7 +95,7 @@ const BillingDemo = () => {
       mandatory: true,
       visible: true,
       editable: true,
-      order: 2,
+      order: 3,
       width: 'full',
       options: [
         { label: 'Wagon', value: 'Wagon' },
@@ -96,7 +113,7 @@ const BillingDemo = () => {
       mandatory: true,
       visible: true,
       editable: true,
-      order: 3,
+      order: 4,
       width: 'half',
       currencySymbol: '€',
       step: 0.01,
@@ -110,7 +127,7 @@ const BillingDemo = () => {
       mandatory: true,
       visible: true,
       editable: true,
-      order: 4,
+      order: 5,
       width: 'half',
       min: 1,
       step: 1,
@@ -124,7 +141,7 @@ const BillingDemo = () => {
       mandatory: true,
       visible: true,
       editable: true,
-      order: 5,
+      order: 6,
       width: 'full',
       placeholder: 'Search tariff code'
     },
@@ -136,7 +153,7 @@ const BillingDemo = () => {
       mandatory: true,
       visible: true,
       editable: true,
-      order: 6,
+      order: 7,
       width: 'full',
       options: [
         { label: 'Rate Per Block Train', value: 'Rate Per Block Train' },
@@ -154,7 +171,7 @@ const BillingDemo = () => {
       mandatory: false,
       visible: true,
       editable: true,
-      order: 7,
+      order: 8,
       width: 'full',
       placeholder: 'Enter Remarks'
     }

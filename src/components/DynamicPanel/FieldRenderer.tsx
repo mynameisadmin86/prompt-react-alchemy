@@ -244,8 +244,45 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
     case 'card':
       const badgeVariant = cardConfig?.variant || 'default';
       const badgeSize = cardConfig?.size || 'md';
-      const IconComponent = FileText; // Default icon, could be dynamic based on cardConfig.icon
+      const IconComponent = FileText;
       
+      // For summary cards with label and value
+      if (typeof value === 'object' && value?.label && value?.amount) {
+        return (
+          <div className={`p-4 rounded-lg ${cardConfig?.color || 'bg-muted/30'} border`}>
+            <div className="space-y-1">
+              {editable ? (
+                <input
+                  type="text"
+                  value={value.label || ''}
+                  onChange={(e) => onChange({ ...value, label: e.target.value })}
+                  className="bg-transparent border-none outline-none text-sm text-muted-foreground font-medium w-full p-0"
+                  placeholder="Label"
+                />
+              ) : (
+                <div className="text-sm text-muted-foreground font-medium">
+                  {value.label}
+                </div>
+              )}
+              {editable ? (
+                <input
+                  type="text"
+                  value={value.amount || ''}
+                  onChange={(e) => onChange({ ...value, amount: e.target.value })}
+                  className="bg-transparent border-none outline-none text-lg font-semibold w-full p-0"
+                  placeholder="Amount"
+                />
+              ) : (
+                <div className="text-lg font-semibold">
+                  {value.amount}
+                </div>
+              )}
+            </div>
+          </div>
+        );
+      }
+      
+      // For simple badge cards
       if (cardConfig?.editable !== false && editable) {
         return (
           <div className="flex items-center gap-2">
