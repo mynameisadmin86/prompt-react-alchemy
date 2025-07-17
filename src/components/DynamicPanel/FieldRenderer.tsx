@@ -14,7 +14,7 @@ interface FieldRendererProps {
   onChange?: (value: any) => void;
 }
 
-export const FieldRenderer: React.FC<FieldRendererProps> = React.memo(({
+const FieldRendererComponent: React.FC<FieldRendererProps> = ({
   config,
   fieldId,
   tabIndex,
@@ -230,5 +230,7 @@ export const FieldRenderer: React.FC<FieldRendererProps> = React.memo(({
           />
         </div>
       );
-   }
- });
+  }
+};
+
+export const FieldRenderer = React.memo(FieldRendererComponent);
