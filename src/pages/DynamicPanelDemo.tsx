@@ -281,9 +281,9 @@ const DynamicPanelDemo = () => {
 
   // Cross-field update logic for Basic Details (customerName affects contractType)
   const handleBasicDetailsChange = (updatedData: Record<string, any>) => {
-    setBasicDetailsData(updatedData);
-    
     // Cross-field logic: When customer changes, auto-select contract type
+    let finalData = { ...updatedData };
+    
     if (updatedData.customerName) {
       const contractMapping: Record<string, string> = {
         'db-cargo': 'fixed',
@@ -293,10 +293,13 @@ const DynamicPanelDemo = () => {
       
       const suggestedContract = contractMapping[updatedData.customerName];
       if (suggestedContract && updatedData.contractType !== suggestedContract) {
-        // Update contract type based on customer selection
-        setBasicDetailsData(prev => ({ ...prev, contractType: suggestedContract }));
+        // Update contract type in the same state update
+        finalData.contractType = suggestedContract;
       }
     }
+    
+    // Single state update to prevent re-renders
+    setBasicDetailsData(finalData);
   };
 
   // Panel visibility management
