@@ -242,12 +242,4 @@ const FieldRendererComponent: React.FC<FieldRendererProps> = ({
   }
 };
 
-export const FieldRenderer = React.memo(FieldRendererComponent, (prevProps, nextProps) => {
-  // Only compare essential props - ignore onChange since it should be stable now
-  return (
-    prevProps.fieldId === nextProps.fieldId &&
-    prevProps.tabIndex === nextProps.tabIndex &&
-    prevProps.value === nextProps.value &&
-    JSON.stringify(prevProps.config) === JSON.stringify(nextProps.config)
-  );
-});
+export const FieldRenderer = React.memo(FieldRendererComponent);

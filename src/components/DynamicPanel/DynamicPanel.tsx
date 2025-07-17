@@ -86,22 +86,30 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
     });
   }, []);
 
+  // Create stable field handlers map using useMemo
+  const fieldHandlers = useMemo(() => {
+    const handlers: Record<string, (value: any) => void> = {};
+    Object.keys(panelConfig).forEach(fieldId => {
+      handlers[fieldId] = (value: any) => handleFieldChange(fieldId, value);
+    });
+    return handlers;
+  }, [handleFieldChange, panelConfig]);
+
   // Get visible fields sorted by order with calculated tab indices
   const visibleFields = useMemo(() => {
-    const fields = Object.entries(panelConfig)
+    console.log('visibleFields recalculating...');
+    return Object.entries(panelConfig)
       .filter(([_, config]) => config.visible)
       .sort(([_, a], [__, b]) => a.order - b.order)
-      .map(([fieldId, config], index) => {
-        const tabIndex = startingTabIndex + index;
-        return {
-          fieldId,
-          config,
-          tabIndex
-        };
-      });
-    
-    return fields;
-  }, [panelConfig, panelOrder, startingTabIndex]);
+      .map(([fieldId, config], index) => ({
+        fieldId,
+        config,
+        tabIndex: startingTabIndex + index,
+        onChange: fieldHandlers[fieldId]
+      }));
+  }, [panelConfig, startingTabIndex, fieldHandlers]);
+
+  console.log('DynamicPanel render, visibleFields count:', visibleFields.length);
 
 
   const handleConfigSave = async (
@@ -191,23 +199,26 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
   const PanelContent = () => (
     <>
       <div className="grid grid-cols-12 gap-4">
-        {visibleFields.map(({ fieldId, config, tabIndex }) => (
-          <div key={fieldId} className={`space-y-1 ${getFieldWidthClass(config.width)}`}>
-            <label className="text-xs font-medium text-gray-600 block">
-              {config.label}
-              {config.mandatory && (
-                <span className="text-red-500 ml-1">*</span>
-              )}
-            </label>
-            <FieldRenderer
-              config={config}
-              fieldId={fieldId}
-              tabIndex={tabIndex}
-              value={formData[fieldId]}
-              onChange={(value) => handleFieldChange(fieldId, value)}
-            />
-          </div>
-        ))}
+        {visibleFields.map(({ fieldId, config, tabIndex, onChange }) => {
+          console.log(`Rendering field: ${fieldId}`);
+          return (
+            <div key={fieldId} className={`space-y-1 ${getFieldWidthClass(config.width)}`}>
+              <label className="text-xs font-medium text-gray-600 block">
+                {config.label}
+                {config.mandatory && (
+                  <span className="text-red-500 ml-1">*</span>
+                )}
+              </label>
+              <FieldRenderer
+                config={config}
+                fieldId={fieldId}
+                tabIndex={tabIndex}
+                value={formData[fieldId]}
+                onChange={onChange}
+              />
+            </div>
+          );
+        })}
       </div>
       
       {visibleFields.length === 0 && !showPreview && (
