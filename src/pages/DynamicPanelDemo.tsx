@@ -352,7 +352,6 @@ const DynamicPanelDemo = () => {
                   panelTitle={basicDetailsTitle}
                   panelConfig={basicDetailsConfig}
                   initialData={basicDetailsData}
-                  onDataChange={setBasicDetailsData}
                   onTitleChange={setBasicDetailsTitle}
                   onWidthChange={setBasicDetailsWidth}
                   getUserPanelConfig={getUserPanelConfig}
@@ -376,7 +375,6 @@ const DynamicPanelDemo = () => {
                   panelTitle={operationalDetailsTitle}
                   panelConfig={operationalDetailsConfig}
                   initialData={operationalDetailsData}
-                  onDataChange={setOperationalDetailsData}
                   onTitleChange={setOperationalDetailsTitle}
                   onWidthChange={setOperationalDetailsWidth}
                   getUserPanelConfig={getUserPanelConfig}
@@ -399,7 +397,6 @@ const DynamicPanelDemo = () => {
                   panelTitle={billingDetailsTitle}
                   panelConfig={billingDetailsConfig}
                   initialData={billingDetailsData}
-                  onDataChange={setBillingDetailsData}
                   onTitleChange={setBillingDetailsTitle}
                   onWidthChange={setBillingDetailsWidth}
                   getUserPanelConfig={getUserPanelConfig}
