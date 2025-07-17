@@ -11,13 +11,15 @@ interface FieldRendererProps {
   value: any;
   onChange: (fieldId: string, value: any) => void;
   fieldId: string;
+  tabIndex?: number;
 }
 
 export const FieldRenderer: React.FC<FieldRendererProps> = ({
   config,
   value,
   onChange,
-  fieldId
+  fieldId,
+  tabIndex
 }) => {
   const [localValue, setLocalValue] = useState(value || '');
 
@@ -39,7 +41,7 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
     );
   }
 
-  const baseInputClasses = "h-8 text-xs border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500";
+  const baseInputClasses = "h-8 text-xs border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:z-20 relative";
 
   switch (fieldType) {
     case 'text':
@@ -51,6 +53,7 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
           onBlur={(e) => handleBlur(e.target.value)}
           placeholder={placeholder}
           className={baseInputClasses}
+          tabIndex={tabIndex}
         />
       );
 
@@ -61,7 +64,8 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
           onChange={(e) => setLocalValue(e.target.value)}
           onBlur={(e) => handleBlur(e.target.value)}
           placeholder={placeholder}
-          className="min-h-[60px] text-xs border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+          className="min-h-[60px] text-xs border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:z-20 relative"
+          tabIndex={tabIndex}
         />
       );
 
@@ -70,11 +74,15 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
         <RadioGroup
           value={value || ''}
           onValueChange={(value) => onChange(fieldId, value)}
-          className="flex gap-4"
+          className="flex gap-4 focus-within:z-20 relative"
         >
           {options?.map((option) => (
             <div key={option.value} className="flex items-center space-x-2">
-              <RadioGroupItem value={option.value} id={`${config.id}-${option.value}`} />
+              <RadioGroupItem 
+                value={option.value} 
+                id={`${config.id}-${option.value}`} 
+                tabIndex={tabIndex}
+              />
               <Label htmlFor={`${config.id}-${option.value}`} className="text-xs">
                 {option.label}
               </Label>
@@ -85,14 +93,15 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
 
     case 'select':
       return (
-        <div className="relative">
+        <div className="relative focus-within:z-20">
           <select
             value={localValue}
             onChange={(e) => {
               setLocalValue(e.target.value);
               handleBlur(e.target.value); // Select updates immediately
             }}
-            className="w-full h-8 px-3 text-xs rounded-md border border-gray-300 bg-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 appearance-none"
+            className="w-full h-8 px-3 text-xs rounded-md border border-gray-300 bg-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:z-20 relative appearance-none"
+            tabIndex={tabIndex}
           >
             <option value="">Select...</option>
             {options?.map((option) => (
@@ -111,13 +120,14 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
 
     case 'date':
       return (
-        <div className="relative">
+        <div className="relative focus-within:z-20">
           <Input
             type="date"
             value={localValue}
             onChange={(e) => setLocalValue(e.target.value)}
             onBlur={(e) => handleBlur(e.target.value)}
             className={baseInputClasses}
+            tabIndex={tabIndex}
           />
           <Calendar className="absolute right-2 top-1/2 transform -translate-y-1/2 w-3 h-3 text-gray-400 pointer-events-none" />
         </div>
@@ -125,13 +135,14 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
 
     case 'time':
       return (
-        <div className="relative">
+        <div className="relative focus-within:z-20">
           <Input
             type="time"
             value={localValue}
             onChange={(e) => setLocalValue(e.target.value)}
             onBlur={(e) => handleBlur(e.target.value)}
             className={baseInputClasses}
+            tabIndex={tabIndex}
           />
           <Clock className="absolute right-2 top-1/2 transform -translate-y-1/2 w-3 h-3 text-gray-400 pointer-events-none" />
         </div>
@@ -139,7 +150,7 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
 
     case 'currency':
       return (
-        <div className="relative">
+        <div className="relative focus-within:z-20">
           <span className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-500 text-xs">
             €
           </span>
@@ -151,13 +162,14 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
             placeholder="0.00"
             className={`${baseInputClasses} pl-6`}
             step="0.01"
+            tabIndex={tabIndex}
           />
         </div>
       );
 
     case 'search':
       return (
-        <div className="relative">
+        <div className="relative focus-within:z-20">
           <Input
             type="search"
             value={localValue}
@@ -165,6 +177,7 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
             onBlur={(e) => handleBlur(e.target.value)}
             placeholder={placeholder || 'Search...'}
             className={`${baseInputClasses} pr-8`}
+            tabIndex={tabIndex}
           />
           <Search className="absolute right-2 top-1/2 transform -translate-y-1/2 w-3 h-3 text-gray-400 pointer-events-none" />
         </div>
@@ -202,6 +215,7 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
           onBlur={(e) => handleBlur(e.target.value)}
           placeholder={placeholder}
           className={baseInputClasses}
+          tabIndex={tabIndex}
         />
       );
   }

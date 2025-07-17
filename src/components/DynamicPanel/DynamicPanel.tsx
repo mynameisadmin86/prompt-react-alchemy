@@ -185,6 +185,7 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
               value={formData[fieldId]}
               onChange={handleFieldChange}
               fieldId={fieldId}
+              tabIndex={fieldConfig.order}
             />
           </div>
         ))}
