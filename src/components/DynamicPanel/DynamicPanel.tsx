@@ -90,7 +90,7 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
     return fields;
   }, [panelConfig, panelOrder, startingTabIndex]);
 
-  // Handle field changes
+  // Handle field changes with stable reference
   const handleFieldChange = useCallback((fieldId: string, value: any) => {
     setFormData(prevData => {
       const newData = { ...prevData, [fieldId]: value };
@@ -99,14 +99,20 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
     });
   }, [onDataChange]);
 
-  // Create memoized onChange handlers for each field
+  // Create memoized onChange handlers for each field with stable references
   const fieldChangeHandlers = useMemo(() => {
     const handlers: Record<string, (value: any) => void> = {};
     Object.keys(panelConfig).forEach(fieldId => {
-      handlers[fieldId] = (value: any) => handleFieldChange(fieldId, value);
+      handlers[fieldId] = (value: any) => {
+        setFormData(prevData => {
+          const newData = { ...prevData, [fieldId]: value };
+          onDataChange?.(newData);
+          return newData;
+        });
+      };
     });
     return handlers;
-  }, [panelConfig, handleFieldChange]);
+  }, [panelConfig, onDataChange]);
 
 
   const handleConfigSave = async (
