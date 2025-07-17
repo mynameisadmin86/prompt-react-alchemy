@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
@@ -77,11 +77,11 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
     [panelConfig]
   );
 
-  const handleFieldChange = (fieldId: string, value: any) => {
+  const handleFieldChange = useCallback((fieldId: string, value: any) => {
     const updatedData = { ...formData, [fieldId]: value };
     setFormData(updatedData);
     onDataChange?.(updatedData);
-  };
+  }, [formData, onDataChange]);
 
   const handleConfigSave = async (
     updatedConfig: PanelConfig, 
