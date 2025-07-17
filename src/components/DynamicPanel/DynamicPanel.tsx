@@ -77,8 +77,10 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
 
   // Single stable onChange handler that never changes
   const handleFieldChange = useCallback((fieldId: string, value: any) => {
+    console.log(`DynamicPanel handleFieldChange: ${fieldId} = ${value}`);
     setFormData(prevData => {
       const newData = { ...prevData, [fieldId]: value };
+      console.log('New form data:', newData);
       onDataChangeRef.current?.(newData);
       return newData;
     });

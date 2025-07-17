@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useRef } from 'react';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
@@ -21,11 +21,17 @@ const FieldRendererComponent: React.FC<FieldRendererProps> = ({
   value,
   onChange
 }) => {
+  console.log(`FieldRenderer render: ${fieldId}, value: ${value}`);
   const { fieldType, editable, placeholder, options, color, fieldColour } = config;
 
+  // Use useRef to keep the latest onChange without causing re-renders
+  const onChangeRef = useRef(onChange);
+  onChangeRef.current = onChange;
+
   const handleChange = useCallback((newValue: any) => {
-    onChange?.(newValue);
-  }, [onChange]);
+    console.log(`FieldRenderer handleChange: ${fieldId} = ${newValue}`);
+    onChangeRef.current?.(newValue);
+  }, [fieldId]);
 
   if (!editable) {
     return (
@@ -62,7 +68,10 @@ const FieldRendererComponent: React.FC<FieldRendererProps> = ({
           <div className="text-xs text-blue-600 mb-1">TabIndex: {tabIndex}</div>
             <Textarea
               value={value || config.value || ''}
-              onChange={(e) => handleChange(e.target.value)}
+              onChange={(e) => {
+                console.log(`Textarea change: ${fieldId} = ${e.target.value}`);
+                handleChange(e.target.value);
+              }}
               placeholder={placeholder}
               className="min-h-[60px] text-xs border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:z-50 focus:relative focus:outline-none"
               tabIndex={tabIndex}
