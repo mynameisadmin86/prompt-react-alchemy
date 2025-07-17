@@ -71,45 +71,26 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
     loadUserConfig();
   }, [getUserPanelConfig, userId, panelId]);
 
-  // Use ref to store the latest onDataChange without causing re-renders
-  const onDataChangeRef = useRef(onDataChange);
-  onDataChangeRef.current = onDataChange;
-
-  // Single stable onChange handler that never changes
+  // Simple, direct approach - no complex memoization
   const handleFieldChange = useCallback((fieldId: string, value: any) => {
-    console.log(`DynamicPanel handleFieldChange: ${fieldId} = ${value}`);
     setFormData(prevData => {
       const newData = { ...prevData, [fieldId]: value };
-      console.log('New form data:', newData);
-      onDataChangeRef.current?.(newData);
+      onDataChange?.(newData);
       return newData;
     });
-  }, []);
+  }, [onDataChange]);
 
-  // Create stable field handlers map using useMemo
-  const fieldHandlers = useMemo(() => {
-    const handlers: Record<string, (value: any) => void> = {};
-    Object.keys(panelConfig).forEach(fieldId => {
-      handlers[fieldId] = (value: any) => handleFieldChange(fieldId, value);
-    });
-    return handlers;
-  }, [handleFieldChange, panelConfig]);
-
-  // Get visible fields sorted by order with calculated tab indices
+  // Simple visible fields calculation
   const visibleFields = useMemo(() => {
-    console.log('visibleFields recalculating...');
     return Object.entries(panelConfig)
       .filter(([_, config]) => config.visible)
       .sort(([_, a], [__, b]) => a.order - b.order)
       .map(([fieldId, config], index) => ({
         fieldId,
         config,
-        tabIndex: startingTabIndex + index,
-        onChange: fieldHandlers[fieldId]
+        tabIndex: startingTabIndex + index
       }));
-  }, [panelConfig, startingTabIndex, fieldHandlers]);
-
-  console.log('DynamicPanel render, visibleFields count:', visibleFields.length);
+  }, [panelConfig, startingTabIndex]);
 
 
   const handleConfigSave = async (
@@ -199,26 +180,24 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
   const PanelContent = () => (
     <>
       <div className="grid grid-cols-12 gap-4">
-        {visibleFields.map(({ fieldId, config, tabIndex, onChange }) => {
-          console.log(`Rendering field: ${fieldId}`);
-          return (
-            <div key={fieldId} className={`space-y-1 ${getFieldWidthClass(config.width)}`}>
-              <label className="text-xs font-medium text-gray-600 block">
-                {config.label}
-                {config.mandatory && (
-                  <span className="text-red-500 ml-1">*</span>
-                )}
-              </label>
-              <FieldRenderer
-                config={config}
-                fieldId={fieldId}
-                tabIndex={tabIndex}
-                value={formData[fieldId]}
-                onChange={onChange}
-              />
-            </div>
-          );
-        })}
+        {visibleFields.map(({ fieldId, config, tabIndex }) => (
+          <div key={`field-${fieldId}`} className={`space-y-1 ${getFieldWidthClass(config.width)}`}>
+            <label className="text-xs font-medium text-gray-600 block">
+              {config.label}
+              {config.mandatory && (
+                <span className="text-red-500 ml-1">*</span>
+              )}
+            </label>
+            <FieldRenderer
+              key={`renderer-${fieldId}`}
+              config={config}
+              fieldId={fieldId}
+              tabIndex={tabIndex}
+              value={formData[fieldId] || ''}
+              onChange={(value) => handleFieldChange(fieldId, value)}
+            />
+          </div>
+        ))}
       </div>
       
       {visibleFields.length === 0 && !showPreview && (
