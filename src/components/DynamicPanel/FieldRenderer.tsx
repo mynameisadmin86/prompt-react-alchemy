@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
@@ -14,7 +14,7 @@ interface FieldRendererProps {
   onChange?: (value: any) => void;
 }
 
-export const FieldRenderer: React.FC<FieldRendererProps> = ({
+export const FieldRenderer: React.FC<FieldRendererProps> = React.memo(({
   config,
   fieldId,
   tabIndex,
@@ -23,9 +23,9 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
 }) => {
   const { fieldType, editable, placeholder, options, color, fieldColour } = config;
 
-  const handleChange = (newValue: any) => {
+  const handleChange = useCallback((newValue: any) => {
     onChange?.(newValue);
-  };
+  }, [onChange]);
 
   if (!editable) {
     return (
@@ -230,5 +230,5 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
           />
         </div>
       );
-  }
-};
+   }
+ });
