@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { useForm, FieldValues } from 'react-hook-form';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
@@ -36,7 +37,22 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
   const [isOpen, setIsOpen] = useState(true);
   const [isConfigModalOpen, setIsConfigModalOpen] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
-  const [formData, setFormData] = useState(initialData);
+  
+  // Initialize react-hook-form with default values from config
+  const defaultValues = useMemo(() => {
+    const defaults: FieldValues = {};
+    Object.entries(initialPanelConfig).forEach(([fieldId, config]) => {
+      defaults[fieldId] = config.value || '';
+    });
+    return { ...defaults, ...initialData };
+  }, [initialPanelConfig, initialData]);
+
+  const { register, watch, reset } = useForm({
+    defaultValues,
+    mode: 'onChange'
+  });
+
+  const formData = watch();
 
   // Load user configuration on mount
   useEffect(() => {
@@ -90,21 +106,10 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
     return fields;
   }, [panelConfig, panelOrder]);
 
-  // Handle field changes
-  const handleFieldChange = (fieldId: string, value: any) => {
-    const newData = { ...formData, [fieldId]: value };
-    setFormData(newData);
-    onDataChange?.(newData);
-  };
-
-  // Handle field validation on blur
-  const handleFieldBlur = (fieldId: string, value: any) => {
-    const field = panelConfig[fieldId];
-    if (field?.mandatory && (!value || value.toString().trim() === '')) {
-      console.warn(`Field ${fieldId} is mandatory but empty`);
-      // Add validation logic here
-    }
-  };
+  // Watch form data and sync with parent
+  useEffect(() => {
+    onDataChange?.(formData);
+  }, [formData, onDataChange]);
 
   const handleConfigSave = async (
     updatedConfig: PanelConfig, 
@@ -205,9 +210,7 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
               config={config}
               fieldId={fieldId}
               tabIndex={tabIndex}
-              value={formData[fieldId]}
-              onChange={(value) => handleFieldChange(fieldId, value)}
-              onBlur={handleFieldBlur}
+              register={register}
             />
           </div>
         ))}
