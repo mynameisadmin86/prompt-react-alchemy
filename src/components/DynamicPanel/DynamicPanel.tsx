@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { useForm } from 'react-hook-form';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
@@ -37,15 +36,7 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
   const [isOpen, setIsOpen] = useState(true);
   const [isConfigModalOpen, setIsConfigModalOpen] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
-
-  // Initialize react-hook-form
-  const form = useForm({
-    defaultValues: initialData,
-    mode: 'onBlur'
-  });
-
-  const { control, watch, setValue, getValues } = form;
-  const formData = watch();
+  const [formData, setFormData] = useState(initialData);
 
   // Load user configuration on mount
   useEffect(() => {
@@ -99,13 +90,21 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
     return fields;
   }, [panelConfig, panelOrder]);
 
-  // Watch for form changes and notify parent
-  useEffect(() => {
-    const subscription = watch((data) => {
-      onDataChange?.(data);
-    });
-    return () => subscription.unsubscribe();
-  }, [watch, onDataChange]);
+  // Handle field changes
+  const handleFieldChange = (fieldId: string, value: any) => {
+    const newData = { ...formData, [fieldId]: value };
+    setFormData(newData);
+    onDataChange?.(newData);
+  };
+
+  // Handle field validation on blur
+  const handleFieldBlur = (fieldId: string, value: any) => {
+    const field = panelConfig[fieldId];
+    if (field?.mandatory && (!value || value.toString().trim() === '')) {
+      console.warn(`Field ${fieldId} is mandatory but empty`);
+      // Add validation logic here
+    }
+  };
 
   const handleConfigSave = async (
     updatedConfig: PanelConfig, 
@@ -204,9 +203,11 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
             </label>
             <FieldRenderer
               config={config}
-              control={control}
               fieldId={fieldId}
               tabIndex={tabIndex}
+              value={formData[fieldId]}
+              onChange={(value) => handleFieldChange(fieldId, value)}
+              onBlur={handleFieldBlur}
             />
           </div>
         ))}
