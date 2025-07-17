@@ -46,7 +46,7 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
   switch (fieldType) {
     case 'text':
       return (
-        {tabIndex}<Input
+        <Input
           type="text"
           value={localValue}
           onChange={(e) => setLocalValue(e.target.value)}
@@ -54,12 +54,12 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
           placeholder={placeholder}
           className={baseInputClasses}
           tabIndex={tabIndex}
-        />
+        />{tabIndex}
       );
 
     case 'textarea':
       return (
-        {tabIndex}<Textarea
+        <Textarea
           value={localValue}
           onChange={(e) => setLocalValue(e.target.value)}
           onBlur={(e) => handleBlur(e.target.value)}
@@ -71,7 +71,7 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
 
     case 'radio':
       return (
-        {tabIndex}<RadioGroup
+        <RadioGroup
           value={value || ''}
           onValueChange={(value) => onChange(fieldId, value)}
           className="flex gap-4 focus-within:z-50 relative"
@@ -94,7 +94,7 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
     case 'select':
       return (
         <div className="relative focus-within:z-50">
-          {tabIndex}<select
+          <select
             value={localValue}
             onChange={(e) => {
               setLocalValue(e.target.value);
@@ -120,7 +120,7 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
 
     case 'date':
       return (
-        {tabIndex}<div className="relative focus-within:z-50">
+        <div className="relative focus-within:z-50">
           <Input
             type="date"
             value={localValue}
