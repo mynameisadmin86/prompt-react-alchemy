@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
@@ -19,6 +19,16 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
   onChange,
   fieldId
 }) => {
+  const [localValue, setLocalValue] = useState(value || '');
+
+  // Sync local value when prop value changes
+  useEffect(() => {
+    setLocalValue(value || '');
+  }, [value]);
+
+  const handleBlur = (newValue: any) => {
+    onChange(fieldId, newValue);
+  };
   const { fieldType, editable, placeholder, options, color, fieldColour } = config;
 
   if (!editable) {
@@ -36,8 +46,9 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
       return (
         <Input
           type="text"
-          value={value || ''}
-          onChange={(e) => onChange(fieldId, e.target.value)}
+          value={localValue}
+          onChange={(e) => setLocalValue(e.target.value)}
+          onBlur={(e) => handleBlur(e.target.value)}
           placeholder={placeholder}
           className={baseInputClasses}
         />
@@ -46,8 +57,9 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
     case 'textarea':
       return (
         <Textarea
-          value={value || ''}
-          onChange={(e) => onChange(fieldId, e.target.value)}
+          value={localValue}
+          onChange={(e) => setLocalValue(e.target.value)}
+          onBlur={(e) => handleBlur(e.target.value)}
           placeholder={placeholder}
           className="min-h-[60px] text-xs border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
         />
@@ -75,8 +87,11 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
       return (
         <div className="relative">
           <select
-            value={value || ''}
-            onChange={(e) => onChange(fieldId, e.target.value)}
+            value={localValue}
+            onChange={(e) => {
+              setLocalValue(e.target.value);
+              handleBlur(e.target.value); // Select updates immediately
+            }}
             className="w-full h-8 px-3 text-xs rounded-md border border-gray-300 bg-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 appearance-none"
           >
             <option value="">Select...</option>
@@ -99,8 +114,9 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
         <div className="relative">
           <Input
             type="date"
-            value={value || ''}
-            onChange={(e) => onChange(fieldId, e.target.value)}
+            value={localValue}
+            onChange={(e) => setLocalValue(e.target.value)}
+            onBlur={(e) => handleBlur(e.target.value)}
             className={baseInputClasses}
           />
           <Calendar className="absolute right-2 top-1/2 transform -translate-y-1/2 w-3 h-3 text-gray-400 pointer-events-none" />
@@ -112,8 +128,9 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
         <div className="relative">
           <Input
             type="time"
-            value={value || ''}
-            onChange={(e) => onChange(fieldId, e.target.value)}
+            value={localValue}
+            onChange={(e) => setLocalValue(e.target.value)}
+            onBlur={(e) => handleBlur(e.target.value)}
             className={baseInputClasses}
           />
           <Clock className="absolute right-2 top-1/2 transform -translate-y-1/2 w-3 h-3 text-gray-400 pointer-events-none" />
@@ -128,8 +145,9 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
           </span>
           <Input
             type="number"
-            value={value || ''}
-            onChange={(e) => onChange(fieldId, parseFloat(e.target.value) || 0)}
+            value={localValue}
+            onChange={(e) => setLocalValue(e.target.value)}
+            onBlur={(e) => handleBlur(parseFloat(e.target.value) || 0)}
             placeholder="0.00"
             className={`${baseInputClasses} pl-6`}
             step="0.01"
@@ -142,8 +160,9 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
         <div className="relative">
           <Input
             type="search"
-            value={value || ''}
-            onChange={(e) => onChange(fieldId, e.target.value)}
+            value={localValue}
+            onChange={(e) => setLocalValue(e.target.value)}
+            onBlur={(e) => handleBlur(e.target.value)}
             placeholder={placeholder || 'Search...'}
             className={`${baseInputClasses} pr-8`}
           />
@@ -178,8 +197,9 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
       return (
         <Input
           type="text"
-          value={value || ''}
-          onChange={(e) => onChange(fieldId, e.target.value)}
+          value={localValue}
+          onChange={(e) => setLocalValue(e.target.value)}
+          onBlur={(e) => handleBlur(e.target.value)}
           placeholder={placeholder}
           className={baseInputClasses}
         />
