@@ -76,12 +76,12 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
           onValueChange={(value) => onChange(fieldId, value)}
           className="flex gap-4 focus-within:z-20 relative"
         >
-          {options?.map((option) => (
+          {options?.map((option, index) => (
             <div key={option.value} className="flex items-center space-x-2">
               <RadioGroupItem 
                 value={option.value} 
                 id={`${config.id}-${option.value}`} 
-                tabIndex={tabIndex}
+                tabIndex={index === 0 ? tabIndex : -1}
               />
               <Label htmlFor={`${config.id}-${option.value}`} className="text-xs">
                 {option.label}
