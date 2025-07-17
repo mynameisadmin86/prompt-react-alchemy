@@ -71,13 +71,14 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
     loadUserConfig();
   }, [getUserPanelConfig, userId, panelId]);
 
-  // Get visible fields sorted by order with calculated tab indices
+  // Get visible fields sorted by order with field-level tab indices
   const visibleFields = useMemo(() => {
     const fields = Object.entries(panelConfig)
       .filter(([_, config]) => config.visible)
       .sort(([_, a], [__, b]) => a.order - b.order)
-      .map(([fieldId, config], index) => {
-        const tabIndex = startingTabIndex + index;
+      .map(([fieldId, config]) => {
+        // Use field's tabIndex if set, otherwise calculate based on order
+        const tabIndex = config.tabIndex !== undefined ? config.tabIndex : startingTabIndex + config.order;
         console.log(`Field ${fieldId} in panel ${panelOrder}: order=${config.order}, tabIndex=${tabIndex}`);
         return {
           fieldId,
@@ -88,7 +89,7 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
     
     console.log('All visible fields with tabIndex:', fields);
     return fields;
-  }, [panelConfig, panelOrder]);
+  }, [panelConfig, startingTabIndex, panelOrder]);
 
   const handleFieldChange = useCallback((fieldId: string, value: any) => {
     setFormData(prevData => {

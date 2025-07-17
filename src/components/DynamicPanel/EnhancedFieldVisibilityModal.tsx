@@ -11,6 +11,7 @@ import { PanelConfig, FieldVisibilityConfig } from '@/types/dynamicPanel';
 
 interface EnhancedFieldVisibilityConfig extends FieldVisibilityConfig {
   width?: 'third' | 'half' | 'two-thirds' | 'full';
+  tabIndex?: number;
 }
 
 interface EnhancedFieldVisibilityModalProps {
@@ -62,7 +63,8 @@ export const EnhancedFieldVisibilityModal: React.FC<EnhancedFieldVisibilityModal
         visible: config.visible,
         order: config.order,
         label: config.label,
-        width: config.width || 'full'
+        width: config.width || 'full',
+        tabIndex: config.tabIndex
       }))
       .sort((a, b) => a.order - b.order);
     
@@ -107,10 +109,11 @@ export const EnhancedFieldVisibilityModal: React.FC<EnhancedFieldVisibilityModal
     newConfigs.splice(draggedIndex, 1);
     newConfigs.splice(index, 0, draggedItem);
     
-    // Update order
+    // Update order and tabIndex based on new position
     const updatedConfigs = newConfigs.map((config, idx) => ({
       ...config,
-      order: idx
+      order: idx,
+      tabIndex: idx + 1 // Auto-assign sequential tab indices based on order
     }));
     
     setFieldConfigs(updatedConfigs);
@@ -139,7 +142,8 @@ export const EnhancedFieldVisibilityModal: React.FC<EnhancedFieldVisibilityModal
           visible: fieldConfig.visible,
           order: fieldConfig.order,
           label: fieldConfig.label,
-          width: fieldConfig.width
+          width: fieldConfig.width,
+          tabIndex: fieldConfig.tabIndex
         };
       }
     });
@@ -353,24 +357,33 @@ export const EnhancedFieldVisibilityModal: React.FC<EnhancedFieldVisibilityModal
                         </div>
                       </div>
                       
-                      <div className="flex items-center space-x-2">
-                        <Label className="text-xs text-gray-600">Field Width:</Label>
-                        <Select 
-                          value={fieldConfig.width || 'full'} 
-                          onValueChange={(value: 'third' | 'half' | 'two-thirds' | 'full') => 
-                            handleWidthChange(fieldConfig.fieldId, value)
-                          }
-                        >
-                          <SelectTrigger className="w-32 h-7 text-xs">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="third">1/3 Width</SelectItem>
-                            <SelectItem value="half">1/2 Width</SelectItem>
-                            <SelectItem value="two-thirds">2/3 Width</SelectItem>
-                            <SelectItem value="full">Full Width</SelectItem>
-                          </SelectContent>
-                        </Select>
+                      <div className="flex items-center space-x-4">
+                        <div className="flex items-center space-x-2">
+                          <Label className="text-xs text-gray-600">Field Width:</Label>
+                          <Select 
+                            value={fieldConfig.width || 'full'} 
+                            onValueChange={(value: 'third' | 'half' | 'two-thirds' | 'full') => 
+                              handleWidthChange(fieldConfig.fieldId, value)
+                            }
+                          >
+                            <SelectTrigger className="w-32 h-7 text-xs">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="third">1/3 Width</SelectItem>
+                              <SelectItem value="half">1/2 Width</SelectItem>
+                              <SelectItem value="two-thirds">2/3 Width</SelectItem>
+                              <SelectItem value="full">Full Width</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        
+                        <div className="flex items-center space-x-2">
+                          <Label className="text-xs text-gray-600">Tab Order:</Label>
+                          <span className="text-xs font-mono bg-gray-100 px-2 py-1 rounded">
+                            {fieldConfig.tabIndex || fieldConfig.order + 1}
+                          </span>
+                        </div>
                       </div>
                     </div>
                   );
