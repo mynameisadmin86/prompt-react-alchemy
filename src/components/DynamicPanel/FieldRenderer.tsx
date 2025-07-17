@@ -1,5 +1,4 @@
 import React from 'react';
-import { UseFormRegister } from 'react-hook-form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
@@ -11,7 +10,8 @@ interface FieldRendererProps {
   config: FieldConfig;
   fieldId: string;
   tabIndex?: number;
-  register: UseFormRegister<Record<string, any>>;
+  value?: any;
+  onChange?: (value: any) => void;
   onBlur?: (fieldId: string, value: any) => void;
 }
 
@@ -19,13 +19,17 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
   config,
   fieldId,
   tabIndex,
-  register,
+  value,
+  onChange,
   onBlur
 }) => {
   const { fieldType, editable, placeholder, options, color, fieldColour } = config;
 
-  const handleBlur = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const value = e.target.value;
+  const handleChange = (newValue: any) => {
+    onChange?.(newValue);
+  };
+
+  const handleBlur = () => {
     onBlur?.(fieldId, value);
   };
 
@@ -34,7 +38,7 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
       <div>
         <div className="text-xs text-blue-600 mb-1">TabIndex: {tabIndex}</div>
         <div className="text-xs text-gray-700 bg-gray-50 p-2 rounded border min-h-[32px] flex items-center">
-          {config.value || '-'}
+          {value || config.value || '-'}
         </div>
       </div>
     );
@@ -49,7 +53,8 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
           <div className="text-xs text-blue-600 mb-1">TabIndex: {tabIndex}</div>
           <Input
             type="text"
-            {...register(fieldId)}
+            value={value || config.value || ''}
+            onChange={(e) => handleChange(e.target.value)}
             onBlur={handleBlur}
             placeholder={placeholder}
             className={baseInputClasses}
@@ -63,7 +68,8 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
         <div>
           <div className="text-xs text-blue-600 mb-1">TabIndex: {tabIndex}</div>
           <Textarea
-            {...register(fieldId)}
+            value={value || config.value || ''}
+            onChange={(e) => handleChange(e.target.value)}
             onBlur={handleBlur}
             placeholder={placeholder}
             className="min-h-[60px] text-xs border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:z-50 focus:relative focus:outline-none"
@@ -76,24 +82,25 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
       return (
         <div>
           <div className="text-xs text-blue-600 mb-1">TabIndex: {tabIndex}</div>
-          <div className="flex gap-4 focus-within:z-50 relative">
+          <RadioGroup
+            value={value || config.value || ''}
+            onValueChange={handleChange}
+            className="flex gap-4 focus-within:z-50 relative"
+          >
             {options?.map((option, index) => (
               <div key={option.value} className="flex items-center space-x-2">
-                <input
-                  type="radio"
-                  {...register(fieldId)}
-                  value={option.value}
-                  id={`${config.id}-${option.value}`}
+                <RadioGroupItem 
+                  value={option.value} 
+                  id={`${config.id}-${option.value}`} 
                   tabIndex={index === 0 ? tabIndex : -1}
                   onBlur={handleBlur}
-                  className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500"
                 />
                 <Label htmlFor={`${config.id}-${option.value}`} className="text-xs">
                   {option.label}
                 </Label>
               </div>
             ))}
-          </div>
+          </RadioGroup>
         </div>
       );
 
@@ -103,7 +110,8 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
           <div className="text-xs text-blue-600 mb-1">TabIndex: {tabIndex}</div>
           <div className="relative focus-within:z-50">
             <select
-              {...register(fieldId)}
+              value={value || config.value || ''}
+              onChange={(e) => handleChange(e.target.value)}
               onBlur={handleBlur}
               className="w-full h-8 px-3 text-xs rounded-md border border-gray-300 bg-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:z-50 focus:relative focus:outline-none appearance-none"
               tabIndex={tabIndex}
@@ -131,7 +139,8 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
           <div className="relative focus-within:z-50">
             <Input
               type="date"
-              {...register(fieldId)}
+              value={value || config.value || ''}
+              onChange={(e) => handleChange(e.target.value)}
               onBlur={handleBlur}
               className={baseInputClasses}
               tabIndex={tabIndex}
@@ -148,7 +157,8 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
           <div className="relative focus-within:z-50">
             <Input
               type="time"
-              {...register(fieldId)}
+              value={value || config.value || ''}
+              onChange={(e) => handleChange(e.target.value)}
               onBlur={handleBlur}
               className={baseInputClasses}
               tabIndex={tabIndex}
@@ -168,10 +178,8 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
             </span>
             <Input
               type="number"
-              {...register(fieldId, { 
-                valueAsNumber: true,
-                setValueAs: (value) => parseFloat(value) || 0
-              })}
+              value={value || config.value || ''}
+              onChange={(e) => handleChange(parseFloat(e.target.value) || 0)}
               onBlur={handleBlur}
               placeholder="0.00"
               className={`${baseInputClasses} pl-6`}
@@ -189,7 +197,8 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
           <div className="relative focus-within:z-50">
             <Input
               type="search"
-              {...register(fieldId)}
+              value={value || config.value || ''}
+              onChange={(e) => handleChange(e.target.value)}
               onBlur={handleBlur}
               placeholder={placeholder || 'Search...'}
               className={`${baseInputClasses} pr-8`}
@@ -216,7 +225,7 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
             className="text-lg font-bold"
             style={{ color: fieldColour || 'inherit' }}
           >
-            {config.value || '€ 0.00'}
+            {value || config.value || '€ 0.00'}
           </div>
         </div>
       );
@@ -227,7 +236,8 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
           <div className="text-xs text-blue-600 mb-1">TabIndex: {tabIndex}</div>
           <Input
             type="text"
-            {...register(fieldId)}
+            value={value || config.value || ''}
+            onChange={(e) => handleChange(e.target.value)}
             onBlur={handleBlur}
             placeholder={placeholder}
             className={baseInputClasses}
