@@ -30,6 +30,7 @@ export interface PanelSettings {
 
 export interface DynamicPanelProps {
   panelId: string;
+  panelOrder?: number; // Add panel order for tab navigation
   panelTitle: string;
   panelConfig: PanelConfig;
   initialData?: Record<string, any>;

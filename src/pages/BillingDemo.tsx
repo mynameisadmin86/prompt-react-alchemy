@@ -56,6 +56,7 @@ const BillingDemo = () => {
         <div className="space-y-6">
           <DynamicPanel
             panelId="billing-snippets"
+            panelOrder={1}
             panelTitle="Financial Snippets"
             panelConfig={snippetPanelConfig}
             panelWidth="full"

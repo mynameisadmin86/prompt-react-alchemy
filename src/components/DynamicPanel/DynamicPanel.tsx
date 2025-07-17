@@ -10,6 +10,7 @@ import { DynamicPanelProps, PanelConfig, PanelSettings } from '@/types/dynamicPa
 
 export const DynamicPanel: React.FC<DynamicPanelProps> = ({
   panelId,
+  panelOrder = 1,
   panelTitle: initialPanelTitle,
   panelConfig: initialPanelConfig,
   initialData = {},
@@ -69,12 +70,17 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
     loadUserConfig();
   }, [getUserPanelConfig, userId, panelId]);
 
-  // Get visible fields sorted by order - memoized to prevent re-creation on every render
+  // Get visible fields sorted by order with calculated tab indices
   const visibleFields = useMemo(() => 
     Object.entries(panelConfig)
       .filter(([_, config]) => config.visible)
-      .sort(([_, a], [__, b]) => a.order - b.order),
-    [panelConfig]
+      .sort(([_, a], [__, b]) => a.order - b.order)
+      .map(([fieldId, config], index) => ({
+        fieldId,
+        config,
+        tabIndex: (panelOrder * 10) + config.order // Panel order * 10 + field order
+      })),
+    [panelConfig, panelOrder]
   );
 
   const handleFieldChange = useCallback((fieldId: string, value: any) => {
@@ -172,20 +178,20 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
   const PanelContent = () => (
     <>
       <div className="grid grid-cols-12 gap-4">
-        {visibleFields.map(([fieldId, fieldConfig]) => (
-          <div key={fieldId} className={`space-y-1 ${getFieldWidthClass(fieldConfig.width)}`}>
+        {visibleFields.map(({ fieldId, config, tabIndex }) => (
+          <div key={fieldId} className={`space-y-1 ${getFieldWidthClass(config.width)}`}>
             <label className="text-xs font-medium text-gray-600 block">
-              {fieldConfig.label}
-              {fieldConfig.mandatory && (
+              {config.label}
+              {config.mandatory && (
                 <span className="text-red-500 ml-1">*</span>
               )}
             </label>
             <FieldRenderer
-              config={fieldConfig}
+              config={config}
               value={formData[fieldId]}
               onChange={handleFieldChange}
               fieldId={fieldId}
-              tabIndex={fieldConfig.order}
+              tabIndex={tabIndex}
             />
           </div>
         ))}
