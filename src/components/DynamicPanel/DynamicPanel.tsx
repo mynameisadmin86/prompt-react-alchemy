@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { useForm } from 'react-hook-form';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
@@ -37,6 +38,21 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
   const [isConfigModalOpen, setIsConfigModalOpen] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [formData, setFormData] = useState(initialData);
+
+  // Initialize react-hook-form
+  const form = useForm({
+    defaultValues: initialData
+  });
+
+  const { register, watch, setValue, getValues } = form;
+
+  // Watch form data for changes
+  const watchedData = watch();
+
+  useEffect(() => {
+    setFormData(watchedData);
+    onDataChange?.(watchedData);
+  }, [watchedData, onDataChange]);
 
   // Load user configuration on mount
   useEffect(() => {
@@ -89,13 +105,6 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
     console.log('All visible fields with tabIndex:', fields);
     return fields;
   }, [panelConfig, panelOrder]);
-
-  // Handle field changes
-  const handleFieldChange = (fieldId: string, value: any) => {
-    const newData = { ...formData, [fieldId]: value };
-    setFormData(newData);
-    onDataChange?.(newData);
-  };
 
   // Handle field validation on blur
   const handleFieldBlur = (fieldId: string, value: any) => {
@@ -205,8 +214,7 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
               config={config}
               fieldId={fieldId}
               tabIndex={tabIndex}
-              value={formData[fieldId]}
-              onChange={(value) => handleFieldChange(fieldId, value)}
+              register={register}
               onBlur={handleFieldBlur}
             />
           </div>
