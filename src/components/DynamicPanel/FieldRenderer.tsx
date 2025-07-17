@@ -41,7 +41,7 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
     );
   }
 
-  const baseInputClasses = "h-8 text-xs border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:z-20 relative";
+  const baseInputClasses = "h-8 text-xs border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:z-50 focus:relative focus:outline-none";
 
   switch (fieldType) {
     case 'text':
@@ -64,7 +64,7 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
           onChange={(e) => setLocalValue(e.target.value)}
           onBlur={(e) => handleBlur(e.target.value)}
           placeholder={placeholder}
-          className="min-h-[60px] text-xs border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:z-20 relative"
+          className="min-h-[60px] text-xs border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:z-50 focus:relative focus:outline-none"
           tabIndex={tabIndex}
         />
       );
@@ -74,7 +74,7 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
         <RadioGroup
           value={value || ''}
           onValueChange={(value) => onChange(fieldId, value)}
-          className="flex gap-4 focus-within:z-20 relative"
+          className="flex gap-4 focus-within:z-50 relative"
         >
           {options?.map((option, index) => (
             <div key={option.value} className="flex items-center space-x-2">
@@ -93,14 +93,14 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
 
     case 'select':
       return (
-        <div className="relative focus-within:z-20">
+        <div className="relative focus-within:z-50">
           <select
             value={localValue}
             onChange={(e) => {
               setLocalValue(e.target.value);
               handleBlur(e.target.value); // Select updates immediately
             }}
-            className="w-full h-8 px-3 text-xs rounded-md border border-gray-300 bg-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:z-20 relative appearance-none"
+            className="w-full h-8 px-3 text-xs rounded-md border border-gray-300 bg-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:z-50 focus:relative focus:outline-none appearance-none"
             tabIndex={tabIndex}
           >
             <option value="">Select...</option>
@@ -120,7 +120,7 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
 
     case 'date':
       return (
-        <div className="relative focus-within:z-20">
+        <div className="relative focus-within:z-50">
           <Input
             type="date"
             value={localValue}
@@ -135,7 +135,7 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
 
     case 'time':
       return (
-        <div className="relative focus-within:z-20">
+        <div className="relative focus-within:z-50">
           <Input
             type="time"
             value={localValue}
@@ -150,7 +150,7 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
 
     case 'currency':
       return (
-        <div className="relative focus-within:z-20">
+        <div className="relative focus-within:z-50">
           <span className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-500 text-xs">
             €
           </span>
@@ -169,7 +169,7 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
 
     case 'search':
       return (
-        <div className="relative focus-within:z-20">
+        <div className="relative focus-within:z-50">
           <Input
             type="search"
             value={localValue}

@@ -71,17 +71,23 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
   }, [getUserPanelConfig, userId, panelId]);
 
   // Get visible fields sorted by order with calculated tab indices
-  const visibleFields = useMemo(() => 
-    Object.entries(panelConfig)
+  const visibleFields = useMemo(() => {
+    const fields = Object.entries(panelConfig)
       .filter(([_, config]) => config.visible)
       .sort(([_, a], [__, b]) => a.order - b.order)
-      .map(([fieldId, config], index) => ({
-        fieldId,
-        config,
-        tabIndex: (panelOrder * 10) + config.order // Panel order * 10 + field order
-      })),
-    [panelConfig, panelOrder]
-  );
+      .map(([fieldId, config], index) => {
+        const tabIndex = (panelOrder * 100) + config.order; // Changed to 100 for better separation
+        console.log(`Field ${fieldId} in panel ${panelOrder}: order=${config.order}, tabIndex=${tabIndex}`);
+        return {
+          fieldId,
+          config,
+          tabIndex
+        };
+      });
+    
+    console.log('All visible fields with tabIndex:', fields);
+    return fields;
+  }, [panelConfig, panelOrder]);
 
   const handleFieldChange = useCallback((fieldId: string, value: any) => {
     setFormData(prevData => {
