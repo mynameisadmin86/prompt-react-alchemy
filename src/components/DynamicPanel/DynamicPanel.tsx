@@ -73,19 +73,31 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
 
   // Get visible fields sorted by order with field-level tab indices
   const visibleFields = useMemo(() => {
-    const fields = Object.entries(panelConfig)
+    const sortedFields = Object.entries(panelConfig)
       .filter(([_, config]) => config.visible)
-      .sort(([_, a], [__, b]) => a.order - b.order)
-      .map(([fieldId, config]) => {
-        // Use field's tabIndex if set, otherwise calculate based on order
-        const tabIndex = config.tabIndex !== undefined ? config.tabIndex : startingTabIndex + config.order;
-        console.log(`Field ${fieldId} in panel ${panelOrder}: order=${config.order}, tabIndex=${tabIndex}`);
-        return {
-          fieldId,
-          config,
-          tabIndex
-        };
-      });
+      .sort(([_, a], [__, b]) => a.order - b.order);
+    
+    let tabIndexCounter = startingTabIndex;
+    
+    const fields = sortedFields.map(([fieldId, config]) => {
+      // Use field's tabIndex if set, otherwise calculate based on editable fields only
+      let tabIndex;
+      if (config.tabIndex !== undefined) {
+        tabIndex = config.tabIndex;
+      } else if (config.editable) {
+        tabIndex = tabIndexCounter;
+        tabIndexCounter++;
+      } else {
+        tabIndex = -1; // Non-editable fields should not be in tab order
+      }
+      
+      console.log(`Field ${fieldId} in panel ${panelOrder}: order=${config.order}, editable=${config.editable}, tabIndex=${tabIndex}`);
+      return {
+        fieldId,
+        config,
+        tabIndex
+      };
+    });
     
     console.log('All visible fields with tabIndex:', fields);
     return fields;

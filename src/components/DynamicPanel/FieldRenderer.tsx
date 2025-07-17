@@ -36,7 +36,7 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
   if (!editable) {
     return (
       <div>
-        <div className="text-xs text-blue-600 mb-1">TabIndex: {tabIndex}</div>
+        <div className="text-xs text-blue-600 mb-1">TabIndex: {tabIndex} (read-only)</div>
         <div className="text-xs text-gray-700 bg-gray-50 p-2 rounded border min-h-[32px] flex items-center">
           {value || '-'}
         </div>

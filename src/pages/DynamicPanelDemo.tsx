@@ -34,16 +34,6 @@ const DynamicPanelDemo = () => {
 
   // Basic Details Panel Configuration
   const basicDetailsConfig: PanelConfig = {
-    tripPlanNo: {
-      id: 'tripPlanNo',
-      label: 'Trip Plan No',
-      fieldType: 'text',
-      value: 'TRIP00000001',
-      mandatory: true,
-      visible: true,
-      editable: false,
-      order: 1
-    },
     customerName: {
       id: 'customerName',
       label: 'Customer Name',
@@ -52,26 +42,12 @@ const DynamicPanelDemo = () => {
       mandatory: true,
       visible: true,
       editable: true,
-      order: 2,
+      order: 0,
+      width: 'half',
       options: [
         { label: 'DB Cargo', value: 'db-cargo' },
         { label: 'ABC Rail Goods', value: 'abc-rail' },
         { label: 'Wave Cargo', value: 'wave-cargo' }
-      ]
-    },
-    contractType: {
-      id: 'contractType',
-      label: 'Contract Type',
-      fieldType: 'select',
-      value: '',
-      mandatory: false,
-      visible: true,
-      editable: true,
-      order: 3,
-      options: [
-        { label: 'Fixed Price', value: 'fixed' },
-        { label: 'Variable', value: 'variable' },
-        { label: 'Cost Plus', value: 'cost-plus' }
       ]
     },
     description: {
@@ -82,8 +58,36 @@ const DynamicPanelDemo = () => {
       mandatory: false,
       visible: true,
       editable: true,
-      order: 4,
+      order: 1,
+      width: 'half',
       placeholder: 'Enter trip description...'
+    },
+    tripPlanNo: {
+      id: 'tripPlanNo',
+      label: 'Trip Plan No',
+      fieldType: 'text',
+      value: 'TRIP00000001',
+      mandatory: true,
+      visible: true,
+      editable: false,
+      order: 2,
+      width: 'half'
+    },
+    contractType: {
+      id: 'contractType',
+      label: 'Contract Type',
+      fieldType: 'select',
+      value: '',
+      mandatory: false,
+      visible: true,
+      editable: true,
+      order: 3,
+      width: 'full',
+      options: [
+        { label: 'Fixed Price', value: 'fixed' },
+        { label: 'Variable', value: 'variable' },
+        { label: 'Cost Plus', value: 'cost-plus' }
+      ]
     },
     priority: {
       id: 'priority',
@@ -93,7 +97,8 @@ const DynamicPanelDemo = () => {
       mandatory: false,
       visible: true,
       editable: true,
-      order: 5,
+      order: 4,
+      width: 'full',
       options: [
         { label: 'High', value: 'high' },
         { label: 'Medium', value: 'medium' },
@@ -342,7 +347,7 @@ const DynamicPanelDemo = () => {
             
             // Panel 1: Basic Details
             if (basicDetailsVisible) {
-              const basicDetailsVisibleCount = Object.values(basicDetailsConfig).filter(config => config.visible).length;
+              const basicDetailsEditableCount = Object.values(basicDetailsConfig).filter(config => config.visible && config.editable).length;
               panels.push(
                 <DynamicPanel
                   key="basic-details"
@@ -361,12 +366,12 @@ const DynamicPanelDemo = () => {
                   panelWidth={basicDetailsWidth}
                 />
               );
-              currentTabIndex += basicDetailsVisibleCount;
+              currentTabIndex += basicDetailsEditableCount;
             }
 
             // Panel 2: Operational Details
             if (operationalDetailsVisible) {
-              const operationalDetailsVisibleCount = Object.values(operationalDetailsConfig).filter(config => config.visible).length;
+              const operationalDetailsEditableCount = Object.values(operationalDetailsConfig).filter(config => config.visible && config.editable).length;
               panels.push(
                 <DynamicPanel
                   key="operational-details"
@@ -385,7 +390,7 @@ const DynamicPanelDemo = () => {
                   panelWidth={operationalDetailsWidth}
                 />
               );
-              currentTabIndex += operationalDetailsVisibleCount;
+              currentTabIndex += operationalDetailsEditableCount;
             }
 
             // Panel 3: Billing Details
