@@ -88,7 +88,7 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
     
     console.log('All visible fields with tabIndex:', fields);
     return fields;
-  }, [panelConfig, panelOrder]);
+  }, [panelConfig, startingTabIndex]);
 
   const handleFieldChange = useCallback((fieldId: string, value: any) => {
     setFormData(prevData => {
