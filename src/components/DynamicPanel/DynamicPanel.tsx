@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
@@ -71,27 +71,40 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
     loadUserConfig();
   }, [getUserPanelConfig, userId, panelId]);
 
-  // Simple, direct approach - no complex memoization
-  const handleFieldChange = useCallback((fieldId: string, value: any) => {
-    setFormData(prevData => {
-      const newData = { ...prevData, [fieldId]: value };
-      onDataChange?.(newData);
-      return newData;
-    });
-  }, [onDataChange]);
-
-  // Simple visible fields calculation
+  // Get visible fields sorted by order with calculated tab indices
   const visibleFields = useMemo(() => {
-    return Object.entries(panelConfig)
+    const fields = Object.entries(panelConfig)
       .filter(([_, config]) => config.visible)
       .sort(([_, a], [__, b]) => a.order - b.order)
-      .map(([fieldId, config], index) => ({
-        fieldId,
-        config,
-        tabIndex: startingTabIndex + index
-      }));
-  }, [panelConfig, startingTabIndex]);
+      .map(([fieldId, config], index) => {
+        const tabIndex = startingTabIndex + index;
+        console.log(`Field ${fieldId} in panel ${panelOrder}: order=${config.order}, tabIndex=${tabIndex}`);
+        return {
+          fieldId,
+          config,
+          tabIndex
+        };
+      });
+    
+    console.log('All visible fields with tabIndex:', fields);
+    return fields;
+  }, [panelConfig, panelOrder]);
 
+  // Handle field changes
+  const handleFieldChange = (fieldId: string, value: any) => {
+    const newData = { ...formData, [fieldId]: value };
+    setFormData(newData);
+    onDataChange?.(newData);
+  };
+
+  // Handle field validation on blur
+  const handleFieldBlur = (fieldId: string, value: any) => {
+    const field = panelConfig[fieldId];
+    if (field?.mandatory && (!value || value.toString().trim() === '')) {
+      console.warn(`Field ${fieldId} is mandatory but empty`);
+      // Add validation logic here
+    }
+  };
 
   const handleConfigSave = async (
     updatedConfig: PanelConfig, 
@@ -181,7 +194,7 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
     <>
       <div className="grid grid-cols-12 gap-4">
         {visibleFields.map(({ fieldId, config, tabIndex }) => (
-          <div key={`field-${fieldId}`} className={`space-y-1 ${getFieldWidthClass(config.width)}`}>
+          <div key={fieldId} className={`space-y-1 ${getFieldWidthClass(config.width)}`}>
             <label className="text-xs font-medium text-gray-600 block">
               {config.label}
               {config.mandatory && (
@@ -189,12 +202,12 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
               )}
             </label>
             <FieldRenderer
-              key={`renderer-${fieldId}`}
               config={config}
               fieldId={fieldId}
               tabIndex={tabIndex}
-              value={formData[fieldId] || ''}
+              value={formData[fieldId]}
               onChange={(value) => handleFieldChange(fieldId, value)}
+              onBlur={handleFieldBlur}
             />
           </div>
         ))}

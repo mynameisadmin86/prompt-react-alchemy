@@ -279,29 +279,6 @@ const DynamicPanelDemo = () => {
     console.log(`Saved config for panel ${panelId}:`, settings);
   };
 
-  // Cross-field update logic for Basic Details (customerName affects contractType)
-  const handleBasicDetailsChange = (updatedData: Record<string, any>) => {
-    // Cross-field logic: When customer changes, auto-select contract type
-    let finalData = { ...updatedData };
-    
-    if (updatedData.customerName) {
-      const contractMapping: Record<string, string> = {
-        'db-cargo': 'fixed',
-        'abc-rail': 'variable', 
-        'wave-cargo': 'cost-plus'
-      };
-      
-      const suggestedContract = contractMapping[updatedData.customerName];
-      if (suggestedContract && updatedData.contractType !== suggestedContract) {
-        // Update contract type in the same state update
-        finalData.contractType = suggestedContract;
-      }
-    }
-    
-    // Single state update to prevent re-renders
-    setBasicDetailsData(finalData);
-  };
-
   // Panel visibility management
   const panels = [
     { id: 'basic-details', title: basicDetailsTitle, visible: basicDetailsVisible },
@@ -375,7 +352,7 @@ const DynamicPanelDemo = () => {
                   panelTitle={basicDetailsTitle}
                   panelConfig={basicDetailsConfig}
                   initialData={basicDetailsData}
-                  onDataChange={handleBasicDetailsChange}
+                  onDataChange={setBasicDetailsData}
                   onTitleChange={setBasicDetailsTitle}
                   onWidthChange={setBasicDetailsWidth}
                   getUserPanelConfig={getUserPanelConfig}
@@ -399,7 +376,7 @@ const DynamicPanelDemo = () => {
                   panelTitle={operationalDetailsTitle}
                   panelConfig={operationalDetailsConfig}
                   initialData={operationalDetailsData}
-                  // No onDataChange - no cross-field updates needed
+                  onDataChange={setOperationalDetailsData}
                   onTitleChange={setOperationalDetailsTitle}
                   onWidthChange={setOperationalDetailsWidth}
                   getUserPanelConfig={getUserPanelConfig}
@@ -422,7 +399,7 @@ const DynamicPanelDemo = () => {
                   panelTitle={billingDetailsTitle}
                   panelConfig={billingDetailsConfig}
                   initialData={billingDetailsData}
-                  // No onDataChange - no cross-field updates needed
+                  onDataChange={setBillingDetailsData}
                   onTitleChange={setBillingDetailsTitle}
                   onWidthChange={setBillingDetailsWidth}
                   getUserPanelConfig={getUserPanelConfig}
