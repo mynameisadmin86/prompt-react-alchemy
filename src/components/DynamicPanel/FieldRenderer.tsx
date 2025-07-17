@@ -54,7 +54,7 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
           placeholder={placeholder}
           className={baseInputClasses}
           tabIndex={tabIndex}
-        />{tabIndex}
+        />
       );
 
     case 'textarea':
