@@ -11,13 +11,15 @@ interface FieldRendererProps {
   fieldId: string;
   tabIndex?: number;
   value?: any;
+  onChange?: (value: any) => void;
 }
 
 const FieldRendererComponent: React.FC<FieldRendererProps> = ({
   config,
   fieldId,
   tabIndex,
-  value
+  value,
+  onChange
 }) => {
   const { fieldType, editable, placeholder, options, color, fieldColour } = config;
 
@@ -42,6 +44,7 @@ const FieldRendererComponent: React.FC<FieldRendererProps> = ({
             <Input
               type="text"
               value={value}
+              onChange={(e) => onChange?.(e.target.value)}
               placeholder={placeholder}
               className={baseInputClasses}
               tabIndex={tabIndex}
@@ -55,6 +58,7 @@ const FieldRendererComponent: React.FC<FieldRendererProps> = ({
           <div className="text-xs text-blue-600 mb-1">TabIndex: {tabIndex}</div>
             <Textarea
               value={value}
+              onChange={(e) => onChange?.(e.target.value)}
               placeholder={placeholder}
               className="min-h-[60px] text-xs border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:z-50 focus:relative focus:outline-none"
               tabIndex={tabIndex}
@@ -68,6 +72,7 @@ const FieldRendererComponent: React.FC<FieldRendererProps> = ({
           <div className="text-xs text-blue-600 mb-1">TabIndex: {tabIndex}</div>
           <RadioGroup
             value={value || config.value || ''}
+            onValueChange={onChange}
             className="flex gap-4 focus-within:z-50 relative"
           >
             {options?.map((option, index) => (
@@ -93,6 +98,7 @@ const FieldRendererComponent: React.FC<FieldRendererProps> = ({
           <div className="relative focus-within:z-50">
             <select
               value={value || config.value || ''}
+              onChange={(e) => onChange?.(e.target.value)}
               className="w-full h-8 px-3 text-xs rounded-md border border-gray-300 bg-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:z-50 focus:relative focus:outline-none appearance-none"
               tabIndex={tabIndex}
             >
@@ -120,6 +126,7 @@ const FieldRendererComponent: React.FC<FieldRendererProps> = ({
             <Input
               type="date"
               value={value || config.value || ''}
+              onChange={(e) => onChange?.(e.target.value)}
               className={baseInputClasses}
               tabIndex={tabIndex}
             />
@@ -136,6 +143,7 @@ const FieldRendererComponent: React.FC<FieldRendererProps> = ({
             <Input
               type="time"
               value={value || config.value || ''}
+              onChange={(e) => onChange?.(e.target.value)}
               className={baseInputClasses}
               tabIndex={tabIndex}
             />
@@ -155,6 +163,7 @@ const FieldRendererComponent: React.FC<FieldRendererProps> = ({
             <Input
               type="number"
               value={value || config.value || ''}
+              onChange={(e) => onChange?.(parseFloat(e.target.value) || 0)}
               placeholder="0.00"
               className={`${baseInputClasses} pl-6`}
               step="0.01"
@@ -172,6 +181,7 @@ const FieldRendererComponent: React.FC<FieldRendererProps> = ({
             <Input
               type="search"
               value={value || config.value || ''}
+              onChange={(e) => onChange?.(e.target.value)}
               placeholder={placeholder || 'Search...'}
               className={`${baseInputClasses} pr-8`}
               tabIndex={tabIndex}
@@ -209,6 +219,7 @@ const FieldRendererComponent: React.FC<FieldRendererProps> = ({
           <Input
             type="text"
             value={value || config.value || ''}
+            onChange={(e) => onChange?.(e.target.value)}
             placeholder={placeholder}
             className={baseInputClasses}
             tabIndex={tabIndex}

@@ -71,6 +71,15 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
     loadUserConfig();
   }, [getUserPanelConfig, userId, panelId]);
 
+  // Simple, direct approach - no complex memoization
+  const handleFieldChange = useCallback((fieldId: string, value: any) => {
+    setFormData(prevData => {
+      const newData = { ...prevData, [fieldId]: value };
+      onDataChange?.(newData);
+      return newData;
+    });
+  }, [onDataChange]);
+
   // Simple visible fields calculation
   const visibleFields = useMemo(() => {
     return Object.entries(panelConfig)
@@ -179,13 +188,14 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
                 <span className="text-red-500 ml-1">*</span>
               )}
             </label>
-              <FieldRenderer
-                key={`renderer-${fieldId}`}
-                config={config}
-                fieldId={fieldId}
-                tabIndex={tabIndex}
-                value={formData[fieldId] || ''}
-              />
+            <FieldRenderer
+              key={`renderer-${fieldId}`}
+              config={config}
+              fieldId={fieldId}
+              tabIndex={tabIndex}
+              value={formData[fieldId] || ''}
+              onChange={(value) => handleFieldChange(fieldId, value)}
+            />
           </div>
         ))}
       </div>
