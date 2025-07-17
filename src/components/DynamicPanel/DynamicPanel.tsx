@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
@@ -34,10 +34,9 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
   const [showStatusIndicator, setShowStatusIndicator] = useState(true);
   const [showHeader, setShowHeader] = useState(true);
   const [isOpen, setIsOpen] = useState(true);
+  const [formData, setFormData] = useState(initialData);
   const [isConfigModalOpen, setIsConfigModalOpen] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
-  const [formData, setFormData] = useState(initialData);
-  const formDataRef = useRef(initialData);
 
   // Load user configuration on mount
   useEffect(() => {
@@ -91,20 +90,14 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
     return fields;
   }, [panelConfig, panelOrder]);
 
-  // Handle field changes - use ref to avoid re-renders
   const handleFieldChange = useCallback((fieldId: string, value: any) => {
-    formDataRef.current = { ...formDataRef.current, [fieldId]: value };
-    onDataChange?.(formDataRef.current);
+    setFormData(prevData => {
+      const updatedData = { ...prevData, [fieldId]: value };
+      // Schedule onDataChange to run after render
+      setTimeout(() => onDataChange?.(updatedData), 0);
+      return updatedData;
+    });
   }, [onDataChange]);
-
-  // Handle field validation on blur
-  const handleFieldBlur = useCallback((fieldId: string, value: any) => {
-    const field = panelConfig[fieldId];
-    if (field?.mandatory && (!value || value.toString().trim() === '')) {
-      console.warn(`Field ${fieldId} is mandatory but empty`);
-      // Add validation logic here
-    }
-  }, [panelConfig]);
 
   const handleConfigSave = async (
     updatedConfig: PanelConfig, 
@@ -202,13 +195,11 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
               )}
             </label>
             <FieldRenderer
-              key={fieldId}
               config={config}
+              value={formData[fieldId]}
+              onChange={handleFieldChange}
               fieldId={fieldId}
               tabIndex={tabIndex}
-              value={formDataRef.current[fieldId] || initialData[fieldId]}
-              onChange={handleFieldChange}
-              onBlur={handleFieldBlur}
             />
           </div>
         ))}
@@ -273,7 +264,7 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
                   <CardTitle className="text-sm font-medium text-gray-700">{panelTitle}</CardTitle>
                   <PanelStatusIndicator 
                     panelConfig={panelConfig}
-                    formData={formDataRef.current}
+                    formData={formData}
                     showStatus={showStatusIndicator}
                   />
                   {showPreview && (
@@ -333,7 +324,7 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
             <CardTitle className="text-sm font-medium text-gray-700">{panelTitle}</CardTitle>
             <PanelStatusIndicator 
               panelConfig={panelConfig}
-              formData={formDataRef.current}
+              formData={formData}
               showStatus={showStatusIndicator}
             />
             {showPreview && (
