@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
@@ -37,6 +37,7 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
   const [isConfigModalOpen, setIsConfigModalOpen] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [formData, setFormData] = useState(initialData);
+  const formDataRef = useRef(initialData);
 
   // Load user configuration on mount
   useEffect(() => {
@@ -90,13 +91,10 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
     return fields;
   }, [panelConfig, panelOrder]);
 
-  // Handle field changes
+  // Handle field changes - use ref to avoid re-renders
   const handleFieldChange = useCallback((fieldId: string, value: any) => {
-    setFormData(prev => {
-      const newData = { ...prev, [fieldId]: value };
-      onDataChange?.(newData);
-      return newData;
-    });
+    formDataRef.current = { ...formDataRef.current, [fieldId]: value };
+    onDataChange?.(formDataRef.current);
   }, [onDataChange]);
 
   // Handle field validation on blur
@@ -208,7 +206,7 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
               config={config}
               fieldId={fieldId}
               tabIndex={tabIndex}
-              value={formData[fieldId]}
+              value={formDataRef.current[fieldId] || initialData[fieldId]}
               onChange={handleFieldChange}
               onBlur={handleFieldBlur}
             />
@@ -275,7 +273,7 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
                   <CardTitle className="text-sm font-medium text-gray-700">{panelTitle}</CardTitle>
                   <PanelStatusIndicator 
                     panelConfig={panelConfig}
-                    formData={formData}
+                    formData={formDataRef.current}
                     showStatus={showStatusIndicator}
                   />
                   {showPreview && (
@@ -335,7 +333,7 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
             <CardTitle className="text-sm font-medium text-gray-700">{panelTitle}</CardTitle>
             <PanelStatusIndicator 
               panelConfig={panelConfig}
-              formData={formData}
+              formData={formDataRef.current}
               showStatus={showStatusIndicator}
             />
             {showPreview && (

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
@@ -24,13 +24,24 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
   onBlur
 }) => {
   const { fieldType, editable, placeholder, options, color, fieldColour } = config;
+  
+  // Use local state for the input value to maintain focus
+  const [localValue, setLocalValue] = useState(value || config.value || '');
+
+  // Update local value when parent value changes (from external sources)
+  useEffect(() => {
+    if (value !== undefined) {
+      setLocalValue(value);
+    }
+  }, [value]);
 
   const handleChange = (newValue: any) => {
+    setLocalValue(newValue);
     onChange?.(fieldId, newValue);
   };
 
   const handleBlur = () => {
-    onBlur?.(fieldId, value);
+    onBlur?.(fieldId, localValue);
   };
 
   if (!editable) {
@@ -53,7 +64,7 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
           <div className="text-xs text-blue-600 mb-1">TabIndex: {tabIndex}</div>
           <Input
             type="text"
-            value={value || config.value || ''}
+            value={localValue}
             onChange={(e) => handleChange(e.target.value)}
             onBlur={handleBlur}
             placeholder={placeholder}
@@ -68,7 +79,7 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
         <div>
           <div className="text-xs text-blue-600 mb-1">TabIndex: {tabIndex}</div>
           <Textarea
-            value={value || config.value || ''}
+            value={localValue}
             onChange={(e) => handleChange(e.target.value)}
             onBlur={handleBlur}
             placeholder={placeholder}
@@ -83,7 +94,7 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
         <div>
           <div className="text-xs text-blue-600 mb-1">TabIndex: {tabIndex}</div>
           <RadioGroup
-            value={value || config.value || ''}
+            value={localValue}
             onValueChange={handleChange}
             className="flex gap-4 focus-within:z-50 relative"
           >
@@ -110,7 +121,7 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
           <div className="text-xs text-blue-600 mb-1">TabIndex: {tabIndex}</div>
           <div className="relative focus-within:z-50">
             <select
-              value={value || config.value || ''}
+              value={localValue}
               onChange={(e) => handleChange(e.target.value)}
               onBlur={handleBlur}
               className="w-full h-8 px-3 text-xs rounded-md border border-gray-300 bg-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:z-50 focus:relative focus:outline-none appearance-none"
@@ -139,7 +150,7 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
           <div className="relative focus-within:z-50">
             <Input
               type="date"
-              value={value || config.value || ''}
+              value={localValue}
               onChange={(e) => handleChange(e.target.value)}
               onBlur={handleBlur}
               className={baseInputClasses}
@@ -157,7 +168,7 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
           <div className="relative focus-within:z-50">
             <Input
               type="time"
-              value={value || config.value || ''}
+              value={localValue}
               onChange={(e) => handleChange(e.target.value)}
               onBlur={handleBlur}
               className={baseInputClasses}
@@ -178,7 +189,7 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
             </span>
             <Input
               type="number"
-              value={value || config.value || ''}
+              value={localValue}
               onChange={(e) => handleChange(parseFloat(e.target.value) || 0)}
               onBlur={handleBlur}
               placeholder="0.00"
@@ -197,7 +208,7 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
           <div className="relative focus-within:z-50">
             <Input
               type="search"
-              value={value || config.value || ''}
+              value={localValue}
               onChange={(e) => handleChange(e.target.value)}
               onBlur={handleBlur}
               placeholder={placeholder || 'Search...'}
@@ -236,7 +247,7 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
           <div className="text-xs text-blue-600 mb-1">TabIndex: {tabIndex}</div>
           <Input
             type="text"
-            value={value || config.value || ''}
+            value={localValue}
             onChange={(e) => handleChange(e.target.value)}
             onBlur={handleBlur}
             placeholder={placeholder}
