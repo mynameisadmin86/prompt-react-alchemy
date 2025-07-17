@@ -76,7 +76,7 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
       .filter(([_, config]) => config.visible)
       .sort(([_, a], [__, b]) => a.order - b.order)
       .map(([fieldId, config], index) => {
-        const tabIndex = (panelOrder * 100) + config.order; // Changed to 100 for better separation
+        const tabIndex = index + 1; // Sequential tabIndex starting from 1
         console.log(`Field ${fieldId} in panel ${panelOrder}: order=${config.order}, tabIndex=${tabIndex}`);
         return {
           fieldId,
