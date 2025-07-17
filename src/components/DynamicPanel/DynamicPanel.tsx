@@ -202,7 +202,7 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
               )}
             </label>
             <FieldRenderer
-              key={`${fieldId}-${config.order}`}
+              key={fieldId}
               config={config}
               fieldId={fieldId}
               tabIndex={tabIndex}

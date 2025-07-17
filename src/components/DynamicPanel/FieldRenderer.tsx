@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
@@ -26,14 +26,7 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
   const { fieldType, editable, placeholder, options, color, fieldColour } = config;
   
   // Use local state for the input value to maintain focus
-  const [localValue, setLocalValue] = useState(value || config.value || '');
-
-  // Update local value when parent value changes (from external sources)
-  useEffect(() => {
-    if (value !== undefined) {
-      setLocalValue(value);
-    }
-  }, [value]);
+  const [localValue, setLocalValue] = useState(() => value || config.value || '');
 
   const handleChange = (newValue: any) => {
     setLocalValue(newValue);
