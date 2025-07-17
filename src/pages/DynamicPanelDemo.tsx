@@ -339,6 +339,7 @@ const DynamicPanelDemo = () => {
           {basicDetailsVisible && (
             <DynamicPanel
               panelId="basic-details"
+              panelOrder={1}
               panelTitle={basicDetailsTitle}
               panelConfig={basicDetailsConfig}
               initialData={basicDetailsData}
@@ -355,6 +356,7 @@ const DynamicPanelDemo = () => {
           {operationalDetailsVisible && (
             <DynamicPanel
               panelId="operational-details"
+              panelOrder={2}
               panelTitle={operationalDetailsTitle}
               panelConfig={operationalDetailsConfig}
               initialData={operationalDetailsData}
@@ -371,6 +373,7 @@ const DynamicPanelDemo = () => {
           {billingDetailsVisible && (
             <DynamicPanel
               panelId="billing-details"
+              panelOrder={3}
               panelTitle={billingDetailsTitle}
               panelConfig={billingDetailsConfig}
               initialData={billingDetailsData}

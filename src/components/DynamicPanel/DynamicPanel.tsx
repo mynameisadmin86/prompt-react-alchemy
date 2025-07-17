@@ -86,7 +86,8 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
   const handleFieldChange = useCallback((fieldId: string, value: any) => {
     setFormData(prevData => {
       const updatedData = { ...prevData, [fieldId]: value };
-      onDataChange?.(updatedData);
+      // Schedule onDataChange to run after render
+      setTimeout(() => onDataChange?.(updatedData), 0);
       return updatedData;
     });
   }, [onDataChange]);
