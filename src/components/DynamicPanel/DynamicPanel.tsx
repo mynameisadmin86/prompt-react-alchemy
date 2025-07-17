@@ -11,6 +11,7 @@ import { DynamicPanelProps, PanelConfig, PanelSettings } from '@/types/dynamicPa
 export const DynamicPanel: React.FC<DynamicPanelProps> = ({
   panelId,
   panelOrder = 1,
+  startingTabIndex = 1,
   panelTitle: initialPanelTitle,
   panelConfig: initialPanelConfig,
   initialData = {},
@@ -76,7 +77,7 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
       .filter(([_, config]) => config.visible)
       .sort(([_, a], [__, b]) => a.order - b.order)
       .map(([fieldId, config], index) => {
-        const tabIndex = index + 1; // Sequential tabIndex starting from 1
+        const tabIndex = startingTabIndex + index;
         console.log(`Field ${fieldId} in panel ${panelOrder}: order=${config.order}, tabIndex=${tabIndex}`);
         return {
           fieldId,
