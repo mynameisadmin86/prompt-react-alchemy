@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
@@ -69,10 +69,13 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
     loadUserConfig();
   }, [getUserPanelConfig, userId, panelId]);
 
-  // Get visible fields sorted by order
-  const visibleFields = Object.entries(panelConfig)
-    .filter(([_, config]) => config.visible)
-    .sort(([_, a], [__, b]) => a.order - b.order);
+  // Get visible fields sorted by order - memoized to prevent re-creation on every render
+  const visibleFields = useMemo(() => 
+    Object.entries(panelConfig)
+      .filter(([_, config]) => config.visible)
+      .sort(([_, a], [__, b]) => a.order - b.order),
+    [panelConfig]
+  );
 
   const handleFieldChange = (fieldId: string, value: any) => {
     const updatedData = { ...formData, [fieldId]: value };
