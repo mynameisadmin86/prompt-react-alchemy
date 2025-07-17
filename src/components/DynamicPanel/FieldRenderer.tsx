@@ -69,6 +69,7 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
           <div className="text-xs text-blue-600 mb-1">TabIndex: {tabIndex}</div>
           <Textarea
             value={value || config.value || ''}
+            onChange={(e) => handleChange(e.target.value)}
             onBlur={handleBlur}
             placeholder={placeholder}
             className="min-h-[60px] text-xs border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:z-50 focus:relative focus:outline-none"
