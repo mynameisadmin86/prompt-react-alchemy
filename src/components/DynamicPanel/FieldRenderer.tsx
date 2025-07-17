@@ -53,6 +53,7 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
     <Controller
       name={fieldId}
       control={control}
+      defaultValue={config.value || ''}
       rules={validation}
       render={({ field }) => {
         const { value, onChange, onBlur } = field;

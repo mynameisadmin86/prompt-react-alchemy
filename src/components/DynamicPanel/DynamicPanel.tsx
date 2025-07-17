@@ -52,35 +52,13 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
   }, [panelConfig]);
 
   // Initialize form with react-hook-form
-  const formDefaultValues = useMemo(() => {
-    const defaults = { ...initialData };
-    Object.entries(panelConfig).forEach(([fieldId, config]) => {
-      if (!defaults[fieldId] && config.value) {
-        defaults[fieldId] = config.value;
-      }
-    });
-    return defaults;
-  }, [initialData, panelConfig]);
-
   const form = useForm({
-    defaultValues: formDefaultValues,
-    mode: 'onBlur',
-    shouldUnregister: false
+    defaultValues: initialData,
+    mode: 'onBlur'
   });
 
-  const { watch, setValue, reset } = form;
+  const { watch } = form;
   const formData = watch();
-
-  // Update form when config or data changes
-  useEffect(() => {
-    const newDefaults = { ...initialData };
-    Object.entries(panelConfig).forEach(([fieldId, config]) => {
-      if (!newDefaults[fieldId] && config.value) {
-        newDefaults[fieldId] = config.value;
-      }
-    });
-    reset(newDefaults);
-  }, [initialData, panelConfig, reset]);
 
   // Load user configuration on mount
   useEffect(() => {
@@ -230,7 +208,7 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
     <FormProvider {...form}>
       <div className="grid grid-cols-12 gap-4">
         {visibleFields.map(({ fieldId, config, tabIndex }) => (
-          <div key={`${panelId}-${fieldId}`} className={`space-y-1 ${getFieldWidthClass(config.width)}`}>
+          <div key={fieldId} className={`space-y-1 ${getFieldWidthClass(config.width)}`}>
             <label className="text-xs font-medium text-gray-600 block">
               {config.label}
               {config.mandatory && (
@@ -238,7 +216,6 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
               )}
             </label>
             <FieldRenderer
-              key={`field-${panelId}-${fieldId}`}
               config={config}
               fieldId={fieldId}
               tabIndex={tabIndex}
