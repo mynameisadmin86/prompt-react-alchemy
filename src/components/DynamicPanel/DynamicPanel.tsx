@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { useForm } from 'react-hook-form';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
@@ -34,9 +35,17 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
   const [showStatusIndicator, setShowStatusIndicator] = useState(true);
   const [showHeader, setShowHeader] = useState(true);
   const [isOpen, setIsOpen] = useState(true);
-  const [formData, setFormData] = useState(initialData);
   const [isConfigModalOpen, setIsConfigModalOpen] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
+
+  // Initialize react-hook-form
+  const form = useForm({
+    defaultValues: initialData,
+    mode: 'onBlur'
+  });
+
+  const { control, watch, setValue, getValues } = form;
+  const formData = watch();
 
   // Load user configuration on mount
   useEffect(() => {
@@ -90,14 +99,13 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
     return fields;
   }, [panelConfig, panelOrder]);
 
-  const handleFieldChange = useCallback((fieldId: string, value: any) => {
-    setFormData(prevData => {
-      const updatedData = { ...prevData, [fieldId]: value };
-      // Schedule onDataChange to run after render
-      setTimeout(() => onDataChange?.(updatedData), 0);
-      return updatedData;
+  // Watch for form changes and notify parent
+  useEffect(() => {
+    const subscription = watch((data) => {
+      onDataChange?.(data);
     });
-  }, [onDataChange]);
+    return () => subscription.unsubscribe();
+  }, [watch, onDataChange]);
 
   const handleConfigSave = async (
     updatedConfig: PanelConfig, 
@@ -196,8 +204,7 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
             </label>
             <FieldRenderer
               config={config}
-              value={formData[fieldId]}
-              onChange={handleFieldChange}
+              control={control}
               fieldId={fieldId}
               tabIndex={tabIndex}
             />
