@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
@@ -71,6 +71,19 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
     loadUserConfig();
   }, [getUserPanelConfig, userId, panelId]);
 
+  // Use ref to store the latest onDataChange without causing re-renders
+  const onDataChangeRef = useRef(onDataChange);
+  onDataChangeRef.current = onDataChange;
+
+  // Single stable onChange handler that never changes
+  const handleFieldChange = useCallback((fieldId: string, value: any) => {
+    setFormData(prevData => {
+      const newData = { ...prevData, [fieldId]: value };
+      onDataChangeRef.current?.(newData);
+      return newData;
+    });
+  }, []);
+
   // Get visible fields sorted by order with calculated tab indices
   const visibleFields = useMemo(() => {
     const fields = Object.entries(panelConfig)
@@ -78,7 +91,6 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
       .sort(([_, a], [__, b]) => a.order - b.order)
       .map(([fieldId, config], index) => {
         const tabIndex = startingTabIndex + index;
-        console.log(`Field ${fieldId} in panel ${panelOrder}: order=${config.order}, tabIndex=${tabIndex}`);
         return {
           fieldId,
           config,
@@ -86,20 +98,8 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
         };
       });
     
-    console.log('All visible fields with tabIndex:', fields);
     return fields;
   }, [panelConfig, panelOrder, startingTabIndex]);
-
-  // Create stable onChange handler that doesn't depend on panelConfig
-  const handleFieldChange = useCallback((fieldId: string, value: any) => {
-    setFormData(prevData => {
-      const newData = { ...prevData, [fieldId]: value };
-      onDataChange?.(newData);
-      return newData;
-    });
-  }, [onDataChange]);
-
-  console.log('DynamicPanel render - handleFieldChange created');
 
 
   const handleConfigSave = async (
