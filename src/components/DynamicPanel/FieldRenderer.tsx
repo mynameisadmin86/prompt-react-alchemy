@@ -11,7 +11,7 @@ interface FieldRendererProps {
   fieldId: string;
   tabIndex?: number;
   value?: any;
-  onChange?: (value: any) => void;
+  onChange?: (fieldId: string, value: any) => void;
   onBlur?: (fieldId: string, value: any) => void;
 }
 
@@ -26,7 +26,7 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
   const { fieldType, editable, placeholder, options, color, fieldColour } = config;
 
   const handleChange = (newValue: any) => {
-    onChange?.(newValue);
+    onChange?.(fieldId, newValue);
   };
 
   const handleBlur = () => {

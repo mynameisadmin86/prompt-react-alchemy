@@ -91,20 +91,22 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
   }, [panelConfig, panelOrder]);
 
   // Handle field changes
-  const handleFieldChange = (fieldId: string, value: any) => {
-    const newData = { ...formData, [fieldId]: value };
-    setFormData(newData);
-    onDataChange?.(newData);
-  };
+  const handleFieldChange = useCallback((fieldId: string, value: any) => {
+    setFormData(prev => {
+      const newData = { ...prev, [fieldId]: value };
+      onDataChange?.(newData);
+      return newData;
+    });
+  }, [onDataChange]);
 
   // Handle field validation on blur
-  const handleFieldBlur = (fieldId: string, value: any) => {
+  const handleFieldBlur = useCallback((fieldId: string, value: any) => {
     const field = panelConfig[fieldId];
     if (field?.mandatory && (!value || value.toString().trim() === '')) {
       console.warn(`Field ${fieldId} is mandatory but empty`);
       // Add validation logic here
     }
-  };
+  }, [panelConfig]);
 
   const handleConfigSave = async (
     updatedConfig: PanelConfig, 
@@ -202,11 +204,12 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
               )}
             </label>
             <FieldRenderer
+              key={`${fieldId}-${config.order}`}
               config={config}
               fieldId={fieldId}
               tabIndex={tabIndex}
               value={formData[fieldId]}
-              onChange={(value) => handleFieldChange(fieldId, value)}
+              onChange={handleFieldChange}
               onBlur={handleFieldBlur}
             />
           </div>
