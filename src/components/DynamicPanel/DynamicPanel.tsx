@@ -78,10 +78,12 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
   );
 
   const handleFieldChange = useCallback((fieldId: string, value: any) => {
-    const updatedData = { ...formData, [fieldId]: value };
-    setFormData(updatedData);
-    onDataChange?.(updatedData);
-  }, [formData, onDataChange]);
+    setFormData(prevData => {
+      const updatedData = { ...prevData, [fieldId]: value };
+      onDataChange?.(updatedData);
+      return updatedData;
+    });
+  }, [onDataChange]);
 
   const handleConfigSave = async (
     updatedConfig: PanelConfig, 
