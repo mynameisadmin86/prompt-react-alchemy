@@ -34,9 +34,9 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
   const [showStatusIndicator, setShowStatusIndicator] = useState(true);
   const [showHeader, setShowHeader] = useState(true);
   const [isOpen, setIsOpen] = useState(true);
-  const [formData, setFormData] = useState(initialData);
   const [isConfigModalOpen, setIsConfigModalOpen] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
+  const [formData, setFormData] = useState(initialData);
 
   // Load user configuration on mount
   useEffect(() => {
@@ -71,46 +71,40 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
     loadUserConfig();
   }, [getUserPanelConfig, userId, panelId]);
 
-  // Get visible fields sorted by order with field-level tab indices
+  // Get visible fields sorted by order with calculated tab indices
   const visibleFields = useMemo(() => {
-    const sortedFields = Object.entries(panelConfig)
+    const fields = Object.entries(panelConfig)
       .filter(([_, config]) => config.visible)
-      .sort(([_, a], [__, b]) => a.order - b.order);
-    
-    let tabIndexCounter = startingTabIndex;
-    
-    const fields = sortedFields.map(([fieldId, config]) => {
-      // Use field's tabIndex if set, otherwise calculate based on editable fields only
-      let tabIndex;
-      if (config.tabIndex !== undefined) {
-        tabIndex = config.tabIndex;
-      } else if (config.editable) {
-        tabIndex = tabIndexCounter;
-        tabIndexCounter++;
-      } else {
-        tabIndex = -1; // Non-editable fields should not be in tab order
-      }
-      
-      console.log(`Field ${fieldId} in panel ${panelOrder}: order=${config.order}, editable=${config.editable}, tabIndex=${tabIndex}`);
-      return {
-        fieldId,
-        config,
-        tabIndex
-      };
-    });
+      .sort(([_, a], [__, b]) => a.order - b.order)
+      .map(([fieldId, config], index) => {
+        const tabIndex = startingTabIndex + index;
+        console.log(`Field ${fieldId} in panel ${panelOrder}: order=${config.order}, tabIndex=${tabIndex}`);
+        return {
+          fieldId,
+          config,
+          tabIndex
+        };
+      });
     
     console.log('All visible fields with tabIndex:', fields);
     return fields;
-  }, [panelConfig, startingTabIndex, panelOrder]);
+  }, [panelConfig, panelOrder]);
 
-  const handleFieldChange = useCallback((fieldId: string, value: any) => {
-    setFormData(prevData => {
-      const updatedData = { ...prevData, [fieldId]: value };
-      // Schedule onDataChange to run after render
-      setTimeout(() => onDataChange?.(updatedData), 0);
-      return updatedData;
-    });
-  }, [onDataChange]);
+  // Handle field changes
+  const handleFieldChange = (fieldId: string, value: any) => {
+    const newData = { ...formData, [fieldId]: value };
+    setFormData(newData);
+    onDataChange?.(newData);
+  };
+
+  // Handle field validation on blur
+  const handleFieldBlur = (fieldId: string, value: any) => {
+    const field = panelConfig[fieldId];
+    if (field?.mandatory && (!value || value.toString().trim() === '')) {
+      console.warn(`Field ${fieldId} is mandatory but empty`);
+      // Add validation logic here
+    }
+  };
 
   const handleConfigSave = async (
     updatedConfig: PanelConfig, 
@@ -209,10 +203,11 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
             </label>
             <FieldRenderer
               config={config}
-              value={formData[fieldId]}
-              onChange={handleFieldChange}
               fieldId={fieldId}
               tabIndex={tabIndex}
+              value={formData[fieldId]}
+              onChange={(value) => handleFieldChange(fieldId, value)}
+              onBlur={handleFieldBlur}
             />
           </div>
         ))}
