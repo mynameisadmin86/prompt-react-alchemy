@@ -99,6 +99,15 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
     });
   }, [onDataChange]);
 
+  // Create memoized onChange handlers for each field
+  const fieldChangeHandlers = useMemo(() => {
+    const handlers: Record<string, (value: any) => void> = {};
+    Object.keys(panelConfig).forEach(fieldId => {
+      handlers[fieldId] = (value: any) => handleFieldChange(fieldId, value);
+    });
+    return handlers;
+  }, [panelConfig, handleFieldChange]);
+
 
   const handleConfigSave = async (
     updatedConfig: PanelConfig, 
@@ -200,7 +209,7 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
               fieldId={fieldId}
               tabIndex={tabIndex}
               value={formData[fieldId]}
-              onChange={(value) => handleFieldChange(fieldId, value)}
+              onChange={fieldChangeHandlers[fieldId]}
             />
           </div>
         ))}
