@@ -183,7 +183,8 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
             <FieldRenderer
               config={fieldConfig}
               value={formData[fieldId]}
-              onChange={(value) => handleFieldChange(fieldId, value)}
+              onChange={handleFieldChange}
+              fieldId={fieldId}
             />
           </div>
         ))}

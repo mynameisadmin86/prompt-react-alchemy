@@ -9,13 +9,15 @@ import { FieldConfig } from '@/types/dynamicPanel';
 interface FieldRendererProps {
   config: FieldConfig;
   value: any;
-  onChange: (value: any) => void;
+  onChange: (fieldId: string, value: any) => void;
+  fieldId: string;
 }
 
 export const FieldRenderer: React.FC<FieldRendererProps> = ({
   config,
   value,
-  onChange
+  onChange,
+  fieldId
 }) => {
   const { fieldType, editable, placeholder, options, color, fieldColour } = config;
 
@@ -35,7 +37,7 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
         <Input
           type="text"
           value={value || ''}
-          onChange={(e) => onChange(e.target.value)}
+          onChange={(e) => onChange(fieldId, e.target.value)}
           placeholder={placeholder}
           className={baseInputClasses}
         />
@@ -45,7 +47,7 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
       return (
         <Textarea
           value={value || ''}
-          onChange={(e) => onChange(e.target.value)}
+          onChange={(e) => onChange(fieldId, e.target.value)}
           placeholder={placeholder}
           className="min-h-[60px] text-xs border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
         />
@@ -55,7 +57,7 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
       return (
         <RadioGroup
           value={value || ''}
-          onValueChange={onChange}
+          onValueChange={(value) => onChange(fieldId, value)}
           className="flex gap-4"
         >
           {options?.map((option) => (
@@ -74,7 +76,7 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
         <div className="relative">
           <select
             value={value || ''}
-            onChange={(e) => onChange(e.target.value)}
+            onChange={(e) => onChange(fieldId, e.target.value)}
             className="w-full h-8 px-3 text-xs rounded-md border border-gray-300 bg-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 appearance-none"
           >
             <option value="">Select...</option>
@@ -98,7 +100,7 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
           <Input
             type="date"
             value={value || ''}
-            onChange={(e) => onChange(e.target.value)}
+            onChange={(e) => onChange(fieldId, e.target.value)}
             className={baseInputClasses}
           />
           <Calendar className="absolute right-2 top-1/2 transform -translate-y-1/2 w-3 h-3 text-gray-400 pointer-events-none" />
@@ -111,7 +113,7 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
           <Input
             type="time"
             value={value || ''}
-            onChange={(e) => onChange(e.target.value)}
+            onChange={(e) => onChange(fieldId, e.target.value)}
             className={baseInputClasses}
           />
           <Clock className="absolute right-2 top-1/2 transform -translate-y-1/2 w-3 h-3 text-gray-400 pointer-events-none" />
@@ -127,7 +129,7 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
           <Input
             type="number"
             value={value || ''}
-            onChange={(e) => onChange(parseFloat(e.target.value) || 0)}
+            onChange={(e) => onChange(fieldId, parseFloat(e.target.value) || 0)}
             placeholder="0.00"
             className={`${baseInputClasses} pl-6`}
             step="0.01"
@@ -141,7 +143,7 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
           <Input
             type="search"
             value={value || ''}
-            onChange={(e) => onChange(e.target.value)}
+            onChange={(e) => onChange(fieldId, e.target.value)}
             placeholder={placeholder || 'Search...'}
             className={`${baseInputClasses} pr-8`}
           />
@@ -177,7 +179,7 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
         <Input
           type="text"
           value={value || ''}
-          onChange={(e) => onChange(e.target.value)}
+          onChange={(e) => onChange(fieldId, e.target.value)}
           placeholder={placeholder}
           className={baseInputClasses}
         />
