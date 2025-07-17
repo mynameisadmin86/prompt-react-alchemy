@@ -97,14 +97,6 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
     onDataChange?.(newData);
   };
 
-  // Handle field validation on blur
-  const handleFieldBlur = (fieldId: string, value: any) => {
-    const field = panelConfig[fieldId];
-    if (field?.mandatory && (!value || value.toString().trim() === '')) {
-      console.warn(`Field ${fieldId} is mandatory but empty`);
-      // Add validation logic here
-    }
-  };
 
   const handleConfigSave = async (
     updatedConfig: PanelConfig, 
@@ -207,7 +199,6 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
               tabIndex={tabIndex}
               value={formData[fieldId]}
               onChange={(value) => handleFieldChange(fieldId, value)}
-              onBlur={handleFieldBlur}
             />
           </div>
         ))}

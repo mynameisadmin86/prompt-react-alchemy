@@ -12,7 +12,6 @@ interface FieldRendererProps {
   tabIndex?: number;
   value?: any;
   onChange?: (value: any) => void;
-  onBlur?: (fieldId: string, value: any) => void;
 }
 
 export const FieldRenderer: React.FC<FieldRendererProps> = ({
@@ -20,17 +19,12 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
   fieldId,
   tabIndex,
   value,
-  onChange,
-  onBlur
+  onChange
 }) => {
   const { fieldType, editable, placeholder, options, color, fieldColour } = config;
 
   const handleChange = (newValue: any) => {
     onChange?.(newValue);
-  };
-
-  const handleBlur = () => {
-    onBlur?.(fieldId, value);
   };
 
   if (!editable) {
@@ -51,15 +45,14 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
       return (
         <div>
           <div className="text-xs text-blue-600 mb-1">TabIndex: {tabIndex}</div>
-          <Input
-            type="text"
-            value={value || config.value || ''}
-            onChange={(e) => handleChange(e.target.value)}
-            onBlur={handleBlur}
-            placeholder={placeholder}
-            className={baseInputClasses}
-            tabIndex={tabIndex}
-          />
+            <Input
+              type="text"
+              value={value || config.value || ''}
+              onChange={(e) => handleChange(e.target.value)}
+              placeholder={placeholder}
+              className={baseInputClasses}
+              tabIndex={tabIndex}
+            />
         </div>
       );
 
@@ -67,14 +60,13 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
       return (
         <div>
           <div className="text-xs text-blue-600 mb-1">TabIndex: {tabIndex}</div>
-          <Textarea
-            value={value || config.value || ''}
-            onChange={(e) => handleChange(e.target.value)}
-            onBlur={handleBlur}
-            placeholder={placeholder}
-            className="min-h-[60px] text-xs border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:z-50 focus:relative focus:outline-none"
-            tabIndex={tabIndex}
-          />
+            <Textarea
+              value={value || config.value || ''}
+              onChange={(e) => handleChange(e.target.value)}
+              placeholder={placeholder}
+              className="min-h-[60px] text-xs border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:z-50 focus:relative focus:outline-none"
+              tabIndex={tabIndex}
+            />
         </div>
       );
 
@@ -93,7 +85,6 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
                   value={option.value} 
                   id={`${config.id}-${option.value}`} 
                   tabIndex={index === 0 ? tabIndex : -1}
-                  onBlur={handleBlur}
                 />
                 <Label htmlFor={`${config.id}-${option.value}`} className="text-xs">
                   {option.label}
@@ -112,7 +103,6 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
             <select
               value={value || config.value || ''}
               onChange={(e) => handleChange(e.target.value)}
-              onBlur={handleBlur}
               className="w-full h-8 px-3 text-xs rounded-md border border-gray-300 bg-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:z-50 focus:relative focus:outline-none appearance-none"
               tabIndex={tabIndex}
             >
@@ -141,7 +131,6 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
               type="date"
               value={value || config.value || ''}
               onChange={(e) => handleChange(e.target.value)}
-              onBlur={handleBlur}
               className={baseInputClasses}
               tabIndex={tabIndex}
             />
@@ -159,7 +148,6 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
               type="time"
               value={value || config.value || ''}
               onChange={(e) => handleChange(e.target.value)}
-              onBlur={handleBlur}
               className={baseInputClasses}
               tabIndex={tabIndex}
             />
@@ -180,7 +168,6 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
               type="number"
               value={value || config.value || ''}
               onChange={(e) => handleChange(parseFloat(e.target.value) || 0)}
-              onBlur={handleBlur}
               placeholder="0.00"
               className={`${baseInputClasses} pl-6`}
               step="0.01"
@@ -199,7 +186,6 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
               type="search"
               value={value || config.value || ''}
               onChange={(e) => handleChange(e.target.value)}
-              onBlur={handleBlur}
               placeholder={placeholder || 'Search...'}
               className={`${baseInputClasses} pr-8`}
               tabIndex={tabIndex}
@@ -238,7 +224,6 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
             type="text"
             value={value || config.value || ''}
             onChange={(e) => handleChange(e.target.value)}
-            onBlur={handleBlur}
             placeholder={placeholder}
             className={baseInputClasses}
             tabIndex={tabIndex}
