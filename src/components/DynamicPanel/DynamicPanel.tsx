@@ -88,7 +88,7 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
     
     console.log('All visible fields with tabIndex:', fields);
     return fields;
-  }, [panelConfig, panelOrder]);
+  }, [panelConfig, panelOrder, startingTabIndex]);
 
   // Handle field changes
   const handleFieldChange = (fieldId: string, value: any) => {
