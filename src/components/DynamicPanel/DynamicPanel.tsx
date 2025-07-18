@@ -270,7 +270,7 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
                   <CardTitle className="text-sm font-medium text-gray-700">{panelTitle}</CardTitle>
                    <PanelStatusIndicator 
                      panelConfig={panelConfig}
-                     formData={getValues()}
+                     formData={getValues() || {}}
                      showStatus={showStatusIndicator}
                    />
                   {showPreview && (
@@ -330,7 +330,7 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
             <CardTitle className="text-sm font-medium text-gray-700">{panelTitle}</CardTitle>
             <PanelStatusIndicator 
               panelConfig={panelConfig}
-              formData={getValues()}
+              formData={getValues() || {}}
               showStatus={showStatusIndicator}
             />
             {showPreview && (
