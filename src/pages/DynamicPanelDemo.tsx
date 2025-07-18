@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { DynamicPanel } from '@/components/DynamicPanel';
+import { DynamicPanelRHF } from '@/components/DynamicPanel';
 import { PanelVisibilityManager } from '@/components/DynamicPanel/PanelVisibilityManager';
 import { PanelConfig, PanelSettings } from '@/types/dynamicPanel';
 import { EyeOff } from 'lucide-react';
@@ -337,7 +337,7 @@ const DynamicPanelDemo = () => {
         {/* Dynamic Panels in 12-column grid */}
         <div className="grid grid-cols-12 gap-6">
           {basicDetailsVisible && (
-            <DynamicPanel
+            <DynamicPanelRHF
               panelId="basic-details"
               panelTitle={basicDetailsTitle}
               panelConfig={basicDetailsConfig}
@@ -353,7 +353,7 @@ const DynamicPanelDemo = () => {
           )}
 
           {operationalDetailsVisible && (
-            <DynamicPanel
+            <DynamicPanelRHF
               panelId="operational-details"
               panelTitle={operationalDetailsTitle}
               panelConfig={operationalDetailsConfig}
@@ -369,7 +369,7 @@ const DynamicPanelDemo = () => {
           )}
 
           {billingDetailsVisible && (
-            <DynamicPanel
+            <DynamicPanelRHF
               panelId="billing-details"
               panelTitle={billingDetailsTitle}
               panelConfig={billingDetailsConfig}
