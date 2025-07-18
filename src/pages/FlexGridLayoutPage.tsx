@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { FlexGridLayout } from '@/components/FlexGridLayout';
 import { DynamicPanel } from '@/components/DynamicPanel';
 import { SmartGrid } from '@/components/SmartGrid';
@@ -180,7 +180,7 @@ const FlexGridLayoutPage = () => {
             panelTitle="Trip Information"
             panelConfig={samplePanelConfig}
             initialData={{}}
-            onDataChange={(data) => console.log('Panel data changed:', data)}
+            onDataChange={useCallback((data: any) => console.log('Panel data changed:', data), [])}
           />
         )
       },
@@ -222,7 +222,7 @@ const FlexGridLayoutPage = () => {
     }
   });
 
-  const handleConfigChange = (newConfig: LayoutConfig) => {
+  const handleConfigChange = useCallback((newConfig: LayoutConfig) => {
     // Auto-adjust center width when left panel collapses/expands
     if (newConfig.sections.left.collapsed) {
       newConfig.sections.center.width = '100%';
@@ -233,7 +233,7 @@ const FlexGridLayoutPage = () => {
     setLayoutConfig(newConfig);
     // Save to localStorage
     localStorage.setItem('flexGridLayoutPage', JSON.stringify(newConfig));
-  };
+  }, []);
 
   // Load from localStorage on mount
   React.useEffect(() => {

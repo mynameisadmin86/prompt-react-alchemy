@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { SmartGrid } from '@/components/SmartGrid';
 import { GridColumnConfig } from '@/types/smartgrid';
 import { Button } from '@/components/ui/button';
@@ -218,10 +218,10 @@ const TripPlansSearchHubAPI = () => {
     setSelectedRows(selectedRowIndices);
   };
 
-  const handleSearchDataChange = (data: Record<string, any>) => {
+  const handleSearchDataChange = useCallback((data: Record<string, any>) => {
     setSearchData(data);
     console.log('Search data changed:', data);
-  };
+  }, []);
 
   const handleSearch = () => {
     const newQueryParams: QueryParams = {
