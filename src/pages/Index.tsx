@@ -61,6 +61,13 @@ const Index = () => {
       icon: PanelLeft,
       path: "/side-drawer-demo",
       color: "text-teal-600"
+    },
+    {
+      title: "Dynamic Panel Configuration",
+      description: "React Hook Form integrated dynamic panels with field configuration",
+      icon: PanelLeft,
+      path: "/dynamic-panel-configuration",
+      color: "text-amber-600"
     }
   ];
 
