@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { SideDrawer } from '@/components/SideDrawer';
 import { Input } from '@/components/ui/input';
@@ -63,7 +63,7 @@ const SideDrawerDemo = () => {
               <Input
                 id="name"
                 value={formData.name}
-                onChange={useCallback((e: React.ChangeEvent<HTMLInputElement>) => setFormData(prev => ({ ...prev, name: e.target.value })), [])}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 placeholder="Enter your name"
               />
             </div>
@@ -73,7 +73,7 @@ const SideDrawerDemo = () => {
                 id="email"
                 type="email"
                 value={formData.email}
-                onChange={useCallback((e: React.ChangeEvent<HTMLInputElement>) => setFormData(prev => ({ ...prev, email: e.target.value })), [])}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 placeholder="Enter your email"
               />
             </div>
@@ -88,7 +88,7 @@ const SideDrawerDemo = () => {
               <Textarea
                 id="message"
                 value={formData.message}
-                onChange={useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => setFormData(prev => ({ ...prev, message: e.target.value })), [])}
+                onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                 placeholder="Enter your message"
                 rows={5}
               />

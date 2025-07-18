@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState } from 'react';
 import { FlexGridLayout } from '@/components/FlexGridLayout';
 import { DynamicPanel } from '@/components/DynamicPanel';
 import { SmartGrid } from '@/components/SmartGrid';
@@ -406,7 +406,7 @@ const TripExecution = () => {
                 'cluster': '10000406',
                 'oc-userdefined-1': 'GC'
               }}
-              onDataChange={useCallback((data: any) => console.log('Trip execution data changed:', data), [])}
+              onDataChange={(data) => console.log('Trip execution data changed:', data)}
             />
           </div>
         )
@@ -452,7 +452,7 @@ const TripExecution = () => {
     }
   });
 
-  const handleConfigChange = useCallback((newConfig: LayoutConfig) => {
+  const handleConfigChange = (newConfig: LayoutConfig) => {
     // Auto-adjust center width when left panel collapses/expands
     if (newConfig.sections.left.collapsed) {
       newConfig.sections.center.width = '100%';
@@ -461,7 +461,7 @@ const TripExecution = () => {
     }
     
     setLayoutConfig(newConfig);
-  }, []);
+  };
 
   return (
     <div className="h-screen bg-gray-50">
