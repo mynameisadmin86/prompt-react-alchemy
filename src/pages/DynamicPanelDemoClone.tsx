@@ -2,7 +2,8 @@ import React, { useState, useCallback } from 'react';
 import { DynamicPanel } from '@/components/DynamicPanel';
 import { PanelVisibilityManager } from '@/components/DynamicPanel/PanelVisibilityManager';
 import { PanelConfig, PanelSettings } from '@/types/dynamicPanel';
-import { EyeOff } from 'lucide-react';
+import { EyeOff, Download } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import {
   Breadcrumb,
   BreadcrumbList,
@@ -16,6 +17,7 @@ const DynamicPanelDemoClone = () => {
   const [basicDetailsData, setBasicDetailsData] = useState({});
   const [operationalDetailsData, setOperationalDetailsData] = useState({});
   const [billingDetailsData, setBillingDetailsData] = useState({});
+  const [allFormData, setAllFormData] = useState({});
 
   // Panel titles state
   const [basicDetailsTitle, setBasicDetailsTitle] = useState('Basic Details');
@@ -34,6 +36,16 @@ const DynamicPanelDemoClone = () => {
   const handleBillingDetailsDataChange = useCallback((data: any) => {
     setBillingDetailsData(data);
   }, []);
+
+  // Function to fetch all form data
+  const fetchAllFormData = useCallback(() => {
+    const combinedData = {
+      basicDetails: basicDetailsData,
+      operationalDetails: operationalDetailsData,
+      billingDetails: billingDetailsData
+    };
+    setAllFormData(combinedData);
+  }, [basicDetailsData, operationalDetailsData, billingDetailsData]);
 
   // Panel widths state - updated for 12-column system
   const [basicDetailsWidth, setBasicDetailsWidth] = useState<'full' | 'half' | 'third' | 'quarter' | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12>(12);
@@ -341,10 +353,20 @@ const DynamicPanelDemoClone = () => {
               Clone version - Configure field visibility, ordering, and labels for each panel
             </p>
           </div>
-          <PanelVisibilityManager
-            panels={panels}
-            onVisibilityChange={handlePanelVisibilityChange}
-          />
+          <div className="flex items-center gap-3">
+            <Button 
+              onClick={fetchAllFormData}
+              variant="outline"
+              className="flex items-center gap-2"
+            >
+              <Download className="h-4 w-4" />
+              Fetch All Data
+            </Button>
+            <PanelVisibilityManager
+              panels={panels}
+              onVisibilityChange={handlePanelVisibilityChange}
+            />
+          </div>
         </div>
 
         {/* Dynamic Panels in 12-column grid */}
@@ -365,6 +387,7 @@ const DynamicPanelDemoClone = () => {
                   panelTitle={basicDetailsTitle}
                   panelConfig={basicDetailsConfig}
                   initialData={basicDetailsData}
+                  onDataChange={handleBasicDetailsDataChange}
                   onTitleChange={setBasicDetailsTitle}
                   onWidthChange={setBasicDetailsWidth}
                   getUserPanelConfig={getUserPanelConfig}
@@ -388,6 +411,7 @@ const DynamicPanelDemoClone = () => {
                   panelTitle={operationalDetailsTitle}
                   panelConfig={operationalDetailsConfig}
                   initialData={operationalDetailsData}
+                  onDataChange={handleOperationalDetailsDataChange}
                   onTitleChange={setOperationalDetailsTitle}
                   onWidthChange={setOperationalDetailsWidth}
                   getUserPanelConfig={getUserPanelConfig}
@@ -410,6 +434,7 @@ const DynamicPanelDemoClone = () => {
                   panelTitle={billingDetailsTitle}
                   panelConfig={billingDetailsConfig}
                   initialData={billingDetailsData}
+                  onDataChange={handleBillingDetailsDataChange}
                   onTitleChange={setBillingDetailsTitle}
                   onWidthChange={setBillingDetailsWidth}
                   getUserPanelConfig={getUserPanelConfig}
@@ -433,10 +458,20 @@ const DynamicPanelDemoClone = () => {
           </div>
         )}
 
+        {/* All Form Data Display */}
+        {Object.keys(allFormData).length > 0 && (
+          <div className="bg-white p-6 rounded-lg shadow-sm">
+            <h3 className="text-lg font-semibold mb-4">Current Form Data (All Panels)</h3>
+            <pre className="text-sm bg-gray-100 p-4 rounded overflow-auto max-h-96">
+              {JSON.stringify(allFormData, null, 2)}
+            </pre>
+          </div>
+        )}
+
         {/* Debug Data Display */}
         {(basicDetailsVisible || operationalDetailsVisible || billingDetailsVisible) && (
           <div className="bg-white p-6 rounded-lg shadow-sm">
-            <h3 className="text-lg font-semibold mb-4">Current Form Data</h3>
+            <h3 className="text-lg font-semibold mb-4">Individual Panel Data</h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {basicDetailsVisible && (
                 <div>
