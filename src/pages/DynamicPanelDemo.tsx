@@ -403,6 +403,7 @@ const DynamicPanelDemo = () => {
 
             // Panel 3: Billing Details
             if (billingDetailsVisible) {
+              const billingDetailsVisibleCount = Object.values(billingDetailsConfig).filter(config => config.visible).length;
               panels.push(
                 <DynamicPanel
                   key="billing-details"
@@ -421,6 +422,7 @@ const DynamicPanelDemo = () => {
                   panelWidth={billingDetailsWidth}
                 />
               );
+              currentTabIndex += billingDetailsVisibleCount;
             }
 
             return panels;
