@@ -45,7 +45,6 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
   });
 
   const { control, watch, setValue, getValues } = form;
-  const formData = watch();
 
   // Load user configuration on mount
   useEffect(() => {
@@ -269,11 +268,11 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
                 <div className="flex items-center gap-2">
                   <div className="w-5 h-5 border-2 border-purple-500 rounded"></div>
                   <CardTitle className="text-sm font-medium text-gray-700">{panelTitle}</CardTitle>
-                  <PanelStatusIndicator 
-                    panelConfig={panelConfig}
-                    formData={formData}
-                    showStatus={showStatusIndicator}
-                  />
+                   <PanelStatusIndicator 
+                     panelConfig={panelConfig}
+                     formData={getValues()}
+                     showStatus={showStatusIndicator}
+                   />
                   {showPreview && (
                     <span className="text-xs text-blue-600 font-medium">DB000023/42</span>
                   )}
@@ -331,7 +330,7 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
             <CardTitle className="text-sm font-medium text-gray-700">{panelTitle}</CardTitle>
             <PanelStatusIndicator 
               panelConfig={panelConfig}
-              formData={formData}
+              formData={getValues()}
               showStatus={showStatusIndicator}
             />
             {showPreview && (
