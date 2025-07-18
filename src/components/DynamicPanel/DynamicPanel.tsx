@@ -54,7 +54,8 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
   // Initialize form with react-hook-form
   const form = useForm({
     defaultValues: initialData,
-    mode: 'onBlur'
+    mode: 'onBlur',
+    shouldUnregister: false
   });
 
   const { watch } = form;
@@ -112,13 +113,15 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
     return fields;
   }, [panelConfig, panelOrder, startingTabIndex]);
 
-  // Watch form data changes and notify parent
+  // Watch form data changes and notify parent - using useCallback to prevent re-renders
+  const handleDataChange = useCallback((value: any) => {
+    onDataChange?.(value);
+  }, [onDataChange]);
+
   useEffect(() => {
-    const subscription = watch((value) => {
-      onDataChange?.(value);
-    });
+    const subscription = watch(handleDataChange);
     return () => subscription.unsubscribe();
-  }, [watch, onDataChange]);
+  }, [watch, handleDataChange]);
 
   const handleConfigSave = async (
     updatedConfig: PanelConfig, 
@@ -208,7 +211,7 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
     <FormProvider {...form}>
       <div className="grid grid-cols-12 gap-4">
         {visibleFields.map(({ fieldId, config, tabIndex }) => (
-          <div key={fieldId} className={`space-y-1 ${getFieldWidthClass(config.width)}`}>
+          <div key={`${panelId}-${fieldId}`} className={`space-y-1 ${getFieldWidthClass(config.width)}`}>
             <label className="text-xs font-medium text-gray-600 block">
               {config.label}
               {config.mandatory && (
@@ -216,6 +219,7 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
               )}
             </label>
             <FieldRenderer
+              key={`${panelId}-${fieldId}-renderer`}
               config={config}
               fieldId={fieldId}
               tabIndex={tabIndex}
