@@ -24,15 +24,15 @@ const DynamicPanelDemo = () => {
 
   // Memoized callbacks to prevent re-rendering and focus loss
   const handleBasicDetailsDataChange = useCallback((data: any) => {
-    //setBasicDetailsData(data);
+    setBasicDetailsData(data);
   }, []);
 
   const handleOperationalDetailsDataChange = useCallback((data: any) => {
-    //setOperationalDetailsData(data);
+    setOperationalDetailsData(data);
   }, []);
 
   const handleBillingDetailsDataChange = useCallback((data: any) => {
-    //setBillingDetailsData(data);
+    setBillingDetailsData(data);
   }, []);
 
   // Panel widths state - updated for 12-column system
