@@ -14,7 +14,6 @@ import FlexGridLayoutPage from "./pages/FlexGridLayoutPage";
 import TripExecution from "./pages/TripExecution";
 import SideDrawerDemo from "./pages/SideDrawerDemo";
 import BillingDemo from "./pages/BillingDemo";
-import DynamicPanelRHFDemo from "./pages/DynamicPanelRHFDemo";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -31,7 +30,6 @@ const App = () => (
           <Route path="/trip-plans-search-hub" element={<TripPlansSearchHub />} />
           <Route path="/trip-plans-search-hub-api" element={<TripPlansSearchHubAPI />} />
           <Route path="/dynamic-panel-demo" element={<DynamicPanelDemo />} />
-          <Route path="/dynamic-panel-rhf-demo" element={<DynamicPanelRHFDemo />} />
           <Route path="/flex-grid-demo" element={<FlexGridDemo />} />
           <Route path="/flex-grid-layout-page" element={<FlexGridLayoutPage />} />
           <Route path="/trip-execution" element={<TripExecution />} />
