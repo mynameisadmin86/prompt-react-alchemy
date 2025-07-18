@@ -35,20 +35,6 @@ const Index = () => {
       color: "text-orange-600"
     },
     {
-      title: "Dynamic Panel RHF Demo",
-      description: "React Hook Form version with Customer and Description fields",
-      icon: PanelLeft,
-      path: "/dynamic-panel-rhf-demo",
-      color: "text-amber-600"
-    },
-    {
-      title: "Dynamic Panel Clone Demo",
-      description: "Full clone of the complex dynamic panel configuration interface",
-      icon: PanelLeft,
-      path: "/dynamic-panel-clone-demo",
-      color: "text-emerald-600"
-    },
-    {
       title: "FlexGrid Demo",
       description: "Flexible grid layouts with drag-and-drop and responsive design",
       icon: Layout,
