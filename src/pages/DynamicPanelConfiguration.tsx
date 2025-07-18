@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { DynamicPanelRHF } from '@/components/DynamicPanelRHF';
 import { PanelConfig, PanelSettings } from '@/types/dynamicPanel';
@@ -59,7 +59,7 @@ const DynamicPanelConfiguration: React.FC = () => {
       order: 3,
       width: 'full',
       options: [
-        { label: 'Select...', value: '' },
+        { label: 'Select...', value: 'select-contract' },
         { label: 'Attribute 3', value: 'attribute3' },
         { label: 'Other Contract', value: 'other' }
       ]
@@ -86,7 +86,7 @@ const DynamicPanelConfiguration: React.FC = () => {
       order: 5,
       width: 'full',
       options: [
-        { label: 'Select...', value: '' },
+        { label: 'Select...', value: 'select-priority' },
         { label: 'Attribute 4', value: 'attribute4' },
         { label: 'High', value: 'high' },
         { label: 'Medium', value: 'medium' },
@@ -176,7 +176,7 @@ const DynamicPanelConfiguration: React.FC = () => {
       order: 7,
       width: 'full',
       options: [
-        { label: 'Select...', value: '' },
+        { label: 'Select...', value: 'select-unit' },
         { label: 'Unit A', value: 'unit-a' },
         { label: 'Unit B', value: 'unit-b' }
       ]
@@ -192,7 +192,7 @@ const DynamicPanelConfiguration: React.FC = () => {
       order: 8,
       width: 'full',
       options: [
-        { label: 'Select...', value: '' },
+        { label: 'Select...', value: 'select-task' },
         { label: 'Type 1', value: 'type1' },
         { label: 'Type 2', value: 'type2' }
       ]
@@ -245,7 +245,7 @@ const DynamicPanelConfiguration: React.FC = () => {
       order: 4,
       width: 'full',
       options: [
-        { label: 'Select...', value: '' },
+        { label: 'Select...', value: 'select-status' },
         { label: 'Pending', value: 'pending' },
         { label: 'Completed', value: 'completed' },
         { label: 'Cancelled', value: 'cancelled' }
@@ -262,7 +262,7 @@ const DynamicPanelConfiguration: React.FC = () => {
       order: 5,
       width: 'full',
       options: [
-        { label: 'Select...', value: '' },
+        { label: 'Select...', value: 'select-terms' },
         { label: 'Net 30', value: 'net30' },
         { label: 'Net 60', value: 'net60' },
         { label: 'Due on Receipt', value: 'due-on-receipt' }
@@ -281,12 +281,12 @@ const DynamicPanelConfiguration: React.FC = () => {
     }
   };
 
-  const handleDataChange = (panelId: string) => (data: Record<string, any>) => {
+  const handleDataChange = useCallback((panelId: string) => (data: Record<string, any>) => {
     setFormData(prev => ({
       ...prev,
       [panelId]: data
     }));
-  };
+  }, []);
 
   const handleSubmit = () => {
     console.log('Form Data:', formData);
