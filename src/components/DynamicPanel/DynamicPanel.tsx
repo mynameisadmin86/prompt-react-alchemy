@@ -38,13 +38,19 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
   const [isConfigModalOpen, setIsConfigModalOpen] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
 
-  // Initialize react-hook-form
+  // Initialize react-hook-form with onBlur mode
   const form = useForm({
     defaultValues: initialData,
     mode: 'onBlur'
   });
 
-  const { control, watch, setValue, getValues } = form;
+  const { control, setValue, getValues, handleSubmit } = form;
+
+  // Handle blur events to trigger onDataChange
+  const handleFieldBlur = useCallback(() => {
+    const currentData = getValues();
+    onDataChange?.(currentData);
+  }, [getValues, onDataChange]);
 
   // Load user configuration on mount
   useEffect(() => {
@@ -97,14 +103,6 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
     console.log('All visible fields with tabIndex:', fields);
     return fields;
   }, [panelConfig, panelOrder]);
-
-  // Watch for form changes and notify parent
-  useEffect(() => {
-    const subscription = watch((data) => {
-      onDataChange?.(data);
-    });
-    return () => subscription.unsubscribe();
-  }, [watch, onDataChange]);
 
   const handleConfigSave = async (
     updatedConfig: PanelConfig, 
@@ -206,6 +204,7 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
               control={control}
               fieldId={fieldId}
               tabIndex={tabIndex}
+              onBlur={handleFieldBlur}
             />
           </div>
         ))}
