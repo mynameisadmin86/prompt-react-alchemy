@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { DynamicPanel } from '@/components/DynamicPanel';
 import { PanelVisibilityManager } from '@/components/DynamicPanel/PanelVisibilityManager';
 import { PanelConfig, PanelSettings } from '@/types/dynamicPanel';
@@ -21,6 +21,19 @@ const DynamicPanelDemo = () => {
   const [basicDetailsTitle, setBasicDetailsTitle] = useState('Basic Details');
   const [operationalDetailsTitle, setOperationalDetailsTitle] = useState('Operational Details');
   const [billingDetailsTitle, setBillingDetailsTitle] = useState('Billing Details');
+
+  // Memoized callbacks to prevent re-rendering and focus loss
+  const handleBasicDetailsDataChange = useCallback((data: any) => {
+    setBasicDetailsData(data);
+  }, []);
+
+  const handleOperationalDetailsDataChange = useCallback((data: any) => {
+    setOperationalDetailsData(data);
+  }, []);
+
+  const handleBillingDetailsDataChange = useCallback((data: any) => {
+    setBillingDetailsData(data);
+  }, []);
 
   // Panel widths state - updated for 12-column system
   const [basicDetailsWidth, setBasicDetailsWidth] = useState<'full' | 'half' | 'third' | 'quarter' | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12>(12);
@@ -352,7 +365,7 @@ const DynamicPanelDemo = () => {
                   panelTitle={basicDetailsTitle}
                   panelConfig={basicDetailsConfig}
                   initialData={basicDetailsData}
-                  onDataChange={setBasicDetailsData}
+                  onDataChange={handleBasicDetailsDataChange}
                   onTitleChange={setBasicDetailsTitle}
                   onWidthChange={setBasicDetailsWidth}
                   getUserPanelConfig={getUserPanelConfig}
@@ -376,7 +389,7 @@ const DynamicPanelDemo = () => {
                   panelTitle={operationalDetailsTitle}
                   panelConfig={operationalDetailsConfig}
                   initialData={operationalDetailsData}
-                  onDataChange={setOperationalDetailsData}
+                  onDataChange={handleOperationalDetailsDataChange}
                   onTitleChange={setOperationalDetailsTitle}
                   onWidthChange={setOperationalDetailsWidth}
                   getUserPanelConfig={getUserPanelConfig}
@@ -399,7 +412,7 @@ const DynamicPanelDemo = () => {
                   panelTitle={billingDetailsTitle}
                   panelConfig={billingDetailsConfig}
                   initialData={billingDetailsData}
-                  onDataChange={setBillingDetailsData}
+                  onDataChange={handleBillingDetailsDataChange}
                   onTitleChange={setBillingDetailsTitle}
                   onWidthChange={setBillingDetailsWidth}
                   getUserPanelConfig={getUserPanelConfig}
