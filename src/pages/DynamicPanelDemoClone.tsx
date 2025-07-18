@@ -355,7 +355,7 @@ const DynamicPanelDemoClone = () => {
             
             // Panel 1: Basic Details
             if (basicDetailsVisible) {
-              const basicDetailsEditableCount = Object.values(basicDetailsConfig).filter(config => config.visible && config.editable).length;
+              const basicDetailsVisibleCount = Object.values(basicDetailsConfig).filter(config => config.visible).length;
               panels.push(
                 <DynamicPanel
                   key="basic-details"
@@ -364,7 +364,7 @@ const DynamicPanelDemoClone = () => {
                   startingTabIndex={currentTabIndex}
                   panelTitle={basicDetailsTitle}
                   panelConfig={basicDetailsConfig}
-                  onDataChange={handleBasicDetailsDataChange}
+                  initialData={basicDetailsData}
                   onTitleChange={setBasicDetailsTitle}
                   onWidthChange={setBasicDetailsWidth}
                   getUserPanelConfig={getUserPanelConfig}
@@ -373,12 +373,12 @@ const DynamicPanelDemoClone = () => {
                   panelWidth={basicDetailsWidth}
                 />
               );
-              currentTabIndex += basicDetailsEditableCount;
+              currentTabIndex += basicDetailsVisibleCount;
             }
 
             // Panel 2: Operational Details
             if (operationalDetailsVisible) {
-              const operationalDetailsEditableCount = Object.values(operationalDetailsConfig).filter(config => config.visible && config.editable).length;
+              const operationalDetailsVisibleCount = Object.values(operationalDetailsConfig).filter(config => config.visible).length;
               panels.push(
                 <DynamicPanel
                   key="operational-details"
@@ -387,7 +387,7 @@ const DynamicPanelDemoClone = () => {
                   startingTabIndex={currentTabIndex}
                   panelTitle={operationalDetailsTitle}
                   panelConfig={operationalDetailsConfig}
-                  onDataChange={handleOperationalDetailsDataChange}
+                  initialData={operationalDetailsData}
                   onTitleChange={setOperationalDetailsTitle}
                   onWidthChange={setOperationalDetailsWidth}
                   getUserPanelConfig={getUserPanelConfig}
@@ -396,12 +396,11 @@ const DynamicPanelDemoClone = () => {
                   panelWidth={operationalDetailsWidth}
                 />
               );
-              currentTabIndex += operationalDetailsEditableCount;
+              currentTabIndex += operationalDetailsVisibleCount;
             }
 
             // Panel 3: Billing Details
             if (billingDetailsVisible) {
-              const billingDetailsEditableCount = Object.values(billingDetailsConfig).filter(config => config.visible && config.editable).length;
               panels.push(
                 <DynamicPanel
                   key="billing-details"
@@ -411,7 +410,6 @@ const DynamicPanelDemoClone = () => {
                   panelTitle={billingDetailsTitle}
                   panelConfig={billingDetailsConfig}
                   initialData={billingDetailsData}
-                  onDataChange={handleBillingDetailsDataChange}
                   onTitleChange={setBillingDetailsTitle}
                   onWidthChange={setBillingDetailsWidth}
                   getUserPanelConfig={getUserPanelConfig}
@@ -420,7 +418,6 @@ const DynamicPanelDemoClone = () => {
                   panelWidth={billingDetailsWidth}
                 />
               );
-              currentTabIndex += billingDetailsEditableCount;
             }
 
             return panels;

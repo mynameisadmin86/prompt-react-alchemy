@@ -355,7 +355,7 @@ const DynamicPanelDemo = () => {
             
             // Panel 1: Basic Details
             if (basicDetailsVisible) {
-              const basicDetailsEditableCount = Object.values(basicDetailsConfig).filter(config => config.visible && config.editable).length;
+              const basicDetailsVisibleCount = Object.values(basicDetailsConfig).filter(config => config.visible).length;
               panels.push(
                 <DynamicPanel
                   key="basic-details"
@@ -374,12 +374,12 @@ const DynamicPanelDemo = () => {
                   panelWidth={basicDetailsWidth}
                 />
               );
-              currentTabIndex += basicDetailsEditableCount;
+              currentTabIndex += basicDetailsVisibleCount;
             }
 
             // Panel 2: Operational Details
             if (operationalDetailsVisible) {
-              const operationalDetailsEditableCount = Object.values(operationalDetailsConfig).filter(config => config.visible && config.editable).length;
+              const operationalDetailsVisibleCount = Object.values(operationalDetailsConfig).filter(config => config.visible).length;
               panels.push(
                 <DynamicPanel
                   key="operational-details"
@@ -398,12 +398,11 @@ const DynamicPanelDemo = () => {
                   panelWidth={operationalDetailsWidth}
                 />
               );
-              currentTabIndex += operationalDetailsEditableCount;
+              currentTabIndex += operationalDetailsVisibleCount;
             }
 
             // Panel 3: Billing Details
             if (billingDetailsVisible) {
-              const billingDetailsEditableCount = Object.values(billingDetailsConfig).filter(config => config.visible && config.editable).length;
               panels.push(
                 <DynamicPanel
                   key="billing-details"
@@ -422,7 +421,6 @@ const DynamicPanelDemo = () => {
                   panelWidth={billingDetailsWidth}
                 />
               );
-              currentTabIndex += billingDetailsEditableCount;
             }
 
             return panels;
