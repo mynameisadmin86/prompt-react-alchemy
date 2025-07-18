@@ -336,53 +336,82 @@ const DynamicPanelDemo = () => {
 
         {/* Dynamic Panels in 12-column grid */}
         <div className="grid grid-cols-12 gap-6">
-          {basicDetailsVisible && (
-            <DynamicPanel
-              panelId="basic-details"
-              panelTitle={basicDetailsTitle}
-              panelConfig={basicDetailsConfig}
-              initialData={basicDetailsData}
-              onDataChange={setBasicDetailsData}
-              onTitleChange={setBasicDetailsTitle}
-              onWidthChange={setBasicDetailsWidth}
-              getUserPanelConfig={getUserPanelConfig}
-              saveUserPanelConfig={saveUserPanelConfig}
-              userId="current-user"
-              panelWidth={basicDetailsWidth}
-            />
-          )}
+          {(() => {
+            let currentTabIndex = 1;
+            const panels = [];
+            
+            // Panel 1: Basic Details
+            if (basicDetailsVisible) {
+              const basicDetailsVisibleCount = Object.values(basicDetailsConfig).filter(config => config.visible).length;
+              panels.push(
+                <DynamicPanel
+                  key="basic-details"
+                  panelId="basic-details"
+                  panelOrder={1}
+                  startingTabIndex={currentTabIndex}
+                  panelTitle={basicDetailsTitle}
+                  panelConfig={basicDetailsConfig}
+                  initialData={basicDetailsData}
+                  onDataChange={setBasicDetailsData}
+                  onTitleChange={setBasicDetailsTitle}
+                  onWidthChange={setBasicDetailsWidth}
+                  getUserPanelConfig={getUserPanelConfig}
+                  saveUserPanelConfig={saveUserPanelConfig}
+                  userId="current-user"
+                  panelWidth={basicDetailsWidth}
+                />
+              );
+              currentTabIndex += basicDetailsVisibleCount;
+            }
 
-          {operationalDetailsVisible && (
-            <DynamicPanel
-              panelId="operational-details"
-              panelTitle={operationalDetailsTitle}
-              panelConfig={operationalDetailsConfig}
-              initialData={operationalDetailsData}
-              onDataChange={setOperationalDetailsData}
-              onTitleChange={setOperationalDetailsTitle}
-              onWidthChange={setOperationalDetailsWidth}
-              getUserPanelConfig={getUserPanelConfig}
-              saveUserPanelConfig={saveUserPanelConfig}
-              userId="current-user"
-              panelWidth={operationalDetailsWidth}
-            />
-          )}
+            // Panel 2: Operational Details
+            if (operationalDetailsVisible) {
+              const operationalDetailsVisibleCount = Object.values(operationalDetailsConfig).filter(config => config.visible).length;
+              panels.push(
+                <DynamicPanel
+                  key="operational-details"
+                  panelId="operational-details"
+                  panelOrder={2}
+                  startingTabIndex={currentTabIndex}
+                  panelTitle={operationalDetailsTitle}
+                  panelConfig={operationalDetailsConfig}
+                  initialData={operationalDetailsData}
+                  onDataChange={setOperationalDetailsData}
+                  onTitleChange={setOperationalDetailsTitle}
+                  onWidthChange={setOperationalDetailsWidth}
+                  getUserPanelConfig={getUserPanelConfig}
+                  saveUserPanelConfig={saveUserPanelConfig}
+                  userId="current-user"
+                  panelWidth={operationalDetailsWidth}
+                />
+              );
+              currentTabIndex += operationalDetailsVisibleCount;
+            }
 
-          {billingDetailsVisible && (
-            <DynamicPanel
-              panelId="billing-details"
-              panelTitle={billingDetailsTitle}
-              panelConfig={billingDetailsConfig}
-              initialData={billingDetailsData}
-              onDataChange={setBillingDetailsData}
-              onTitleChange={setBillingDetailsTitle}
-              onWidthChange={setBasicDetailsWidth}
-              getUserPanelConfig={getUserPanelConfig}
-              saveUserPanelConfig={saveUserPanelConfig}
-              userId="current-user"
-              panelWidth={billingDetailsWidth}
-            />
-          )}
+            // Panel 3: Billing Details
+            if (billingDetailsVisible) {
+              panels.push(
+                <DynamicPanel
+                  key="billing-details"
+                  panelId="billing-details"
+                  panelOrder={3}
+                  startingTabIndex={currentTabIndex}
+                  panelTitle={billingDetailsTitle}
+                  panelConfig={billingDetailsConfig}
+                  initialData={billingDetailsData}
+                  onDataChange={setBillingDetailsData}
+                  onTitleChange={setBillingDetailsTitle}
+                  onWidthChange={setBillingDetailsWidth}
+                  getUserPanelConfig={getUserPanelConfig}
+                  saveUserPanelConfig={saveUserPanelConfig}
+                  userId="current-user"
+                  panelWidth={billingDetailsWidth}
+                />
+              );
+            }
+
+            return panels;
+          })()}
         </div>
 
         {/* Show message when all panels are hidden */}

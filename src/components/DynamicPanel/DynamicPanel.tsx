@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { useForm } from 'react-hook-form';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
@@ -10,6 +11,8 @@ import { DynamicPanelProps, PanelConfig, PanelSettings } from '@/types/dynamicPa
 
 export const DynamicPanel: React.FC<DynamicPanelProps> = ({
   panelId,
+  panelOrder = 1,
+  startingTabIndex = 1,
   panelTitle: initialPanelTitle,
   panelConfig: initialPanelConfig,
   initialData = {},
@@ -32,9 +35,17 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
   const [showStatusIndicator, setShowStatusIndicator] = useState(true);
   const [showHeader, setShowHeader] = useState(true);
   const [isOpen, setIsOpen] = useState(true);
-  const [formData, setFormData] = useState(initialData);
   const [isConfigModalOpen, setIsConfigModalOpen] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
+
+  // Initialize react-hook-form
+  const form = useForm({
+    defaultValues: initialData,
+    mode: 'onBlur'
+  });
+
+  const { control, watch, setValue, getValues } = form;
+  const formData = watch();
 
   // Load user configuration on mount
   useEffect(() => {
@@ -69,16 +80,32 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
     loadUserConfig();
   }, [getUserPanelConfig, userId, panelId]);
 
-  // Get visible fields sorted by order
-  const visibleFields = Object.entries(panelConfig)
-    .filter(([_, config]) => config.visible)
-    .sort(([_, a], [__, b]) => a.order - b.order);
+  // Get visible fields sorted by order with calculated tab indices
+  const visibleFields = useMemo(() => {
+    const fields = Object.entries(panelConfig)
+      .filter(([_, config]) => config.visible)
+      .sort(([_, a], [__, b]) => a.order - b.order)
+      .map(([fieldId, config], index) => {
+        const tabIndex = startingTabIndex + index;
+        console.log(`Field ${fieldId} in panel ${panelOrder}: order=${config.order}, tabIndex=${tabIndex}`);
+        return {
+          fieldId,
+          config,
+          tabIndex
+        };
+      });
+    
+    console.log('All visible fields with tabIndex:', fields);
+    return fields;
+  }, [panelConfig, panelOrder]);
 
-  const handleFieldChange = (fieldId: string, value: any) => {
-    const updatedData = { ...formData, [fieldId]: value };
-    setFormData(updatedData);
-    onDataChange?.(updatedData);
-  };
+  // Watch for form changes and notify parent
+  useEffect(() => {
+    const subscription = watch((data) => {
+      onDataChange?.(data);
+    });
+    return () => subscription.unsubscribe();
+  }, [watch, onDataChange]);
 
   const handleConfigSave = async (
     updatedConfig: PanelConfig, 
@@ -167,18 +194,19 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
   const PanelContent = () => (
     <>
       <div className="grid grid-cols-12 gap-4">
-        {visibleFields.map(([fieldId, fieldConfig]) => (
-          <div key={fieldId} className={`space-y-1 ${getFieldWidthClass(fieldConfig.width)}`}>
+        {visibleFields.map(({ fieldId, config, tabIndex }) => (
+          <div key={fieldId} className={`space-y-1 ${getFieldWidthClass(config.width)}`}>
             <label className="text-xs font-medium text-gray-600 block">
-              {fieldConfig.label}
-              {fieldConfig.mandatory && (
+              {config.label}
+              {config.mandatory && (
                 <span className="text-red-500 ml-1">*</span>
               )}
             </label>
             <FieldRenderer
-              config={fieldConfig}
-              value={formData[fieldId]}
-              onChange={(value) => handleFieldChange(fieldId, value)}
+              config={config}
+              control={control}
+              fieldId={fieldId}
+              tabIndex={tabIndex}
             />
           </div>
         ))}
