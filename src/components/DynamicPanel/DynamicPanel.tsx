@@ -91,8 +91,14 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
       .filter(([_, config]) => config.visible)
       .sort(([_, a], [__, b]) => a.order - b.order)
       .map(([fieldId, config], index) => {
-        const tabIndex = startingTabIndex + index;
-        console.log(`Field ${fieldId} in panel ${panelOrder}: order=${config.order}, tabIndex=${tabIndex}`);
+        // Only assign tabIndex to editable fields
+        const editableFieldsBefore = Object.entries(panelConfig)
+          .filter(([_, c]) => c.visible && c.editable && c.order < config.order)
+          .length;
+        
+        const tabIndex = config.editable ? startingTabIndex + editableFieldsBefore : undefined;
+        
+        console.log(`Field ${fieldId} in panel ${panelOrder}: order=${config.order}, editable=${config.editable}, tabIndex=${tabIndex}`);
         return {
           fieldId,
           config,
@@ -102,7 +108,7 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
     
     console.log('All visible fields with tabIndex:', fields);
     return fields;
-  }, [panelConfig, panelOrder]);
+  }, [panelConfig, panelOrder, startingTabIndex]);
 
   const handleConfigSave = async (
     updatedConfig: PanelConfig, 
