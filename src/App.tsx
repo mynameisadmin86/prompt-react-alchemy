@@ -9,6 +9,7 @@ import GridDemo from "./pages/GridDemo";
 import TripPlansSearchHub from "./pages/TripPlansSearchHub";
 import TripPlansSearchHubAPI from "./pages/TripPlansSearchHubAPI";
 import DynamicPanelDemo from "./pages/DynamicPanelDemo";
+import DynamicPanelDemoClone from "./pages/DynamicPanelDemoClone";
 import FlexGridDemo from "./pages/FlexGridDemo";
 import FlexGridLayoutPage from "./pages/FlexGridLayoutPage";
 import TripExecution from "./pages/TripExecution";
@@ -30,6 +31,7 @@ const App = () => (
           <Route path="/trip-plans-search-hub" element={<TripPlansSearchHub />} />
           <Route path="/trip-plans-search-hub-api" element={<TripPlansSearchHubAPI />} />
           <Route path="/dynamic-panel-demo" element={<DynamicPanelDemo />} />
+          <Route path="/dynamic-panel-demo-clone" element={<DynamicPanelDemoClone />} />
           <Route path="/flex-grid-demo" element={<FlexGridDemo />} />
           <Route path="/flex-grid-layout-page" element={<FlexGridLayoutPage />} />
           <Route path="/trip-execution" element={<TripExecution />} />

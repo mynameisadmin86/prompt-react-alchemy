@@ -35,6 +35,13 @@ const Index = () => {
       color: "text-orange-600"
     },
     {
+      title: "Dynamic Panel Demo Clone",
+      description: "Clone version of the configurable form panels demo",
+      icon: PanelLeft,
+      path: "/dynamic-panel-demo-clone",
+      color: "text-amber-600"
+    },
+    {
       title: "FlexGrid Demo",
       description: "Flexible grid layouts with drag-and-drop and responsive design",
       icon: Layout,
