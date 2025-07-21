@@ -120,6 +120,7 @@ export interface SmartGridProps {
   onUpdate?(row: any): Promise<void>;
   onLinkClick?(rowData: any, columnKey: string): void;
   onSubRowToggle?(columnKey: string): void;
+  onServerFilter?(filters: FilterConfig[]): Promise<void>;
   paginationMode?: 'pagination' | 'infinite';
   nestedRowRenderer?(row: any, rowIndex: number): React.ReactNode;
   plugins?: GridPlugin[];
