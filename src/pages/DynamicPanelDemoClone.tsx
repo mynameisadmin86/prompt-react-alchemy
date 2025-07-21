@@ -374,7 +374,9 @@ const DynamicPanelDemoClone = () => {
                   startingTabIndex={currentTabIndex}
                   panelTitle={basicDetailsTitle}
                   panelConfig={basicDetailsConfig}
+                  formName="basicDetailsForm"
                   initialData={basicDetailsData}
+                  onDataChange={handleBasicDetailsDataChange}
                   onTitleChange={setBasicDetailsTitle}
                   onWidthChange={setBasicDetailsWidth}
                   getUserPanelConfig={getUserPanelConfig}
@@ -397,7 +399,9 @@ const DynamicPanelDemoClone = () => {
                   startingTabIndex={currentTabIndex}
                   panelTitle={operationalDetailsTitle}
                   panelConfig={operationalDetailsConfig}
+                  formName="operationalDetailsForm"
                   initialData={operationalDetailsData}
+                  onDataChange={handleOperationalDetailsDataChange}
                   onTitleChange={setOperationalDetailsTitle}
                   onWidthChange={setOperationalDetailsWidth}
                   getUserPanelConfig={getUserPanelConfig}
@@ -419,7 +423,9 @@ const DynamicPanelDemoClone = () => {
                   startingTabIndex={currentTabIndex}
                   panelTitle={billingDetailsTitle}
                   panelConfig={billingDetailsConfig}
+                  formName="billingDetailsForm"
                   initialData={billingDetailsData}
+                  onDataChange={handleBillingDetailsDataChange}
                   onTitleChange={setBillingDetailsTitle}
                   onWidthChange={setBillingDetailsWidth}
                   getUserPanelConfig={getUserPanelConfig}

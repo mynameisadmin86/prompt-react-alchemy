@@ -45,6 +45,7 @@ export interface DynamicPanelProps {
   startingTabIndex?: number; // Starting tabIndex for sequential navigation across panels
   panelTitle: string;
   panelConfig: PanelConfig;
+  formName?: string; // Form name for the panel form element
   initialData?: Record<string, any>;
   onDataChange?: (updatedData: Record<string, any>) => void;
   onTitleChange?: (newTitle: string) => void;
