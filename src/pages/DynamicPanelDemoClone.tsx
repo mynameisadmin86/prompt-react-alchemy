@@ -103,8 +103,8 @@ const DynamicPanelDemoClone = () => {
       order: 4,
       placeholder: 'Enter trip description...',
       events: {
-        onBlur: (value, event) => {
-          console.log('Description changed:', value);
+        onBlur: (event) => {
+          console.log('Description blur event:', event);
         }
       }
     },
