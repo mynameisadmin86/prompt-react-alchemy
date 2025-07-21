@@ -20,6 +20,7 @@ export interface GridColumnConfig {
   width?: number;          // Column width in pixels
   sortable?: boolean;
   filterable?: boolean;
+  filterMode?: 'local' | 'server'; // Determines if filtering is done locally or on server
   editable?: boolean;
   mandatory?: boolean;
   hidden?: boolean;
