@@ -85,7 +85,12 @@ const DynamicPanelDemoClone = () => {
         { label: 'Fixed Price', value: 'fixed' },
         { label: 'Variable', value: 'variable' },
         { label: 'Cost Plus', value: 'cost-plus' }
-      ]
+      ],
+      events: {
+        onChange: (value, event) => {
+          console.log('contractType changed:', value);
+        }
+      }
     },
     description: {
       id: 'description',
@@ -96,7 +101,12 @@ const DynamicPanelDemoClone = () => {
       visible: true,
       editable: true,
       order: 4,
-      placeholder: 'Enter trip description...'
+      placeholder: 'Enter trip description...',
+      events: {
+        onBlur: (value, event) => {
+          console.log('Description changed:', value);
+        }
+      }
     },
     priority: {
       id: 'priority',
@@ -365,7 +375,6 @@ const DynamicPanelDemoClone = () => {
                   panelTitle={basicDetailsTitle}
                   panelConfig={basicDetailsConfig}
                   initialData={basicDetailsData}
-                  onDataChange={handleBasicDetailsDataChange}
                   onTitleChange={setBasicDetailsTitle}
                   onWidthChange={setBasicDetailsWidth}
                   getUserPanelConfig={getUserPanelConfig}
@@ -389,7 +398,6 @@ const DynamicPanelDemoClone = () => {
                   panelTitle={operationalDetailsTitle}
                   panelConfig={operationalDetailsConfig}
                   initialData={operationalDetailsData}
-                  onDataChange={handleOperationalDetailsDataChange}
                   onTitleChange={setOperationalDetailsTitle}
                   onWidthChange={setOperationalDetailsWidth}
                   getUserPanelConfig={getUserPanelConfig}
@@ -412,7 +420,6 @@ const DynamicPanelDemoClone = () => {
                   panelTitle={billingDetailsTitle}
                   panelConfig={billingDetailsConfig}
                   initialData={billingDetailsData}
-                  onDataChange={handleBillingDetailsDataChange}
                   onTitleChange={setBillingDetailsTitle}
                   onWidthChange={setBillingDetailsWidth}
                   getUserPanelConfig={getUserPanelConfig}
@@ -465,52 +472,6 @@ const DynamicPanelDemoClone = () => {
                   </pre>
                 </div>
               )}
-            </div>
-            
-            {/* Form Access Example */}
-            <div className="mt-6 pt-6 border-t border-gray-200">
-              <h4 className="font-medium text-gray-700 mb-3">Form Access Methods</h4>
-              <div className="space-y-2">
-                <button
-                  onClick={() => {
-                    const basicForm = document.forms['basic-details'] as HTMLFormElement;
-                    if (basicForm) {
-                      const formData = new FormData(basicForm);
-                      console.log('Basic Details Form Data:', Object.fromEntries(formData));
-                    }
-                  }}
-                  className="px-3 py-1 bg-blue-100 text-blue-700 rounded text-sm hover:bg-blue-200"
-                >
-                  Get Basic Details Form Data
-                </button>
-                <button
-                  onClick={() => {
-                    const operationalForm = document.forms['operational-details'] as HTMLFormElement;
-                    if (operationalForm) {
-                      const formData = new FormData(operationalForm);
-                      console.log('Operational Details Form Data:', Object.fromEntries(formData));
-                    }
-                  }}
-                  className="px-3 py-1 bg-green-100 text-green-700 rounded text-sm hover:bg-green-200"
-                >
-                  Get Operational Details Form Data
-                </button>
-                <button
-                  onClick={() => {
-                    const billingForm = document.forms['billing-details'] as HTMLFormElement;
-                    if (billingForm) {
-                      const formData = new FormData(billingForm);
-                      console.log('Billing Details Form Data:', Object.fromEntries(formData));
-                    }
-                  }}
-                  className="px-3 py-1 bg-purple-100 text-purple-700 rounded text-sm hover:bg-purple-200"
-                >
-                  Get Billing Details Form Data
-                </button>
-              </div>
-              <p className="text-xs text-gray-500 mt-2">
-                Click buttons above to access form data using document.forms['panelId']. Check console for output.
-              </p>
             </div>
           </div>
         )}
