@@ -87,7 +87,8 @@ const DynamicPanelDemoClone = () => {
         { label: 'Cost Plus', value: 'cost-plus' }
       ],
       onChange: (value, event) => {
-      console.log('contractType changed:', value);
+        console.log('contractType changed:', value);
+      }
     },
     description: {
       id: 'description',
