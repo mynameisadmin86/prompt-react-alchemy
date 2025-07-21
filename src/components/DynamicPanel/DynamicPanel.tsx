@@ -25,8 +25,7 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
   userId = 'default-user',
   panelWidth = 'full',
   collapsible = false,
-  showPreview = false,
-  formName
+  showPreview = false
 }) => {
   const [panelConfig, setPanelConfig] = useState<PanelConfig>(initialPanelConfig);
   const [panelTitle, setPanelTitle] = useState(initialPanelTitle);
@@ -192,7 +191,7 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
   };
 
   const PanelContent = () => (
-    <form name={formName || panelId}>
+    <>
       <div className="grid grid-cols-12 gap-4">
         {visibleFields.map(({ fieldId, config, tabIndex }) => (
           <div key={fieldId} className={`space-y-1 ${getFieldWidthClass(config.width)}`}>
@@ -217,7 +216,7 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
           No visible fields configured. Click the settings icon to configure fields.
         </div>
       )}
-    </form>
+    </>
   );
 
   // Don't render the panel if it's not visible

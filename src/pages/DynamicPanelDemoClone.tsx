@@ -103,8 +103,8 @@ const DynamicPanelDemoClone = () => {
       order: 4,
       placeholder: 'Enter trip description...',
       events: {
-        onBlur: (event) => {
-          console.log('Description changed:', (event.target as HTMLTextAreaElement).value);
+        onBlur: (value, event) => {
+          console.log('Description changed:', value);
         }
       }
     },
@@ -375,14 +375,12 @@ const DynamicPanelDemoClone = () => {
                   panelTitle={basicDetailsTitle}
                   panelConfig={basicDetailsConfig}
                   initialData={basicDetailsData}
-                  onDataChange={handleBasicDetailsDataChange}
                   onTitleChange={setBasicDetailsTitle}
                   onWidthChange={setBasicDetailsWidth}
                   getUserPanelConfig={getUserPanelConfig}
                   saveUserPanelConfig={saveUserPanelConfig}
                   userId="current-user"
                   panelWidth={basicDetailsWidth}
-                  formName="basicDetailsForm"
                 />
               );
               currentTabIndex += basicDetailsVisibleCount;
@@ -400,14 +398,12 @@ const DynamicPanelDemoClone = () => {
                   panelTitle={operationalDetailsTitle}
                   panelConfig={operationalDetailsConfig}
                   initialData={operationalDetailsData}
-                  onDataChange={handleOperationalDetailsDataChange}
                   onTitleChange={setOperationalDetailsTitle}
                   onWidthChange={setOperationalDetailsWidth}
                   getUserPanelConfig={getUserPanelConfig}
                   saveUserPanelConfig={saveUserPanelConfig}
                   userId="current-user"
                   panelWidth={operationalDetailsWidth}
-                  formName="operationalDetailsForm"
                 />
               );
               currentTabIndex += operationalDetailsVisibleCount;
@@ -424,14 +420,12 @@ const DynamicPanelDemoClone = () => {
                   panelTitle={billingDetailsTitle}
                   panelConfig={billingDetailsConfig}
                   initialData={billingDetailsData}
-                  onDataChange={handleBillingDetailsDataChange}
                   onTitleChange={setBillingDetailsTitle}
                   onWidthChange={setBillingDetailsWidth}
                   getUserPanelConfig={getUserPanelConfig}
                   saveUserPanelConfig={saveUserPanelConfig}
                   userId="current-user"
                   panelWidth={billingDetailsWidth}
-                  formName="billingDetailsForm"
                 />
               );
             }
