@@ -70,7 +70,16 @@ const DynamicPanelDemo = () => {
         { label: 'DB Cargo', value: 'db-cargo' },
         { label: 'ABC Rail Goods', value: 'abc-rail' },
         { label: 'Wave Cargo', value: 'wave-cargo' }
-      ]
+      ],
+      events: {
+        onChange: (value, event) => {
+          console.log('Customer changed:', value);
+          console.log('Event:', event);
+        },
+        onFocus: (event) => {
+          console.log('Customer field focused');
+        }
+      }
     },
     contractType: {
       id: 'contractType',
@@ -96,7 +105,17 @@ const DynamicPanelDemo = () => {
       visible: true,
       editable: true,
       order: 4,
-      placeholder: 'Enter trip description...'
+      placeholder: 'Enter trip description...',
+      events: {
+        onKeyDown: (event) => {
+          if (event.key === 'Enter' && event.ctrlKey) {
+            console.log('Ctrl+Enter pressed in description');
+          }
+        },
+        onBlur: (event) => {
+          console.log('Description field blurred with value:', (event.target as HTMLTextAreaElement).value);
+        }
+      }
     },
     priority: {
       id: 'priority',
@@ -166,7 +185,18 @@ const DynamicPanelDemo = () => {
       visible: true,
       editable: true,
       order: 5,
-      placeholder: 'Search departure location...'
+      placeholder: 'Search departure location...',
+      events: {
+        onChange: (value, event) => {
+          console.log('Searching for departure point:', value);
+          // You could trigger an API call here to search for locations
+        },
+        onKeyDown: (event) => {
+          if (event.key === 'Enter') {
+            console.log('Enter pressed in departure search');
+          }
+        }
+      }
     },
     arrivalPoint: {
       id: 'arrivalPoint',
@@ -216,7 +246,19 @@ const DynamicPanelDemo = () => {
       mandatory: true,
       visible: true,
       editable: true,
-      order: 1
+      order: 1,
+      events: {
+        onChange: (value, event) => {
+          console.log('Total amount changed to:', value);
+          // Auto-calculate other fields based on total amount
+          if (value > 1000) {
+            console.log('High value transaction detected');
+          }
+        },
+        onFocus: (event) => {
+          console.log('Total amount field focused');
+        }
+      }
     },
     taxAmount: {
       id: 'taxAmount',

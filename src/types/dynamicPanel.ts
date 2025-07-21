@@ -13,6 +13,17 @@ export interface FieldConfig {
   placeholder?: string;
   color?: string; // For card field type background color
   fieldColour?: string; // For card field type color
+  // Event handlers for field interactions
+  events?: {
+    onClick?: (event: React.MouseEvent, value: any) => void;
+    onChange?: (value: any, event: React.ChangeEvent) => void;
+    onFocus?: (event: React.FocusEvent) => void;
+    onBlur?: (event: React.FocusEvent) => void;
+    onKeyDown?: (event: React.KeyboardEvent) => void;
+    onKeyUp?: (event: React.KeyboardEvent) => void;
+    onMouseEnter?: (event: React.MouseEvent) => void;
+    onMouseLeave?: (event: React.MouseEvent) => void;
+  };
 }
 
 export interface PanelConfig {
