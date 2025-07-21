@@ -86,11 +86,6 @@ const DynamicPanelDemoClone = () => {
         { label: 'Variable', value: 'variable' },
         { label: 'Cost Plus', value: 'cost-plus' }
       ],
-      events: {
-        onChange: (value, event) => {
-          console.log('contractType changed:', value);
-        }
-      }
     },
     description: {
       id: 'description',
@@ -102,11 +97,6 @@ const DynamicPanelDemoClone = () => {
       editable: true,
       order: 4,
       placeholder: 'Enter trip description...',
-      events: {
-        onBlur: (value, event) => {
-          console.log('Description changed:', value);
-        }
-      }
     },
     priority: {
       id: 'priority',
@@ -375,6 +365,7 @@ const DynamicPanelDemoClone = () => {
                   panelTitle={basicDetailsTitle}
                   panelConfig={basicDetailsConfig}
                   initialData={basicDetailsData}
+                  onDataChange={handleBasicDetailsDataChange}
                   onTitleChange={setBasicDetailsTitle}
                   onWidthChange={setBasicDetailsWidth}
                   getUserPanelConfig={getUserPanelConfig}
@@ -398,6 +389,7 @@ const DynamicPanelDemoClone = () => {
                   panelTitle={operationalDetailsTitle}
                   panelConfig={operationalDetailsConfig}
                   initialData={operationalDetailsData}
+                  onDataChange={handleOperationalDetailsDataChange}
                   onTitleChange={setOperationalDetailsTitle}
                   onWidthChange={setOperationalDetailsWidth}
                   getUserPanelConfig={getUserPanelConfig}
@@ -420,6 +412,7 @@ const DynamicPanelDemoClone = () => {
                   panelTitle={billingDetailsTitle}
                   panelConfig={billingDetailsConfig}
                   initialData={billingDetailsData}
+                  onDataChange={handleBillingDetailsDataChange}
                   onTitleChange={setBillingDetailsTitle}
                   onWidthChange={setBillingDetailsWidth}
                   getUserPanelConfig={getUserPanelConfig}
