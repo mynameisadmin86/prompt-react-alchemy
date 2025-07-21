@@ -88,6 +88,7 @@ const DynamicPanelDemoClone = () => {
       ],
       events: {
         onChange: (value, event) => {
+          alert('hai');
           console.log('contractType changed:', value);
         }
       }
