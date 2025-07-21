@@ -101,7 +101,12 @@ const DynamicPanelDemoClone = () => {
       visible: true,
       editable: true,
       order: 4,
-      placeholder: 'Enter trip description...'
+      placeholder: 'Enter trip description...',
+      events: {
+        onBlur: (value, event) => {
+          console.log('Description changed:', value);
+        }
+      }
     },
     priority: {
       id: 'priority',
