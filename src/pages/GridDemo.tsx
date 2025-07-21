@@ -52,7 +52,8 @@ const GridDemo = () => {
       sortable: true,
       editable: false,
       mandatory: true,
-      subRow: false
+      subRow: false,
+      filterMode?: 'server'
     },
     {
       key: 'status',
