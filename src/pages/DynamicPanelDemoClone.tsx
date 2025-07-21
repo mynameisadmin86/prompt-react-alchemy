@@ -87,8 +87,8 @@ const DynamicPanelDemoClone = () => {
         { label: 'Cost Plus', value: 'cost-plus' }
       ],
       events: {
-        onChange: (value, event) => {
-          console.log('contractType changed:', value);
+        onChange: (event) => {
+          console.log('contractType changed:', (event.target as HTMLSelectElement).value);
         }
       }
     },
@@ -103,8 +103,8 @@ const DynamicPanelDemoClone = () => {
       order: 4,
       placeholder: 'Enter trip description...',
       events: {
-        onBlur: (value, event) => {
-          console.log('Description changed:', value);
+        onBlur: (event) => {
+          console.log('Description changed:', (event.target as HTMLTextAreaElement).value);
         }
       }
     },
@@ -377,6 +377,7 @@ const DynamicPanelDemoClone = () => {
                   initialData={basicDetailsData}
                   onTitleChange={setBasicDetailsTitle}
                   onWidthChange={setBasicDetailsWidth}
+                  onDataChange={handleBasicDetailsDataChange}
                   getUserPanelConfig={getUserPanelConfig}
                   saveUserPanelConfig={saveUserPanelConfig}
                   userId="current-user"
@@ -400,6 +401,7 @@ const DynamicPanelDemoClone = () => {
                   initialData={operationalDetailsData}
                   onTitleChange={setOperationalDetailsTitle}
                   onWidthChange={setOperationalDetailsWidth}
+                  onDataChange={handleOperationalDetailsDataChange}
                   getUserPanelConfig={getUserPanelConfig}
                   saveUserPanelConfig={saveUserPanelConfig}
                   userId="current-user"
@@ -422,6 +424,7 @@ const DynamicPanelDemoClone = () => {
                   initialData={billingDetailsData}
                   onTitleChange={setBillingDetailsTitle}
                   onWidthChange={setBillingDetailsWidth}
+                  onDataChange={handleBillingDetailsDataChange}
                   getUserPanelConfig={getUserPanelConfig}
                   saveUserPanelConfig={saveUserPanelConfig}
                   userId="current-user"
