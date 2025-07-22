@@ -103,8 +103,7 @@ const TripPlansSearchHubAPI = () => {
       sortable: true,
       editable: false,
       mandatory: true,
-      subRow: false,
-      filterMode: 'server'
+      subRow: false
     },
     {
       key: 'title',
@@ -112,8 +111,7 @@ const TripPlansSearchHubAPI = () => {
       type: 'Text',
       sortable: true,
       editable: true,
-      subRow: false,
-      filterMode: 'server'
+      subRow: false
     },
     {
       key: 'status',
@@ -121,8 +119,7 @@ const TripPlansSearchHubAPI = () => {
       type: 'Badge',
       sortable: true,
       editable: false,
-      subRow: false,
-      filterMode: 'server'
+      subRow: false
     },
     {
       key: 'startDate',
@@ -227,29 +224,19 @@ const TripPlansSearchHubAPI = () => {
   };
 
   const handleSearch = () => {
-    // Filter out empty values and format the search data for API
-    const apiFilters = Object.entries(searchData).reduce((acc, [key, value]) => {
-      if (value && value !== '') {
-        // Handle date formatting for API
-        if (key === 'startDate' || key === 'endDate') {
-          acc[key] = new Date(value).toISOString();
-        } else {
-          acc[key] = value;
-        }
-      }
-      return acc;
-    }, {} as Record<string, any>);
-
+    console.log('handleSearch');
     const newQueryParams: QueryParams = {
       ...queryParams,
       page: 1,
-      filters: apiFilters
+      filters: {
+        ...searchData
+      }
     };
     setQueryParams(newQueryParams);
     
     toast({
       title: "Search",
-      description: `Searching with ${Object.keys(apiFilters).length} filters...`
+      description: "Searching with filters..."
     });
   };
 
@@ -333,17 +320,17 @@ const TripPlansSearchHubAPI = () => {
 
   // Handle loading and error states
   if (error) {
-    // return (
-    //   <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-    //     <div className="text-center">
-    //       <h2 className="text-xl font-semibold text-red-600 mb-2">Error Loading Trips</h2>
-    //       <p className="text-gray-600 mb-4">Failed to load trip data from the server.</p>
-    //       <Button onClick={() => refetch()}>
-    //         Try Again
-    //       </Button>
-    //     </div>
-    //   </div>
-    // );
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-xl font-semibold text-red-600 mb-2">Error Loading Trips</h2>
+          <p className="text-gray-600 mb-4">Failed to load trip data from the server.</p>
+          <Button onClick={() => refetch()}>
+            Try Again
+          </Button>
+        </div>
+      </div>
+    );
   }
 
   return (
