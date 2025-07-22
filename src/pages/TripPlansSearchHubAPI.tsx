@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { SmartGrid } from '@/components/SmartGrid';
-import { GridColumnConfig, FilterConfig } from '@/types/smartgrid';
+import { GridColumnConfig } from '@/types/smartgrid';
 import { Button } from '@/components/ui/button';
 import { Plus, Upload } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -50,6 +50,7 @@ const TripPlansSearchHubAPI = () => {
       visible: true,
       editable: true,
       order: 1,
+       filterMode: 'server',
       placeholder: 'Enter trip plan number'
     },
     status: {
@@ -61,6 +62,7 @@ const TripPlansSearchHubAPI = () => {
       visible: true,
       editable: true,
       order: 2,
+       filterMode: 'server',
       options: [
         { label: 'Draft', value: 'draft' },
         { label: 'Pending', value: 'pending' },
@@ -76,6 +78,7 @@ const TripPlansSearchHubAPI = () => {
       mandatory: false,
       visible: true,
       editable: true,
+       filterMode: 'server',
       order: 3
     },
     endDate: {
@@ -101,8 +104,6 @@ const TripPlansSearchHubAPI = () => {
       label: 'Trip Plan No',
       type: 'Link',
       sortable: true,
-      filterable: true,
-      filterMode: 'server',
       editable: false,
       mandatory: true,
       subRow: false
@@ -112,8 +113,6 @@ const TripPlansSearchHubAPI = () => {
       label: 'Title',
       type: 'Text',
       sortable: true,
-      filterable: true,
-      filterMode: 'server',
       editable: true,
       subRow: false
     },
@@ -122,8 +121,6 @@ const TripPlansSearchHubAPI = () => {
       label: 'Status',
       type: 'Badge',
       sortable: true,
-      filterable: true,
-      filterMode: 'server',
       editable: false,
       subRow: false
     },
@@ -132,8 +129,6 @@ const TripPlansSearchHubAPI = () => {
       label: 'Start Date',
       type: 'Date',
       sortable: true,
-      filterable: true,
-      filterMode: 'local',
       editable: true,
       subRow: true
     },
@@ -142,8 +137,6 @@ const TripPlansSearchHubAPI = () => {
       label: 'End Date',
       type: 'Date',
       sortable: true,
-      filterable: true,
-      filterMode: 'local',
       editable: true,
       subRow: true
     },
@@ -152,8 +145,6 @@ const TripPlansSearchHubAPI = () => {
       label: 'Cost',
       type: 'Text',
       sortable: true,
-      filterable: true,
-      filterMode: 'local',
       editable: true,
       subRow: true
     },
@@ -162,8 +153,6 @@ const TripPlansSearchHubAPI = () => {
       label: 'Currency',
       type: 'Text',
       sortable: true,
-      filterable: true,
-      filterMode: 'local',
       editable: true,
       subRow: true
     },
@@ -172,8 +161,6 @@ const TripPlansSearchHubAPI = () => {
       label: 'Description',
       type: 'Text',
       sortable: false,
-      filterable: true,
-      filterMode: 'local',
       editable: true,
       subRow: false
     }
@@ -270,33 +257,6 @@ const TripPlansSearchHubAPI = () => {
     });
   };
 
-  // Handle server-side filtering for grid columns
-  const handleServerFilter = async (filters: FilterConfig[]) => {
-    console.log('Server-side filters applied:', filters);
-    
-    // Convert FilterConfig to QueryParams format
-    const filterParams: Record<string, any> = {};
-    filters.forEach(filter => {
-      filterParams[filter.column] = filter.value;
-    });
-    
-    const newQueryParams: QueryParams = {
-      ...queryParams,
-      page: 1, // Reset to first page when filtering
-      filters: {
-        ...queryParams.filters,
-        ...filterParams
-      }
-    };
-    
-    setQueryParams(newQueryParams);
-    
-    toast({
-      title: "Filters Applied",
-      description: `Applied ${filters.length} server-side filter(s)`,
-    });
-  };
-
   const handleCreateTrip = async () => {
     try {
       const newTrip: TripCreateInput = {
@@ -362,17 +322,17 @@ const TripPlansSearchHubAPI = () => {
 
   // Handle loading and error states
   if (error) {
-    // return (
-    //   <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-    //     <div className="text-center">
-    //       <h2 className="text-xl font-semibold text-red-600 mb-2">Error Loading Trips</h2>
-    //       <p className="text-gray-600 mb-4">Failed to load trip data from the server.</p>
-    //       <Button onClick={() => refetch()}>
-    //         Try Again
-    //       </Button>
-    //     </div>
-    //   </div>
-    // );
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-xl font-semibold text-red-600 mb-2">Error Loading Trips</h2>
+          <p className="text-gray-600 mb-4">Failed to load trip data from the server.</p>
+          <Button onClick={() => refetch()}>
+            Try Again
+          </Button>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -427,7 +387,6 @@ const TripPlansSearchHubAPI = () => {
             onLinkClick={handleLinkClick}
             onUpdate={handleUpdate}
             onSubRowToggle={gridState.handleSubRowToggle}
-            onServerFilter={handleServerFilter}
             selectedRows={selectedRows}
             onSelectionChange={handleRowSelection}
             rowClassName={(row: any, index: number) => 
