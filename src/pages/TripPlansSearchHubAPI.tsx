@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { SmartGrid } from '@/components/SmartGrid';
-import { GridColumnConfig } from '@/types/smartgrid';
+import { GridColumnConfig, FilterConfig } from '@/types/smartgrid';
 import { Button } from '@/components/ui/button';
 import { Plus, Upload } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -103,7 +103,9 @@ const TripPlansSearchHubAPI = () => {
       sortable: true,
       editable: false,
       mandatory: true,
-      subRow: false
+      subRow: false,
+      filterable: true,
+      filterMode: 'server'
     },
     {
       key: 'title',
@@ -111,7 +113,9 @@ const TripPlansSearchHubAPI = () => {
       type: 'Text',
       sortable: true,
       editable: true,
-      subRow: false
+      subRow: false,
+      filterable: true,
+      filterMode: 'server'
     },
     {
       key: 'status',
@@ -119,7 +123,9 @@ const TripPlansSearchHubAPI = () => {
       type: 'Badge',
       sortable: true,
       editable: false,
-      subRow: false
+      subRow: false,
+      filterable: true,
+      filterMode: 'server'
     },
     {
       key: 'startDate',
@@ -127,7 +133,9 @@ const TripPlansSearchHubAPI = () => {
       type: 'Date',
       sortable: true,
       editable: true,
-      subRow: true
+      subRow: true,
+      filterable: true,
+      filterMode: 'local'
     },
     {
       key: 'endDate',
@@ -135,7 +143,9 @@ const TripPlansSearchHubAPI = () => {
       type: 'Date',
       sortable: true,
       editable: true,
-      subRow: true
+      subRow: true,
+      filterable: true,
+      filterMode: 'local'
     },
     {
       key: 'cost',
@@ -143,7 +153,9 @@ const TripPlansSearchHubAPI = () => {
       type: 'Text',
       sortable: true,
       editable: true,
-      subRow: true
+      subRow: true,
+      filterable: true,
+      filterMode: 'local'
     },
     {
       key: 'currency',
@@ -151,7 +163,9 @@ const TripPlansSearchHubAPI = () => {
       type: 'Text',
       sortable: true,
       editable: true,
-      subRow: true
+      subRow: true,
+      filterable: true,
+      filterMode: 'local'
     },
     {
       key: 'description',
@@ -159,7 +173,9 @@ const TripPlansSearchHubAPI = () => {
       type: 'Text',
       sortable: false,
       editable: true,
-      subRow: false
+      subRow: false,
+      filterable: true,
+      filterMode: 'local'
     }
   ];
 
@@ -280,6 +296,35 @@ const TripPlansSearchHubAPI = () => {
     });
   };
 
+  const handleServerFilter = async (filters: FilterConfig[]) => {
+    console.log('Server filters applied:', filters);
+    
+    // Convert FilterConfig[] to QueryParams filters format
+    const serverFilters: Record<string, any> = {};
+    
+    filters.forEach(filter => {
+      if (filter.value !== undefined && filter.value !== null && filter.value !== '') {
+        serverFilters[filter.column] = filter.value;
+      }
+    });
+    
+    const newQueryParams: QueryParams = {
+      ...queryParams,
+      page: 1, // Reset to first page when filtering
+      filters: {
+        ...queryParams.filters,
+        ...serverFilters
+      }
+    };
+    
+    setQueryParams(newQueryParams);
+    
+    toast({
+      title: "Column Filters Applied",
+      description: `Applied ${filters.length} server-side filters`
+    });
+  };
+
   // Configure the Create Trip button for the grid toolbar
   const gridConfigurableButtons: ConfigurableButtonConfig[] = [
     {
@@ -385,6 +430,7 @@ const TripPlansSearchHubAPI = () => {
             onLinkClick={handleLinkClick}
             onUpdate={handleUpdate}
             onSubRowToggle={gridState.handleSubRowToggle}
+            onServerFilter={handleServerFilter}
             selectedRows={selectedRows}
             onSelectionChange={handleRowSelection}
             rowClassName={(row: any, index: number) => 
