@@ -227,18 +227,29 @@ const TripPlansSearchHubAPI = () => {
   };
 
   const handleSearch = () => {
+    // Filter out empty values and format the search data for API
+    const apiFilters = Object.entries(searchData).reduce((acc, [key, value]) => {
+      if (value && value !== '') {
+        // Handle date formatting for API
+        if (key === 'startDate' || key === 'endDate') {
+          acc[key] = new Date(value).toISOString();
+        } else {
+          acc[key] = value;
+        }
+      }
+      return acc;
+    }, {} as Record<string, any>);
+
     const newQueryParams: QueryParams = {
       ...queryParams,
       page: 1,
-      filters: {
-        ...searchData
-      }
+      filters: apiFilters
     };
     setQueryParams(newQueryParams);
     
     toast({
       title: "Search",
-      description: "Searching with filters..."
+      description: `Searching with ${Object.keys(apiFilters).length} filters...`
     });
   };
 
