@@ -20,7 +20,6 @@ export interface GridColumnConfig {
   width?: number;          // Column width in pixels
   sortable?: boolean;
   filterable?: boolean;
-  filterMode?: 'local' | 'server'; // Determines if filtering is done locally or on server
   editable?: boolean;
   mandatory?: boolean;
   hidden?: boolean;
@@ -120,7 +119,6 @@ export interface SmartGridProps {
   onUpdate?(row: any): Promise<void>;
   onLinkClick?(rowData: any, columnKey: string): void;
   onSubRowToggle?(columnKey: string): void;
-  onServerFilter?(filters: FilterConfig[]): Promise<void>;
   paginationMode?: 'pagination' | 'infinite';
   nestedRowRenderer?(row: any, rowIndex: number): React.ReactNode;
   plugins?: GridPlugin[];

@@ -32,16 +32,10 @@ export function processGridData(
     );
   }
 
-  // Apply column filters (only local filters - server filters are handled separately)
+  // Apply column filters
   if (filters.length > 0) {
     result = result.filter(row => {
       return filters.every(filter => {
-        // Only process filters that are for local filtering
-        const column = columns.find(col => col.key === filter.column);
-        if (column?.filterMode === 'server') {
-          return true; // Skip server-side filters in local processing
-        }
-        
         // Handle sub-row filters (prefixed with 'subrow-')
         const isSubRowFilter = filter.column.startsWith('subrow-');
         const actualColumnKey = isSubRowFilter ? filter.column.replace('subrow-', '') : filter.column;

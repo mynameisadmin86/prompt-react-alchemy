@@ -41,7 +41,6 @@ export function SmartGrid({
   onUpdate,
   onLinkClick,
   onSubRowToggle,
-  onServerFilter,
   paginationMode = 'pagination',
   nestedRowRenderer,
   plugins = [],
@@ -298,33 +297,8 @@ export function SmartGrid({
       value: filterValue.value,
       operator: filterValue.operator || 'contains'
     }));
-    
-    // Check if any filters require server-side processing
-    const serverFilters = legacyFilters.filter(filter => {
-      const column = currentColumns.find(col => col.key === filter.column);
-      return column?.filterMode === 'server';
-    });
-    
-    const localFilters = legacyFilters.filter(filter => {
-      const column = currentColumns.find(col => col.key === filter.column);
-      return column?.filterMode !== 'server';
-    });
-    
-    // Apply server-side filters if any and onServerFilter is provided
-    if (serverFilters.length > 0 && onServerFilter) {
-      onServerFilter(serverFilters).catch(error => {
-        console.error('Server-side filtering failed:', error);
-        toast({
-          title: "Error",
-          description: "Failed to apply server-side filters",
-          variant: "destructive"
-        });
-      });
-    }
-    
-    // Set local filters only
-    setFilters(localFilters);
-  }, [setFilters, currentColumns, onServerFilter, toast]);
+    setFilters(legacyFilters);
+  }, [setFilters]);
 
   // Define handleExport and handleResetPreferences after processedData and orderedColumns
   const handleExport = useCallback((format: 'csv') => {
@@ -918,7 +892,7 @@ export function SmartGrid({
                               currentFilter={currentFilter}
                               onFilterChange={(filter) => {
                                 if (filter) {
-                                  handleColumnFilterChange(filter, column, onServerFilter);
+                                  handleColumnFilterChange(filter);
                                 } else {
                                   handleClearColumnFilter(column.key);
                                 }
