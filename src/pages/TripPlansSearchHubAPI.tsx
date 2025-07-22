@@ -319,17 +319,17 @@ const TripPlansSearchHubAPI = () => {
 
   // Handle loading and error states
   if (error) {
-    // return (
-    //   <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-    //     <div className="text-center">
-    //       <h2 className="text-xl font-semibold text-red-600 mb-2">Error Loading Trips</h2>
-    //       <p className="text-gray-600 mb-4">Failed to load trip data from the server.</p>
-    //       <Button onClick={() => refetch()}>
-    //         Try Again
-    //       </Button>
-    //     </div>
-    //   </div>
-    // );
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-xl font-semibold text-red-600 mb-2">Error Loading Trips</h2>
+          <p className="text-gray-600 mb-4">Failed to load trip data from the server.</p>
+          <Button onClick={() => refetch()}>
+            Try Again
+          </Button>
+        </div>
+      </div>
+    );
   }
 
   return (

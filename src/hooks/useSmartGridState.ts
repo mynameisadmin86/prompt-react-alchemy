@@ -26,22 +26,47 @@ export function useSmartGridState() {
   const [subRowColumnOrder, setSubRowColumnOrder] = useState<string[]>([]);
   const resizeStartRef = useRef<{ x: number; width: number } | null>(null);
 
-  const handleColumnFilterChange = useCallback((filter: FilterConfig | null) => {
+  const handleColumnFilterChange = useCallback((filter: FilterConfig | null, column?: any, onServerFilter?: (filters: FilterConfig[]) => Promise<void>) => {
     if (!filter) {
       return;
     }
 
-    setFilters(prev => {
-      const existing = prev.find(f => f.column === filter.column);
+    // Check if this column requires server-side filtering
+    if (column?.filterMode === 'server' && onServerFilter) {
+      // For server-side filtering, call the API
+      const updatedFilters = [...filters];
+      const existingIndex = updatedFilters.findIndex(f => f.column === filter.column);
+      
       if (filter.value === '' || filter.value == null) {
-        return prev.filter(f => f.column !== filter.column);
-      } else if (existing) {
-        return prev.map(f => f.column === filter.column ? filter : f);
+        if (existingIndex >= 0) {
+          updatedFilters.splice(existingIndex, 1);
+        }
+      } else if (existingIndex >= 0) {
+        updatedFilters[existingIndex] = filter;
       } else {
-        return [...prev, filter];
+        updatedFilters.push(filter);
       }
-    });
-  }, []);
+      
+      // Call server-side filter API
+      onServerFilter(updatedFilters).then(() => {
+        setFilters(updatedFilters);
+      }).catch(error => {
+        console.error('Server-side filtering failed:', error);
+      });
+    } else {
+      // Local filtering (existing behavior)
+      setFilters(prev => {
+        const existing = prev.find(f => f.column === filter.column);
+        if (filter.value === '' || filter.value == null) {
+          return prev.filter(f => f.column !== filter.column);
+        } else if (existing) {
+          return prev.map(f => f.column === filter.column ? filter : f);
+        } else {
+          return [...prev, filter];
+        }
+      });
+    }
+  }, [filters]);
 
   const handleClearColumnFilter = useCallback((columnKey: string) => {
     setFilters(prev => prev.filter(f => f.column !== columnKey));
