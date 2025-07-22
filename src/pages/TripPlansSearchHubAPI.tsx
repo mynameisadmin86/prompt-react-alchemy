@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { SmartGrid } from '@/components/SmartGrid';
-import { GridColumnConfig } from '@/types/smartgrid';
+import { GridColumnConfig, FilterConfig } from '@/types/smartgrid';
 import { Button } from '@/components/ui/button';
 import { Plus, Upload } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -101,6 +101,8 @@ const TripPlansSearchHubAPI = () => {
       label: 'Trip Plan No',
       type: 'Link',
       sortable: true,
+      filterable: true,
+      filterMode: 'server',
       editable: false,
       mandatory: true,
       subRow: false
@@ -110,6 +112,8 @@ const TripPlansSearchHubAPI = () => {
       label: 'Title',
       type: 'Text',
       sortable: true,
+      filterable: true,
+      filterMode: 'server',
       editable: true,
       subRow: false
     },
@@ -118,6 +122,8 @@ const TripPlansSearchHubAPI = () => {
       label: 'Status',
       type: 'Badge',
       sortable: true,
+      filterable: true,
+      filterMode: 'server',
       editable: false,
       subRow: false
     },
@@ -126,6 +132,8 @@ const TripPlansSearchHubAPI = () => {
       label: 'Start Date',
       type: 'Date',
       sortable: true,
+      filterable: true,
+      filterMode: 'local',
       editable: true,
       subRow: true
     },
@@ -134,6 +142,8 @@ const TripPlansSearchHubAPI = () => {
       label: 'End Date',
       type: 'Date',
       sortable: true,
+      filterable: true,
+      filterMode: 'local',
       editable: true,
       subRow: true
     },
@@ -142,6 +152,8 @@ const TripPlansSearchHubAPI = () => {
       label: 'Cost',
       type: 'Text',
       sortable: true,
+      filterable: true,
+      filterMode: 'local',
       editable: true,
       subRow: true
     },
@@ -150,6 +162,8 @@ const TripPlansSearchHubAPI = () => {
       label: 'Currency',
       type: 'Text',
       sortable: true,
+      filterable: true,
+      filterMode: 'local',
       editable: true,
       subRow: true
     },
@@ -158,6 +172,8 @@ const TripPlansSearchHubAPI = () => {
       label: 'Description',
       type: 'Text',
       sortable: false,
+      filterable: true,
+      filterMode: 'local',
       editable: true,
       subRow: false
     }
@@ -251,6 +267,33 @@ const TripPlansSearchHubAPI = () => {
     toast({
       title: "Cleared",
       description: "Search filters have been cleared"
+    });
+  };
+
+  // Handle server-side filtering for grid columns
+  const handleServerFilter = async (filters: FilterConfig[]) => {
+    console.log('Server-side filters applied:', filters);
+    
+    // Convert FilterConfig to QueryParams format
+    const filterParams: Record<string, any> = {};
+    filters.forEach(filter => {
+      filterParams[filter.column] = filter.value;
+    });
+    
+    const newQueryParams: QueryParams = {
+      ...queryParams,
+      page: 1, // Reset to first page when filtering
+      filters: {
+        ...queryParams.filters,
+        ...filterParams
+      }
+    };
+    
+    setQueryParams(newQueryParams);
+    
+    toast({
+      title: "Filters Applied",
+      description: `Applied ${filters.length} server-side filter(s)`,
     });
   };
 
@@ -384,6 +427,7 @@ const TripPlansSearchHubAPI = () => {
             onLinkClick={handleLinkClick}
             onUpdate={handleUpdate}
             onSubRowToggle={gridState.handleSubRowToggle}
+            onServerFilter={handleServerFilter}
             selectedRows={selectedRows}
             onSelectionChange={handleRowSelection}
             rowClassName={(row: any, index: number) => 
