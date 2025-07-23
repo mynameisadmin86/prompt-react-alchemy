@@ -92,6 +92,28 @@ const DynamicPanelDemoClone = () => {
         }
       }
     },
+    unitPrice: {
+      id: 'unitPrice',
+      label: 'Unit Price',
+      fieldType: 'inputdropdown',
+      value: { dropdown: '€', input: '' },
+      mandatory: false,
+      visible: true,
+      editable: true,
+      order: 4,
+      placeholder: 'Enter Value',
+      options: [
+        { label: '€', value: '€' },
+        { label: '$', value: '$' },
+        { label: '£', value: '£' },
+        { label: '¥', value: '¥' }
+      ],
+      events: {
+        onChange: (value, event) => {
+          console.log('unitPrice changed:', value);
+        }
+      }
+    },
     description: {
       id: 'description',
       label: 'Description',
@@ -100,7 +122,7 @@ const DynamicPanelDemoClone = () => {
       mandatory: false,
       visible: true,
       editable: true,
-      order: 4,
+      order: 5,
       placeholder: 'Enter trip description...',
       events: {
         onBlur: (event) => {
@@ -116,7 +138,7 @@ const DynamicPanelDemoClone = () => {
       mandatory: false,
       visible: true,
       editable: true,
-      order: 5,
+      order: 6,
       options: [
         { label: 'High', value: 'high' },
         { label: 'Medium', value: 'medium' },
