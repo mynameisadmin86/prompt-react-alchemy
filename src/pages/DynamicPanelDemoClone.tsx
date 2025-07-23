@@ -14,20 +14,9 @@ import {
 } from "@/components/ui/breadcrumb";
 
 const DynamicPanelDemoClone = () => {
-  const [basicDetailsData, setBasicDetailsData] = useState({
-    tripPlanNo: 'TRIP00000001',
-    customerName: 'db-cargo',
-    contractType: 'fixed',
-    unitPrice: { dropdown: '€', input: '100' },
-    priority: 'medium'
-  });
-  const [operationalDetailsData, setOperationalDetailsData] = useState({
-    trainType: 'freight'
-  });
-  const [billingDetailsData, setBillingDetailsData] = useState({
-    billingStatus: 'draft',
-    paymentTerms: 'net-30'
-  });
+  const [basicDetailsData, setBasicDetailsData] = useState({});
+  const [operationalDetailsData, setOperationalDetailsData] = useState({});
+  const [billingDetailsData, setBillingDetailsData] = useState({});
 
   // Panel titles state
   const [basicDetailsTitle, setBasicDetailsTitle] = useState('Basic Details');
@@ -78,7 +67,7 @@ const DynamicPanelDemoClone = () => {
       id: 'customerName',
       label: 'Customer Name',
       fieldType: 'select',
-      value: 'db-cargo',
+      value: '',
       mandatory: true,
       visible: true,
       editable: true,
@@ -93,7 +82,7 @@ const DynamicPanelDemoClone = () => {
       id: 'contractType',
       label: 'Contract Type',
       fieldType: 'select',
-      value: 'fixed',
+      value: '',
       mandatory: false,
       visible: true,
       editable: true,
@@ -113,7 +102,7 @@ const DynamicPanelDemoClone = () => {
       id: 'unitPrice',
       label: 'Unit Price',
       fieldType: 'inputdropdown',
-      value: { dropdown: '€', input: '100' },
+      value: { dropdown: '€', input: '' },
       mandatory: false,
       visible: true,
       editable: true,
@@ -151,7 +140,7 @@ const DynamicPanelDemoClone = () => {
       id: 'priority',
       label: 'Priority',
       fieldType: 'select',
-      value: 'medium',
+      value: '',
       mandatory: false,
       visible: true,
       editable: true,
@@ -242,7 +231,7 @@ const DynamicPanelDemoClone = () => {
       id: 'trainType',
       label: 'Train Type',
       fieldType: 'select',
-      value: 'freight',
+      value: '',
       mandatory: false,
       visible: true,
       editable: true,
@@ -291,7 +280,7 @@ const DynamicPanelDemoClone = () => {
       id: 'billingStatus',
       label: 'Billing Status',
       fieldType: 'select',
-      value: 'draft',
+      value: '',
       mandatory: true,
       visible: true,
       editable: true,
@@ -307,7 +296,7 @@ const DynamicPanelDemoClone = () => {
       id: 'paymentTerms',
       label: 'Payment Terms',
       fieldType: 'select',
-      value: 'net-30',
+      value: '',
       mandatory: false,
       visible: true,
       editable: true,
