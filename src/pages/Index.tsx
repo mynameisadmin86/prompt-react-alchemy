@@ -68,6 +68,13 @@ const Index = () => {
       icon: PanelLeft,
       path: "/side-drawer-demo",
       color: "text-teal-600"
+    },
+    {
+      title: "SmartGridPlus Demo",
+      description: "Enhanced grid with inline row addition and editing capabilities",
+      icon: Grid3x3,
+      path: "/smart-grid-plus-demo",
+      color: "text-emerald-600"
     }
   ];
 
