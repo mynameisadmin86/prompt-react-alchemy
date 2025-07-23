@@ -2,7 +2,7 @@
 export interface FieldConfig {
   id: string;
   label: string;
-  fieldType: 'text' | 'select' | 'search' | 'currency' | 'date' | 'time' | 'textarea' | 'radio' | 'card';
+  fieldType: 'text' | 'select' | 'search' | 'currency' | 'date' | 'time' | 'textarea' | 'radio' | 'card' | 'inputdropdown';
   value: any;
   mandatory: boolean;
   visible: boolean;

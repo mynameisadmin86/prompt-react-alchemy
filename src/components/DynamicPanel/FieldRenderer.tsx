@@ -330,6 +330,71 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
         />
       );
 
+    case 'inputdropdown':
+      return (
+        <Controller
+          name={fieldId}
+          control={control}
+          render={({ field }) => {
+            const eventHandlers = createEventHandlers(field);
+            const fieldValue = field.value || {};
+            const dropdownValue = fieldValue.dropdown || '';
+            const inputValue = fieldValue.input || '';
+            
+            return (
+              <div>
+                <div className="text-xs text-blue-600 mb-1">TabIndex: {tabIndex}</div>
+                <div className="flex focus-within:z-50 relative">
+                  <div className="relative">
+                    <select
+                      value={dropdownValue}
+                      onChange={(e) => {
+                        const newValue = { ...fieldValue, dropdown: e.target.value };
+                        field.onChange(newValue);
+                        events?.onChange?.(newValue, e);
+                      }}
+                      className="h-8 px-3 text-xs rounded-l-md border border-r-0 border-gray-300 bg-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:z-50 focus:relative focus:outline-none appearance-none min-w-[60px]"
+                      tabIndex={tabIndex}
+                      onClick={events?.onClick ? (e) => events.onClick!(e, fieldValue) : undefined}
+                      onFocus={events?.onFocus}
+                      onBlur={events?.onBlur}
+                    >
+                      {options?.map((option) => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                    <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+                      <svg className="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </div>
+                  </div>
+                  <Input
+                    type="text"
+                    value={inputValue}
+                    onChange={(e) => {
+                      const newValue = { ...fieldValue, input: e.target.value };
+                      field.onChange(newValue);
+                      events?.onChange?.(newValue, e);
+                    }}
+                    placeholder={placeholder || 'Enter Value'}
+                    className={`${baseInputClasses} rounded-l-none border-l-0 flex-1`}
+                    tabIndex={tabIndex ? tabIndex + 1 : undefined}
+                    onClick={events?.onClick ? (e) => events.onClick!(e, fieldValue) : undefined}
+                    onFocus={events?.onFocus}
+                    onBlur={events?.onBlur}
+                    onKeyDown={events?.onKeyDown}
+                    onKeyUp={events?.onKeyUp}
+                  />
+                </div>
+              </div>
+            );
+          }}
+        />
+      );
+
     default:
       return (
         <Controller
