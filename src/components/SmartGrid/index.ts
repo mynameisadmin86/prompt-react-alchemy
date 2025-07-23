@@ -1,5 +1,6 @@
 
 export { SmartGrid } from './SmartGrid';
+export { SmartGridPlus } from './SmartGridPlus';
 export { CellEditor } from './CellEditor';
 export { ColumnManager } from './ColumnManager';
 export { ColumnVisibilityManager } from './ColumnVisibilityManager';

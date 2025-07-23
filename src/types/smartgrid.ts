@@ -186,3 +186,25 @@ export interface CellEditProps {
   onSave: (value: any) => void;
   onCancel: () => void;
 }
+
+// SmartGridPlus specific interfaces
+export interface SmartGridPlusProps extends SmartGridProps {
+  // Row operations
+  inlineRowAddition?: boolean;
+  inlineRowEditing?: boolean;
+  onAddRow?: (row: any) => Promise<void> | void;
+  onEditRow?: (row: any, rowIndex: number) => Promise<void> | void;
+  onDeleteRow?: (row: any, rowIndex: number) => Promise<void> | void;
+  
+  // Default values and validation
+  defaultRowValues?: Record<string, any>;
+  validationRules?: {
+    requiredFields?: string[];
+    maxLength?: Record<string, number>;
+    customValidationFn?: (values: Record<string, any>) => Record<string, string>;
+  };
+  
+  // UI configuration
+  addRowButtonLabel?: string;
+  addRowButtonPosition?: "top-left" | "top-right" | "top";
+}
