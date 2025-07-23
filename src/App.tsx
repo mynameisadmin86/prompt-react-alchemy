@@ -14,6 +14,7 @@ import FlexGridDemo from "./pages/FlexGridDemo";
 import FlexGridLayoutPage from "./pages/FlexGridLayoutPage";
 import TripExecution from "./pages/TripExecution";
 import SideDrawerDemo from "./pages/SideDrawerDemo";
+import SmartGridPlusDemo from "./pages/SmartGridPlusDemo";
 import BillingDemo from "./pages/BillingDemo";
 import NotFound from "./pages/NotFound";
 
@@ -36,6 +37,7 @@ const App = () => (
           <Route path="/flex-grid-layout-page" element={<FlexGridLayoutPage />} />
           <Route path="/trip-execution" element={<TripExecution />} />
           <Route path="/side-drawer-demo" element={<SideDrawerDemo />} />
+          <Route path="/smart-grid-plus-demo" element={<SmartGridPlusDemo />} />
           <Route path="/billing-demo" element={<BillingDemo />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
