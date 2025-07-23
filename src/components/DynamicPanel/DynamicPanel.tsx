@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useImperativeHandle, forwardRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -9,7 +9,11 @@ import { EnhancedFieldVisibilityModal } from './EnhancedFieldVisibilityModal';
 import { PanelStatusIndicator } from './PanelStatusIndicator';
 import { DynamicPanelProps, PanelConfig, PanelSettings } from '@/types/dynamicPanel';
 
-export const DynamicPanel: React.FC<DynamicPanelProps> = ({
+export interface DynamicPanelRef {
+  getFormValues: () => any;
+}
+
+export const DynamicPanel = forwardRef<DynamicPanelRef, DynamicPanelProps>(({
   panelId,
   panelOrder = 1,
   startingTabIndex = 1,
@@ -27,7 +31,7 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
   panelWidth = 'full',
   collapsible = false,
   showPreview = false
-}) => {
+}, ref) => {
   const [panelConfig, setPanelConfig] = useState<PanelConfig>(initialPanelConfig);
   const [panelTitle, setPanelTitle] = useState(initialPanelTitle);
   const [currentPanelWidth, setCurrentPanelWidth] = useState<'full' | 'half' | 'third' | 'quarter' | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12>(panelWidth);
@@ -46,6 +50,11 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
   });
 
   const { control, watch, setValue, getValues } = form;
+
+  // Expose getFormValues method via ref
+  useImperativeHandle(ref, () => ({
+    getFormValues: () => getValues()
+  }), [getValues]);
 
   // Load user configuration on mount
   useEffect(() => {
@@ -365,4 +374,4 @@ export const DynamicPanel: React.FC<DynamicPanelProps> = ({
       )}
     </Card>
   );
-};
+});

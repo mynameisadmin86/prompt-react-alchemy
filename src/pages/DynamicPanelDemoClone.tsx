@@ -1,8 +1,9 @@
-import React, { useState, useCallback } from 'react';
-import { DynamicPanel } from '@/components/DynamicPanel';
+import React, { useState, useCallback, useRef } from 'react';
+import { DynamicPanel, type DynamicPanelRef } from '@/components/DynamicPanel';
 import { PanelVisibilityManager } from '@/components/DynamicPanel/PanelVisibilityManager';
 import { PanelConfig, PanelSettings } from '@/types/dynamicPanel';
-import { EyeOff } from 'lucide-react';
+import { EyeOff, RefreshCw } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import {
   Breadcrumb,
   BreadcrumbList,
@@ -44,6 +45,11 @@ const DynamicPanelDemoClone = () => {
   const [basicDetailsVisible, setBasicDetailsVisible] = useState(true);
   const [operationalDetailsVisible, setOperationalDetailsVisible] = useState(true);
   const [billingDetailsVisible, setBillingDetailsVisible] = useState(true);
+
+  // Panel refs for getting form values
+  const basicDetailsRef = useRef<DynamicPanelRef>(null);
+  const operationalDetailsRef = useRef<DynamicPanelRef>(null);
+  const billingDetailsRef = useRef<DynamicPanelRef>(null);
 
   // Basic Details Panel Configuration
   const basicDetailsConfig: PanelConfig = {
@@ -345,6 +351,19 @@ const DynamicPanelDemoClone = () => {
     }
   };
 
+  // Function to get form values from all panels
+  const handleGetFormValues = () => {
+    const formValues = {
+      basicDetails: basicDetailsRef.current?.getFormValues() || {},
+      operationalDetails: operationalDetailsRef.current?.getFormValues() || {},
+      billingDetails: billingDetailsRef.current?.getFormValues() || {}
+    };
+    
+    setBasicDetailsData(formValues.basicDetails);
+    setOperationalDetailsData(formValues.operationalDetails);
+    setBillingDetailsData(formValues.billingDetails);
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto p-6 space-y-6">
@@ -373,10 +392,21 @@ const DynamicPanelDemoClone = () => {
               Clone version - Configure field visibility, ordering, and labels for each panel
             </p>
           </div>
-          <PanelVisibilityManager
-            panels={panels}
-            onVisibilityChange={handlePanelVisibilityChange}
-          />
+          <div className="flex items-center gap-3">
+            <Button 
+              onClick={handleGetFormValues}
+              variant="outline"
+              size="sm"
+              className="flex items-center gap-2"
+            >
+              <RefreshCw className="h-4 w-4" />
+              Get Form Values
+            </Button>
+            <PanelVisibilityManager
+              panels={panels}
+              onVisibilityChange={handlePanelVisibilityChange}
+            />
+          </div>
         </div>
 
         {/* Dynamic Panels in 12-column grid */}
@@ -390,6 +420,7 @@ const DynamicPanelDemoClone = () => {
               const basicDetailsVisibleCount = Object.values(basicDetailsConfig).filter(config => config.visible).length;
               panels.push(
                 <DynamicPanel
+                  ref={basicDetailsRef}
                   key="basic-details"
                   panelId="basic-details"
                   panelOrder={1}
@@ -414,6 +445,7 @@ const DynamicPanelDemoClone = () => {
               const operationalDetailsVisibleCount = Object.values(operationalDetailsConfig).filter(config => config.visible).length;
               panels.push(
                 <DynamicPanel
+                  ref={operationalDetailsRef}
                   key="operational-details"
                   panelId="operational-details"
                   panelOrder={2}
@@ -437,6 +469,7 @@ const DynamicPanelDemoClone = () => {
             if (billingDetailsVisible) {
               panels.push(
                 <DynamicPanel
+                  ref={billingDetailsRef}
                   key="billing-details"
                   panelId="billing-details"
                   panelOrder={3}
