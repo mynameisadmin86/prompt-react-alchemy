@@ -2,7 +2,8 @@ import React, { useState, useCallback } from 'react';
 import { DynamicPanel } from '@/components/DynamicPanel';
 import { PanelVisibilityManager } from '@/components/DynamicPanel/PanelVisibilityManager';
 import { PanelConfig, PanelSettings } from '@/types/dynamicPanel';
-import { EyeOff } from 'lucide-react';
+import { EyeOff, RefreshCw } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import {
   Breadcrumb,
   BreadcrumbList,
@@ -16,6 +17,11 @@ const DynamicPanelDemoClone = () => {
   const [basicDetailsData, setBasicDetailsData] = useState({});
   const [operationalDetailsData, setOperationalDetailsData] = useState({});
   const [billingDetailsData, setBillingDetailsData] = useState({});
+  
+  // Captured form data state for manual updates
+  const [capturedBasicDetailsData, setCapturedBasicDetailsData] = useState({});
+  const [capturedOperationalDetailsData, setCapturedOperationalDetailsData] = useState({});
+  const [capturedBillingDetailsData, setCapturedBillingDetailsData] = useState({});
 
   // Panel titles state
   const [basicDetailsTitle, setBasicDetailsTitle] = useState('Basic Details');
@@ -345,6 +351,13 @@ const DynamicPanelDemoClone = () => {
     }
   };
 
+  // Function to capture current form values
+  const captureFormValues = () => {
+    setCapturedBasicDetailsData({ ...basicDetailsData });
+    setCapturedOperationalDetailsData({ ...operationalDetailsData });
+    setCapturedBillingDetailsData({ ...billingDetailsData });
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto p-6 space-y-6">
@@ -398,6 +411,7 @@ const DynamicPanelDemoClone = () => {
                   panelConfig={basicDetailsConfig}
                   formName="basicDetailsForm"
                   initialData={basicDetailsData}
+                  onDataChange={handleBasicDetailsDataChange}
                   onTitleChange={setBasicDetailsTitle}
                   onWidthChange={setBasicDetailsWidth}
                   getUserPanelConfig={getUserPanelConfig}
@@ -422,6 +436,7 @@ const DynamicPanelDemoClone = () => {
                   panelConfig={operationalDetailsConfig}
                   formName="operationalDetailsForm"
                   initialData={operationalDetailsData}
+                  onDataChange={handleOperationalDetailsDataChange}
                   onTitleChange={setOperationalDetailsTitle}
                   onWidthChange={setOperationalDetailsWidth}
                   getUserPanelConfig={getUserPanelConfig}
@@ -445,6 +460,7 @@ const DynamicPanelDemoClone = () => {
                   panelConfig={billingDetailsConfig}
                   formName="billingDetailsForm"
                   initialData={billingDetailsData}
+                  onDataChange={handleBillingDetailsDataChange}
                   onTitleChange={setBillingDetailsTitle}
                   onWidthChange={setBillingDetailsWidth}
                   getUserPanelConfig={getUserPanelConfig}
@@ -471,13 +487,19 @@ const DynamicPanelDemoClone = () => {
         {/* Debug Data Display */}
         {(basicDetailsVisible || operationalDetailsVisible || billingDetailsVisible) && (
           <div className="bg-white p-6 rounded-lg shadow-sm">
-            <h3 className="text-lg font-semibold mb-4">Current Form Data</h3>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold">Current Form Data</h3>
+              <Button onClick={captureFormValues} variant="outline" className="flex items-center gap-2">
+                <RefreshCw className="h-4 w-4" />
+                Get Form Values
+              </Button>
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {basicDetailsVisible && (
                 <div>
                   <h4 className="font-medium text-gray-700 mb-2">{basicDetailsTitle}</h4>
                   <pre className="text-xs bg-gray-100 p-3 rounded overflow-auto">
-                    {JSON.stringify(basicDetailsData, null, 2)}
+                    {JSON.stringify(capturedBasicDetailsData, null, 2)}
                   </pre>
                 </div>
               )}
@@ -485,7 +507,7 @@ const DynamicPanelDemoClone = () => {
                 <div>
                   <h4 className="font-medium text-gray-700 mb-2">{operationalDetailsTitle}</h4>
                   <pre className="text-xs bg-gray-100 p-3 rounded overflow-auto">
-                    {JSON.stringify(operationalDetailsData, null, 2)}
+                    {JSON.stringify(capturedOperationalDetailsData, null, 2)}
                   </pre>
                 </div>
               )}
@@ -493,7 +515,7 @@ const DynamicPanelDemoClone = () => {
                 <div>
                   <h4 className="font-medium text-gray-700 mb-2">{billingDetailsTitle}</h4>
                   <pre className="text-xs bg-gray-100 p-3 rounded overflow-auto">
-                    {JSON.stringify(billingDetailsData, null, 2)}
+                    {JSON.stringify(capturedBillingDetailsData, null, 2)}
                   </pre>
                 </div>
               )}
