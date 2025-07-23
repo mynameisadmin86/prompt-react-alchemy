@@ -43,9 +43,26 @@ export const DynamicPanel = forwardRef<DynamicPanelRef, DynamicPanelProps>(({
   const [isConfigModalOpen, setIsConfigModalOpen] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
 
+  // Extract default values from panel configuration
+  const getDefaultValuesFromConfig = useCallback((config: PanelConfig) => {
+    const defaultValues: any = {};
+    Object.entries(config).forEach(([fieldId, fieldConfig]) => {
+      if (fieldConfig.value !== undefined && fieldConfig.value !== '') {
+        defaultValues[fieldId] = fieldConfig.value;
+      }
+    });
+    return defaultValues;
+  }, []);
+
+  // Merge initial data with config default values
+  const mergedDefaultValues = useMemo(() => {
+    const configDefaults = getDefaultValuesFromConfig(initialPanelConfig);
+    return { ...configDefaults, ...initialData };
+  }, [initialData, initialPanelConfig, getDefaultValuesFromConfig]);
+
   // Initialize react-hook-form
   const form = useForm({
-    defaultValues: initialData,
+    defaultValues: mergedDefaultValues,
     mode: 'onBlur'
   });
 
