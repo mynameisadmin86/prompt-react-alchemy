@@ -14,7 +14,16 @@ const initialData = [
     category: 'Electronics',
     status: 'Active',
     dateAdded: '2024-01-15',
-    supplier: 'TechCorp'
+    supplier: 'TechCorp',
+    specifications: [
+      { spec: 'RAM', value: '16GB DDR4' },
+      { spec: 'Storage', value: '512GB SSD' },
+      { spec: 'Processor', value: 'Intel i7' }
+    ],
+    reviews: [
+      { reviewer: 'John D.', rating: 5, comment: 'Excellent performance' },
+      { reviewer: 'Jane S.', rating: 4, comment: 'Great value for money' }
+    ]
   },
   {
     id: '2',
@@ -24,7 +33,15 @@ const initialData = [
     category: 'Furniture',
     status: 'Active',
     dateAdded: '2024-01-10',
-    supplier: 'FurniCorp'
+    supplier: 'FurniCorp',
+    specifications: [
+      { spec: 'Material', value: 'Mesh Back' },
+      { spec: 'Height', value: 'Adjustable' },
+      { spec: 'Wheels', value: 'Caster Wheels' }
+    ],
+    reviews: [
+      { reviewer: 'Mike R.', rating: 4, comment: 'Very comfortable' }
+    ]
   },
   {
     id: '3',
@@ -34,7 +51,15 @@ const initialData = [
     category: 'Electronics',
     status: 'Low Stock',
     dateAdded: '2024-01-08',
-    supplier: 'MobileTech'
+    supplier: 'MobileTech',
+    specifications: [
+      { spec: 'Screen', value: '6.5" OLED' },
+      { spec: 'Camera', value: '108MP Triple' },
+      { spec: 'Battery', value: '4500mAh' }
+    ],
+    reviews: [
+      { reviewer: 'Sarah T.', rating: 5, comment: 'Amazing camera quality' }
+    ]
   }
 ];
 
@@ -101,6 +126,31 @@ const columns: GridColumnConfig[] = [
     width: 150
   },
   {
+    key: 'specifications',
+    label: 'Specifications',
+    type: 'SubRow',
+    sortable: false,
+    filterable: false,
+    width: 150,
+    subRowColumns: [
+      { key: 'spec', label: 'Spec', type: 'Text', width: 80 },
+      { key: 'value', label: 'Value', type: 'Text', width: 120 }
+    ]
+  },
+  {
+    key: 'reviews',
+    label: 'Reviews',
+    type: 'SubRow',
+    sortable: false,
+    filterable: false,
+    width: 150,
+    subRowColumns: [
+      { key: 'reviewer', label: 'Reviewer', type: 'Text', width: 80 },
+      { key: 'rating', label: 'Rating', type: 'Text', width: 60 },
+      { key: 'comment', label: 'Comment', type: 'Text', width: 150 }
+    ]
+  },
+  {
     key: 'actions',
     label: 'Actions',
     type: 'Text',
@@ -138,7 +188,13 @@ export default function SmartGridPlusDemo() {
     category: 'Electronics',
     status: 'Active',
     dateAdded: new Date().toISOString().split('T')[0],
-    supplier: ''
+    supplier: '',
+    specifications: [
+      { spec: '', value: '' }
+    ],
+    reviews: [
+      { reviewer: '', rating: 5, comment: '' }
+    ]
   };
 
   const validationRules = {

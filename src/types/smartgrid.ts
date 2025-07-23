@@ -11,7 +11,8 @@ export type GridColumnType =
   | 'Text'                 // Standard text cell
   | 'Date'                 // Formatted date
   | 'Dropdown'             // Selectable value from list (for edit or filter)
-  | 'EditableText';        // Inline editable text
+  | 'EditableText'         // Inline editable text
+  | 'SubRow';              // Sub-row expandable content
 
 export interface GridColumnConfig {
   key: string;
@@ -39,6 +40,9 @@ export interface GridColumnConfig {
   
   // ExpandableCount specific properties
   renderExpandedContent?: (rowData: any) => React.ReactNode;
+  
+  // SubRow specific properties
+  subRowColumns?: GridColumnConfig[];
 }
 
 // Legacy interfaces for backward compatibility
