@@ -229,7 +229,6 @@ export function FilterSystem({
   };
 
   const clearAllFilters = () => {
-    console.log('FilterSystem: Clearing all filters');
     setActiveFilters({});
     onFiltersChange({});
     
@@ -308,7 +307,7 @@ export function FilterSystem({
         <div className="bg-white border rounded shadow-sm">
           <div className="grid gap-2 p-3" style={{ gridTemplateColumns: `repeat(${filterableColumns.length}, 1fr)` }}>
             {filterableColumns.map((column) => (
-              <div key={`main-${column.key}`} className="space-y-1">
+              <div key={column.key} className="space-y-1">
                 <div className="text-xs font-medium text-gray-600 truncate">
                   {column.label}
                 </div>
@@ -351,7 +350,7 @@ export function FilterSystem({
                   <div className="bg-blue-50/30 p-3">
                     <div className="grid gap-2" style={{ gridTemplateColumns: `repeat(${filterableSubRowColumns.length}, 1fr)` }}>
                       {filterableSubRowColumns.map((column) => (
-                        <div key={`subrow-filter-${column.key}`} className="space-y-1">
+                        <div key={`subrow-${column.key}`} className="space-y-1">
                           <div className="text-xs font-medium text-blue-600 truncate">
                             {column.label}
                           </div>

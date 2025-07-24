@@ -286,18 +286,8 @@ export function SmartGrid({
 
   // Process data with sorting and filtering (only if not using lazy loading)
   const processedData = useMemo(() => {
-    // Combine both filter systems - merge legacy filters with filter system filters
-    const combinedFilters = [
-      ...filters,
-      ...Object.entries(filterSystemFilters).map(([column, filterValue]) => ({
-        column,
-        value: filterValue.value,
-        operator: filterValue.operator || 'contains'
-      }))
-    ];
-    
-    return processGridData(gridData, globalFilter, combinedFilters, sort, currentColumns, onDataFetch);
-  }, [gridData, globalFilter, filters, filterSystemFilters, sort, currentColumns, onDataFetch]);
+    return processGridData(gridData, globalFilter, filters, sort, currentColumns, onDataFetch);
+  }, [gridData, globalFilter, filters, sort, currentColumns, onDataFetch]);
 
   // Handle filter system changes
   const handleFiltersChange = useCallback((newFilters: Record<string, any>) => {
@@ -357,7 +347,6 @@ export function SmartGrid({
       await savePreferences(defaultPreferences);
       setSort(undefined);
       setFilters([]);
-      setFilterSystemFilters({}); // Also clear filter system filters
       setGlobalFilter('');
       setColumnWidths({});
       setShowColumnFilters(false);
@@ -974,11 +963,8 @@ export function SmartGrid({
                     </TableCell>
                   </TableRow>
                 ) : (
-                  paginatedData.map((row, rowIndex) => {
-                    // Create a unique key using row ID if available, otherwise fall back to rowIndex
-                    const uniqueKey = row.id || `row-${rowIndex}`;
-                    return (
-                    <React.Fragment key={uniqueKey}>
+                  paginatedData.map((row, rowIndex) => (
+                    <React.Fragment key={rowIndex}>
                       <TableRow 
                         className={cn(
                           "hover:bg-gray-50/50 transition-colors duration-150 border-b border-gray-100",
@@ -1052,9 +1038,8 @@ export function SmartGrid({
                           </TableCell>
                         </TableRow>
                       )}
-                     </React.Fragment>
-                    );
-                  })
+                    </React.Fragment>
+                  ))
                 )}
               </TableBody>
             </Table>

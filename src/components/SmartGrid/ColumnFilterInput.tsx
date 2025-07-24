@@ -90,7 +90,6 @@ export function ColumnFilterInput({
   };
 
   const handleClear = () => {
-    console.log('ColumnFilterInput: Clearing filter for column', column.key);
     setLocalValue('');
     onChange(undefined);
     onApply();
