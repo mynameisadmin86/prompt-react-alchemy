@@ -223,7 +223,7 @@ export function ColumnFilterInput({
         {renderFilterInput()}
       </div>
       
-      {localValue && (
+      {(localValue !== '' && localValue != null) && (
         <Button
           variant="ghost"
           size="sm"
