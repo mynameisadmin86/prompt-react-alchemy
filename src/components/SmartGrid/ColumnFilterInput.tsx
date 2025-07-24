@@ -92,7 +92,7 @@ export function ColumnFilterInput({
   const handleClear = () => {
     setLocalValue('');
     onChange(undefined);
-    onApply();
+    // onApply will be called automatically when the parent updates filters
   };
 
   const getAvailableOperators = () => {

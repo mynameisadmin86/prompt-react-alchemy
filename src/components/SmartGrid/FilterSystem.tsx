@@ -55,6 +55,14 @@ export function FilterSystem({
     }
   }, [filterSets]);
 
+  // Auto-apply filters when activeFilters changes
+  useEffect(() => {
+    onFiltersChange(activeFilters);
+    if (api) {
+      api.applyGridFilters(activeFilters);
+    }
+  }, [activeFilters, onFiltersChange, api]);
+
   const loadFilterSets = async () => {
     if (!api) return;
     
