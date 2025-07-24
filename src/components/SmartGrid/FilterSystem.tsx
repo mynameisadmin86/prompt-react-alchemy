@@ -229,6 +229,7 @@ export function FilterSystem({
   };
 
   const clearAllFilters = () => {
+    console.log('FilterSystem: Clearing all filters');
     setActiveFilters({});
     onFiltersChange({});
     
