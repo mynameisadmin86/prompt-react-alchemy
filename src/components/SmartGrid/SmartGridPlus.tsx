@@ -642,12 +642,30 @@ export function SmartGridPlus({
   // Add Row functionality
   const handleAddRowClick = useCallback(() => {
     setIsAddingRow(true);
-    setNewRowValues(defaultRowValues);
+    
+    // Initialize newRowValues with defaultRowValues and ensure sub-row arrays are properly initialized
+    const initializedValues = { ...defaultRowValues };
+    
+    // Initialize sub-row columns if they don't exist or are empty
+    currentColumns.forEach(column => {
+      if (column.type === 'SubRow' && column.subRowColumns) {
+        if (!initializedValues[column.key] || !Array.isArray(initializedValues[column.key]) || initializedValues[column.key].length === 0) {
+          // Create a default item for sub-row
+          const defaultItem = column.subRowColumns.reduce((acc, subCol) => {
+            acc[subCol.key] = subCol.type === 'Text' ? '' : 0;
+            return acc;
+          }, {} as any);
+          initializedValues[column.key] = [defaultItem];
+        }
+      }
+    });
+    
+    setNewRowValues(initializedValues);
     // Scroll to top if needed
     if (addRowButtonPosition === "top") {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
-  }, [defaultRowValues, addRowButtonPosition]);
+  }, [defaultRowValues, addRowButtonPosition, currentColumns]);
 
   const handleSaveNewRow = useCallback(async () => {
     const errors = validateRow(newRowValues);
