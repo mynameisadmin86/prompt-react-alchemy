@@ -652,7 +652,7 @@ export function SmartGridPlus({
         if (!initializedValues[column.key] || !Array.isArray(initializedValues[column.key]) || initializedValues[column.key].length === 0) {
           // Create a default item for sub-row
           const defaultItem = column.subRowColumns.reduce((acc, subCol) => {
-            acc[subCol.key] = subCol.type === 'Text' ? '' : 0;
+            acc[subCol.key] = subCol.type === 'Text' ? '' : '';
             return acc;
           }, {} as any);
           initializedValues[column.key] = [defaultItem];
@@ -661,6 +661,8 @@ export function SmartGridPlus({
     });
     
     setNewRowValues(initializedValues);
+    setValidationErrors({});
+    
     // Scroll to top if needed
     if (addRowButtonPosition === "top") {
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -1019,13 +1021,14 @@ export function SmartGridPlus({
                   variant="outline"
                   onClick={() => {
                     const defaultItem = column.subRowColumns!.reduce((acc, subCol) => {
-                      acc[subCol.key] = subCol.type === 'Text' ? '' : 0;
+                      acc[subCol.key] = subCol.type === 'Text' ? '' : '';
                       return acc;
                     }, {} as any);
                     
+                    const currentItems = newRowValues[column.key] as any[] || [];
                     setNewRowValues(prev => ({
                       ...prev,
-                      [column.key]: [...(prev[column.key] as any[] || []), defaultItem]
+                      [column.key]: [...currentItems, defaultItem]
                     }));
                   }}
                   className="h-7 text-xs"
