@@ -12,13 +12,33 @@ export function exportToCSV(
     return columns.map(col => {
       const value = row[col.key];
       
-      // Escape CSV values
+      // Handle null/undefined values
       if (value == null) return '';
-      const stringValue = String(value);
-      if (stringValue.includes(',') || stringValue.includes('"') || stringValue.includes('\n')) {
-        return `"${stringValue.replace(/"/g, '""')}"`;
+      
+      // Handle object values (like Badge type with {value, variant})
+      let displayValue: string;
+      if (typeof value === 'object' && value !== null) {
+        if ('value' in value) {
+          // Handle Badge type objects {value, variant}
+          displayValue = String(value.value);
+        } else if (Array.isArray(value)) {
+          // Handle arrays by joining with semicolons
+          displayValue = value.map(item => 
+            typeof item === 'object' && item !== null && 'value' in item ? item.value : String(item)
+          ).join('; ');
+        } else {
+          // For other objects, try to extract meaningful content
+          displayValue = JSON.stringify(value);
+        }
+      } else {
+        displayValue = String(value);
       }
-      return stringValue;
+      
+      // Escape CSV values
+      if (displayValue.includes(',') || displayValue.includes('"') || displayValue.includes('\n')) {
+        return `"${displayValue.replace(/"/g, '""')}"`;
+      }
+      return displayValue;
     }).join(',');
   });
 
