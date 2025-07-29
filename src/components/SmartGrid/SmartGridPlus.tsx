@@ -642,32 +642,12 @@ export function SmartGridPlus({
   // Add Row functionality
   const handleAddRowClick = useCallback(() => {
     setIsAddingRow(true);
-    
-    // Initialize newRowValues with defaultRowValues and ensure sub-row arrays are properly initialized
-    const initializedValues = { ...defaultRowValues };
-    
-    // Initialize sub-row columns if they don't exist or are empty
-    currentColumns.forEach(column => {
-      if (column.type === 'SubRow' && column.subRowColumns) {
-        if (!initializedValues[column.key] || !Array.isArray(initializedValues[column.key]) || initializedValues[column.key].length === 0) {
-          // Create a default item for sub-row
-          const defaultItem = column.subRowColumns.reduce((acc, subCol) => {
-            acc[subCol.key] = subCol.type === 'Text' ? '' : '';
-            return acc;
-          }, {} as any);
-          initializedValues[column.key] = [defaultItem];
-        }
-      }
-    });
-    
-    setNewRowValues(initializedValues);
-    setValidationErrors({});
-    
+    setNewRowValues(defaultRowValues);
     // Scroll to top if needed
     if (addRowButtonPosition === "top") {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
-  }, [defaultRowValues, addRowButtonPosition, currentColumns]);
+  }, [defaultRowValues, addRowButtonPosition]);
 
   const handleSaveNewRow = useCallback(async () => {
     const errors = validateRow(newRowValues);
@@ -971,80 +951,10 @@ export function SmartGridPlus({
                   <X className="h-4 w-4" />
                 </Button>
               </div>
-            ) : column.type === 'SubRow' && column.subRowColumns ? (
-              <div className="space-y-2">
-                <div className="text-xs font-medium text-gray-700">{column.label}</div>
-                {(newRowValues[column.key] as any[] || []).map((item: any, index: number) => (
-                  <div key={index} className="border border-gray-200 rounded p-2 bg-white space-y-2">
-                    {column.subRowColumns!.map((subColumn) => (
-                      <div key={subColumn.key} className="space-y-1">
-                        <label className="text-xs text-gray-600">{subColumn.label}</label>
-                        <Input
-                          type={subColumn.type === 'Text' ? 'text' : 'number'}
-                          value={item[subColumn.key] || ''}
-                          onChange={(e) => {
-                            const updatedItems = [...(newRowValues[column.key] as any[] || [])];
-                            updatedItems[index] = {
-                              ...updatedItems[index],
-                              [subColumn.key]: e.target.value
-                            };
-                            setNewRowValues(prev => ({
-                              ...prev,
-                              [column.key]: updatedItems
-                            }));
-                          }}
-                          className="h-7 text-xs"
-                          placeholder={subColumn.label}
-                        />
-                      </div>
-                    ))}
-                    <div className="flex justify-end">
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => {
-                          const updatedItems = (newRowValues[column.key] as any[] || []).filter((_, i) => i !== index);
-                          setNewRowValues(prev => ({
-                            ...prev,
-                            [column.key]: updatedItems
-                          }));
-                        }}
-                        className="h-6 w-6 p-0 text-red-600 hover:text-red-700"
-                      >
-                        <X className="h-3 w-3" />
-                      </Button>
-                    </div>
-                  </div>
-                ))}
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => {
-                    const defaultItem = column.subRowColumns!.reduce((acc, subCol) => {
-                      acc[subCol.key] = subCol.type === 'Text' ? '' : '';
-                      return acc;
-                    }, {} as any);
-                    
-                    const currentItems = newRowValues[column.key] as any[] || [];
-                    setNewRowValues(prev => ({
-                      ...prev,
-                      [column.key]: [...currentItems, defaultItem]
-                    }));
-                  }}
-                  className="h-7 text-xs"
-                >
-                  + Add {column.label.slice(0, -1)}
-                </Button>
-                {validationErrors[column.key] && (
-                  <div className="text-xs text-red-600">
-                    {validationErrors[column.key]}
-                  </div>
-                )}
-              </div>
             ) : (
               <div className="space-y-1">
                 <Input
-                  type={column.type === 'Text' ? 'text' : column.type === 'Date' ? 'date' : 'text'}
+                  type="text"
                   value={newRowValues[column.key] || ''}
                   onChange={(e) => setNewRowValues(prev => ({
                     ...prev,

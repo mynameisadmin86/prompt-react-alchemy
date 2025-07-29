@@ -136,7 +136,7 @@ export const CellRenderer: React.FC<CellRendererProps> = ({
         disabled={loading}
         title={String(value)}
       >
-        {String(value)}
+        {value}
       </button>
     );
   };
@@ -159,7 +159,7 @@ export const CellRenderer: React.FC<CellRendererProps> = ({
     return (
       <div className="flex items-center gap-2 min-w-0">
         <span className="text-gray-900 font-medium truncate flex-1" title={String(value)}>
-          {String(value)}
+          {value}
         </span>
         <TooltipProvider>
           <Tooltip>
@@ -194,9 +194,9 @@ export const CellRenderer: React.FC<CellRendererProps> = ({
             size="sm"
             className="text-gray-900 font-medium hover:bg-blue-50 hover:border-blue-300 transition-colors duration-150 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
             disabled={loading}
-            aria-label={`View ${String(value)} details`}
+            aria-label={`View ${value} details`}
           >
-            {String(value)}
+            {value}
           </Button>
         </DialogTrigger>
         <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto bg-white">
@@ -252,12 +252,12 @@ export const CellRenderer: React.FC<CellRendererProps> = ({
             }
           }}
         >
-          {value ? String(value) : <span className="text-gray-400">Click to edit</span>}
+          {value || <span className="text-gray-400">Click to edit</span>}
         </div>
       );
     }
 
-    return <span className="truncate" title={String(value)}>{String(value)}</span>;
+    return <span className="truncate" title={String(value)}>{value}</span>;
   };
 
   // Dropdown renderer
@@ -277,7 +277,7 @@ export const CellRenderer: React.FC<CellRendererProps> = ({
         </select>
       );
     }
-    return <span className="truncate" title={String(value)}>{String(value)}</span>;
+    return <span className="truncate" title={String(value)}>{value}</span>;
   };
 
   // Date renderer
@@ -289,7 +289,7 @@ export const CellRenderer: React.FC<CellRendererProps> = ({
       const formattedDate = date.toLocaleDateString();
       return <span className="truncate" title={formattedDate}>{formattedDate}</span>;
     } catch {
-      return <span className="truncate" title={String(value)}>{String(value)}</span>;
+      return <span className="truncate" title={String(value)}>{value}</span>;
     }
   };
 
@@ -314,7 +314,7 @@ export const CellRenderer: React.FC<CellRendererProps> = ({
         return renderDate();
       case 'Text':
       default:
-        return <span className="text-gray-900 truncate" title={String(value)}>{String(value)}</span>;
+        return <span className="text-gray-900 truncate" title={String(value)}>{value}</span>;
     }
   };
 
