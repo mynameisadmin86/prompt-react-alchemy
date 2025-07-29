@@ -1,7 +1,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowRight, Grid3x3, Layout, Search, Workflow, PanelLeft, Layers } from "lucide-react";
+import { ArrowRight, Grid3x3, Layout, Search, Workflow, PanelLeft, Layers, Upload } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const Index = () => {
@@ -75,6 +75,13 @@ const Index = () => {
       icon: Grid3x3,
       path: "/smart-grid-plus-demo",
       color: "text-emerald-600"
+    },
+    {
+      title: "File Upload Demo",
+      description: "Comprehensive file upload with categorization, drag & drop, and file management",
+      icon: Upload,
+      path: "/file-upload-demo",
+      color: "text-rose-600"
     }
   ];
 
