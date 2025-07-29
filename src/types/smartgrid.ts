@@ -94,7 +94,7 @@ export interface GridAPI {
   columns: GridColumnConfig[];
   preferences: GridPreferences;
   actions: {
-    exportData: (format: 'csv' | 'excel' | 'json') => void;
+    exportData: (format: 'csv' | 'xlsx' | 'json') => void;
     resetPreferences: () => void;
     toggleRowSelection: (rowIndex: number) => void;
     selectAllRows: () => void;
