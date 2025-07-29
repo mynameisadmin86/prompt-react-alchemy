@@ -251,6 +251,7 @@ const DynamicFileUpload: React.FC<FileUploadProps> = ({
     const matchesSearch = !filters.searchTerm || 
       file.fileName.toLowerCase().includes(filters.searchTerm.toLowerCase());
     const matchesCategory = !filters.selectedCategory || 
+      filters.selectedCategory === 'all' || 
       file.category === filters.selectedCategory;
     const matchesFileType = !filters.selectedFileType || 
       file.fileName.toLowerCase().endsWith(filters.selectedFileType.toLowerCase());
@@ -395,7 +396,7 @@ const DynamicFileUpload: React.FC<FileUploadProps> = ({
                 <SelectValue placeholder="All Categories" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Categories</SelectItem>
+                <SelectItem value="all">All Categories</SelectItem>
                 {finalConfig.categories.map(category => (
                   <SelectItem key={category} value={category}>
                     {category}
