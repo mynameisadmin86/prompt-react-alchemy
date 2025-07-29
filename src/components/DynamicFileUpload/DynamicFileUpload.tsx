@@ -260,21 +260,18 @@ const DynamicFileUpload: React.FC<FileUploadProps> = ({
   });
 
   return (
-    <div className={`space-y-6 ${className}`}>
-      {/* Upload Form */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Upload Files</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
+    <div className={`grid lg:grid-cols-2 gap-6 ${className}`}>
+      {/* Left Panel - Upload Form */}
+      <Card className="h-fit">
+        <CardContent className="p-6 space-y-6">
           {/* Category Selection */}
           <div className="space-y-2">
-            <Label htmlFor="category">File Category *</Label>
+            <Label htmlFor="category" className="text-sm font-medium">File Category *</Label>
             <Select 
               value={selectedCategory} 
               onValueChange={(value) => setValue('category', value)}
             >
-              <SelectTrigger>
+              <SelectTrigger className="h-11">
                 <SelectValue placeholder="Select a category" />
               </SelectTrigger>
               <SelectContent>
@@ -289,178 +286,183 @@ const DynamicFileUpload: React.FC<FileUploadProps> = ({
 
           {/* Remarks */}
           <div className="space-y-2">
-            <Label htmlFor="remarks">Remarks</Label>
+            <Label htmlFor="remarks" className="text-sm font-medium">Remarks</Label>
             <Textarea
               {...register('remarks')}
-              placeholder="Enter remarks"
-              className="resize-none"
+              placeholder="Enter Remarks"
+              className="min-h-[80px] resize-none"
             />
           </div>
 
-          {/* Upload Area */}
-          <div
-            className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
-              isDragOver 
-                ? 'border-primary bg-primary/5' 
-                : 'border-muted-foreground/25 hover:border-primary/50'
-            }`}
-            onDragOver={handleDragOver}
-            onDragLeave={handleDragLeave}
-            onDrop={handleDrop}
-          >
-            <Upload className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-            <p className="text-lg font-medium mb-2">Drop files here or click to upload</p>
-            <p className="text-sm text-muted-foreground mb-4">
-              Supports: {finalConfig.allowedTypes?.join(', ')} • Max {finalConfig.maxFileSizeMB}MB each
-            </p>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => fileInputRef.current?.click()}
+          {/* Attachment Section */}
+          <div className="space-y-2">
+            <Label className="text-sm font-medium">Attachment *</Label>
+            <div
+              className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
+                isDragOver 
+                  ? 'border-primary bg-primary/5' 
+                  : 'border-gray-200 hover:border-gray-300 bg-gray-50'
+              }`}
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
             >
-              Choose Files
-            </Button>
-            <input
-              ref={fileInputRef}
-              type="file"
-              multiple
-              accept={finalConfig.allowedTypes?.map(type => `.${type}`).join(',')}
-              onChange={handleFileInputChange}
-              className="hidden"
-            />
+              <Upload className="mx-auto h-8 w-8 text-gray-400 mb-3" />
+              <div className="space-y-1">
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="text-blue-600 hover:text-blue-700 font-medium text-sm"
+                >
+                  Click to Upload
+                </button>
+                <span className="text-gray-500 text-sm"> or drag and drop</span>
+              </div>
+              <p className="text-xs text-gray-400 mt-2">
+                SVG, PNG, JPG, GIF or PDF (Maximum File Size 2 MB)
+              </p>
+              <input
+                ref={fileInputRef}
+                type="file"
+                multiple
+                accept={finalConfig.allowedTypes?.map(type => `.${type}`).join(',')}
+                onChange={handleFileInputChange}
+                className="hidden"
+              />
+            </div>
           </div>
 
-          {/* Staged Files Preview */}
+          {/* Staged Files List */}
           {stagedFiles.length > 0 && (
-            <div className="space-y-2">
-              <Label>Files to Upload ({stagedFiles.length})</Label>
-              <div className="space-y-2 max-h-40 overflow-y-auto">
-                {stagedFiles.map(file => (
-                  <div key={file.id} className="flex items-center justify-between p-2 bg-muted rounded-lg">
-                    <div className="flex items-center space-x-2 flex-1 min-w-0">
-                      {getFileIcon(file.file.name)}
-                      <span className="text-sm font-medium truncate">{file.file.name}</span>
-                      <span className="text-xs text-muted-foreground">
-                        ({(file.file.size / 1024 / 1024).toFixed(2)} MB)
-                      </span>
+            <div className="space-y-3">
+              {stagedFiles.map(file => (
+                <div key={file.id} className="flex items-center justify-between p-3 border rounded-lg bg-white">
+                  <div className="flex items-center space-x-3">
+                    <div className="p-2 bg-red-100 rounded">
+                      <FileText className="h-4 w-4 text-red-600" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-sm text-gray-900">{file.file.name}</p>
+                      <p className="text-xs text-gray-500">
+                        {new Date().toLocaleDateString('en-GB', { 
+                          day: '2-digit', 
+                          month: 'short', 
+                          year: 'numeric' 
+                        })} at {new Date().toLocaleTimeString('en-GB', { 
+                          hour: '2-digit', 
+                          minute: '2-digit', 
+                          hour12: false 
+                        })} • {(file.file.size / 1024 / 1024).toFixed(1)} Mb
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <div className="p-1 bg-green-100 rounded-full">
+                      <Check className="h-3 w-3 text-green-600" />
                     </div>
                     <Button
                       type="button"
                       variant="ghost"
                       size="sm"
                       onClick={() => removeStagedFile(file.id)}
+                      className="p-1 h-6 w-6 text-red-500 hover:text-red-700"
                     >
-                      <X className="h-4 w-4" />
+                      <Trash2 className="h-3 w-3" />
                     </Button>
                   </div>
-                ))}
-              </div>
+                </div>
+              ))}
             </div>
           )}
 
-          {/* Upload Button */}
+          {/* Save Button */}
           <Button
             onClick={handleUploadSubmit}
             disabled={stagedFiles.length === 0 || !selectedCategory || isUploading}
-            className="w-full"
+            className="w-full h-11 bg-blue-600 hover:bg-blue-700 text-white font-medium"
           >
-            <Check className="h-4 w-4 mr-2" />
             {isUploading ? 'Uploading...' : 'Save'}
           </Button>
         </CardContent>
       </Card>
 
-      {/* Uploaded Files List */}
+      {/* Right Panel - Uploaded Files List */}
       <Card>
-        <CardHeader>
-          <CardTitle>Total Attachments ({uploadedFiles.length})</CardTitle>
+        <CardHeader className="pb-4">
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-lg font-semibold">
+              Total Attachments <span className="ml-2 px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium">{uploadedFiles.length}</span>
+            </CardTitle>
+          </div>
           
-          {/* Filters */}
-          <div className="flex flex-wrap gap-4">
-            <div className="flex-1 min-w-0">
-              <div className="relative">
-                <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search files..."
-                  value={filters.searchTerm}
-                  onChange={(e) => setFilters(prev => ({ ...prev, searchTerm: e.target.value }))}
-                  className="pl-8"
-                />
-              </div>
+          {/* Search and Filter Bar */}
+          <div className="flex gap-3">
+            <div className="flex-1 relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Input
+                placeholder="Search"
+                value={filters.searchTerm}
+                onChange={(e) => setFilters(prev => ({ ...prev, searchTerm: e.target.value }))}
+                className="pl-10 h-10"
+              />
             </div>
-            <Select
-              value={filters.selectedCategory}
-              onValueChange={(value) => setFilters(prev => ({ ...prev, selectedCategory: value }))}
-            >
-              <SelectTrigger className="w-40">
-                <SelectValue placeholder="All Categories" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Categories</SelectItem>
-                {finalConfig.categories.map(category => (
-                  <SelectItem key={category} value={category}>
-                    {category}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Button variant="outline" size="sm" className="px-3">
+              <Filter className="h-4 w-4" />
+            </Button>
           </div>
         </CardHeader>
-        <CardContent>
+        <CardContent className="pt-0">
           {filteredFiles.length === 0 ? (
-            <p className="text-center text-muted-foreground py-8">No files uploaded yet</p>
+            <div className="text-center py-12">
+              <div className="mx-auto w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                <FileText className="h-8 w-8 text-gray-400" />
+              </div>
+              <p className="text-gray-500 text-sm">No files uploaded yet</p>
+            </div>
           ) : (
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {filteredFiles.map(file => (
-                <Card key={file.id} className="p-4">
-                  <div className="flex items-start justify-between mb-2">
-                    <div className="flex items-center space-x-2 flex-1 min-w-0">
-                      {getFileIcon(file.fileName)}
-                      <span className="font-medium truncate">{file.fileName}</span>
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Badge variant="secondary" className="text-xs">
-                      {file.category}
-                    </Badge>
-                    
-                    <p className="text-xs text-muted-foreground">
-                      {new Date(file.uploadDate).toLocaleDateString()}
-                    </p>
-                    
-                    {file.remarks && (
-                      <p className="text-xs text-muted-foreground italic truncate">
-                        {file.remarks}
-                      </p>
-                    )}
-                    
-                    <div className="flex space-x-1">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => onDownload?.(file)}
-                      >
-                        <Download className="h-3 w-3" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => {/* view functionality */}}
-                      >
-                        <Eye className="h-3 w-3" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleDeleteFile(file.id)}
-                      >
-                        <Trash2 className="h-3 w-3" />
+            <div className="grid gap-4 sm:grid-cols-2">
+              {filteredFiles.map(file => {
+                const extension = file.fileName.split('.').pop()?.toLowerCase();
+                let iconColor = 'bg-gray-100 text-gray-600';
+                let iconBg = 'bg-gray-100';
+                
+                if (extension === 'pdf') {
+                  iconColor = 'text-red-600';
+                  iconBg = 'bg-red-100';
+                } else if (['jpg', 'jpeg', 'png', 'gif'].includes(extension || '')) {
+                  iconColor = 'text-orange-600';
+                  iconBg = 'bg-orange-100';
+                } else if (['xls', 'xlsx'].includes(extension || '')) {
+                  iconColor = 'text-green-600';
+                  iconBg = 'bg-green-100';
+                } else if (['doc', 'docx'].includes(extension || '')) {
+                  iconColor = 'text-blue-600';
+                  iconBg = 'bg-blue-100';
+                }
+                
+                return (
+                  <div key={file.id} className="p-4 border rounded-lg hover:shadow-sm transition-shadow bg-white">
+                    <div className="flex items-start justify-between mb-3">
+                      <div className={`p-2 rounded ${iconBg}`}>
+                        {getFileIcon(file.fileName)}
+                        <span className={`sr-only ${iconColor}`}>File icon</span>
+                      </div>
+                      <Button variant="ghost" size="sm" className="p-1">
+                        <svg className="h-4 w-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                          <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
+                        </svg>
                       </Button>
                     </div>
+                    
+                    <div className="space-y-2">
+                      <h4 className="font-medium text-sm text-gray-900 truncate">{file.fileName}</h4>
+                      <Badge variant="secondary" className="text-xs bg-gray-100 text-gray-700">
+                        {file.category}
+                      </Badge>
+                    </div>
                   </div>
-                </Card>
-              ))}
+                );
+              })}
             </div>
           )}
         </CardContent>
