@@ -396,20 +396,36 @@ const DynamicFileUpload: React.FC<FileUploadProps> = ({
           </div>
           
           {/* Search and Filter Bar */}
-          <div className="flex gap-3">
-            <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-              <Input
-                placeholder="Search"
-                value={filters.searchTerm}
-                onChange={(e) => setFilters(prev => ({ ...prev, searchTerm: e.target.value }))}
-                className="pl-10 h-10"
-              />
+            <div className="flex gap-3">
+              <div className="flex-1 relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Input
+                  placeholder="Search"
+                  value={filters.searchTerm}
+                  onChange={(e) => setFilters(prev => ({ ...prev, searchTerm: e.target.value }))}
+                  className="pl-10 h-10"
+                />
+              </div>
+              <Select 
+                value={filters.selectedCategory} 
+                onValueChange={(value) => setFilters(prev => ({ ...prev, selectedCategory: value }))}
+              >
+                <SelectTrigger className="w-40 h-10">
+                  <div className="flex items-center gap-2">
+                    <Filter className="h-4 w-4" />
+                    <SelectValue placeholder="All Categories" />
+                  </div>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Categories</SelectItem>
+                  {finalConfig.categories.map(category => (
+                    <SelectItem key={category} value={category}>
+                      {category}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
-            <Button variant="outline" size="sm" className="px-3">
-              <Filter className="h-4 w-4" />
-            </Button>
-          </div>
         </CardHeader>
         <CardContent className="pt-0">
           {filteredFiles.length === 0 ? (
