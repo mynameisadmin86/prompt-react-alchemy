@@ -9,12 +9,14 @@ import {
   CheckSquare,
   Grid2x2,
   List,
-  Plus
+  Plus,
+  ChevronDown
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ColumnVisibilityManager } from './ColumnVisibilityManager';
 import { GridColumnConfig, GridPreferences } from '@/types/smartgrid';
 import { ConfigurableButton, ConfigurableButtonConfig } from '@/components/ui/configurable-button';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
 interface GridToolbarProps {
   globalFilter: string;
@@ -32,7 +34,7 @@ interface GridToolbarProps {
   onColumnVisibilityToggle: (columnId: string) => void;
   onColumnHeaderChange: (columnId: string, header: string) => void;
   onResetToDefaults: () => void;
-  onExport: (format: 'csv') => void;
+  onExport: (format: 'csv' | 'excel') => void;
   onSubRowToggle?: (columnKey: string) => void;
   configurableButtons?: ConfigurableButtonConfig[];
   showDefaultConfigurableButton?: boolean;
@@ -196,16 +198,27 @@ export function GridToolbar({
           <RotateCcw className="h-4 w-4" />
         </Button>
         
-        <Button 
-          variant="ghost"
-          size="sm" 
-          onClick={() => onExport('csv')} 
-          disabled={loading}
-          title="Download CSV"
-          className="w-8 h-8 flex items-center justify-center rounded hover:bg-gray-100 p-0"
-        >
-          <Download className="h-4 w-4" />
-        </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button 
+              variant="ghost"
+              size="sm" 
+              disabled={loading}
+              title="Export Data"
+              className="w-8 h-8 flex items-center justify-center rounded hover:bg-gray-100 p-0"
+            >
+              <Download className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={() => onExport('csv')}>
+              Export CSV
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => onExport('excel')}>
+              Export Excel
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
 
         {/* Create Button */}
         {showCreateButton && (
