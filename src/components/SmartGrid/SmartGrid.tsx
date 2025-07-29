@@ -327,17 +327,31 @@ export function SmartGrid({
   }, [setFilters, currentColumns, onServerFilter, toast]);
 
   // Define handleExport and handleResetPreferences after processedData and orderedColumns
-  const handleExport = useCallback((format: 'csv' | 'xlsx' | 'json') => {
+ const handleExport = useCallback((format: 'csv' | 'xlsx') => {
     const filename = `export-${new Date().toISOString().split('T')[0]}.${format}`;
-    if (format === 'xlsx') {
-      exportToExcel(processedData, orderedColumns, filename);
-    } else if (format === 'json') {
-      // JSON export functionality can be added here if needed
-      console.log('JSON export not yet implemented');
-    } else {
-      exportToCSV(processedData, orderedColumns, filename);
+    try {
+      if (format === 'csv') {
+        exportToCSV(processedData, orderedColumns, filename);
+        toast({
+          title: "Success",
+          description: "CSV file exported successfully"
+        });
+      } else if (format === 'xlsx') {
+        exportToExcel(processedData, orderedColumns, filename);
+        toast({
+          title: "Success",
+          description: "Excel file exported successfully"
+        });
+      }
+    } catch (error) {
+      console.error('Export failed:', error);
+      toast({
+        title: "Error",
+        description: `Failed to export ${format.toUpperCase()} file: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        variant: "destructive"
+      });
     }
-  }, [processedData, orderedColumns]);
+  }, [processedData, orderedColumns, toast]);
 
   const handleResetPreferences = useCallback(async () => {
     const defaultPreferences = {
@@ -971,8 +985,8 @@ export function SmartGrid({
                   </TableRow>
                 ) : (
                   paginatedData.map((row, rowIndex) => (
-                    <React.Fragment key={rowIndex}>
-                      <TableRow 
+                    <>
+                      <TableRow key={rowIndex}
                         className={cn(
                           "hover:bg-gray-50/50 transition-colors duration-150 border-b border-gray-100",
                           rowClassName ? rowClassName(row, rowIndex) : ''
@@ -1045,7 +1059,7 @@ export function SmartGrid({
                           </TableCell>
                         </TableRow>
                       )}
-                    </React.Fragment>
+                    </>
                   ))
                 )}
               </TableBody>
