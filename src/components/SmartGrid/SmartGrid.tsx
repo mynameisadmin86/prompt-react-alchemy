@@ -190,7 +190,7 @@ export function SmartGrid({
       }
     });
     
-    // Return columns in order: left pinned + unpinned + right pinned
+    // Return columns in order: left pinned FIRST, then unpinned, then right pinned
     return [...leftPinnedColumns, ...unpinnedColumns, ...rightPinnedColumns];
   }, [currentColumns, preferences, calculateColumnWidthsCallback]);
 
@@ -499,9 +499,10 @@ export function SmartGrid({
     setEditingHeader(columnKey);
   }, [resizingColumn, setEditingHeader]);
 
-  // Handle drag and drop for column reordering
+  // Handle drag and drop for column reordering - prevent dragging pinned columns
   const handleColumnDragStart = useCallback((e: React.DragEvent, columnKey: string) => {
-    if (editingHeader || resizingColumn) {
+    const column = orderedColumns.find(col => col.key === columnKey);
+    if (editingHeader || resizingColumn || column?.pinned) {
       e.preventDefault();
       return;
     }
@@ -509,7 +510,7 @@ export function SmartGrid({
     setDraggedColumn(columnKey);
     e.dataTransfer.effectAllowed = 'move';
     e.dataTransfer.setData('text/plain', columnKey);
-  }, [editingHeader, resizingColumn, setDraggedColumn]);
+  }, [editingHeader, resizingColumn, orderedColumns, setDraggedColumn]);
 
   const handleColumnDragOver = useCallback((e: React.DragEvent, targetColumnKey: string) => {
     if (resizingColumn) {
