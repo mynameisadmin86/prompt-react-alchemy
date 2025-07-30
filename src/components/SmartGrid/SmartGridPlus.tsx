@@ -368,6 +368,7 @@ export function SmartGridPlus({
       columnHeaders: {},
       subRowColumns: [],
       subRowColumnOrder: [], // Reset sub-row column order
+      pinnedColumns: {},
       filters: []
     };
     

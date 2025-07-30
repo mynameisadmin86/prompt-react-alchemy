@@ -17,7 +17,9 @@ import {
   Edit2, 
   Check, 
   X,
-  Rows3
+  Rows3,
+  Pin,
+  PinOff
 } from 'lucide-react';
 import { GridColumnConfig, GridPreferences } from '@/types/smartgrid';
 import { cn } from '@/lib/utils';
@@ -27,6 +29,7 @@ interface ColumnVisibilityManagerProps {
   preferences: GridPreferences;
   onColumnVisibilityToggle: (columnId: string) => void;
   onColumnHeaderChange: (columnId: string, header: string) => void;
+  onColumnPin?: (columnId: string, direction?: 'left' | 'right') => void;
   onResetToDefaults: () => void;
   onSubRowToggle?: (columnKey: string) => void;
 }
@@ -36,6 +39,7 @@ export function ColumnVisibilityManager({
   preferences,
   onColumnVisibilityToggle,
   onColumnHeaderChange,
+  onColumnPin,
   onResetToDefaults,
   onSubRowToggle
 }: ColumnVisibilityManagerProps) {
@@ -73,6 +77,16 @@ export function ColumnVisibilityManager({
     return preferences.columnHeaders[columnId] || columns.find(col => col.key === columnId)?.label || columnId;
   };
 
+  const getColumnPinStatus = (columnId: string) => {
+    return preferences.pinnedColumns?.[columnId] || null;
+  };
+
+  const handleColumnPin = (columnId: string, direction?: 'left' | 'right') => {
+    if (onColumnPin) {
+      onColumnPin(columnId, direction);
+    }
+  };
+
   return (
     <Popover>
       <PopoverTrigger asChild>
@@ -100,6 +114,7 @@ export function ColumnVisibilityManager({
               const isInSubRow = isColumnInSubRow(column.key);
               const currentHeader = getColumnHeader(column.key);
               const isEditing = editingHeader === column.key;
+              const pinStatus = getColumnPinStatus(column.key);
 
               return (
                 <div key={column.key} className={cn(
@@ -179,6 +194,14 @@ export function ColumnVisibilityManager({
                                   Sub-row
                                 </span>
                               )}
+                              {pinStatus && (
+                                <span className={cn(
+                                  "text-xs px-1.5 py-0.5 rounded",
+                                  pinStatus === 'left' ? "bg-green-100 text-green-700" : "bg-orange-100 text-orange-700"
+                                )}>
+                                  Pin {pinStatus}
+                                </span>
+                              )}
                             </div>
                           </div>
                           <Button
@@ -193,6 +216,40 @@ export function ColumnVisibilityManager({
                       )}
                     </div>
                   </div>
+
+                  {/* Pin Controls */}
+                  {onColumnPin && (
+                    <div className="flex items-center space-x-1 ml-2">
+                      <Button
+                        variant={pinStatus === 'left' ? "default" : "ghost"}
+                        size="sm"
+                        onClick={() => handleColumnPin(column.key, 'left')}
+                        className={cn(
+                          "h-7 w-7 p-0 transition-colors",
+                          pinStatus === 'left' 
+                            ? "bg-green-600 hover:bg-green-700 text-white" 
+                            : "text-gray-400 hover:text-green-600 hover:bg-green-50"
+                        )}
+                        title={pinStatus === 'left' ? "Unpin column" : "Pin to left"}
+                      >
+                        <Pin className="h-3 w-3" />
+                      </Button>
+                      <Button
+                        variant={pinStatus === 'right' ? "default" : "ghost"}
+                        size="sm"
+                        onClick={() => handleColumnPin(column.key, 'right')}
+                        className={cn(
+                          "h-7 w-7 p-0 transition-colors",
+                          pinStatus === 'right' 
+                            ? "bg-orange-600 hover:bg-orange-700 text-white" 
+                            : "text-gray-400 hover:text-orange-600 hover:bg-orange-50"
+                        )}
+                        title={pinStatus === 'right' ? "Unpin column" : "Pin to right"}
+                      >
+                        <Pin className="h-3 w-3 rotate-45" />
+                      </Button>
+                    </div>
+                  )}
 
                   {/* Sub-row Toggle */}
                   {onSubRowToggle && (

@@ -133,6 +133,7 @@ export function SmartGrid({
     toggleColumnVisibility,
     updateColumnHeader,
     updateSubRowColumnOrder,
+    toggleColumnPin,
     savePreferences
   } = useGridPreferences(
     preferencesColumns,
@@ -165,13 +166,32 @@ export function SmartGrid({
     
     const calculatedWidths = calculateColumnWidthsCallback(visibleColumns);
     
-    return visibleColumns.map(col => ({
-      ...col,
-      label: preferences.columnHeaders[col.key] || col.label,
-      hidden: preferences.hiddenColumns.includes(col.key),
-      width: calculatedWidths[col.key] || 100,
-      filterable: col.filterable !== false // Enable filtering by default
-    }));
+    // Separate columns into pinned and unpinned
+    const leftPinnedColumns: GridColumnConfig[] = [];
+    const rightPinnedColumns: GridColumnConfig[] = [];
+    const unpinnedColumns: GridColumnConfig[] = [];
+    
+    visibleColumns.forEach(col => {
+      const enhancedCol = {
+        ...col,
+        label: preferences.columnHeaders[col.key] || col.label,
+        hidden: preferences.hiddenColumns.includes(col.key),
+        width: calculatedWidths[col.key] || 100,
+        filterable: col.filterable !== false, // Enable filtering by default
+        pinned: preferences.pinnedColumns[col.key] || col.pinned
+      };
+      
+      if (enhancedCol.pinned === 'left') {
+        leftPinnedColumns.push(enhancedCol);
+      } else if (enhancedCol.pinned === 'right') {
+        rightPinnedColumns.push(enhancedCol);
+      } else {
+        unpinnedColumns.push(enhancedCol);
+      }
+    });
+    
+    // Return columns in order: left pinned + unpinned + right pinned
+    return [...leftPinnedColumns, ...unpinnedColumns, ...rightPinnedColumns];
   }, [currentColumns, preferences, calculateColumnWidthsCallback]);
 
   // Get sub-row columns (columns marked with subRow: true)
@@ -361,6 +381,7 @@ export function SmartGrid({
       columnHeaders: {},
       subRowColumns: [],
       subRowColumnOrder: [], // Reset sub-row column order
+      pinnedColumns: {},
       filters: []
     };
     
@@ -736,6 +757,7 @@ export function SmartGrid({
         preferences={preferences}
         onColumnVisibilityToggle={toggleColumnVisibility}
         onColumnHeaderChange={updateColumnHeader}
+        onColumnPin={toggleColumnPin}
         onResetToDefaults={handleResetPreferences}
         onExport={handleExport}
         onSubRowToggle={handleSubRowToggleInternal}
@@ -787,6 +809,20 @@ export function SmartGrid({
                     const shouldHideIcons = resizeHoverColumn === column.key || resizingColumn === column.key;
                     const currentFilter = filters.find(f => f.column === column.key);
                     const widthPercentage = (column.width / orderedColumns.reduce((total, col) => total + col.width, 0)) * 100;
+                    const isPinned = column.pinned;
+                    const leftPinnedCols = orderedColumns.filter(col => col.pinned === 'left');
+                    const rightPinnedCols = orderedColumns.filter(col => col.pinned === 'right');
+                    
+                    // Calculate left/right position for pinned columns
+                    let pinnedPosition = 0;
+                    if (isPinned === 'left') {
+                      const pinnedIndex = leftPinnedCols.findIndex(col => col.key === column.key);
+                      pinnedPosition = leftPinnedCols.slice(0, pinnedIndex).reduce((sum, col) => sum + col.width, 0);
+                      if (showCheckboxes) pinnedPosition += 50; // Add checkbox column width
+                    } else if (isPinned === 'right') {
+                      const pinnedIndex = rightPinnedCols.findIndex(col => col.key === column.key);
+                      pinnedPosition = rightPinnedCols.slice(pinnedIndex + 1).reduce((sum, col) => sum + col.width, 0);
+                    }
                     
                     return (
                       <TableHead 
@@ -796,14 +832,19 @@ export function SmartGrid({
                           draggedColumn === column.key && "opacity-50",
                           dragOverColumn === column.key && "bg-blue-100 border-blue-300",
                           resizingColumn === column.key && "bg-blue-50",
-                          !resizingColumn && "cursor-move"
+                          !resizingColumn && "cursor-move",
+                          isPinned && "sticky z-30",
+                          isPinned === 'left' && "shadow-lg",
+                          isPinned === 'right' && "shadow-lg"
                         )}
                         style={{ 
-                          width: `${widthPercentage}%`,
-                          minWidth: `${Math.max(80, column.width * 0.8)}px`,
-                          maxWidth: `${column.width * 1.5}px`
+                          width: `${column.width}px`,
+                          minWidth: `${column.width}px`,
+                          maxWidth: `${column.width}px`,
+                          ...(isPinned === 'left' && { left: `${pinnedPosition}px` }),
+                          ...(isPinned === 'right' && { right: `${pinnedPosition}px` })
                         }}
-                        draggable={!editingHeader && !resizingColumn}
+                        draggable={!editingHeader && !resizingColumn && !isPinned}
                         onDragStart={(e) => handleColumnDragStart(e, column.key)}
                         onDragOver={(e) => handleColumnDragOver(e, column.key)}
                         onDragLeave={handleColumnDragLeave}
@@ -1030,16 +1071,36 @@ export function SmartGrid({
                             </TableCell>
                           )}
                           {orderedColumns.map((column, columnIndex) => {
-                            const widthPercentage = (column.width / orderedColumns.reduce((total, col) => total + col.width, 0)) * 100;
+                            const isPinned = column.pinned;
+                            const leftPinnedCols = orderedColumns.filter(col => col.pinned === 'left');
+                            const rightPinnedCols = orderedColumns.filter(col => col.pinned === 'right');
+                            
+                            // Calculate left/right position for pinned columns
+                            let pinnedPosition = 0;
+                            if (isPinned === 'left') {
+                              const pinnedIndex = leftPinnedCols.findIndex(col => col.key === column.key);
+                              pinnedPosition = leftPinnedCols.slice(0, pinnedIndex).reduce((sum, col) => sum + col.width, 0);
+                              if (showCheckboxes) pinnedPosition += 50; // Add checkbox column width
+                            } else if (isPinned === 'right') {
+                              const pinnedIndex = rightPinnedCols.findIndex(col => col.key === column.key);
+                              pinnedPosition = rightPinnedCols.slice(pinnedIndex + 1).reduce((sum, col) => sum + col.width, 0);
+                            }
                             
                             return (
                               <TableCell 
                                 key={column.key} 
-                                className="relative px-3 py-3 border-r border-gray-50 last:border-r-0 align-top"
+                                className={cn(
+                                  "relative px-3 py-3 border-r border-gray-50 last:border-r-0 align-top",
+                                  isPinned && "sticky z-20 bg-white",
+                                  isPinned === 'left' && "shadow-lg",
+                                  isPinned === 'right' && "shadow-lg"
+                                )}
                                 style={{ 
-                                  width: `${widthPercentage}%`,
-                                  minWidth: `${Math.max(80, column.width * 0.8)}px`,
-                                  maxWidth: `${column.width * 1.5}px`
+                                  width: `${column.width}px`,
+                                  minWidth: `${column.width}px`,
+                                  maxWidth: `${column.width}px`,
+                                  ...(isPinned === 'left' && { left: `${pinnedPosition}px` }),
+                                  ...(isPinned === 'right' && { right: `${pinnedPosition}px` })
                                 }}
                               >
                                 <div className="overflow-hidden">
