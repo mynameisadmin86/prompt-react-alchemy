@@ -82,13 +82,6 @@ const Index = () => {
       icon: Upload,
       path: "/file-upload-demo",
       color: "text-rose-600"
-    },
-    {
-      title: "SmartGrid Grouping Demo",
-      description: "Advanced grid with row grouping functionality and expandable groups",
-      icon: Layers,
-      path: "/smart-grid-grouping-demo",
-      color: "text-violet-600"
     }
   ];
 
