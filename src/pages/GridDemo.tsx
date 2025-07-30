@@ -483,7 +483,7 @@ const GridDemo = () => {
             key={`grid-${gridState.forceUpdate}`}
             columns={gridState.columns}
             data={gridState.gridData.length > 0 ? gridState.gridData : processedData}
-            groupableColumns={['status', 'tripBillingStatus', 'departurePoint', 'arrivalPoint']}
+            groupableColumns={['id','status', 'tripBillingStatus', 'departurePoint', 'arrivalPoint']}
             showGroupingDropdown={true}
             editableColumns={['plannedStartEndDateTime']}
             paginationMode="pagination"
