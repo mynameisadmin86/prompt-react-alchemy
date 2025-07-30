@@ -101,7 +101,8 @@ export function SmartGridWithGrouping({
           if (index === 0) {
             // Create a special display value for the first column with expand/collapse icon
             const icon = group.isExpanded ? '▼' : '▶';
-            acc[col.key] = `${icon} ${group.groupValue} (${group.items.length} ${group.items.length === 1 ? 'item' : 'items'})`;
+            const fieldLabel = columns.find(c => c.key === currentGroupBy)?.label || currentGroupBy;
+            acc[col.key] = `${icon} ${fieldLabel}: ${group.groupValue} (${group.items.length} ${group.items.length === 1 ? 'item' : 'items'})`;
           } else {
             acc[col.key] = '';
           }
