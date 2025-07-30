@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { SmartGrid } from '@/components/SmartGrid';
+import { SmartGridWithGrouping } from '@/components/SmartGrid';
 import { GridColumnConfig } from '@/types/smartgrid';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -458,10 +458,12 @@ const TripPlansSearchHub = () => {
               background-color: #dbeafe !important;
             }
           `}</style>
-          <SmartGrid
+          <SmartGridWithGrouping
             key={`grid-${gridState.forceUpdate}`}
             columns={gridState.columns}
             data={gridState.gridData.length > 0 ? gridState.gridData : processedData}
+            groupableColumns={['status', 'tripBillingStatus', 'departurePoint', 'arrivalPoint', 'customer']}
+            showGroupingDropdown={true}
             paginationMode="pagination"
             onLinkClick={handleLinkClick}
             onUpdate={handleUpdate}
