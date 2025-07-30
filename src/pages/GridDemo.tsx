@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { SmartGrid } from '@/components/SmartGrid';
+import { SmartGridWithGrouping } from '@/components/SmartGrid';
 import { GridColumnConfig } from '@/types/smartgrid';
 import { Button } from '@/components/ui/button';
 import { Printer, MoreHorizontal, User, Train, UserCheck, Container, Plus, Upload } from 'lucide-react';
@@ -479,10 +479,12 @@ const GridDemo = () => {
               background-color: #dbeafe !important;
             }
           `}</style>
-          <SmartGrid
+          <SmartGridWithGrouping
             key={`grid-${gridState.forceUpdate}`}
             columns={gridState.columns}
             data={gridState.gridData.length > 0 ? gridState.gridData : processedData}
+            groupableColumns={['status', 'tripBillingStatus', 'departurePoint', 'arrivalPoint']}
+            showGroupingDropdown={true}
             editableColumns={['plannedStartEndDateTime']}
             paginationMode="pagination"
             onLinkClick={handleLinkClick}

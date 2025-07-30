@@ -2,7 +2,6 @@ import React, { useState, useMemo, useCallback } from 'react';
 import { SmartGrid } from './SmartGrid';
 import { SmartGridProps, GridColumnConfig } from '@/types/smartgrid';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ChevronDown, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface GroupedData {
@@ -39,7 +38,8 @@ export function SmartGridWithGrouping({
     // Auto-detect groupable columns (excluding certain types)
     return columns.filter(col => 
       col.type !== 'EditableText' && 
-      col.type !== 'SubRow'
+      col.type !== 'SubRow' &&
+      col.type !== 'ExpandableCount'
     );
   }, [columns, groupableColumns]);
 
@@ -53,8 +53,6 @@ export function SmartGridWithGrouping({
     const groups: { [key: string]: any[] } = {};
     
     data.forEach(item => {
-      // Get the value for grouping - since GridColumnConfig doesn't have accessor,
-      // we'll use the key directly to access the property
       let groupValue = item[currentGroupBy];
       
       // Handle object values (like status objects)
