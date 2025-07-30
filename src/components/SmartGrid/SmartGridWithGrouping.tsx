@@ -173,7 +173,7 @@ export function SmartGridWithGrouping({
     return baseClassName;
   }, [props.rowClassName]);
 
-  // Modify the first column to handle group header display
+  // Modify the first column to handle group header display and remove subRow columns when grouping
   const modifiedColumns = useMemo(() => {
     const currentGroupBy = internalGroupBy || groupByField;
     if (!currentGroupBy) {
@@ -188,7 +188,11 @@ export function SmartGridWithGrouping({
           type: 'Link' as const
         };
       }
-      return col;
+      // Remove subRow property when grouping is active to prevent expansion icons
+      return {
+        ...col,
+        subRow: false
+      };
     });
   }, [columns, internalGroupBy, groupByField]);
 
