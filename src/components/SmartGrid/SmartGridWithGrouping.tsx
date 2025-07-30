@@ -2,7 +2,6 @@ import React, { useState, useMemo, useCallback } from 'react';
 import { SmartGrid } from './SmartGrid';
 import { SmartGridProps, GridColumnConfig } from '@/types/smartgrid';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ChevronDown, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface GroupedData {
@@ -101,13 +100,8 @@ export function SmartGridWithGrouping({
         ...columns.reduce((acc, col, index) => {
           if (index === 0) {
             // Create a special display value for the first column with expand/collapse icon
-            const Icon = group.isExpanded ? ChevronDown : ChevronRight;
-            acc[col.key] = (
-              <div className="flex items-center gap-1">
-                <Icon size={16} />
-                <span>{group.groupValue} ({group.items.length} {group.items.length === 1 ? 'item' : 'items'})</span>
-              </div>
-            );
+            const icon = group.isExpanded ? '▼' : '▶';
+            acc[col.key] = `${icon} ${group.groupValue} (${group.items.length} ${group.items.length === 1 ? 'item' : 'items'})`;
           } else {
             acc[col.key] = '';
           }
@@ -191,16 +185,10 @@ export function SmartGridWithGrouping({
         return {
           ...col,
           // Make it a link to enable clicking
-          type: 'Link' as const,
-          // Remove sub-row functionality when grouping
-          subRow: false
+          type: 'Link' as const
         };
       }
-      return {
-        ...col,
-        // Remove sub-row functionality from all columns when grouping
-        subRow: false
-      };
+      return col;
     });
   }, [columns, internalGroupBy, groupByField]);
 
