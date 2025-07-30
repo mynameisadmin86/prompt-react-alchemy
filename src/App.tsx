@@ -17,6 +17,7 @@ import SideDrawerDemo from "./pages/SideDrawerDemo";
 import SmartGridPlusDemo from "./pages/SmartGridPlusDemo";
 import BillingDemo from "./pages/BillingDemo";
 import FileUploadDemo from "./pages/FileUploadDemo";
+import SmartGridGroupingDemo from "./pages/SmartGridGroupingDemo";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -41,6 +42,7 @@ const App = () => (
           <Route path="/smart-grid-plus-demo" element={<SmartGridPlusDemo />} />
           <Route path="/billing-demo" element={<BillingDemo />} />
           <Route path="/file-upload-demo" element={<FileUploadDemo />} />
+          <Route path="/smart-grid-grouping-demo" element={<SmartGridGroupingDemo />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
