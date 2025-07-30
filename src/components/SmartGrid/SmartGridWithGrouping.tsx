@@ -226,6 +226,8 @@ export function SmartGridWithGrouping({
         columns={modifiedColumns}
         rowClassName={getRowClassName}
         onLinkClick={handleLinkClick}
+        // Disable nested row renderer when grouping is active to prevent expansion icons
+        nestedRowRenderer={internalGroupBy || groupByField ? undefined : props.nestedRowRenderer}
       />
     </div>
   );
