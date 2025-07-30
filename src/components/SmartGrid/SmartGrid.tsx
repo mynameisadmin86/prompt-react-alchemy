@@ -480,10 +480,7 @@ export function SmartGrid({
 
   // Handle drag and drop for column reordering
   const handleColumnDragStart = useCallback((e: React.DragEvent, columnKey: string) => {
-    // Check if any row has group headers (indicated by __isGroupHeader)
-    const hasGroupHeaders = paginatedData.some(row => row.__isGroupHeader);
-    
-    if (editingHeader || resizingColumn || hasGroupHeaders) {
+    if (editingHeader || resizingColumn) {
       e.preventDefault();
       return;
     }
@@ -491,7 +488,7 @@ export function SmartGrid({
     setDraggedColumn(columnKey);
     e.dataTransfer.effectAllowed = 'move';
     e.dataTransfer.setData('text/plain', columnKey);
-  }, [editingHeader, resizingColumn, setDraggedColumn, paginatedData]);
+  }, [editingHeader, resizingColumn, setDraggedColumn]);
 
   const handleColumnDragOver = useCallback((e: React.DragEvent, targetColumnKey: string) => {
     if (resizingColumn) {
@@ -806,7 +803,7 @@ export function SmartGrid({
                           minWidth: `${Math.max(80, column.width * 0.8)}px`,
                           maxWidth: `${column.width * 1.5}px`
                         }}
-                        draggable={!editingHeader && !resizingColumn && !paginatedData.some(row => row.__isGroupHeader)}
+                        draggable={!editingHeader && !resizingColumn}
                         onDragStart={(e) => handleColumnDragStart(e, column.key)}
                         onDragOver={(e) => handleColumnDragOver(e, column.key)}
                         onDragLeave={handleColumnDragLeave}
