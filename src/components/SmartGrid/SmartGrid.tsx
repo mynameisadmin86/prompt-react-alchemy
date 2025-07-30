@@ -986,64 +986,83 @@ export function SmartGrid({
                 ) : (
                   paginatedData.map((row, rowIndex) => (
                     <>
-                      <TableRow key={rowIndex}
-                        className={cn(
-                          "hover:bg-gray-50/50 transition-colors duration-150 border-b border-gray-100",
-                          rowClassName ? rowClassName(row, rowIndex) : ''
-                        )}
-                      >
-                        {/* Checkbox cell */}
-                        {showCheckboxes && (
-                          <TableCell className="px-3 py-3 border-r border-gray-50 w-[50px]">
-                            <input 
-                              type="checkbox" 
-                              className="rounded" 
-                              checked={currentSelectedRows.has(rowIndex)}
-                              onChange={() => {
-                                const newSet = new Set(currentSelectedRows);
-                                if (newSet.has(rowIndex)) {
-                                  newSet.delete(rowIndex);
-                                } else {
-                                  newSet.add(rowIndex);
-                                }
-                                handleSelectionChange(newSet);
-                              }}
-                            />
+                      {/* Group Header Row - spans all columns */}
+                      {row.__isGroupHeader ? (
+                        <TableRow key={rowIndex}
+                          className={cn(
+                            "hover:bg-gray-50/50 transition-colors duration-150 border-b border-gray-100",
+                            rowClassName ? rowClassName(row, rowIndex) : ''
+                          )}
+                        >
+                          <TableCell 
+                            colSpan={orderedColumns.length + (showCheckboxes ? 1 : 0) + (plugins.some(plugin => plugin.rowActions) ? 1 : 0)}
+                            className="px-3 py-3 font-semibold cursor-pointer"
+                            onClick={() => onLinkClick?.(row, orderedColumns[0]?.key)}
+                          >
+                            {row.__groupHeaderText}
                           </TableCell>
-                        )}
-                        {orderedColumns.map((column, columnIndex) => {
-                          const widthPercentage = (column.width / orderedColumns.reduce((total, col) => total + col.width, 0)) * 100;
-                          
-                          return (
-                            <TableCell 
-                              key={column.key} 
-                              className="relative px-3 py-3 border-r border-gray-50 last:border-r-0 align-top"
-                              style={{ 
-                                width: `${widthPercentage}%`,
-                                minWidth: `${Math.max(80, column.width * 0.8)}px`,
-                                maxWidth: `${column.width * 1.5}px`
-                              }}
-                            >
-                              <div className="overflow-hidden">
-                                {renderCell(row, column, rowIndex, columnIndex)}
+                        </TableRow>
+                      ) : (
+                        /* Regular Data Row */
+                        <TableRow key={rowIndex}
+                          className={cn(
+                            "hover:bg-gray-50/50 transition-colors duration-150 border-b border-gray-100",
+                            rowClassName ? rowClassName(row, rowIndex) : ''
+                          )}
+                        >
+                          {/* Checkbox cell */}
+                          {showCheckboxes && (
+                            <TableCell className="px-3 py-3 border-r border-gray-50 w-[50px]">
+                              <input 
+                                type="checkbox" 
+                                className="rounded" 
+                                checked={currentSelectedRows.has(rowIndex)}
+                                onChange={() => {
+                                  const newSet = new Set(currentSelectedRows);
+                                  if (newSet.has(rowIndex)) {
+                                    newSet.delete(rowIndex);
+                                  } else {
+                                    newSet.add(rowIndex);
+                                  }
+                                  handleSelectionChange(newSet);
+                                }}
+                              />
+                            </TableCell>
+                          )}
+                          {orderedColumns.map((column, columnIndex) => {
+                            const widthPercentage = (column.width / orderedColumns.reduce((total, col) => total + col.width, 0)) * 100;
+                            
+                            return (
+                              <TableCell 
+                                key={column.key} 
+                                className="relative px-3 py-3 border-r border-gray-50 last:border-r-0 align-top"
+                                style={{ 
+                                  width: `${widthPercentage}%`,
+                                  minWidth: `${Math.max(80, column.width * 0.8)}px`,
+                                  maxWidth: `${column.width * 1.5}px`
+                                }}
+                              >
+                                <div className="overflow-hidden">
+                                  {renderCell(row, column, rowIndex, columnIndex)}
+                                </div>
+                              </TableCell>
+                            );
+                          })}
+                          {/* Plugin row actions */}
+                          {plugins.some(plugin => plugin.rowActions) && (
+                            <TableCell className="px-3 py-3 text-center align-top w-[100px]">
+                              <div className="flex items-center justify-center space-x-1">
+                                <PluginRowActions
+                                  plugins={plugins}
+                                  gridAPI={gridAPI}
+                                  row={row}
+                                  rowIndex={rowIndex}
+                                />
                               </div>
                             </TableCell>
-                          );
-                        })}
-                        {/* Plugin row actions */}
-                        {plugins.some(plugin => plugin.rowActions) && (
-                          <TableCell className="px-3 py-3 text-center align-top w-[100px]">
-                            <div className="flex items-center justify-center space-x-1">
-                              <PluginRowActions
-                                plugins={plugins}
-                                gridAPI={gridAPI}
-                                row={row}
-                                rowIndex={rowIndex}
-                              />
-                            </div>
-                          </TableCell>
-                        )}
-                      </TableRow>
+                          )}
+                        </TableRow>
+                      )}
                       {/* Nested row content */}
                       {effectiveNestedRowRenderer && expandedRows.has(rowIndex) && (
                         <TableRow className="bg-gray-50/30">

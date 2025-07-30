@@ -86,22 +86,21 @@ export function SmartGridWithGrouping({
     
     groupedData.forEach(group => {
       // Create a group header row that will be specially styled
+      const icon = group.isExpanded ? '▼' : '▶';
+      const fieldLabel = columns.find(c => c.key === currentGroupBy)?.label || currentGroupBy;
+      const groupHeaderText = `${icon} ${fieldLabel}: ${group.groupValue} (${group.items.length} ${group.items.length === 1 ? 'item' : 'items'})`;
+      
       const groupHeaderRow = {
         __isGroupHeader: true,
         __groupKey: group.groupKey,
         __groupValue: group.groupValue,
         __groupCount: group.items.length,
         __isExpanded: group.isExpanded,
-        // Set first column to show group info, others empty
-        ...columns.reduce((acc, col, index) => {
-          if (index === 0) {
-            // Create a special display value for the first column with expand/collapse icon
-            const icon = group.isExpanded ? '▼' : '▶';
-            const fieldLabel = columns.find(c => c.key === currentGroupBy)?.label || currentGroupBy;
-            acc[col.key] = `${icon} ${fieldLabel}: ${group.groupValue} (${group.items.length} ${group.items.length === 1 ? 'item' : 'items'})`;
-          } else {
-            acc[col.key] = '';
-          }
+        __groupHeaderText: groupHeaderText,
+        __columnSpan: columns.length,
+        // Set all columns to empty - the rendering will be handled specially
+        ...columns.reduce((acc, col) => {
+          acc[col.key] = '';
           return acc;
         }, {} as any)
       };
@@ -141,14 +140,14 @@ export function SmartGridWithGrouping({
 
   // Handle link click for group headers (using onLinkClick prop)
   const handleLinkClick = useCallback((row: any, columnKey: string) => {
-    if (row.__isGroupHeader && columnKey === columns[0]?.key) {
+    if (row.__isGroupHeader) {
       toggleGroupExpansion(row.__groupKey);
     }
     // Call original onLinkClick if provided
     if (props.onLinkClick) {
       props.onLinkClick(row, columnKey);
     }
-  }, [toggleGroupExpansion, columns, props.onLinkClick]);
+  }, [toggleGroupExpansion, props.onLinkClick]);
 
   // Custom row class name function
   const getRowClassName = useCallback((row: any, index: number) => {
