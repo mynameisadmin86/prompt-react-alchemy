@@ -15,6 +15,7 @@ import FlexGridLayoutPage from "./pages/FlexGridLayoutPage";
 import TripExecution from "./pages/TripExecution";
 import SideDrawerDemo from "./pages/SideDrawerDemo";
 import SmartGridPlusDemo from "./pages/SmartGridPlusDemo";
+import SmartGridGroupingDemo from "./pages/SmartGridGroupingDemo";
 import BillingDemo from "./pages/BillingDemo";
 import FileUploadDemo from "./pages/FileUploadDemo";
 import NotFound from "./pages/NotFound";
@@ -39,6 +40,7 @@ const App = () => (
           <Route path="/trip-execution" element={<TripExecution />} />
           <Route path="/side-drawer-demo" element={<SideDrawerDemo />} />
           <Route path="/smart-grid-plus-demo" element={<SmartGridPlusDemo />} />
+          <Route path="/smart-grid-grouping-demo" element={<SmartGridGroupingDemo />} />
           <Route path="/billing-demo" element={<BillingDemo />} />
           <Route path="/file-upload-demo" element={<FileUploadDemo />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
