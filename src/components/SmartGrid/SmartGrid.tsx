@@ -614,7 +614,7 @@ export function SmartGrid({
     const isEditing = editingCell?.rowIndex === rowIndex && editingCell?.columnKey === column.key;
     const isEditable = isColumnEditable(column, columnIndex);
 
-    if (columnIndex === 0 && (effectiveNestedRowRenderer || hasCollapsibleColumns)) {
+    if (columnIndex === 0 && (effectiveNestedRowRenderer || hasCollapsibleColumns) && !row.__isGroupHeader) {
       const isExpanded = expandedRows.has(rowIndex);
       return (
         <div className="flex items-center space-x-1 min-w-0">
