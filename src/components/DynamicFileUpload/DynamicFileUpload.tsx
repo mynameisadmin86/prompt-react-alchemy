@@ -6,12 +6,14 @@ import {
   FileText, 
   Image, 
   Download, 
-  Trash2, 
+  Trash,
+  CircleCheck, 
   Eye, 
   Edit, 
   Search,
   Filter,
-  Check
+  Check, UploadCloud,
+  BookPlus, FileImage, BookA
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -47,11 +49,12 @@ const DynamicFileUpload: React.FC<FileUploadProps> = ({
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
   const [isDragOver, setIsDragOver] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
-  
+
   const [filters, setFilters] = useState<FileFilterState>({
     searchTerm: '',
     selectedCategory: '',
-    selectedFileType: ''
+    selectedFileType: '',
+    showCategoryDropdown: false
   });
 
   const { register, handleSubmit, watch, setValue, reset } = useForm({
@@ -260,13 +263,14 @@ const DynamicFileUpload: React.FC<FileUploadProps> = ({
   });
 
   return (
-    <div className={`grid lg:grid-cols-2 gap-6 ${className}`}>
+    <div className={`flex flex-col md:flex-row gap-6 w-full h-full bg-[#f8fafd]`}>
       {/* Left Panel - Upload Form */}
-      <Card className="h-fit">
-        <CardContent className="p-6 space-y-6">
+      <div className="md:w-1/3 w-full bg-white p-6 flex flex-col gap-6">
+
+        <div className="">
           {/* Category Selection */}
           <div className="space-y-2">
-            <Label htmlFor="category" className="text-sm font-medium">File Category *</Label>
+            <label className="block text-sm font-medium mb-1">File Category <span className="text-red-500">*</span></label>
             <Select 
               value={selectedCategory} 
               onValueChange={(value) => setValue('category', value)}
@@ -285,8 +289,8 @@ const DynamicFileUpload: React.FC<FileUploadProps> = ({
           </div>
 
           {/* Remarks */}
-          <div className="space-y-2">
-            <Label htmlFor="remarks" className="text-sm font-medium">Remarks</Label>
+          <div className="space-y-2 mt-3">
+            <label className="block text-sm font-medium mb-1">Remarks</label>
             <Textarea
               {...register('remarks')}
               placeholder="Enter Remarks"
@@ -295,19 +299,17 @@ const DynamicFileUpload: React.FC<FileUploadProps> = ({
           </div>
 
           {/* Attachment Section */}
-          <div className="space-y-2">
-            <Label className="text-sm font-medium">Attachment *</Label>
+          <div className="mt-3">
+            <label className="block text-sm font-medium mb-3">Attachment <span className="text-red-500">*</span></label>
             <div
-              className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
-                isDragOver 
-                  ? 'border-primary bg-primary/5' 
-                  : 'border-gray-200 hover:border-gray-300 bg-gray-50'
-              }`}
+              className={`border-2 border-dashed border-blue-200 rounded-lg p-4 flex flex-col items-center justify-center text-center bg-blue-50 cursor-pointer mb-3`}
               onDragOver={handleDragOver}
               onDragLeave={handleDragLeave}
               onDrop={handleDrop}
             >
-              <Upload className="mx-auto h-8 w-8 text-gray-400 mb-3" />
+              <div className="bg-white w-10 h-10 rounded-full flex items-center justify-center mb-2">
+                <UploadCloud className="w-7 h-7 p-1 text-gray-500 bg-gray-200 rounded-full" />
+              </div>
               <div className="space-y-1">
                 <button
                   type="button"
@@ -338,9 +340,9 @@ const DynamicFileUpload: React.FC<FileUploadProps> = ({
               {stagedFiles.map(file => (
                 <div key={file.id} className="flex items-center justify-between p-3 border rounded-lg bg-white">
                   <div className="flex items-center space-x-3">
-                    <div className="p-2 bg-red-100 rounded">
-                      <FileText className="h-4 w-4 text-red-600" />
-                    </div>
+                    {/* <div className="p-2 bg-red-100 rounded"> */}
+                      <FileText className="w-8 h-8 text-red-500" />
+                    {/* </div> */}
                     <div>
                       <p className="font-medium text-sm text-gray-900">{file.file.name}</p>
                       <p className="text-xs text-gray-500">
@@ -357,9 +359,9 @@ const DynamicFileUpload: React.FC<FileUploadProps> = ({
                     </div>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <div className="p-1 bg-green-100 rounded-full">
-                      <Check className="h-3 w-3 text-green-600" />
-                    </div>
+                    {/* <div className="p-1 bg-green-100 rounded-full"> */}
+                      <CircleCheck  className="w-5 h-5 text-white" fill="green" />
+                    {/* </div> */}
                     <Button
                       type="button"
                       variant="ghost"
@@ -367,7 +369,7 @@ const DynamicFileUpload: React.FC<FileUploadProps> = ({
                       onClick={() => removeStagedFile(file.id)}
                       className="p-1 h-6 w-6 text-red-500 hover:text-red-700"
                     >
-                      <Trash2 className="h-3 w-3" />
+                      <Trash className="w-5 h-5 text-red-500" />
                     </Button>
                   </div>
                 </div>
@@ -379,55 +381,72 @@ const DynamicFileUpload: React.FC<FileUploadProps> = ({
           <Button
             onClick={handleUploadSubmit}
             disabled={stagedFiles.length === 0 || !selectedCategory || isUploading}
-            className="w-full h-11 bg-blue-600 hover:bg-blue-700 text-white font-medium"
+            className="w-full h-10 bg-blue-600 hover:bg-blue-700 text-white font-medium mt-6"
           >
             {isUploading ? 'Uploading...' : 'Save'}
           </Button>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       {/* Right Panel - Uploaded Files List */}
-      <Card>
-        <CardHeader className="pb-4">
-          <div className="flex items-center justify-between">
-            <CardTitle className="text-lg font-semibold">
-              Total Attachments <span className="ml-2 px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium">{uploadedFiles.length}</span>
-            </CardTitle>
+      <div className='flex-1 pt-4'>
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <span className="text-lg font-semibold">Total Attachments</span>
+            <span className="bg-blue-100 text-blue-600 text-xs font-bold px-2 py-0.5 rounded-full">{uploadedFiles.length}</span>
           </div>
-          
-          {/* Search and Filter Bar */}
-            <div className="flex gap-3">
-              <div className="flex-1 relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                <Input
-                  placeholder="Search"
-                  value={filters.searchTerm}
-                  onChange={(e) => setFilters(prev => ({ ...prev, searchTerm: e.target.value }))}
-                  className="pl-10 h-10"
-                />
-              </div>
-              <Select 
-                value={filters.selectedCategory} 
-                onValueChange={(value) => setFilters(prev => ({ ...prev, selectedCategory: value }))}
-              >
-                <SelectTrigger className="w-40 h-10">
-                  <div className="flex items-center gap-2">
-                    <Filter className="h-4 w-4" />
-                    <SelectValue placeholder="All Categories" />
-                  </div>
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Categories</SelectItem>
-                  {finalConfig.categories.map(category => (
-                    <SelectItem key={category} value={category}>
-                      {category}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+          <div className="flex items-center gap-3">
+            <div className="flex-1 relative">
+              <Input
+                placeholder="Search"
+                value={filters.searchTerm}
+                onChange={(e) => setFilters(prev => ({ ...prev, searchTerm: e.target.value }))}
+                className="pl-3 h-10"
+              />
+              <Search className="absolute right-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-600" />
             </div>
-        </CardHeader>
-        <CardContent className="pt-0">
+            <div className="relative">
+              <button
+                type="button"
+                className="rounded-lg border border-gray-300 p-2 hover:bg-gray-100 flex items-center gap-2"
+                onClick={() => setFilters(prev => ({ ...prev, showCategoryDropdown: !prev.showCategoryDropdown }))}
+              >
+                <Filter className="w-5 h-5 text-gray-500" />
+              </button>
+              {filters.showCategoryDropdown && (
+                <div
+                  tabIndex={-1}
+                  onBlur={(e) => {
+                    // Only close if focus leaves the dropdown and its children
+                    if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+                      setFilters(prev => ({ ...prev, showCategoryDropdown: false }));
+                    }
+                  }}
+                  className="absolute right-0 z-10 mt-2 w-40 bg-white border border-gray-200 rounded shadow-lg"
+                >
+                  <div
+                    className={`px-4 py-2 cursor-pointer hover:bg-gray-100 ${filters.selectedCategory === 'all' ? 'font-semibold text-blue-600' : ''}`}
+                    onClick={() => setFilters(prev => ({ ...prev, selectedCategory: 'all', showCategoryDropdown: false }))}
+                    >
+                      All Categories
+                    </div>
+                    {finalConfig.categories.map(category => (
+                      <div
+                        key={category}
+                        className={`px-4 py-2 cursor-pointer hover:bg-gray-100 ${filters.selectedCategory === category ? 'font-semibold text-blue-600' : ''}`}
+                        onClick={() => setFilters(prev => ({ ...prev, selectedCategory: category, showCategoryDropdown: false }))}
+                      >
+                        {category}
+                      </div>
+                    ))}
+                  </div>
+                // </ClickAwayListener>
+              )}
+            </div>
+          </div>
+        </div>
+        
+        <div className="pt-0">
           {filteredFiles.length === 0 ? (
             <div className="text-center py-12">
               <div className="mx-auto w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
@@ -439,12 +458,12 @@ const DynamicFileUpload: React.FC<FileUploadProps> = ({
             <div className="grid gap-4 sm:grid-cols-2">
               {filteredFiles.map(file => {
                 const extension = file.fileName.split('.').pop()?.toLowerCase();
-                let iconColor = 'bg-gray-100 text-gray-600';
-                let iconBg = 'bg-gray-100';
+                let iconColor = '';
+                let iconBg = '';
                 
                 if (extension === 'pdf') {
-                  iconColor = 'text-red-600';
-                  iconBg = 'bg-red-100';
+                  iconColor = 'bg-red-100 text-red-600';
+                  iconBg = 'bg-gray-100';
                 } else if (['jpg', 'jpeg', 'png', 'gif'].includes(extension || '')) {
                   iconColor = 'text-orange-600';
                   iconBg = 'bg-orange-100';
@@ -455,34 +474,48 @@ const DynamicFileUpload: React.FC<FileUploadProps> = ({
                   iconColor = 'text-blue-600';
                   iconBg = 'bg-blue-100';
                 }
-                
+
+                const fileIcons: { [key: string]: JSX.Element } = {
+                  pdf: <FileText className="text-red-500 w-6 h-6" />,
+                  xls: <BookPlus className="text-green-500 w-6 h-6" />,
+                  xlsx: <BookPlus className="text-green-500 w-6 h-6" />,
+                  jpg: <FileImage className="text-orange-400 w-6 h-6" />,
+                  jpeg: <FileImage className="text-orange-400 w-6 h-6" />,
+                  png: <FileImage className="text-orange-400 w-6 h-6" />,
+                  gif: <FileImage className="text-orange-400 w-6 h-6" />,
+                  doc: <BookA className="text-blue-500 w-6 h-6" />,
+                  docx: <BookA className="text-blue-500 w-6 h-6" />,
+                };
                 return (
                   <div key={file.id} className="p-4 border rounded-lg hover:shadow-sm transition-shadow bg-white">
-                    <div className="flex items-start justify-between mb-3">
-                      <div className={`p-2 rounded ${iconBg}`}>
-                        {getFileIcon(file.fileName)}
-                        <span className={`sr-only ${iconColor}`}>File icon</span>
+                    <div className="flex items-start justify-between">
+                      <div className='flex gap-2'>
+                        <div className={`p-2 h-10 w-10 rounded ${iconBg}`}>
+                          {fileIcons[extension]}
+                          {/* {getFileIcon(file.fileName)} */}
+                          {/* <span className={`sr-only ${iconColor}`}>File icon</span> */}
+                        </div>
+                        <div className="">
+                          <h4 className="font-medium text-sm text-gray-900 truncate">{file.fileName}</h4>
+                          <Badge variant="secondary" className="text-xs text-gray-400 p-0 bg-white hover:bg-white">
+                            {file.category}
+                          </Badge>
+                        </div>
                       </div>
                       <Button variant="ghost" size="sm" className="p-1">
-                        <svg className="h-4 w-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                        <svg className="h-4 w-4 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
                           <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
                         </svg>
                       </Button>
                     </div>
                     
-                    <div className="space-y-2">
-                      <h4 className="font-medium text-sm text-gray-900 truncate">{file.fileName}</h4>
-                      <Badge variant="secondary" className="text-xs bg-gray-100 text-gray-700">
-                        {file.category}
-                      </Badge>
-                    </div>
                   </div>
                 );
               })}
             </div>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 };
