@@ -38,7 +38,6 @@ interface GridToolbarProps {
   preferences: GridPreferences;
   onColumnVisibilityToggle: (columnId: string) => void;
   onColumnHeaderChange: (columnId: string, header: string) => void;
-  onColumnPin?: (columnId: string, direction?: 'left' | 'right') => void;
   onResetToDefaults: () => void;
   onExport: (format: 'csv' | 'xlsx') => void;
   onSubRowToggle?: (columnKey: string) => void;
@@ -66,7 +65,6 @@ export function GridToolbar({
   preferences,
   onColumnVisibilityToggle,
   onColumnHeaderChange,
-  onColumnPin,
   onResetToDefaults,
   onExport,
   onSubRowToggle,
@@ -190,7 +188,6 @@ export function GridToolbar({
           preferences={preferences}
           onColumnVisibilityToggle={onColumnVisibilityToggle}
           onColumnHeaderChange={onColumnHeaderChange}
-          onColumnPin={onColumnPin}
           onResetToDefaults={onResetToDefaults}
           onSubRowToggle={onSubRowToggle}
         />

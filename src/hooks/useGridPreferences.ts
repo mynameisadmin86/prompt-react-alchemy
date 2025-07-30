@@ -16,7 +16,6 @@ export function useGridPreferences<T>(
     columnHeaders: {},
     subRowColumns: [], // Initialize empty sub-row columns array
     subRowColumnOrder: [], // Initialize empty sub-row column order array
-    pinnedColumns: {},
     filters: []
   };
 
@@ -63,8 +62,7 @@ export function useGridPreferences<T>(
             ...columns.filter(col => !loadedPreferences.columnOrder.includes(col.id)).map(col => col.id)
           ],
           subRowColumns: loadedPreferences.subRowColumns || [], // Ensure subRowColumns is initialized
-          subRowColumnOrder: loadedPreferences.subRowColumnOrder || [], // Ensure subRowColumnOrder is initialized
-          pinnedColumns: loadedPreferences.pinnedColumns || {} // Ensure pinnedColumns is initialized
+          subRowColumnOrder: loadedPreferences.subRowColumnOrder || [] // Ensure subRowColumnOrder is initialized
         };
         setPreferences(mergedPreferences);
       }
@@ -125,21 +123,6 @@ export function useGridPreferences<T>(
     savePreferences(newPreferences);
   }, [preferences, savePreferences]);
 
-  const toggleColumnPin = useCallback((columnId: string, pinDirection?: 'left' | 'right') => {
-    const pinnedColumns = { ...preferences.pinnedColumns };
-    
-    if (pinnedColumns[columnId]) {
-      // Unpin if already pinned
-      delete pinnedColumns[columnId];
-    } else {
-      // Pin to specified direction or left by default
-      pinnedColumns[columnId] = pinDirection || 'left';
-    }
-    
-    const newPreferences = { ...preferences, pinnedColumns };
-    savePreferences(newPreferences);
-  }, [preferences, savePreferences]);
-
   return {
     preferences,
     updateColumnOrder,
@@ -148,7 +131,6 @@ export function useGridPreferences<T>(
     updateColumnHeader,
     toggleSubRow, // Function for toggling sub-row at column level
     updateSubRowColumnOrder, // New function for updating sub-row column order
-    toggleColumnPin, // New function for pinning/unpinning columns
     savePreferences
   };
 }

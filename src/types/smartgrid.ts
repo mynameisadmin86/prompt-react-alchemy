@@ -28,7 +28,6 @@ export interface GridColumnConfig {
   order?: number;
   options?: string[];
   subRow?: boolean; // Property for sub-row display
-  pinned?: 'left' | 'right'; // Column pinning - left or right side
   
   // Badge specific properties
   statusMap?: Record<string, string>;
@@ -83,7 +82,6 @@ export interface GridPreferences {
   subRowColumns: string[]; // Existing property for tracking sub-row columns
   subRowColumnOrder: string[]; // New property for sub-row column ordering
   enableSubRowConfig?: boolean; // New property for enabling/disabling sub-row configuration
-  pinnedColumns: Record<string, 'left' | 'right'>; // Pinned columns mapping
   sort?: SortConfig;
   filters: FilterConfig[];
   pageSize?: number;
