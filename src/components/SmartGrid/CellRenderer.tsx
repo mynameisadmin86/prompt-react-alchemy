@@ -129,14 +129,19 @@ export const CellRenderer: React.FC<CellRendererProps> = ({
       }
     };
 
+    // Special handling for group headers - always show group header text in first column
+    const displayValue = row.__isGroupHeader && columnIndex === 0 
+      ? row.__groupHeaderText 
+      : value;
+
     return (
       <button
         onClick={handleClick}
         className="text-blue-600 hover:text-blue-800 cursor-pointer font-medium hover:underline transition-colors duration-150 truncate max-w-full"
         disabled={loading}
-        title={String(value)}
+        title={String(displayValue)}
       >
-        {value}
+        {displayValue}
       </button>
     );
   };
@@ -295,6 +300,31 @@ export const CellRenderer: React.FC<CellRendererProps> = ({
 
   // Main renderer switch
   const renderCellContent = () => {
+    // Special handling for group headers - always show group header text in first column
+    if (row.__isGroupHeader && columnIndex === 0) {
+      const handleClick = () => {
+        if (onLinkClick) {
+          onLinkClick(row, column.key);
+        }
+      };
+
+      return (
+        <button
+          onClick={handleClick}
+          className="text-gray-900 font-semibold hover:text-blue-600 cursor-pointer transition-colors duration-150 truncate max-w-full text-left"
+          disabled={loading}
+          title={String(row.__groupHeaderText)}
+        >
+          {row.__groupHeaderText}
+        </button>
+      );
+    }
+
+    // For group headers in non-first columns, show empty content
+    if (row.__isGroupHeader && columnIndex !== 0) {
+      return <span className="text-gray-400">-</span>;
+    }
+
     switch (column.type) {
       case 'Link':
         return renderLink();
