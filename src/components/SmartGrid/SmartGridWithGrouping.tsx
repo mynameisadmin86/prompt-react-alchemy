@@ -92,15 +92,16 @@ export function SmartGridWithGrouping({
         __groupValue: group.groupValue,
         __groupCount: group.items.length,
         __isExpanded: group.isExpanded,
-        __groupHeaderText: (() => {
-          // Create a special display value for the first column with expand/collapse icon
-          const icon = group.isExpanded ? '▼' : '▶';
-          const fieldLabel = columns.find(c => c.key === currentGroupBy)?.label || currentGroupBy;
-          return `${icon} ${fieldLabel}: ${group.groupValue} (${group.items.length} ${group.items.length === 1 ? 'item' : 'items'})`;
-        })(),
-        // Initialize all column values as empty - the special header text will always be rendered in the first column
-        ...columns.reduce((acc, col) => {
-          acc[col.key] = '';
+        // Set first column to show group info, others empty
+        ...columns.reduce((acc, col, index) => {
+          if (index === 0) {
+            // Create a special display value for the first column with expand/collapse icon
+            const icon = group.isExpanded ? '▼' : '▶';
+            const fieldLabel = columns.find(c => c.key === currentGroupBy)?.label || currentGroupBy;
+            acc[col.key] = `${icon} ${fieldLabel}: ${group.groupValue} (${group.items.length} ${group.items.length === 1 ? 'item' : 'items'})`;
+          } else {
+            acc[col.key] = '';
+          }
           return acc;
         }, {} as any)
       };
