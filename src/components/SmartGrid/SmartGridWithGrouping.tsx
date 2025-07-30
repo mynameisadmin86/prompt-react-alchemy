@@ -35,12 +35,8 @@ export function SmartGridWithGrouping({
     if (groupableColumns) {
       return columns.filter(col => groupableColumns.includes(col.key));
     }
-    // Auto-detect groupable columns (excluding certain types)
-    return columns.filter(col => 
-      col.type !== 'EditableText' && 
-      col.type !== 'SubRow' &&
-      col.type !== 'ExpandableCount'
-    );
+    // Show all columns by default
+    return columns;
   }, [columns, groupableColumns]);
 
   // Group the data based on selected field
