@@ -35,7 +35,6 @@ export interface FileUploadProps {
 }
 
 export interface FileFilterState {
-  showCategoryDropdown: any;
   searchTerm: string;
   selectedCategory: string;
   selectedFileType: string;
