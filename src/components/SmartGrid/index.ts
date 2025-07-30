@@ -1,6 +1,8 @@
 
 export { SmartGrid } from './SmartGrid';
 export { SmartGridPlus } from './SmartGridPlus';
+export { SmartGridWithGrouping } from './SmartGridWithGrouping';
+export { GroupHeaderCellRenderer } from './GroupHeaderCellRenderer';
 export { CellEditor } from './CellEditor';
 export { ColumnManager } from './ColumnManager';
 export { ColumnVisibilityManager } from './ColumnVisibilityManager';
