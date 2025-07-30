@@ -185,10 +185,16 @@ export function SmartGridWithGrouping({
         return {
           ...col,
           // Make it a link to enable clicking
-          type: 'Link' as const
+          type: 'Link' as const,
+          // Remove sub-row functionality when grouping
+          subRow: false
         };
       }
-      return col;
+      return {
+        ...col,
+        // Remove sub-row functionality from all columns when grouping
+        subRow: false
+      };
     });
   }, [columns, internalGroupBy, groupByField]);
 
