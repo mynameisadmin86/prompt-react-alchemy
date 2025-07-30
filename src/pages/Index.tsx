@@ -77,13 +77,6 @@ const Index = () => {
       color: "text-emerald-600"
     },
     {
-      title: "SmartGrid Grouping Demo",
-      description: "Enhanced SmartGrid with row grouping, expand/collapse functionality and preserved filtering",
-      icon: Grid3x3,
-      path: "/smart-grid-grouping-demo",
-      color: "text-violet-600"
-    },
-    {
       title: "File Upload Demo",
       description: "Comprehensive file upload with categorization, drag & drop, and file management",
       icon: Upload,
