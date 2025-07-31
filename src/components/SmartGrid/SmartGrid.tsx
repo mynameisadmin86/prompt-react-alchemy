@@ -52,7 +52,13 @@ export function SmartGrid({
   showDefaultConfigurableButton,
   defaultConfigurableButtonLabel,
   gridTitle,
-  recordCount
+  recordCount,
+  showCreateButton,
+  searchPlaceholder,
+  groupByField,
+  onGroupByChange,
+  groupableColumns,
+  showGroupingDropdown
 }: SmartGridProps) {
   const {
     gridData,
@@ -744,6 +750,12 @@ export function SmartGrid({
         defaultConfigurableButtonLabel={defaultConfigurableButtonLabel}
         gridTitle={gridTitle}
         recordCount={recordCount}
+        showCreateButton={showCreateButton}
+        searchPlaceholder={searchPlaceholder}
+        groupByField={groupByField}
+        onGroupByChange={onGroupByChange}
+        groupableColumns={groupableColumns}
+        showGroupingDropdown={showGroupingDropdown}
       />
 
        {/* Advanced Filter System */}

@@ -138,6 +138,11 @@ export interface SmartGridProps {
   recordCount?: number;
   showCreateButton?: boolean;
   searchPlaceholder?: string;
+  // Grouping props
+  groupByField?: string | null;
+  onGroupByChange?: (field: string | null) => void;
+  groupableColumns?: string[];
+  showGroupingDropdown?: boolean;
 }
 
 // Legacy interface for backward compatibility

@@ -12,6 +12,7 @@ import {
   Plus,
   ChevronDown
 } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
 import { ColumnVisibilityManager } from './ColumnVisibilityManager';
 import { GridColumnConfig, GridPreferences } from '@/types/smartgrid';
@@ -48,6 +49,11 @@ interface GridToolbarProps {
   recordCount?: number;
   showCreateButton?: boolean;
   searchPlaceholder?: string;
+  // Grouping props
+  groupByField?: string | null;
+  onGroupByChange?: (field: string | null) => void;
+  groupableColumns?: string[];
+  showGroupingDropdown?: boolean;
 }
 
 export function GridToolbar({
@@ -74,7 +80,11 @@ export function GridToolbar({
   gridTitle,
   recordCount,
   showCreateButton = false,
-  searchPlaceholder = "Search all columns..."
+  searchPlaceholder = "Search all columns...",
+  groupByField,
+  onGroupByChange,
+  groupableColumns,
+  showGroupingDropdown = false
 }: GridToolbarProps) {
   // Default configurable button configuration
   const defaultConfigurableButton: ConfigurableButtonConfig = {
@@ -87,6 +97,20 @@ export function GridToolbar({
   const buttonsToShow = configurableButtons && configurableButtons.length > 0 
     ? configurableButtons 
     : (showDefaultConfigurableButton ? [defaultConfigurableButton] : []);
+
+  // Determine which columns can be grouped
+  const availableGroupColumns = React.useMemo(() => {
+    if (groupableColumns) {
+      return columns.filter(col => groupableColumns.includes(col.key));
+    }
+    // Show all columns by default
+    return columns;
+  }, [columns, groupableColumns]);
+
+  const handleGroupByChange = (value: string) => {
+    const newGroupBy = value === 'none' ? null : value;
+    onGroupByChange?.(newGroupBy);
+  };
 
   return (
     <div className="flex items-center justify-between w-full py-2 bg-gray-50">
@@ -118,6 +142,29 @@ export function GridToolbar({
 
       {/* Right side - Controls */}
       <div className="flex items-center space-x-1">
+        {/* Group by dropdown */}
+        {showGroupingDropdown && availableGroupColumns.length > 0 && (
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-medium text-gray-700">Group by:</span>
+            <Select 
+              value={groupByField || 'none'} 
+              onValueChange={handleGroupByChange}
+            >
+              <SelectTrigger className="w-40 h-8">
+                <SelectValue placeholder="Select column" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">No grouping</SelectItem>
+                {availableGroupColumns.map(col => (
+                  <SelectItem key={col.key} value={col.key}>
+                    {col.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
+
         {/* Search box */}
         <div className="relative">
           <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />

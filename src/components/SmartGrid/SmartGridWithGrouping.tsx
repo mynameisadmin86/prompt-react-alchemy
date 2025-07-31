@@ -202,40 +202,21 @@ export function SmartGridWithGrouping({
   }, [columns, internalGroupBy, groupByField]);
 
   return (
-    <div className="space-y-4">
-      {showGroupingDropdown && availableGroupColumns.length > 0 && (
-        <div className="flex items-center justify-end gap-2">
-          <span className="text-sm font-medium">Group by:</span>
-          <Select 
-            value={internalGroupBy || groupByField || 'none'} 
-            onValueChange={handleGroupByChange}
-          >
-            <SelectTrigger className="w-40">
-              <SelectValue placeholder="Select column" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="none">No grouping</SelectItem>
-              {availableGroupColumns.map(col => (
-                <SelectItem key={col.key} value={col.key}>
-                  {col.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-      )}
-
-      <SmartGrid
-        {...props}
-        data={displayData}
-        columns={modifiedColumns}
-        rowClassName={getRowClassName}
-        onLinkClick={handleLinkClick}
-        // Override nested row renderer when grouping is active to prevent sub-row expansion
-        nestedRowRenderer={
-          (internalGroupBy || groupByField) ? undefined : props.nestedRowRenderer
-        }
-      />
-    </div>
+    <SmartGrid
+      {...props}
+      data={displayData}
+      columns={modifiedColumns}
+      rowClassName={getRowClassName}
+      onLinkClick={handleLinkClick}
+      // Override nested row renderer when grouping is active to prevent sub-row expansion
+      nestedRowRenderer={
+        (internalGroupBy || groupByField) ? undefined : props.nestedRowRenderer
+      }
+      // Pass grouping props to toolbar
+      groupByField={internalGroupBy || groupByField}
+      onGroupByChange={handleGroupByChange}
+      groupableColumns={groupableColumns}
+      showGroupingDropdown={showGroupingDropdown}
+    />
   );
 }
