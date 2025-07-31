@@ -142,12 +142,25 @@ export function SmartGridWithGrouping({
   const handleLinkClick = useCallback((row: any, columnKey: string) => {
     if (row.__isGroupHeader) {
       toggleGroupExpansion(row.__groupKey);
+      return; // Don't proceed with regular link handling for group headers
     }
     // Call original onLinkClick if provided
     if (props.onLinkClick) {
       props.onLinkClick(row, columnKey);
     }
   }, [toggleGroupExpansion, props.onLinkClick]);
+
+  // When grouping is active, we need to override the row expansion behavior
+  // to ensure sub-rows remain collapsed and arrows are hidden/disabled
+  const handleRowExpansionOverride = useCallback((rowIndex: number) => {
+    const currentGroupBy = internalGroupBy || groupByField;
+    if (currentGroupBy) {
+      // If grouping is active, prevent sub-row expansion
+      return;
+    }
+    // If no grouping, allow normal row expansion if provided
+    // This would be handled by the parent SmartGrid component
+  }, [internalGroupBy, groupByField]);
 
   // Custom row class name function
   const getRowClassName = useCallback((row: any, index: number) => {
@@ -218,6 +231,10 @@ export function SmartGridWithGrouping({
         columns={modifiedColumns}
         rowClassName={getRowClassName}
         onLinkClick={handleLinkClick}
+        // Override nested row renderer when grouping is active to prevent sub-row expansion
+        nestedRowRenderer={
+          (internalGroupBy || groupByField) ? undefined : props.nestedRowRenderer
+        }
       />
     </div>
   );
