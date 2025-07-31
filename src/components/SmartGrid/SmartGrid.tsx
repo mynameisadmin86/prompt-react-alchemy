@@ -58,7 +58,9 @@ export function SmartGrid({
   groupByField,
   onGroupByChange,
   groupableColumns,
-  showGroupingDropdown
+  showGroupingDropdown,
+  expandedRows: overrideExpandedRows,
+  onRowExpansionToggle: overrideRowExpansionToggle
 }: SmartGridProps) {
   const {
     gridData,
@@ -120,6 +122,10 @@ export function SmartGrid({
   // Use external selectedRows if provided, otherwise use internal state
   const currentSelectedRows = selectedRows || internalSelectedRows;
   const handleSelectionChange = onSelectionChange || setInternalSelectedRows;
+
+  // Use override expanded rows and toggle function if provided
+  const currentExpandedRows = overrideExpandedRows || expandedRows;
+  const currentToggleRowExpansion = overrideRowExpansionToggle || toggleRowExpansion;
 
   // Use the current state columns (which include sub-row updates) instead of props
   const currentColumns = stateColumns.length > 0 ? stateColumns : columns;
@@ -621,13 +627,13 @@ export function SmartGrid({
     const isEditable = isColumnEditable(column, columnIndex);
 
     if (columnIndex === 0 && (effectiveNestedRowRenderer || hasCollapsibleColumns) && !row.__isGroupHeader) {
-      const isExpanded = expandedRows.has(rowIndex);
+      const isExpanded = currentExpandedRows.has(rowIndex);
       return (
         <div className="flex items-center space-x-1 min-w-0">
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => toggleRowExpansion(rowIndex)}
+            onClick={() => currentToggleRowExpansion(rowIndex)}
             className="h-5 w-5 p-0 hover:bg-gray-100 flex-shrink-0"
           >
             {isExpanded ? (
@@ -674,7 +680,7 @@ export function SmartGrid({
         />
       </div>
     );
-  }, [editingCell, isColumnEditable, effectiveNestedRowRenderer, hasCollapsibleColumns, expandedRows, toggleRowExpansion, handleCellEdit, handleEditStart, handleEditCancel, onLinkClick, loading]);
+  }, [editingCell, isColumnEditable, effectiveNestedRowRenderer, hasCollapsibleColumns, currentExpandedRows, currentToggleRowExpansion, handleCellEdit, handleEditStart, handleEditCancel, onLinkClick, loading]);
 
   // Update grid data when prop data changes (only if not using lazy loading)
   useEffect(() => {
@@ -1076,7 +1082,7 @@ export function SmartGrid({
                         </TableRow>
                       )}
                       {/* Nested row content */}
-                      {effectiveNestedRowRenderer && expandedRows.has(rowIndex) && (
+                      {effectiveNestedRowRenderer && currentExpandedRows.has(rowIndex) && (
                         <TableRow className="bg-gray-50/30">
                           <TableCell 
                             colSpan={orderedColumns.length + (showCheckboxes ? 1 : 0) + (plugins.some(plugin => plugin.rowActions) ? 1 : 0)} 
