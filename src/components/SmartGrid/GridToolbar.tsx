@@ -10,7 +10,8 @@ import {
   Grid2x2,
   List,
   Plus,
-  ChevronDown
+  ChevronDown,
+  Group
 } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
@@ -142,27 +143,36 @@ export function GridToolbar({
 
       {/* Right side - Controls */}
       <div className="flex items-center space-x-1">
-        {/* Group by dropdown */}
+        {/* Group by dropdown button */}
         {showGroupingDropdown && availableGroupColumns.length > 0 && (
-          <div className="flex items-center gap-2">
-            <span className="text-sm font-medium text-gray-700">Group by:</span>
-            <Select 
-              value={groupByField || 'none'} 
-              onValueChange={handleGroupByChange}
-            >
-              <SelectTrigger className="w-40 h-8">
-                <SelectValue placeholder="Select column" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="none">No grouping</SelectItem>
-                {availableGroupColumns.map(col => (
-                  <SelectItem key={col.key} value={col.key}>
-                    {col.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button 
+                variant="ghost"
+                size="sm" 
+                disabled={loading}
+                title="Group By"
+                className="w-8 h-8 flex items-center justify-center rounded hover:bg-gray-100 p-0"
+              >
+                <Group className="h-4 w-4" />
+                <ChevronDown className="h-3 w-3 ml-0.5" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => handleGroupByChange('none')}>
+                No grouping
+              </DropdownMenuItem>
+              {availableGroupColumns.map(col => (
+                <DropdownMenuItem 
+                  key={col.key} 
+                  onClick={() => handleGroupByChange(col.key)}
+                  className={groupByField === col.key ? 'bg-blue-50 text-blue-600' : ''}
+                >
+                  {col.label}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
         )}
 
         {/* Search box */}
