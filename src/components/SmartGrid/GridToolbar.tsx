@@ -143,38 +143,6 @@ export function GridToolbar({
 
       {/* Right side - Controls */}
       <div className="flex items-center space-x-1">
-        {/* Group by dropdown button */}
-        {showGroupingDropdown && availableGroupColumns.length > 0 && (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button 
-                variant="ghost"
-                size="sm" 
-                disabled={loading}
-                title="Group By"
-                className="w-8 h-8 flex items-center justify-center rounded hover:bg-gray-100 p-0"
-              >
-                <Group className="h-4 w-4" />
-                <ChevronDown className="h-3 w-3 ml-0.5" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => handleGroupByChange('none')}>
-                No grouping
-              </DropdownMenuItem>
-              {availableGroupColumns.map(col => (
-                <DropdownMenuItem 
-                  key={col.key} 
-                  onClick={() => handleGroupByChange(col.key)}
-                  className={groupByField === col.key ? 'bg-blue-50 text-blue-600' : ''}
-                >
-                  {col.label}
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        )}
-
         {/* Search box */}
         <div className="relative">
           <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -282,6 +250,38 @@ export function GridToolbar({
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
+
+        {/* Group by dropdown button */}
+        {showGroupingDropdown && availableGroupColumns.length > 0 && (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button 
+                variant="ghost"
+                size="sm" 
+                disabled={loading}
+                title="Group By"
+                className="w-8 h-8 flex items-center justify-center rounded hover:bg-gray-100 p-0"
+              >
+                <Group className="h-4 w-4" />
+                <ChevronDown className="h-3 w-3 ml-0.5" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => handleGroupByChange('none')}>
+                No grouping
+              </DropdownMenuItem>
+              {availableGroupColumns.map(col => (
+                <DropdownMenuItem 
+                  key={col.key} 
+                  onClick={() => handleGroupByChange(col.key)}
+                  className={groupByField === col.key ? 'bg-blue-50 text-blue-600' : ''}
+                >
+                  {col.label}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
 
         {/* Create Button */}
         {showCreateButton && (
