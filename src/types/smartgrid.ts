@@ -127,6 +127,7 @@ export interface SmartGridProps {
   onServerFilter?(filters: FilterConfig[]): Promise<void>;
   paginationMode?: 'pagination' | 'infinite';
   nestedRowRenderer?(row: any, rowIndex: number): React.ReactNode;
+  onRowExpansionOverride?(rowIndex: number): void;
   plugins?: GridPlugin[];
   selectedRows?: Set<number>;
   onSelectionChange?(selectedRows: Set<number>): void;

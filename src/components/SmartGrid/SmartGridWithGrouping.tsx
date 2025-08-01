@@ -150,16 +150,15 @@ export function SmartGridWithGrouping({
     }
   }, [toggleGroupExpansion, props.onLinkClick]);
 
-  // When grouping is active, we need to override the row expansion behavior
-  // to ensure sub-rows remain collapsed and arrows are hidden/disabled
+  // When grouping is active, override the row expansion to always collapse
   const handleRowExpansionOverride = useCallback((rowIndex: number) => {
     const currentGroupBy = internalGroupBy || groupByField;
     if (currentGroupBy) {
-      // If grouping is active, prevent sub-row expansion
+      // If grouping is active, force sub-rows to always remain collapsed
+      // Don't call any expansion logic - just return to prevent expansion
       return;
     }
-    // If no grouping, allow normal row expansion if provided
-    // This would be handled by the parent SmartGrid component
+    // If no grouping, this won't be used and normal expansion will work
   }, [internalGroupBy, groupByField]);
 
   // Custom row class name function
@@ -211,6 +210,10 @@ export function SmartGridWithGrouping({
       // Override nested row renderer when grouping is active to prevent sub-row expansion
       nestedRowRenderer={
         (internalGroupBy || groupByField) ? undefined : props.nestedRowRenderer
+      }
+      // Override row expansion when grouping is active to force collapse
+      onRowExpansionOverride={
+        (internalGroupBy || groupByField) ? handleRowExpansionOverride : undefined
       }
       // Pass grouping props to toolbar
       groupByField={internalGroupBy || groupByField}

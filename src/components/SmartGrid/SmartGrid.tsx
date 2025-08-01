@@ -44,6 +44,7 @@ export function SmartGrid({
   onServerFilter,
   paginationMode = 'pagination',
   nestedRowRenderer,
+  onRowExpansionOverride,
   plugins = [],
   selectedRows,
   onSelectionChange,
@@ -627,7 +628,7 @@ export function SmartGrid({
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => toggleRowExpansion(rowIndex)}
+            onClick={() => onRowExpansionOverride ? onRowExpansionOverride(rowIndex) : toggleRowExpansion(rowIndex)}
             className="h-5 w-5 p-0 hover:bg-gray-100 flex-shrink-0"
           >
             {isExpanded ? (
@@ -674,7 +675,7 @@ export function SmartGrid({
         />
       </div>
     );
-  }, [editingCell, isColumnEditable, effectiveNestedRowRenderer, hasCollapsibleColumns, expandedRows, toggleRowExpansion, handleCellEdit, handleEditStart, handleEditCancel, onLinkClick, loading]);
+  }, [editingCell, isColumnEditable, effectiveNestedRowRenderer, hasCollapsibleColumns, expandedRows, onRowExpansionOverride, toggleRowExpansion, handleCellEdit, handleEditStart, handleEditCancel, onLinkClick, loading]);
 
   // Update grid data when prop data changes (only if not using lazy loading)
   useEffect(() => {
