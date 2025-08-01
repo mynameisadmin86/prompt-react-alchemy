@@ -143,9 +143,6 @@ export interface SmartGridProps {
   onGroupByChange?: (field: string | null) => void;
   groupableColumns?: string[];
   showGroupingDropdown?: boolean;
-  // Row expansion override props
-  expandedRows?: Set<number>;
-  onRowExpansionToggle?: (rowIndex: number) => void;
 }
 
 // Legacy interface for backward compatibility

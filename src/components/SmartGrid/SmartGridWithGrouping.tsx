@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { SmartGrid } from './SmartGrid';
 import { SmartGridProps, GridColumnConfig } from '@/types/smartgrid';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -150,39 +150,16 @@ export function SmartGridWithGrouping({
     }
   }, [toggleGroupExpansion, props.onLinkClick]);
 
-  // Track expanded rows state locally to override when grouping is active
-  const [overrideExpandedRows, setOverrideExpandedRows] = useState<Set<number>>(new Set());
-
-  // Collapse all expanded rows when grouping becomes active
-  useEffect(() => {
-    const currentGroupBy = internalGroupBy || groupByField;
-    if (currentGroupBy) {
-      setOverrideExpandedRows(new Set());
-    }
-  }, [internalGroupBy, groupByField]);
-
-  // Custom row expansion handler that prevents expansion when grouping is active
+  // When grouping is active, we need to override the row expansion behavior
+  // to ensure sub-rows remain collapsed and arrows are hidden/disabled
   const handleRowExpansionOverride = useCallback((rowIndex: number) => {
     const currentGroupBy = internalGroupBy || groupByField;
     if (currentGroupBy) {
-      // If grouping is active, always collapse sub-rows (never expand)
-      setOverrideExpandedRows(prev => {
-        const newSet = new Set(prev);
-        newSet.delete(rowIndex);
-        return newSet;
-      });
+      // If grouping is active, prevent sub-row expansion
       return;
     }
     // If no grouping, allow normal row expansion if provided
-    setOverrideExpandedRows(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(rowIndex)) {
-        newSet.delete(rowIndex);
-      } else {
-        newSet.add(rowIndex);
-      }
-      return newSet;
-    });
+    // This would be handled by the parent SmartGrid component
   }, [internalGroupBy, groupByField]);
 
   // Custom row class name function
@@ -234,13 +211,6 @@ export function SmartGridWithGrouping({
       // Override nested row renderer when grouping is active to prevent sub-row expansion
       nestedRowRenderer={
         (internalGroupBy || groupByField) ? undefined : props.nestedRowRenderer
-      }
-      // Override row expansion behavior when grouping is active
-      expandedRows={
-        (internalGroupBy || groupByField) ? overrideExpandedRows : props.expandedRows
-      }
-      onRowExpansionToggle={
-        (internalGroupBy || groupByField) ? handleRowExpansionOverride : props.onRowExpansionToggle
       }
       // Pass grouping props to toolbar
       groupByField={internalGroupBy || groupByField}
