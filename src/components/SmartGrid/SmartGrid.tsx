@@ -998,14 +998,23 @@ export function SmartGrid({
                     </TableCell>
                   </TableRow>
                 ) : (
-                  paginatedData.map((row, rowIndex) => (
+                  paginatedData.map((row, rowIndex) => {
+                    // Calculate actual index in the full dataset for unique keys and proper selection
+                    const actualRowIndex = paginationMode === 'pagination' && !onDataFetch 
+                      ? (currentPage - 1) * pageSize + rowIndex 
+                      : rowIndex;
+                    
+                    // Use a unique key - prefer row.id if available, otherwise use actual index
+                    const rowKey = row.id || row.key || `row-${actualRowIndex}`;
+                    
+                    return (
                     <>
                       {/* Group Header Row - spans all columns */}
                       {row.__isGroupHeader ? (
-                        <TableRow key={rowIndex}
+                        <TableRow key={`group-${rowKey}`}
                           className={cn(
                             "hover:bg-gray-50/50 transition-colors duration-150 border-b border-gray-100",
-                            rowClassName ? rowClassName(row, rowIndex) : ''
+                            rowClassName ? rowClassName(row, actualRowIndex) : ''
                           )}
                         >
                           <TableCell 
@@ -1018,10 +1027,10 @@ export function SmartGrid({
                         </TableRow>
                       ) : (
                         /* Regular Data Row */
-                        <TableRow key={rowIndex}
+                        <TableRow key={rowKey}
                           className={cn(
                             "hover:bg-gray-50/50 transition-colors duration-150 border-b border-gray-100",
-                            rowClassName ? rowClassName(row, rowIndex) : ''
+                            rowClassName ? rowClassName(row, actualRowIndex) : ''
                           )}
                         >
                           {/* Checkbox cell */}
@@ -1030,13 +1039,13 @@ export function SmartGrid({
                               <input 
                                 type="checkbox" 
                                 className="rounded" 
-                                checked={currentSelectedRows.has(rowIndex)}
+                                checked={currentSelectedRows.has(actualRowIndex)}
                                 onChange={() => {
                                   const newSet = new Set(currentSelectedRows);
-                                  if (newSet.has(rowIndex)) {
-                                    newSet.delete(rowIndex);
+                                  if (newSet.has(actualRowIndex)) {
+                                    newSet.delete(actualRowIndex);
                                   } else {
-                                    newSet.add(rowIndex);
+                                    newSet.add(actualRowIndex);
                                   }
                                   handleSelectionChange(newSet);
                                 }}
@@ -1048,7 +1057,7 @@ export function SmartGrid({
                             
                             return (
                               <TableCell 
-                                key={column.key} 
+                                key={`${rowKey}-${column.key}`} 
                                 className="relative px-3 py-3 border-r border-gray-50 last:border-r-0 align-top"
                                 style={{ 
                                   width: `${widthPercentage}%`,
@@ -1057,7 +1066,7 @@ export function SmartGrid({
                                 }}
                               >
                                 <div className="overflow-hidden">
-                                  {renderCell(row, column, rowIndex, columnIndex)}
+                                  {renderCell(row, column, actualRowIndex, columnIndex)}
                                 </div>
                               </TableCell>
                             );
@@ -1070,7 +1079,7 @@ export function SmartGrid({
                                   plugins={plugins}
                                   gridAPI={gridAPI}
                                   row={row}
-                                  rowIndex={rowIndex}
+                                  rowIndex={actualRowIndex}
                                 />
                               </div>
                             </TableCell>
@@ -1078,22 +1087,23 @@ export function SmartGrid({
                         </TableRow>
                       )}
                       {/* Nested row content */}
-                      {effectiveNestedRowRenderer && expandedRows.has(rowIndex) && (
-                        <TableRow className="bg-gray-50/30">
+                      {effectiveNestedRowRenderer && expandedRows.has(actualRowIndex) && (
+                        <TableRow key={`nested-${rowKey}`} className="bg-gray-50/30">
                           <TableCell 
                             colSpan={orderedColumns.length + (showCheckboxes ? 1 : 0) + (plugins.some(plugin => plugin.rowActions) ? 1 : 0)} 
                             className="p-0 border-b border-gray-200"
                           >
                             <div className="bg-gradient-to-r from-gray-50/50 to-white border-l-4 border-blue-500">
                               <div className="p-6 pl-12">
-                                {effectiveNestedRowRenderer(row, rowIndex)}
+                                {effectiveNestedRowRenderer(row, actualRowIndex)}
                               </div>
                             </div>
                           </TableCell>
                         </TableRow>
                       )}
                     </>
-                  ))
+                    );
+                  })
                 )}
               </TableBody>
             </Table>
