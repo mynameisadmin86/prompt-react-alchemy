@@ -804,7 +804,7 @@ export function SmartGrid({
                     
                     return (
                       <TableHead 
-                        key={column.key}
+                        key={`header-${column.key}`}
                         className={cn(
                           "relative group bg-gray-50/80 backdrop-blur-sm font-semibold text-gray-900 px-2 py-3 border-r border-gray-100 last:border-r-0",
                           draggedColumn === column.key && "opacity-50",
@@ -940,7 +940,7 @@ export function SmartGrid({
                       
                       return (
                         <TableHead 
-                          key={`filter-${column.key}`}
+                          key={`filter-header-${column.key}`}
                           className="bg-gray-25 px-2 py-2 border-r border-gray-100 last:border-r-0 relative"
                           style={{ 
                             width: `${widthPercentage}%`,
