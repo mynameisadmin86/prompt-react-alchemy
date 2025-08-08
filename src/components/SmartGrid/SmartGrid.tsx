@@ -291,10 +291,12 @@ export function SmartGrid({
   // Use sub-row renderer if we have sub-row columns, otherwise use collapsible or custom renderer
   const effectiveNestedRowRenderer = hasSubRowColumns ? renderSubRowContent : (hasCollapsibleColumns ? renderCollapsibleContent : nestedRowRenderer);
 
-  // Process data with sorting and filtering (only if not using lazy loading)
+  // Process data with sorting and filtering (use prop data, not state data for full dataset filtering)
   const processedData = useMemo(() => {
-    return processGridData(gridData, globalFilter, filters, sort, currentColumns, onDataFetch);
-  }, [gridData, globalFilter, filters, sort, currentColumns, onDataFetch]);
+    // Use the prop data to ensure filters apply to the entire dataset, not just state data
+    const sourceData = data && data.length > 0 ? data : gridData;
+    return processGridData(sourceData, globalFilter, filters, sort, currentColumns, onDataFetch);
+  }, [data, gridData, globalFilter, filters, sort, currentColumns, onDataFetch]);
 
   // Handle filter system changes
   const handleFiltersChange = useCallback((newFilters: Record<string, any>) => {
@@ -431,7 +433,7 @@ export function SmartGrid({
 
   // Create Grid API for plugins
   const gridAPI: GridAPI = useMemo(() => ({
-    data: gridData,
+    data: data && data.length > 0 ? data : gridData,
     filteredData: processedData,
     selectedRows: Array.from(currentSelectedRows).map(index => processedData[index]).filter(Boolean),
     columns: orderedColumns,
