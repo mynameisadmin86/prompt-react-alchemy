@@ -292,9 +292,10 @@ export function SmartGrid({
   const effectiveNestedRowRenderer = hasSubRowColumns ? renderSubRowContent : (hasCollapsibleColumns ? renderCollapsibleContent : nestedRowRenderer);
 
   // Process data with sorting and filtering (only if not using lazy loading)
+  // Use the full dataset from props instead of gridData state to ensure filters work across all pages
   const processedData = useMemo(() => {
-    return processGridData(gridData, globalFilter, filters, sort, currentColumns, onDataFetch);
-  }, [gridData, globalFilter, filters, sort, currentColumns, onDataFetch]);
+    return processGridData(data, globalFilter, filters, sort, currentColumns, onDataFetch);
+  }, [data, globalFilter, filters, sort, currentColumns, onDataFetch]);
 
   // Handle filter system changes
   const handleFiltersChange = useCallback((newFilters: Record<string, any>) => {
@@ -431,7 +432,7 @@ export function SmartGrid({
 
   // Create Grid API for plugins
   const gridAPI: GridAPI = useMemo(() => ({
-    data: gridData,
+    data: data,
     filteredData: processedData,
     selectedRows: Array.from(currentSelectedRows).map(index => processedData[index]).filter(Boolean),
     columns: orderedColumns,
@@ -455,7 +456,7 @@ export function SmartGrid({
         handleSelectionChange(new Set());
       }
     }
-  }), [gridData, processedData, currentSelectedRows, orderedColumns, preferences, handleExport, handleResetPreferences, handleSelectionChange]);
+  }), [data, processedData, currentSelectedRows, orderedColumns, preferences, handleExport, handleResetPreferences, handleSelectionChange]);
 
   // Pagination
   const paginatedData = useMemo(() => {
