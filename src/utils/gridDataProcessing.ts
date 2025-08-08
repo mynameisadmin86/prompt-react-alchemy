@@ -32,7 +32,7 @@ export function processGridData(
     );
   }
 
-  // Apply column filters (only local filters - server filters are handled separately)
+  // Apply column filters (filters are applied to ALL data, not just current page)
   if (filters.length > 0) {
     result = result.filter(row => {
       return filters.every(filter => {
