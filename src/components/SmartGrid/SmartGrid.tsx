@@ -293,8 +293,8 @@ export function SmartGrid({
 
   // Process data with sorting and filtering (only if not using lazy loading)
   const processedData = useMemo(() => {
-    return processGridData(gridData, globalFilter, filters, sort, currentColumns, onDataFetch);
-  }, [gridData, globalFilter, filters, sort, currentColumns, onDataFetch]);
+    return processGridData(data, globalFilter, filters, sort, currentColumns, onDataFetch);
+  }, [data, globalFilter, filters, sort, currentColumns, onDataFetch]);
 
   // Handle filter system changes
   const handleFiltersChange = useCallback((newFilters: Record<string, any>) => {
@@ -331,7 +331,10 @@ export function SmartGrid({
     
     // Set local filters only
     setFilters(localFilters);
-  }, [setFilters, currentColumns, onServerFilter, toast]);
+    
+    // Reset to page 1 when filters change
+    setCurrentPage(1);
+  }, [setFilters, currentColumns, onServerFilter, toast, setCurrentPage]);
 
   // Define handleExport and handleResetPreferences after processedData and orderedColumns
  const handleExport = useCallback((format: 'csv' | 'xlsx') => {
@@ -431,7 +434,7 @@ export function SmartGrid({
 
   // Create Grid API for plugins
   const gridAPI: GridAPI = useMemo(() => ({
-    data: gridData,
+    data: data,
     filteredData: processedData,
     selectedRows: Array.from(currentSelectedRows).map(index => processedData[index]).filter(Boolean),
     columns: orderedColumns,
@@ -455,14 +458,23 @@ export function SmartGrid({
         handleSelectionChange(new Set());
       }
     }
-  }), [gridData, processedData, currentSelectedRows, orderedColumns, preferences, handleExport, handleResetPreferences, handleSelectionChange]);
+  }), [data, processedData, currentSelectedRows, orderedColumns, preferences, handleExport, handleResetPreferences, handleSelectionChange]);
 
-  // Pagination
+  // Pagination with auto-reset when current page has no data
   const paginatedData = useMemo(() => {
     if (paginationMode !== 'pagination' || onDataFetch) return processedData;
+    
+    const totalPages = Math.ceil(processedData.length / pageSize);
+    
+    // Reset to page 1 if current page is beyond available data
+    if (currentPage > totalPages && totalPages > 0) {
+      setCurrentPage(1);
+      return processedData.slice(0, pageSize);
+    }
+    
     const start = (currentPage - 1) * pageSize;
     return processedData.slice(start, start + pageSize);
-  }, [processedData, paginationMode, currentPage, pageSize, onDataFetch]);
+  }, [processedData, paginationMode, currentPage, pageSize, onDataFetch, setCurrentPage]);
 
   const totalPages = Math.ceil(processedData.length / pageSize);
 
