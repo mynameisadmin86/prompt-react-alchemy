@@ -21,6 +21,8 @@ export interface GridColumnConfig {
   width?: number;          // Column width in pixels
   sortable?: boolean;
   filterable?: boolean;
+  advancefilterable?: boolean;     // Controls visibility in advanced filter
+  gridHeadingFilterable?: boolean; // Controls visibility in column header filter
   filterMode?: 'local' | 'server'; // Determines if filtering is done locally or on server
   editable?: boolean;
   mandatory?: boolean;
