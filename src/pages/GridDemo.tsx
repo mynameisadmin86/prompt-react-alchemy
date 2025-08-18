@@ -62,7 +62,9 @@ const GridDemo = () => {
       sortable: true,
       editable: false,
       subRow: false,
-      filterMode: 'local'
+      filterMode: 'local',
+      advancefilterable: false,
+      gridHeadingFilterable: true
     },
     {
       key: 'tripBillingStatus',
@@ -70,7 +72,10 @@ const GridDemo = () => {
       type: 'Badge',
       sortable: true,
       editable: false,
-      subRow: false
+      subRow: false,
+      filterMode: 'local',
+      advancefilterable: false,
+      gridHeadingFilterable: true
     },
     {
       key: 'plannedStartEndDateTime',
