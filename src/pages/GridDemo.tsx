@@ -74,8 +74,8 @@ const GridDemo = () => {
       editable: false,
       subRow: false,
       filterMode: 'local',
-      advancefilterable: false,
-      gridHeadingFilterable: true
+      advancefilterable: true,,
+      gridHeadingFilterable: false
     },
     {
       key: 'plannedStartEndDateTime',
