@@ -1270,7 +1270,7 @@ export function SmartGridPlus({
                             maxWidth: `${column.width * 1.5}px`
                           }}
                         >
-                          {column.gridHeadingFilterable !== false && (
+                          {column.filterable && (
                             <ColumnFilter
                               column={column}
                               currentFilter={currentFilter}

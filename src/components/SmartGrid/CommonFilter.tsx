@@ -24,7 +24,7 @@ export function CommonFilter({ columns, filters, onFiltersChange }: CommonFilter
     return initial;
   });
 
-  const filterableColumns = columns.filter(col => col.advancefilterable !== false);
+  const filterableColumns = columns.filter(col => col.filterable);
   const hasActiveFilters = filters.length > 0;
 
   const handleFilterChange = (columnKey: string, value: string) => {

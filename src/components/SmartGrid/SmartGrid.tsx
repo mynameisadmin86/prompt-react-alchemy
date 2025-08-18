@@ -958,7 +958,7 @@ export function SmartGrid({
                             minWidth: `${Math.max(80, column.width * 0.8)}px`
                           }}
                         >
-                          {column.gridHeadingFilterable !== false && (
+                          {column.filterable && (
                             <ColumnFilter
                               column={column}
                               currentFilter={currentFilter}

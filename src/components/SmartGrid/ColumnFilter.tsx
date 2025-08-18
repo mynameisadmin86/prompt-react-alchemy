@@ -22,7 +22,7 @@ export function ColumnFilter({ column, currentFilter, onFilterChange }: ColumnFi
     setValue(currentFilter?.value || '');
   }, [currentFilter]);
 
-  if (column.gridHeadingFilterable === false) {
+  if (!column.filterable) {
     return null;
   }
 

@@ -246,8 +246,8 @@ export function FilterSystem({
   };
 
   const activeFilterCount = Object.keys(activeFilters).length;
-  const filterableColumns = columns.filter(col => col.gridHeadingFilterable !== false);
-  const filterableSubRowColumns = subRowColumns.filter(col => col.gridHeadingFilterable !== false);
+  const filterableColumns = columns.filter(col => col.filterable !== false);
+  const filterableSubRowColumns = subRowColumns.filter(col => col.filterable !== false);
   const subRowFilterCount = Object.keys(activeFilters).filter(key => key.startsWith('subrow-')).length;
 
   return (
