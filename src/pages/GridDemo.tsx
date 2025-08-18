@@ -97,7 +97,7 @@ const GridDemo = () => {
       editable: false,
       subRow: true,
       advancefilterable: true,
-      gridHeadingFilterable: false
+      gridHeadingFilterable: true
     },
     {
       key: 'departurePoint',
@@ -108,7 +108,7 @@ const GridDemo = () => {
       infoTextField: 'departurePointDetails',
       subRow: true,
       advancefilterable: true,
-      gridHeadingFilterable: false
+      gridHeadingFilterable: true
     },
     {
       key: 'arrivalPoint',
