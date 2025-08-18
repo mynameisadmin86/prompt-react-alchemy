@@ -72,7 +72,7 @@ const GridDemo = () => {
       sortable: true,
       editable: false,
       subRow: false,
-      filterable: true
+      filterable: false
     },
     {
       key: 'plannedStartEndDateTime',
