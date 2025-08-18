@@ -62,8 +62,7 @@ const GridDemo = () => {
       sortable: true,
       editable: false,
       subRow: false,
-      filterMode: 'local',
-      filterable: false
+      filterMode: 'local'
     },
     {
       key: 'tripBillingStatus',
