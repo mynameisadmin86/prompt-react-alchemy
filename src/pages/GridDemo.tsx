@@ -53,7 +53,7 @@ const GridDemo = () => {
       editable: false,
       mandatory: true,
       subRow: false,
-      filterMode: 'server'
+      filterMode: 'local'
     },
     {
       key: 'status',
@@ -61,8 +61,7 @@ const GridDemo = () => {
       type: 'Badge',
       sortable: true,
       editable: false,
-      subRow: false,
-      filterMode: 'local'
+      subRow: false
     },
     {
       key: 'tripBillingStatus',
