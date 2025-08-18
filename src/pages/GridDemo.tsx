@@ -53,7 +53,8 @@ const GridDemo = () => {
       editable: false,
       mandatory: true,
       subRow: false,
-      filterMode: 'local'
+      filterMode: 'local',
+      filterable: false
     },
     {
       key: 'status',
