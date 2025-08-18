@@ -81,7 +81,7 @@ const GridDemo = () => {
       sortable: true,
       editable: true,
       subRow: true,
-      filterable: false
+      filterable: true
     },
     {
       key: 'actualStartEndDateTime',
@@ -90,7 +90,7 @@ const GridDemo = () => {
       sortable: true,
       editable: false,
       subRow: true,
-      filterable: false
+      filterable: true
     },
     {
       key: 'departurePoint',
