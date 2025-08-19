@@ -112,13 +112,6 @@ export interface GridPlugin {
   destroy?: () => void;
 }
 
-export interface ExtraFilter {
-  field: string;
-  label: string;
-  type: 'text' | 'select' | 'date' | 'dateRange' | 'number' | 'boolean';
-  options?: string[];
-}
-
 export interface SmartGridProps {
   columns: GridColumnConfig[];
   data: any[];
@@ -151,11 +144,6 @@ export interface SmartGridProps {
   onGroupByChange?: (field: string | null) => void;
   groupableColumns?: string[];
   showGroupingDropdown?: boolean;
-  // AdvancedFilter props
-  showAdvancedFilterDefault?: boolean;
-  extraFilters?: ExtraFilter[];
-  onAdvancedFiltersSearch?: (filters: Record<string, any>) => void;
-  onAdvancedFiltersClear?: () => void;
 }
 
 // Legacy interface for backward compatibility

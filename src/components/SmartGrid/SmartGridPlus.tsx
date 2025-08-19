@@ -30,7 +30,6 @@ import { PluginRenderer, PluginRowActions } from './PluginRenderer';
 import { ColumnFilter } from './ColumnFilter';
 import { DraggableSubRow } from './DraggableSubRow';
 import { FilterSystem } from './FilterSystem';
-import { AdvancedFilter } from './AdvancedFilter';
 import { mockFilterAPI } from '@/utils/mockFilterAPI';
 import { cn } from '@/lib/utils';
 
@@ -67,13 +66,7 @@ export function SmartGridPlus({
   defaultRowValues = {},
   validationRules = {},
   addRowButtonLabel = "Add Row",
-  addRowButtonPosition = "top-left",
-  // AdvancedFilter props
-  showAdvancedFilterDefault = false,
-  extraFilters = [],
-  onAdvancedFiltersSearch,
-  onAdvancedFiltersClear,
-  ...restProps
+  addRowButtonPosition = "top-left"
 }: SmartGridPlusProps) {
   const {
     gridData,
@@ -130,8 +123,6 @@ export function SmartGridPlus({
   const [pageSize] = useState(10);
   const [showFilterRow, setShowFilterRow] = useState(false);
   const [filterSystemFilters, setFilterSystemFilters] = useState<Record<string, any>>({});
-  const [showAdvancedFilter, setShowAdvancedFilter] = useState(showAdvancedFilterDefault);
-  const [advancedFilterFilters, setAdvancedFilterFilters] = useState<Record<string, any>>({});
   const { toast } = useToast();
 
   // SmartGridPlus specific state
@@ -352,39 +343,9 @@ export function SmartGridPlus({
       });
     }
     
-  // Set local filters only
+    // Set local filters only
     setFilters(localFilters);
   }, [setFilters, currentColumns, onServerFilter, toast]);
-
-  // Handle advanced filter changes
-  const handleAdvancedFiltersSearch = useCallback((newFilters: Record<string, any>) => {
-    setAdvancedFilterFilters(newFilters);
-    
-    // Convert advanced filter filters to legacy format if needed
-    const legacyFilters = Object.entries(newFilters).map(([column, filterValue]) => ({
-      column,
-      value: filterValue.value,
-      operator: filterValue.operator || 'contains'
-    }));
-    
-    // Apply filters
-    setFilters(legacyFilters);
-    
-    // Call external handler if provided
-    if (onAdvancedFiltersSearch) {
-      onAdvancedFiltersSearch(newFilters);
-    }
-  }, [setFilters, onAdvancedFiltersSearch]);
-
-  const handleAdvancedFiltersClear = useCallback(() => {
-    setAdvancedFilterFilters({});
-    setFilters([]);
-    
-    // Call external handler if provided
-    if (onAdvancedFiltersClear) {
-      onAdvancedFiltersClear();
-    }
-  }, [setFilters, onAdvancedFiltersClear]);
 
   // Define handleExport and handleResetPreferences after processedData and orderedColumns
   const handleExport = useCallback((format: 'csv' | 'xlsx' | 'json') => {
@@ -1119,9 +1080,6 @@ export function SmartGridPlus({
         defaultConfigurableButtonLabel={defaultConfigurableButtonLabel}
         gridTitle={gridTitle}
         recordCount={recordCount}
-        showAdvancedFilter={showAdvancedFilter}
-        onToggleAdvancedFilter={() => setShowAdvancedFilter(!showAdvancedFilter)}
-        advancedFilterCount={Object.keys(advancedFilterFilters).length}
       />
 
        {/* Advanced Filter System */}
@@ -1132,20 +1090,6 @@ export function SmartGridPlus({
         onToggleFilterRow={() => setShowFilterRow(!showFilterRow)}
         onFiltersChange={handleFiltersChange}
         gridId="smart-grid-plus"
-        userId="demo-user"
-        api={mockFilterAPI}
-      />
-
-      {/* Advanced Filter Component */}
-      <AdvancedFilter
-        columns={orderedColumns}
-        subRowColumns={subRowColumns}
-        showAdvancedFilter={showAdvancedFilter}
-        onToggleAdvancedFilter={() => setShowAdvancedFilter(!showAdvancedFilter)}
-        onSearch={handleAdvancedFiltersSearch}
-        onClear={handleAdvancedFiltersClear}
-        extraFilters={extraFilters}
-        gridId="smart-grid-plus-advanced"
         userId="demo-user"
         api={mockFilterAPI}
       />
