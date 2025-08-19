@@ -11,8 +11,7 @@ import {
   List,
   Plus,
   ChevronDown,
-  Group,
-  SearchX
+  Group
 } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
@@ -56,10 +55,6 @@ interface GridToolbarProps {
   onGroupByChange?: (field: string | null) => void;
   groupableColumns?: string[];
   showGroupingDropdown?: boolean;
-  // Advanced filter props
-  showAdvancedFilter: boolean;
-  setShowAdvancedFilter: (show: boolean) => void;
-  advancedFilterCount?: number;
 }
 
 export function GridToolbar({
@@ -90,10 +85,7 @@ export function GridToolbar({
   groupByField,
   onGroupByChange,
   groupableColumns,
-  showGroupingDropdown = false,
-  showAdvancedFilter,
-  setShowAdvancedFilter,
-  advancedFilterCount = 0
+  showGroupingDropdown = false
 }: GridToolbarProps) {
   // Default configurable button configuration
   const defaultConfigurableButton: ConfigurableButtonConfig = {
@@ -164,25 +156,6 @@ export function GridToolbar({
         </div>
 
         {/* Icon buttons */}
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => setShowAdvancedFilter(!showAdvancedFilter)}
-          disabled={loading}
-          title="Toggle Advanced Filter"
-          className={cn(
-            "w-8 h-8 flex items-center justify-center rounded hover:bg-gray-100 p-0",
-            showAdvancedFilter && "bg-blue-50 text-blue-600"
-          )}
-        >
-          <SearchX className="h-4 w-4" />
-          {advancedFilterCount > 0 && (
-            <span className="absolute -top-1 -right-1 text-xs bg-blue-500 text-white rounded-full w-4 h-4 flex items-center justify-center">
-              {advancedFilterCount}
-            </span>
-          )}
-        </Button>
-
         <Button
           variant="ghost"
           size="sm"

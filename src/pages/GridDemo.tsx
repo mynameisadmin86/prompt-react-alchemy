@@ -15,7 +15,6 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { mockFilterAPI } from '@/utils/mockFilterAPI';
 
 interface SampleData {
   id: string;
@@ -54,8 +53,7 @@ const GridDemo = () => {
       editable: false,
       mandatory: true,
       subRow: false,
-      filterMode: 'local',
-      showInAdvancedFilter: true
+      filterMode: 'local'
     },
     {
       key: 'status',
@@ -63,8 +61,7 @@ const GridDemo = () => {
       type: 'Badge',
       sortable: true,
       editable: false,
-      subRow: false,
-      showInAdvancedFilter: true
+      subRow: false
     },
     {
       key: 'tripBillingStatus',
@@ -72,8 +69,7 @@ const GridDemo = () => {
       type: 'Badge',
       sortable: true,
       editable: false,
-      subRow: false,
-      showInAdvancedFilter: false
+      subRow: false
     },
     {
       key: 'plannedStartEndDateTime',
@@ -81,8 +77,7 @@ const GridDemo = () => {
       type: 'EditableText',
       sortable: true,
       editable: true,
-      subRow: true,
-      showInAdvancedFilter: true
+      subRow: true
     },
     {
       key: 'actualStartEndDateTime',
@@ -90,8 +85,7 @@ const GridDemo = () => {
       type: 'DateTimeRange',
       sortable: true,
       editable: false,
-      subRow: true,
-      showInAdvancedFilter: true
+      subRow: true
     },
     {
       key: 'departurePoint',
@@ -100,8 +94,7 @@ const GridDemo = () => {
       sortable: true,
       editable: false,
       infoTextField: 'departurePointDetails',
-      subRow: true,
-      showInAdvancedFilter: true
+      subRow: true
     },
     {
       key: 'arrivalPoint',
@@ -110,8 +103,7 @@ const GridDemo = () => {
       sortable: true,
       editable: false,
       infoTextField: 'arrivalPointDetails',
-      subRow: true,
-      showInAdvancedFilter: true
+      subRow: true
     },
     {
       key: 'customer',
@@ -119,7 +111,6 @@ const GridDemo = () => {
       type: 'ExpandableCount',
       sortable: true,
       editable: false,
-      showInAdvancedFilter: false,
       renderExpandedContent: (row: SampleData) => (
         <div className="space-y-3">
           <div className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-4">
@@ -146,7 +137,6 @@ const GridDemo = () => {
       type: 'ExpandableCount',
       sortable: true,
       editable: false,
-      showInAdvancedFilter: false,
       renderExpandedContent: (row: SampleData) => (
         <div className="space-y-3">
           <div className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-4">
@@ -626,15 +616,7 @@ const GridDemo = () => {
             gridTitle="Trip Plans"
             recordCount={gridState.gridData.length > 0 ? gridState.gridData.length : processedData.length}
             showCreateButton={true}
-            extraFilters={[
-              { field: 'priority', label: 'Priority', type: 'dropdown', options: [
-                { label: 'High', value: 'high' },
-                { label: 'Medium', value: 'medium' },
-                { label: 'Low', value: 'low' }
-              ]},
-              { field: 'region', label: 'Region', type: 'text' }
-            ]}
-            defaultShowAdvancedFilter={true}
+            searchPlaceholder="Search all columns..."
           />
           
           {/* Footer with action buttons matching the screenshot style */}
