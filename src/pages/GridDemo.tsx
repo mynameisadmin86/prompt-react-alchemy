@@ -617,7 +617,7 @@ const GridDemo = () => {
             recordCount={gridState.gridData.length > 0 ? gridState.gridData.length : processedData.length}
             showCreateButton={true}
             searchPlaceholder="Search all columns..."
-            clientSideSearch={true}
+            clientSideSearch={false}
           />
           
           {/* Footer with action buttons matching the screenshot style */}
