@@ -36,6 +36,7 @@ interface AdvancedFilterProps {
   gridId: string;
   userId: string;
   api?: FilterSystemAPI;
+  clientSideSearch?: boolean;
 }
 
 export function AdvancedFilter({
@@ -49,7 +50,8 @@ export function AdvancedFilter({
   onSearch,
   gridId,
   userId,
-  api
+  api,
+  clientSideSearch = false
 }: AdvancedFilterProps) {
   const [activeFilters, setActiveFilters] = useState<Record<string, FilterValue>>({});
   const [filterSets, setFilterSets] = useState<FilterSet[]>([]);
@@ -79,10 +81,13 @@ export function AdvancedFilter({
   // Auto-apply filters when activeFilters changes
   useEffect(() => {
     onFiltersChange(activeFilters);
-    if (api) {
+    
+    // For client-side search, apply filters immediately
+    // For server-side search, only apply filters when Search button is clicked
+    if (clientSideSearch && api) {
       api.applyGridFilters(activeFilters);
     }
-  }, [activeFilters, onFiltersChange, api]);
+  }, [activeFilters, onFiltersChange, api, clientSideSearch]);
 
   const loadFilterSets = async () => {
     if (!api) return;
@@ -314,12 +319,19 @@ export function AdvancedFilter({
           <Button
             variant="default"
             size="sm"
-            onClick={onSearch}
+            onClick={() => {
+              // For server-side search, trigger the search callback
+              // For client-side search, apply filters via API
+              if (clientSideSearch && api) {
+                api.applyGridFilters(activeFilters);
+              }
+              onSearch();
+            }}
             disabled={loading}
             className="bg-blue-600 hover:bg-blue-700 text-white"
           >
             <Search className="h-4 w-4 mr-1" />
-            Search
+            {clientSideSearch ? 'Apply Filters' : 'Search'}
           </Button>
 
           {activeFilterCount > 0 && (

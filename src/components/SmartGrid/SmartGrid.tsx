@@ -62,7 +62,8 @@ export function SmartGrid({
   groupByField,
   onGroupByChange,
   groupableColumns,
-  showGroupingDropdown
+  showGroupingDropdown,
+  clientSideSearch = false
 }: SmartGridProps) {
   const {
     gridData,
@@ -813,6 +814,7 @@ export function SmartGrid({
         gridId="smart-grid"
         userId="demo-user"
         api={mockFilterAPI}
+        clientSideSearch={clientSideSearch}
       />
       
       {/* Table Container with horizontal scroll prevention */}

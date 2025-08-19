@@ -161,6 +161,8 @@ export interface SmartGridProps {
   onGroupByChange?: (field: string | null) => void;
   groupableColumns?: string[];
   showGroupingDropdown?: boolean;
+  // Search mode props
+  clientSideSearch?: boolean;
 }
 
 // Legacy interface for backward compatibility
