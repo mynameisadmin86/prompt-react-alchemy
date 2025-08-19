@@ -24,12 +24,6 @@ interface SubRowFilter {
   options?: string[];
 }
 
-interface FilterSectionConfig {
-  showMainFilters?: boolean;
-  showExtraFilters?: boolean;
-  showSubRowFilters?: boolean;
-}
-
 interface AdvancedFilterProps {
   columns: GridColumnConfig[];
   subRowColumns: GridColumnConfig[];
@@ -43,7 +37,6 @@ interface AdvancedFilterProps {
   userId: string;
   api?: FilterSystemAPI;
   clientSideSearch?: boolean;
-  filterConfig?: FilterSectionConfig;
 }
 
 export function AdvancedFilter({
@@ -58,8 +51,7 @@ export function AdvancedFilter({
   gridId,
   userId,
   api,
-  clientSideSearch = false,
-  filterConfig = { showMainFilters: true, showExtraFilters: true, showSubRowFilters: true }
+  clientSideSearch = false
 }: AdvancedFilterProps) {
   const [activeFilters, setActiveFilters] = useState<Record<string, FilterValue>>({});
   const [pendingFilters, setPendingFilters] = useState<Record<string, FilterValue>>({});
@@ -377,7 +369,7 @@ export function AdvancedFilter({
       {/* Filter Panel - Always expanded when visible */}
       <div className="bg-white border rounded shadow-sm">
         {/* Main Column Filters */}
-        {filterConfig.showMainFilters && filterableColumns.length > 0 && (
+        {filterableColumns.length > 0 && (
           <Collapsible open={isMainFiltersOpen} onOpenChange={setIsMainFiltersOpen}>
             <CollapsibleTrigger asChild>
               <div className="bg-gray-50/50 px-3 py-2 cursor-pointer hover:bg-gray-50 transition-colors border-b">
@@ -404,7 +396,7 @@ export function AdvancedFilter({
         )}
 
         {/* Extra Filters */}
-        {filterConfig.showExtraFilters && extraFilters.length > 0 && (
+        {extraFilters.length > 0 && (
           <Collapsible open={isExtraFiltersOpen} onOpenChange={setIsExtraFiltersOpen}>
             <CollapsibleTrigger asChild>
               <div className="bg-green-50/50 px-3 py-2 cursor-pointer hover:bg-green-50 transition-colors border-b">
@@ -431,7 +423,7 @@ export function AdvancedFilter({
         )}
 
         {/* Sub-row Filters */}
-        {filterConfig.showSubRowFilters && (filterableSubRowColumns.length > 0 || subRowFilters.length > 0) && (
+        {(filterableSubRowColumns.length > 0 || subRowFilters.length > 0) && (
           <Collapsible open={isSubRowFiltersOpen} onOpenChange={setIsSubRowFiltersOpen}>
             <CollapsibleTrigger asChild>
               <div className="bg-blue-50/50 px-3 py-2 cursor-pointer hover:bg-blue-50 transition-colors">
