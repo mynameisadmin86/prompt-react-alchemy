@@ -28,6 +28,7 @@ export interface GridColumnConfig {
   order?: number;
   options?: string[];
   subRow?: boolean; // Property for sub-row display
+  showInAdvancedFilter?: boolean; // Controls visibility in advanced filter
   
   // Badge specific properties
   statusMap?: Record<string, string>;
@@ -71,7 +72,7 @@ export interface SortConfig {
 export interface FilterConfig {
   column: string;
   value: any;
-  operator?: 'equals' | 'contains' | 'startsWith' | 'endsWith' | 'gt' | 'lt' | 'gte' | 'lte';
+  operator?: 'equals' | 'contains' | 'startsWith' | 'endsWith' | 'gt' | 'lt' | 'gte' | 'lte' | 'between' | 'in';
 }
 
 export interface GridPreferences {
@@ -144,6 +145,11 @@ export interface SmartGridProps {
   onGroupByChange?: (field: string | null) => void;
   groupableColumns?: string[];
   showGroupingDropdown?: boolean;
+  // Advanced filter props
+  extraFilters?: AdvancedFilterField[];
+  defaultShowAdvancedFilter?: boolean;
+  onAdvancedFiltersApply?: (filters: FilterCondition[]) => void;
+  onAdvancedFiltersClear?: () => void;
 }
 
 // Legacy interface for backward compatibility
@@ -195,6 +201,21 @@ export interface CellEditProps {
   column: Column;
   onSave: (value: any) => void;
   onCancel: () => void;
+}
+
+// Advanced Filter interfaces
+export interface AdvancedFilterField {
+  field: string;
+  label: string;
+  type: 'text' | 'dropdown' | 'date' | 'dateRange' | 'number';
+  options?: Array<{ label: string; value: any }>;
+}
+
+export interface FilterCondition {
+  field: string;
+  value: any;
+  operator?: 'equals' | 'contains' | 'startsWith' | 'endsWith' | 'gt' | 'lt' | 'gte' | 'lte' | 'between' | 'in';
+  type?: 'text' | 'select' | 'date' | 'dateRange' | 'time' | 'number' | 'boolean';
 }
 
 // SmartGridPlus specific interfaces

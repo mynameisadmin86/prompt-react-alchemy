@@ -1,4 +1,5 @@
 
+export { AdvancedFilter } from './AdvancedFilter';
 export { SmartGrid } from './SmartGrid';
 export { SmartGridPlus } from './SmartGridPlus';
 export { SmartGridWithGrouping } from './SmartGridWithGrouping';

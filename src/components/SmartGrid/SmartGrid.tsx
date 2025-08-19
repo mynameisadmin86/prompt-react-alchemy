@@ -13,7 +13,7 @@ import {
   ChevronRight, 
   ChevronDown, 
 } from 'lucide-react';
-import { SmartGridProps, GridColumnConfig, SortConfig, FilterConfig, GridAPI } from '@/types/smartgrid';
+import { SmartGridProps, GridColumnConfig, SortConfig, FilterConfig, GridAPI, FilterCondition } from '@/types/smartgrid';
 import { exportToCSV, exportToExcel } from '@/utils/gridExport';
 import { useToast } from '@/hooks/use-toast';
 import { useGridPreferences } from '@/hooks/useGridPreferences';
@@ -26,6 +26,7 @@ import { PluginRenderer, PluginRowActions } from './PluginRenderer';
 import { ColumnFilter } from './ColumnFilter';
 import { DraggableSubRow } from './DraggableSubRow';
 import { FilterSystem } from './FilterSystem';
+import { AdvancedFilter } from './AdvancedFilter';
 import { mockFilterAPI } from '@/utils/mockFilterAPI';
 import { cn } from '@/lib/utils';
 
@@ -59,7 +60,11 @@ export function SmartGrid({
   groupByField,
   onGroupByChange,
   groupableColumns,
-  showGroupingDropdown
+  showGroupingDropdown,
+  extraFilters,
+  defaultShowAdvancedFilter = false,
+  onAdvancedFiltersApply,
+  onAdvancedFiltersClear
 }: SmartGridProps) {
   const {
     gridData,
@@ -116,6 +121,8 @@ export function SmartGrid({
   const [pageSize] = useState(10);
   const [showFilterRow, setShowFilterRow] = useState(false);
   const [filterSystemFilters, setFilterSystemFilters] = useState<Record<string, any>>({});
+  const [showAdvancedFilter, setShowAdvancedFilter] = useState(defaultShowAdvancedFilter);
+  const [advancedFilters, setAdvancedFilters] = useState<FilterCondition[]>([]);
   const { toast } = useToast();
 
   // Use external selectedRows if provided, otherwise use internal state
@@ -296,6 +303,31 @@ export function SmartGrid({
     return processGridData(data, globalFilter, filters, sort, currentColumns, onDataFetch);
   }, [data, globalFilter, filters, sort, currentColumns, onDataFetch]);
 
+  // Handle advanced filter functions
+  const handleAdvancedFiltersApply = useCallback((filters: FilterCondition[]) => {
+    setAdvancedFilters(filters);
+    if (onAdvancedFiltersApply) {
+      onAdvancedFiltersApply(filters);
+    }
+    
+    // Convert to legacy filter format for internal processing
+    const legacyFilters = filters.map(filter => ({
+      column: filter.field,
+      value: filter.value,
+      operator: filter.operator || 'contains'
+    }));
+    setFilters(legacyFilters);
+    setCurrentPage(1);
+  }, [onAdvancedFiltersApply, setFilters, setCurrentPage]);
+
+  const handleAdvancedFiltersClear = useCallback(() => {
+    setAdvancedFilters([]);
+    if (onAdvancedFiltersClear) {
+      onAdvancedFiltersClear();
+    }
+    setFilters([]);
+    setCurrentPage(1);
+  }, [onAdvancedFiltersClear, setFilters, setCurrentPage]);
   // Handle filter system changes
   const handleFiltersChange = useCallback((newFilters: Record<string, any>) => {
     setFilterSystemFilters(newFilters);
@@ -769,7 +801,21 @@ export function SmartGrid({
         onGroupByChange={onGroupByChange}
         groupableColumns={groupableColumns}
         showGroupingDropdown={showGroupingDropdown}
+        showAdvancedFilter={showAdvancedFilter}
+        setShowAdvancedFilter={setShowAdvancedFilter}
+        advancedFilterCount={advancedFilters.length}
       />
+
+      {/* Advanced Filter */}
+      {showAdvancedFilter && (
+        <AdvancedFilter
+          columns={currentColumns}
+          extraFilters={extraFilters}
+          onApply={handleAdvancedFiltersApply}
+          onClear={handleAdvancedFiltersClear}
+          className="mb-4"
+        />
+      )}
 
        {/* Advanced Filter System */}
       <FilterSystem
