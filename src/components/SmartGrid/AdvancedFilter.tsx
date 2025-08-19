@@ -23,6 +23,20 @@ interface FilterValue {
   operator: string;
 }
 
+// Helper function to determine filter type from column type
+const getFilterType = (columnType: string): 'text' | 'dropdown' | 'date' | 'dateRange' | 'number' => {
+  switch (columnType) {
+    case 'Date':
+    case 'DateTimeRange':
+      return 'date';
+    case 'Dropdown':
+    case 'Badge':
+      return 'dropdown';
+    default:
+      return 'text';
+  }
+};
+
 export function AdvancedFilter({
   columns,
   extraFilters = [],
@@ -42,25 +56,12 @@ export function AdvancedFilter({
     const columnFilters: AdvancedFilterField[] = filterableColumns.map(col => ({
       field: col.key,
       label: col.label,
-      type: getFilterType(col.type) as 'text' | 'dropdown' | 'date' | 'dateRange' | 'number',
+      type: getFilterType(col.type),
       options: col.options?.map(opt => ({ label: opt, value: opt }))
     }));
     
     return [...columnFilters, ...extraFilters];
   }, [filterableColumns, extraFilters]);
-
-  const getFilterType = (columnType: string): 'text' | 'dropdown' | 'date' | 'dateRange' | 'number' => {
-    switch (columnType) {
-      case 'Date':
-      case 'DateTimeRange':
-        return 'date';
-      case 'Dropdown':
-      case 'Badge':
-        return 'dropdown';
-      default:
-        return 'text';
-    }
-  };
 
   const getDefaultOperator = (type: string) => {
     switch (type) {
