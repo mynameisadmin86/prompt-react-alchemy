@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
-import { Star, X, ChevronDown, ChevronUp, Search } from 'lucide-react';
+import { Star, X, ChevronDown, ChevronUp, Search, Settings } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Checkbox } from '@/components/ui/checkbox';
 import { ColumnFilterInput } from './ColumnFilterInput';
 import { FilterSetModal } from './FilterSetModal';
 import { FilterSetDropdown } from './FilterSetDropdown';
@@ -61,8 +63,37 @@ export function AdvancedFilter({
   const [isMainFiltersOpen, setIsMainFiltersOpen] = useState(true);
   const [isExtraFiltersOpen, setIsExtraFiltersOpen] = useState(true);
   const [isSubRowFiltersOpen, setIsSubRowFiltersOpen] = useState(true);
+  const [showSettingsModal, setShowSettingsModal] = useState(false);
+  const [visibleFields, setVisibleFields] = useState<Record<string, boolean>>({});
   
   const { toast } = useToast();
+
+  // Initialize visible fields on mount
+  useEffect(() => {
+    const allFields: Record<string, boolean> = {};
+    
+    // Main columns
+    filterableColumns.forEach(col => {
+      allFields[col.key] = true;
+    });
+    
+    // Extra filters
+    extraFilters.forEach(filter => {
+      allFields[`extra-${filter.key}`] = true;
+    });
+    
+    // Sub-row columns
+    filterableSubRowColumns.forEach(col => {
+      allFields[`subrow-${col.key}`] = true;
+    });
+    
+    // Sub-row filters
+    subRowFilters.forEach(filter => {
+      allFields[`subrowfilter-${filter.key}`] = true;
+    });
+    
+    setVisibleFields(allFields);
+  }, [columns, subRowColumns, extraFilters, subRowFilters]);
 
   // Load saved filter sets on mount
   useEffect(() => {
@@ -266,33 +297,38 @@ export function AdvancedFilter({
 
   // Helper function to render filter inputs
   const renderFilterInputs = (filterColumns: GridColumnConfig[] | ExtraFilter[] | SubRowFilter[], keyPrefix = '') => {
-    return filterColumns.map((column) => {
-      const columnKey = keyPrefix ? `${keyPrefix}${column.key}` : column.key;
-      return (
-        <div key={columnKey} className="space-y-1">
-          <div className="text-xs font-medium text-gray-600 truncate">
-            {column.label}
+    return filterColumns
+      .filter((column) => {
+        const columnKey = keyPrefix ? `${keyPrefix}${column.key}` : column.key;
+        return visibleFields[columnKey];
+      })
+      .map((column) => {
+        const columnKey = keyPrefix ? `${keyPrefix}${column.key}` : column.key;
+        return (
+          <div key={columnKey} className="space-y-1">
+            <div className="text-xs font-medium text-gray-600 truncate">
+              {column.label}
+            </div>
+            <div className="relative">
+              <ColumnFilterInput
+                column={column as GridColumnConfig}
+                value={pendingFilters[columnKey]}
+                onChange={(value) => handleFilterChange(columnKey, value)}
+              />
+              {pendingFilters[columnKey] && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => handleFilterChange(columnKey, undefined)}
+                  className="absolute right-1 top-1/2 transform -translate-y-1/2 h-6 w-6 p-0 hover:bg-gray-100"
+                >
+                  <X className="h-3 w-3" />
+                </Button>
+              )}
+            </div>
           </div>
-          <div className="relative">
-            <ColumnFilterInput
-              column={column as GridColumnConfig}
-              value={pendingFilters[columnKey]}
-              onChange={(value) => handleFilterChange(columnKey, value)}
-            />
-            {pendingFilters[columnKey] && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => handleFilterChange(columnKey, undefined)}
-                className="absolute right-1 top-1/2 transform -translate-y-1/2 h-6 w-6 p-0 hover:bg-gray-100"
-              >
-                <X className="h-3 w-3" />
-              </Button>
-            )}
-          </div>
-        </div>
-      );
-    });
+        );
+      });
   };
 
   if (!visible) return null;
@@ -363,6 +399,128 @@ export function AdvancedFilter({
             onRename={handleRename}
             onDelete={handleDelete}
           />
+
+          <Dialog open={showSettingsModal} onOpenChange={setShowSettingsModal}>
+            <DialogTrigger asChild>
+              <Button
+                variant="outline"
+                size="sm"
+                className="hover:bg-gray-50"
+              >
+                <Settings className="h-4 w-4" />
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-2xl">
+              <DialogHeader>
+                <DialogTitle>Filter Field Settings</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-6 max-h-96 overflow-y-auto">
+                {/* Main Columns */}
+                {filterableColumns.length > 0 && (
+                  <div>
+                    <h4 className="text-sm font-medium text-gray-700 mb-3">Main Row Filters</h4>
+                    <div className="grid grid-cols-2 gap-3">
+                      {filterableColumns.map((column) => (
+                        <div key={column.key} className="flex items-center space-x-2">
+                          <Checkbox
+                            id={column.key}
+                            checked={visibleFields[column.key] || false}
+                            onCheckedChange={(checked) => {
+                              setVisibleFields(prev => ({
+                                ...prev,
+                                [column.key]: !!checked
+                              }));
+                            }}
+                          />
+                          <label htmlFor={column.key} className="text-sm text-gray-600 cursor-pointer">
+                            {column.label}
+                          </label>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Extra Filters */}
+                {extraFilters.length > 0 && (
+                  <div>
+                    <h4 className="text-sm font-medium text-green-700 mb-3">Extra Filters</h4>
+                    <div className="grid grid-cols-2 gap-3">
+                      {extraFilters.map((filter) => {
+                        const fieldKey = `extra-${filter.key}`;
+                        return (
+                          <div key={fieldKey} className="flex items-center space-x-2">
+                            <Checkbox
+                              id={fieldKey}
+                              checked={visibleFields[fieldKey] || false}
+                              onCheckedChange={(checked) => {
+                                setVisibleFields(prev => ({
+                                  ...prev,
+                                  [fieldKey]: !!checked
+                                }));
+                              }}
+                            />
+                            <label htmlFor={fieldKey} className="text-sm text-gray-600 cursor-pointer">
+                              {filter.label}
+                            </label>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {/* Sub-row Filters */}
+                {(filterableSubRowColumns.length > 0 || subRowFilters.length > 0) && (
+                  <div>
+                    <h4 className="text-sm font-medium text-blue-700 mb-3">Sub-row Filters</h4>
+                    <div className="grid grid-cols-2 gap-3">
+                      {filterableSubRowColumns.map((column) => {
+                        const fieldKey = `subrow-${column.key}`;
+                        return (
+                          <div key={fieldKey} className="flex items-center space-x-2">
+                            <Checkbox
+                              id={fieldKey}
+                              checked={visibleFields[fieldKey] || false}
+                              onCheckedChange={(checked) => {
+                                setVisibleFields(prev => ({
+                                  ...prev,
+                                  [fieldKey]: !!checked
+                                }));
+                              }}
+                            />
+                            <label htmlFor={fieldKey} className="text-sm text-gray-600 cursor-pointer">
+                              {column.label}
+                            </label>
+                          </div>
+                        );
+                      })}
+                      {subRowFilters.map((filter) => {
+                        const fieldKey = `subrowfilter-${filter.key}`;
+                        return (
+                          <div key={fieldKey} className="flex items-center space-x-2">
+                            <Checkbox
+                              id={fieldKey}
+                              checked={visibleFields[fieldKey] || false}
+                              onCheckedChange={(checked) => {
+                                setVisibleFields(prev => ({
+                                  ...prev,
+                                  [fieldKey]: !!checked
+                                }));
+                              }}
+                            />
+                            <label htmlFor={fieldKey} className="text-sm text-gray-600 cursor-pointer">
+                              {filter.label}
+                            </label>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </DialogContent>
+          </Dialog>
         </div>
       </div>
 
