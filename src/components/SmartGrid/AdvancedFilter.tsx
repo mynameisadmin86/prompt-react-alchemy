@@ -378,7 +378,7 @@ export function AdvancedFilter({
               <div className="bg-gray-50/50 px-3 py-2 cursor-pointer hover:bg-gray-50 transition-colors border-b">
                 <div className="flex items-center justify-between">
                   <div className="text-sm font-medium text-gray-700">
-                    Column Filters
+                    Main-row filters
                   </div>
                   {isMainFiltersOpen ? (
                     <ChevronUp className="h-4 w-4 text-gray-600" />
