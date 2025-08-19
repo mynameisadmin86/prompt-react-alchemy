@@ -794,7 +794,7 @@ export function SmartGrid({
 
       {/* Advanced Filter System */}
       <AdvancedFilter
-        columns={currentColumns}
+        columns={orderedColumns}
         subRowColumns={subRowColumns}
         showAdvancedFilter={showAdvancedFilter}
         onToggleAdvancedFilter={() => setShowAdvancedFilter(!showAdvancedFilter)}

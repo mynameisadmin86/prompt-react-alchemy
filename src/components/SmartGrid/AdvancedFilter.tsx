@@ -45,9 +45,17 @@ export function AdvancedFilter({
   
   const { toast } = useToast();
 
-  // Get filterable columns (including hidden ones) - independent of column visibility
-  const filterableColumns = columns.filter(col => col.filterable !== false);
-  const filterableSubRowColumns = subRowColumns.filter(col => col.filterable !== false);
+  // Get main-row filterable columns (only non-subRow columns that are filterable and not hidden)
+  const mainRowFilterableColumns = columns.filter(col => 
+    col.filterable !== false && 
+    col.subRow !== true
+  );
+  
+  // Get sub-row filterable columns (only subRow columns that are filterable)
+  const subRowFilterableColumns = columns.filter(col => 
+    col.filterable !== false && 
+    col.subRow === true
+  );
 
   // Apply default filter set on load
   useEffect(() => {
@@ -265,22 +273,24 @@ export function AdvancedFilter({
       {/* Filter Panel - Only show when showAdvancedFilter is true */}
       {showAdvancedFilter && (
         <div className="bg-white border rounded shadow-sm">
-          {/* Main Column Filters */}
-          <div className="grid gap-2 p-3" style={{ gridTemplateColumns: `repeat(${filterableColumns.length}, 1fr)` }}>
-            {filterableColumns.map((column) => (
-              <div key={column.key} className="space-y-1">
-                <div className="text-xs font-medium text-gray-600 truncate">
-                  {column.label}
+          {/* Main Column Filters - Only non-subRow columns */}
+          {mainRowFilterableColumns.length > 0 && (
+            <div className="grid gap-2 p-3" style={{ gridTemplateColumns: `repeat(${mainRowFilterableColumns.length}, 1fr)` }}>
+              {mainRowFilterableColumns.map((column) => (
+                <div key={column.key} className="space-y-1">
+                  <div className="text-xs font-medium text-gray-600 truncate">
+                    {column.label}
+                  </div>
+                  <ColumnFilterInput
+                    column={column}
+                    value={activeFilters[column.key]}
+                    onChange={(value) => handleFilterChange(column.key, value)}
+                    onApply={handleSearch}
+                  />
                 </div>
-                <ColumnFilterInput
-                  column={column}
-                  value={activeFilters[column.key]}
-                  onChange={(value) => handleFilterChange(column.key, value)}
-                  onApply={handleSearch}
-                />
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
 
           {/* Extra Filters Section */}
           {extraFilters.length > 0 && (
@@ -336,8 +346,8 @@ export function AdvancedFilter({
             </div>
           )}
 
-          {/* Collapsible Sub-Row Filters */}
-          {filterableSubRowColumns.length > 0 && (
+          {/* Collapsible Sub-Row Filters - Only subRow columns */}
+          {subRowFilterableColumns.length > 0 && (
             <div className="border-t">
               <Collapsible open={isSubRowFiltersOpen} onOpenChange={setIsSubRowFiltersOpen}>
                 <CollapsibleTrigger asChild>
@@ -363,8 +373,8 @@ export function AdvancedFilter({
                 </CollapsibleTrigger>
                 <CollapsibleContent>
                   <div className="bg-blue-50/30 p-3">
-                    <div className="grid gap-2" style={{ gridTemplateColumns: `repeat(${filterableSubRowColumns.length}, 1fr)` }}>
-                      {filterableSubRowColumns.map((column) => (
+                    <div className="grid gap-2" style={{ gridTemplateColumns: `repeat(${subRowFilterableColumns.length}, 1fr)` }}>
+                      {subRowFilterableColumns.map((column) => (
                         <div key={`subrow-${column.key}`} className="space-y-1">
                           <div className="text-xs font-medium text-blue-600 truncate">
                             {column.label}
