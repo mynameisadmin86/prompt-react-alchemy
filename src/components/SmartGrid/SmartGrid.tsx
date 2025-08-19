@@ -26,6 +26,7 @@ import { PluginRenderer, PluginRowActions } from './PluginRenderer';
 import { ColumnFilter } from './ColumnFilter';
 import { DraggableSubRow } from './DraggableSubRow';
 import { FilterSystem } from './FilterSystem';
+import { AdvancedFilter } from './AdvancedFilter';
 import { mockFilterAPI } from '@/utils/mockFilterAPI';
 import { cn } from '@/lib/utils';
 
@@ -56,6 +57,8 @@ export function SmartGrid({
   recordCount,
   showCreateButton,
   searchPlaceholder,
+  extraFilters,
+  subRowFilters,
   groupByField,
   onGroupByChange,
   groupableColumns,
@@ -115,6 +118,7 @@ export function SmartGrid({
 
   const [pageSize] = useState(10);
   const [showFilterRow, setShowFilterRow] = useState(false);
+  const [showAdvancedFilter, setShowAdvancedFilter] = useState(false);
   const [filterSystemFilters, setFilterSystemFilters] = useState<Record<string, any>>({});
   const { toast } = useToast();
 
@@ -295,6 +299,29 @@ export function SmartGrid({
   const processedData = useMemo(() => {
     return processGridData(data, globalFilter, filters, sort, currentColumns, onDataFetch);
   }, [data, globalFilter, filters, sort, currentColumns, onDataFetch]);
+
+  // Handle advanced filter search
+  const handleAdvancedFilterSearch = useCallback(() => {
+    // Reset to page 1 when search is performed
+    setCurrentPage(1);
+    
+    // If we have server-side filtering, call the server
+    const serverFilters = filters.filter(filter => {
+      const column = currentColumns.find(col => col.key === filter.column);
+      return column?.filterMode === 'server';
+    });
+    
+    if (serverFilters.length > 0 && onServerFilter) {
+      onServerFilter(serverFilters).catch(error => {
+        console.error('Server-side filtering failed:', error);
+        toast({
+          title: "Error",
+          description: "Failed to apply server-side filters",
+          variant: "destructive"
+        });
+      });
+    }
+  }, [filters, currentColumns, onServerFilter, toast, setCurrentPage]);
 
   // Handle filter system changes
   const handleFiltersChange = useCallback((newFilters: Record<string, any>) => {
@@ -765,6 +792,8 @@ export function SmartGrid({
         recordCount={recordCount}
         showCreateButton={showCreateButton}
         searchPlaceholder={searchPlaceholder}
+        showAdvancedFilter={showAdvancedFilter}
+        onToggleAdvancedFilter={() => setShowAdvancedFilter(!showAdvancedFilter)}
         groupByField={groupByField}
         onGroupByChange={onGroupByChange}
         groupableColumns={groupableColumns}
@@ -772,12 +801,15 @@ export function SmartGrid({
       />
 
        {/* Advanced Filter System */}
-      <FilterSystem
+      <AdvancedFilter
         columns={orderedColumns}
         subRowColumns={subRowColumns}
-        showFilterRow={showFilterRow}
-        onToggleFilterRow={() => setShowFilterRow(!showFilterRow)}
+        extraFilters={extraFilters}
+        subRowFilters={subRowFilters}
+        visible={showAdvancedFilter}
+        onToggle={() => setShowAdvancedFilter(!showAdvancedFilter)}
         onFiltersChange={handleFiltersChange}
+        onSearch={handleAdvancedFilterSearch}
         gridId="smart-grid"
         userId="demo-user"
         api={mockFilterAPI}

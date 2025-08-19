@@ -112,6 +112,20 @@ export interface GridPlugin {
   destroy?: () => void;
 }
 
+export interface ExtraFilter {
+  key: string;
+  label: string;
+  type?: 'text' | 'select' | 'date' | 'dateRange' | 'time' | 'number' | 'boolean';
+  options?: string[];
+}
+
+export interface SubRowFilter {
+  key: string;
+  label: string;
+  type?: 'text' | 'select' | 'date' | 'dateRange' | 'time' | 'number' | 'boolean';
+  options?: string[];
+}
+
 export interface SmartGridProps {
   columns: GridColumnConfig[];
   data: any[];
@@ -139,6 +153,9 @@ export interface SmartGridProps {
   recordCount?: number;
   showCreateButton?: boolean;
   searchPlaceholder?: string;
+  // Advanced Filter props
+  extraFilters?: ExtraFilter[];
+  subRowFilters?: SubRowFilter[];
   // Grouping props
   groupByField?: string | null;
   onGroupByChange?: (field: string | null) => void;

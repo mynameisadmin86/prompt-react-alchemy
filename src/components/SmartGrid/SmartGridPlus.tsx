@@ -1080,6 +1080,8 @@ export function SmartGridPlus({
         defaultConfigurableButtonLabel={defaultConfigurableButtonLabel}
         gridTitle={gridTitle}
         recordCount={recordCount}
+        showAdvancedFilter={false}
+        onToggleAdvancedFilter={() => {}}
       />
 
        {/* Advanced Filter System */}

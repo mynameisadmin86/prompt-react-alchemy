@@ -50,6 +50,9 @@ interface GridToolbarProps {
   recordCount?: number;
   showCreateButton?: boolean;
   searchPlaceholder?: string;
+  // Advanced Filter props
+  showAdvancedFilter: boolean;
+  onToggleAdvancedFilter: () => void;
   // Grouping props
   groupByField?: string | null;
   onGroupByChange?: (field: string | null) => void;
@@ -82,6 +85,8 @@ export function GridToolbar({
   recordCount,
   showCreateButton = false,
   searchPlaceholder = "Search all columns...",
+  showAdvancedFilter,
+  onToggleAdvancedFilter,
   groupByField,
   onGroupByChange,
   groupableColumns,
@@ -173,6 +178,21 @@ export function GridToolbar({
               {filters.length}
             </span>
           )}
+        </Button>
+
+        {/* Advanced Filter Toggle */}
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={onToggleAdvancedFilter}
+          disabled={loading}
+          title="Toggle Advanced Filters"
+          className={cn(
+            "w-8 h-8 flex items-center justify-center rounded hover:bg-gray-100 p-0",
+            showAdvancedFilter && "bg-blue-50 text-blue-600"
+          )}
+        >
+          <Search className="h-4 w-4" />
         </Button>
 
         <Button 
