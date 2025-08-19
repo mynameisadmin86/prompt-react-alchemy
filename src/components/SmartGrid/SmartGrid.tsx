@@ -298,8 +298,8 @@ export function SmartGrid({
 
   // Process data with sorting and filtering (only if not using lazy loading)
   const processedData = useMemo(() => {
-    return processGridData(data, globalFilter, filters, sort, currentColumns, onDataFetch);
-  }, [data, globalFilter, filters, sort, currentColumns, onDataFetch]);
+    return processGridData(data, globalFilter, filters, sort, currentColumns, onDataFetch, clientSideSearch);
+  }, [data, globalFilter, filters, sort, currentColumns, onDataFetch, clientSideSearch]);
 
   // Handle advanced filter search
   const handleAdvancedFilterSearch = useCallback(() => {
@@ -780,6 +780,7 @@ export function SmartGrid({
         loading={loading}
         filters={filters}
         columns={currentColumns}
+        clientSideSearch={clientSideSearch}
         preferences={preferences}
         onColumnVisibilityToggle={toggleColumnVisibility}
         onColumnHeaderChange={updateColumnHeader}
@@ -813,8 +814,8 @@ export function SmartGrid({
         onSearch={handleAdvancedFilterSearch}
         gridId="smart-grid"
         userId="demo-user"
-        api={mockFilterAPI}
         clientSideSearch={clientSideSearch}
+        api={mockFilterAPI}
       />
       
       {/* Table Container with horizontal scroll prevention */}

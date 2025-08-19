@@ -50,6 +50,7 @@ interface GridToolbarProps {
   recordCount?: number;
   showCreateButton?: boolean;
   searchPlaceholder?: string;
+  clientSideSearch?: boolean;
   // Advanced Filter props
   showAdvancedFilter: boolean;
   onToggleAdvancedFilter: () => void;
@@ -85,6 +86,7 @@ export function GridToolbar({
   recordCount,
   showCreateButton = false,
   searchPlaceholder = "Search all columns...",
+  clientSideSearch = true,
   showAdvancedFilter,
   onToggleAdvancedFilter,
   groupByField,
@@ -148,17 +150,19 @@ export function GridToolbar({
 
       {/* Right side - Controls */}
       <div className="flex items-center space-x-1">
-        {/* Search box */}
-        <div className="relative">
-          <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-          <Input
-            placeholder={searchPlaceholder}
-            value={globalFilter}
-            onChange={(e) => setGlobalFilter(e.target.value)}
-            className="border border-gray-300 rounded text-sm placeholder-gray-400 px-2 py-1 pl-8 w-64 h-8"
-            disabled={loading}
-          />
-        </div>
+        {/* Search box - only show if clientSideSearch is enabled */}
+        {clientSideSearch && (
+          <div className="relative">
+            <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <Input
+              placeholder={searchPlaceholder}
+              value={globalFilter}
+              onChange={(e) => setGlobalFilter(e.target.value)}
+              className="border border-gray-300 rounded text-sm placeholder-gray-400 px-2 py-1 pl-8 w-64 h-8"
+              disabled={loading}
+            />
+          </div>
+        )}
 
         {/* Icon buttons */}
         <Button
