@@ -1,14 +1,17 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { CalendarIcon, Search, X, Trash2 } from 'lucide-react';
+import { CalendarIcon, Filter, X, Star } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { GridColumnConfig, AdvancedFilterField, FilterCondition } from '@/types/smartgrid';
+import { FilterValue, FilterSet, FilterSystemAPI } from '@/types/filterSystem';
+import { FilterSetModal } from './FilterSetModal';
+import { FilterSetDropdown } from './FilterSetDropdown';
+import { useToast } from '@/hooks/use-toast';
 
 interface AdvancedFilterProps {
   columns: GridColumnConfig[];
@@ -16,11 +19,10 @@ interface AdvancedFilterProps {
   onApply: (filters: FilterCondition[]) => void;
   onClear: () => void;
   className?: string;
-}
-
-interface FilterValue {
-  value: any;
-  operator: string;
+  defaultShowAdvancedFilter?: boolean;
+  gridId?: string;
+  userId?: string;
+  api?: FilterSystemAPI;
 }
 
 // Helper function to determine filter type from column type
@@ -42,17 +44,23 @@ export function AdvancedFilter({
   extraFilters = [],
   onApply,
   onClear,
-  className
+  className,
+  defaultShowAdvancedFilter = false,
+  gridId = 'advanced-filter',
+  userId = 'user',
+  api
 }: AdvancedFilterProps) {
   const [filterValues, setFilterValues] = useState<Record<string, FilterValue>>({});
-
-  // Get filterable columns - show all columns (visible + hidden) if showInAdvancedFilter is true or not defined
-  const filterableColumns = useMemo(() => {
-    return columns.filter(col => col.showInAdvancedFilter !== false);
-  }, [columns]);
+  const [showAdvancedFilter, setShowAdvancedFilter] = useState(defaultShowAdvancedFilter);
+  const [filterSets, setFilterSets] = useState<FilterSet[]>([]);
+  const [showSaveModal, setShowSaveModal] = useState(false);
+  const [loading, setLoading] = useState(false);
+  
+  const { toast } = useToast();
 
   // Combine column filters with extra filters
   const allFilters = useMemo(() => {
+    const filterableColumns = columns.filter(col => col.showInAdvancedFilter !== false);
     const columnFilters: AdvancedFilterField[] = filterableColumns.map(col => ({
       field: col.key,
       label: col.label,
@@ -61,9 +69,48 @@ export function AdvancedFilter({
     }));
     
     return [...columnFilters, ...extraFilters];
-  }, [filterableColumns, extraFilters]);
+  }, [columns, extraFilters]);
 
-  const getDefaultOperator = (type: string) => {
+  const applyFilterSet = useCallback((filterSet: FilterSet) => {
+    setFilterValues(filterSet.filters);
+    
+    // Apply filters directly
+    const conditions: FilterCondition[] = Object.entries(filterSet.filters)
+      .filter(([_, filterValue]) => filterValue.value !== '' && filterValue.value !== undefined && filterValue.value !== null)
+      .map(([field, filterValue]) => {
+        const filter = allFilters.find(f => f.field === field);
+        return {
+          field,
+          value: filterValue.value,
+          operator: filterValue.operator as any,
+          type: filter?.type as any
+        };
+      });
+
+    onApply(conditions);
+    
+    toast({
+      title: "Filter Set Applied",
+      description: `Applied "${filterSet.name}" with ${Object.keys(filterSet.filters).length} filters`,
+    });
+  }, [allFilters, onApply, toast]);
+
+  // Load saved filter sets on mount
+  useEffect(() => {
+    if (api && userId) {
+      loadFilterSets();
+    }
+  }, [api, userId, gridId]);
+
+  // Apply default filter set on load
+  useEffect(() => {
+    const defaultSet = filterSets.find(set => set.isDefault);
+    if (defaultSet && Object.keys(filterValues).length === 0) {
+      applyFilterSet(defaultSet);
+    }
+  }, [filterSets, filterValues, applyFilterSet]);
+
+  const getDefaultOperator = (type: string): FilterValue['operator'] => {
     switch (type) {
       case 'text':
         return 'contains';
@@ -78,60 +125,43 @@ export function AdvancedFilter({
     }
   };
 
-  const getOperatorOptions = (type: string) => {
-    switch (type) {
-      case 'text':
-        return [
-          { label: 'Contains', value: 'contains' },
-          { label: 'Equals', value: 'equals' },
-          { label: 'Starts with', value: 'startsWith' },
-          { label: 'Ends with', value: 'endsWith' }
-        ];
-      case 'number':
-        return [
-          { label: 'Equals', value: 'equals' },
-          { label: 'Greater than', value: 'gt' },
-          { label: 'Less than', value: 'lt' },
-          { label: 'Greater or equal', value: 'gte' },
-          { label: 'Less or equal', value: 'lte' }
-        ];
-      case 'date':
-        return [
-          { label: 'Equals', value: 'equals' },
-          { label: 'After', value: 'gt' },
-          { label: 'Before', value: 'lt' }
-        ];
-      default:
-        return [{ label: 'Equals', value: 'equals' }];
+  const loadFilterSets = async () => {
+    if (!api) return;
+    
+    try {
+      setLoading(true);
+      const sets = await api.getUserFilterSets(userId, gridId);
+      setFilterSets(sets);
+    } catch (error) {
+      console.error('Failed to load filter sets:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load saved filter sets",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleFilterChange = (field: string, value: any) => {
+  const handleFilterChange = useCallback((field: string, value: any) => {
     const filter = allFilters.find(f => f.field === field);
     const operator = filterValues[field]?.operator || getDefaultOperator(filter?.type || 'text');
     
-    setFilterValues(prev => ({
-      ...prev,
-      [field]: { value, operator }
-    }));
-  };
-
-  const handleOperatorChange = (field: string, operator: string) => {
-    setFilterValues(prev => ({
-      ...prev,
-      [field]: { ...prev[field], operator }
-    }));
-  };
-
-  const handleRemoveFilter = (field: string) => {
     setFilterValues(prev => {
-      const newValues = { ...prev };
-      delete newValues[field];
-      return newValues;
+      const newFilters = { ...prev };
+      
+      if (value === undefined || value === '' || value === null) {
+        delete newFilters[field];
+      } else {
+        newFilters[field] = { value, operator };
+      }
+      
+      return newFilters;
     });
-  };
+  }, [allFilters, filterValues]);
 
-  const handleApply = () => {
+  const handleApply = useCallback(() => {
     const conditions: FilterCondition[] = Object.entries(filterValues)
       .filter(([_, filterValue]) => filterValue.value !== '' && filterValue.value !== undefined && filterValue.value !== null)
       .map(([field, filterValue]) => {
@@ -145,16 +175,135 @@ export function AdvancedFilter({
       });
 
     onApply(conditions);
-  };
+  }, [filterValues, allFilters, onApply]);
 
-  const handleClear = () => {
+  const handleClear = useCallback(() => {
     setFilterValues({});
     onClear();
+  }, [onClear]);
+
+  const handleSaveFilterSet = async (name: string, isDefault: boolean) => {
+    if (!api) {
+      toast({
+        title: "Error",
+        description: "Filter set API not available",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      setLoading(true);
+      
+      // If setting as default, remove default from other sets
+      if (isDefault) {
+        const promises = filterSets
+          .filter(set => set.isDefault)
+          .map(set => api.updateFilterSet(set.id, { isDefault: false }));
+        await Promise.all(promises);
+      }
+
+      const newSet = await api.saveUserFilterSet(userId, name, filterValues, isDefault, gridId);
+      setFilterSets(prev => [...prev.map(set => ({ ...set, isDefault: false })), newSet]);
+      
+      toast({
+        title: "Success",
+        description: `Filter set "${name}" saved successfully`,
+      });
+    } catch (error) {
+      console.error('Failed to save filter set:', error);
+      toast({
+        title: "Error",
+        description: "Failed to save filter set",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+
+  const handleSetDefault = async (filterSetId: string) => {
+    if (!api) return;
+
+    try {
+      setLoading(true);
+      
+      // Remove default from all sets
+      const promises = filterSets.map(set => 
+        api.updateFilterSet(set.id, { isDefault: set.id === filterSetId })
+      );
+      await Promise.all(promises);
+      
+      setFilterSets(prev => prev.map(set => ({
+        ...set,
+        isDefault: set.id === filterSetId
+      })));
+      
+      const filterSet = filterSets.find(set => set.id === filterSetId);
+      toast({
+        title: "Default Set Updated",
+        description: `"${filterSet?.name}" is now the default filter set`,
+      });
+    } catch (error) {
+      console.error('Failed to update default filter set:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update default filter set",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRename = async (filterSetId: string, newName: string) => {
+    if (!api) return;
+
+    try {
+      const updatedSet = await api.updateFilterSet(filterSetId, { name: newName });
+      setFilterSets(prev => prev.map(set => 
+        set.id === filterSetId ? updatedSet : set
+      ));
+      
+      toast({
+        title: "Filter Set Renamed",
+        description: `Filter set renamed to "${newName}"`,
+      });
+    } catch (error) {
+      console.error('Failed to rename filter set:', error);
+      toast({
+        title: "Error",
+        description: "Failed to rename filter set",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleDelete = async (filterSetId: string) => {
+    if (!api) return;
+
+    try {
+      await api.deleteFilterSet(filterSetId);
+      const deletedSet = filterSets.find(set => set.id === filterSetId);
+      setFilterSets(prev => prev.filter(set => set.id !== filterSetId));
+      
+      toast({
+        title: "Filter Set Deleted",
+        description: `"${deletedSet?.name}" has been deleted`,
+      });
+    } catch (error) {
+      console.error('Failed to delete filter set:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete filter set",
+        variant: "destructive"
+      });
+    }
   };
 
   const renderFilterInput = (filter: AdvancedFilterField) => {
     const currentValue = filterValues[filter.field]?.value || '';
-    const currentOperator = filterValues[filter.field]?.operator || getDefaultOperator(filter.type);
 
     switch (filter.type) {
       case 'dropdown':
@@ -164,7 +313,7 @@ export function AdvancedFilter({
             onValueChange={(value) => handleFilterChange(filter.field, value)}
           >
             <SelectTrigger className="w-full">
-              <SelectValue placeholder="Select value..." />
+              <SelectValue placeholder={`Filter ${filter.label.toLowerCase()}...`} />
             </SelectTrigger>
             <SelectContent className="bg-white dark:bg-gray-800 border z-50">
               {filter.options?.map(option => (
@@ -209,7 +358,7 @@ export function AdvancedFilter({
             type="number"
             value={currentValue}
             onChange={(e) => handleFilterChange(filter.field, e.target.value)}
-            placeholder="Enter number..."
+            placeholder={`Filter ${filter.label.toLowerCase()}...`}
             className="w-full"
           />
         );
@@ -220,7 +369,7 @@ export function AdvancedFilter({
             type="text"
             value={currentValue}
             onChange={(e) => handleFilterChange(filter.field, e.target.value)}
-            placeholder="Enter text..."
+            placeholder={`Filter ${filter.label.toLowerCase()}...`}
             className="w-full"
           />
         );
@@ -232,86 +381,89 @@ export function AdvancedFilter({
   ).length;
 
   return (
-    <Card className={cn("w-full", className)}>
-      <CardHeader className="pb-3">
-        <CardTitle className="text-sm font-medium flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Search className="h-4 w-4" />
-            Advanced Filters
+    <div className={cn("space-y-2", className)}>
+      {/* Filter Controls */}
+      <div className="flex items-center justify-between bg-gray-50 p-2 rounded border">
+        <div className="flex items-center space-x-2">
+          <Button
+            variant={showAdvancedFilter ? "default" : "outline"}
+            size="sm"
+            onClick={() => setShowAdvancedFilter(!showAdvancedFilter)}
+            className={cn(
+              "transition-all",
+              showAdvancedFilter && "bg-blue-600 hover:bg-blue-700 text-white"
+            )}
+          >
+            <Filter className="h-4 w-4 mr-1" />
+            Filters
             {activeFiltersCount > 0 && (
-              <span className="bg-primary text-primary-foreground text-xs px-2 py-0.5 rounded-full">
-                {activeFiltersCount} active
+              <span className="ml-1 text-xs bg-white text-blue-600 rounded-full px-1.5 py-0.5">
+                {activeFiltersCount}
               </span>
             )}
-          </div>
-          <div className="flex gap-2">
-            <Button 
-              variant="outline" 
-              size="sm" 
+          </Button>
+
+          {activeFiltersCount > 0 && (
+            <Button
+              variant="outline"
+              size="sm"
               onClick={handleClear}
-              disabled={activeFiltersCount === 0}
+              className="text-red-600 hover:bg-red-50"
             >
-              <Trash2 className="h-4 w-4 mr-1" />
-              Clear
+              <X className="h-4 w-4 mr-1" />
+              Clear All
             </Button>
-            <Button 
-              size="sm" 
-              onClick={handleApply}
-              disabled={activeFiltersCount === 0}
-            >
-              <Search className="h-4 w-4 mr-1" />
-              Search
-            </Button>
-          </div>
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {allFilters.map((filter) => (
-            <div key={filter.field} className="space-y-2">
-              <div className="flex items-center justify-between">
-                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                  {filter.label}
-                </label>
-                {filterValues[filter.field]?.value && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleRemoveFilter(filter.field)}
-                    className="h-auto p-1 text-muted-foreground hover:text-foreground"
-                  >
-                    <X className="h-3 w-3" />
-                  </Button>
-                )}
-              </div>
-              
-              <div className="flex gap-2">
-                {filter.type !== 'dropdown' && (
-                  <Select 
-                    value={filterValues[filter.field]?.operator || getDefaultOperator(filter.type)}
-                    onValueChange={(operator) => handleOperatorChange(filter.field, operator)}
-                  >
-                    <SelectTrigger className="w-32">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent className="bg-white dark:bg-gray-800 border z-50">
-                      {getOperatorOptions(filter.type).map(option => (
-                        <SelectItem key={option.value} value={option.value}>
-                          {option.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                )}
-                
-                <div className="flex-1">
-                  {renderFilterInput(filter)}
-                </div>
-              </div>
-            </div>
-          ))}
+          )}
         </div>
-      </CardContent>
-    </Card>
+
+        <div className="flex items-center space-x-2">
+          {activeFiltersCount > 0 && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowSaveModal(true)}
+              disabled={loading}
+              className="transition-all hover:bg-yellow-50 hover:border-yellow-300"
+            >
+              <Star className="h-4 w-4 mr-1" />
+              Save Set
+            </Button>
+          )}
+
+          <FilterSetDropdown
+            filterSets={filterSets}
+            onApply={applyFilterSet}
+            onSetDefault={handleSetDefault}
+            onRename={handleRename}
+            onDelete={handleDelete}
+          />
+        </div>
+      </div>
+
+      {/* Filter Panel - Only show when showAdvancedFilter is true */}
+      {showAdvancedFilter && (
+        <div className="bg-white border rounded shadow-sm">
+          <div className="grid gap-2 p-3" style={{ gridTemplateColumns: `repeat(${Math.min(allFilters.length, 4)}, 1fr)` }}>
+            {allFilters.map((filter) => (
+              <div key={filter.field} className="space-y-1">
+                <div className="text-xs font-medium text-gray-600 truncate">
+                  {filter.label}
+                </div>
+                {renderFilterInput(filter)}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Save Filter Set Modal */}
+      <FilterSetModal
+        isOpen={showSaveModal}
+        onClose={() => setShowSaveModal(false)}
+        onSave={handleSaveFilterSet}
+        activeFilters={filterValues}
+        existingNames={filterSets.map(set => set.name)}
+      />
+    </div>
   );
 }
