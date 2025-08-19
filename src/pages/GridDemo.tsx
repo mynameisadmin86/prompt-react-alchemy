@@ -53,8 +53,7 @@ const GridDemo = () => {
       editable: false,
       mandatory: true,
       subRow: false,
-      filterMode: 'local',
-      filterable: true
+      filterMode: 'local'
     },
     {
       key: 'status',
@@ -62,8 +61,7 @@ const GridDemo = () => {
       type: 'Badge',
       sortable: true,
       editable: false,
-      subRow: false,
-      filterable: true
+      subRow: false
     },
     {
       key: 'tripBillingStatus',
@@ -71,8 +69,7 @@ const GridDemo = () => {
       type: 'Badge',
       sortable: true,
       editable: false,
-      subRow: false,
-      filterable: false
+      subRow: false
     },
     {
       key: 'plannedStartEndDateTime',
@@ -80,8 +77,7 @@ const GridDemo = () => {
       type: 'EditableText',
       sortable: true,
       editable: true,
-      subRow: true,
-      filterable: true
+      subRow: true
     },
     {
       key: 'actualStartEndDateTime',
@@ -89,8 +85,7 @@ const GridDemo = () => {
       type: 'DateTimeRange',
       sortable: true,
       editable: false,
-      subRow: true,
-      filterable: true
+      subRow: true
     },
     {
       key: 'departurePoint',
@@ -99,8 +94,7 @@ const GridDemo = () => {
       sortable: true,
       editable: false,
       infoTextField: 'departurePointDetails',
-      subRow: true,
-      filterable: true
+      subRow: true
     },
     {
       key: 'arrivalPoint',
@@ -109,8 +103,7 @@ const GridDemo = () => {
       sortable: true,
       editable: false,
       infoTextField: 'arrivalPointDetails',
-      subRow: true,
-      filterable: true
+      subRow: true
     },
     {
       key: 'customer',
@@ -118,7 +111,6 @@ const GridDemo = () => {
       type: 'ExpandableCount',
       sortable: true,
       editable: false,
-      filterable: false,
       renderExpandedContent: (row: SampleData) => (
         <div className="space-y-3">
           <div className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-4">
@@ -145,7 +137,6 @@ const GridDemo = () => {
       type: 'ExpandableCount',
       sortable: true,
       editable: false,
-      filterable: false,
       renderExpandedContent: (row: SampleData) => (
         <div className="space-y-3">
           <div className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-4">
