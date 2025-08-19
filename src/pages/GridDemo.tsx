@@ -485,13 +485,14 @@ const GridDemo = () => {
     }));
   }, []);
 
-  // Initialize columns and data in the grid state
-  useEffect(() => {
-    console.log('Initializing columns in GridDemo');
-    if (gridState.columns.length === 0) {
-      gridState.setColumns(initialColumns);
-    }
-  }, [initialColumns]);
+  // Remove GridDemo column initialization to avoid duplication
+  // useEffect(() => {
+  //   console.log('Initializing columns in GridDemo');
+  //   console.log('Initial columns:', initialColumns.map(col => ({ key: col.key, label: col.label, subRow: col.subRow })));
+  //   if (gridState.columns.length === 0) {
+  //     gridState.setColumns(initialColumns);
+  //   }
+  // }, [initialColumns]);
 
   // Log when columns change
   useEffect(() => {
@@ -607,7 +608,7 @@ const GridDemo = () => {
           <SmartGridWithGrouping
             key={`grid-${gridState.forceUpdate}`}
             columns={initialColumns}
-            data={gridState.gridData.length > 0 ? gridState.gridData : processedData}
+            data={processedData}
             groupableColumns={['id','status', 'tripBillingStatus', 'departurePoint', 'arrivalPoint']}
             showGroupingDropdown={true}
             editableColumns={['plannedStartEndDateTime']}
@@ -624,7 +625,7 @@ const GridDemo = () => {
             configurableButtons={configurableButtons}
             showDefaultConfigurableButton={false}
             gridTitle="Trip Plans"
-            recordCount={gridState.gridData.length > 0 ? gridState.gridData.length : processedData.length}
+            recordCount={processedData.length}
             showCreateButton={true}
             searchPlaceholder="Search all columns..."
             showAdvancedFilterDefault={true}

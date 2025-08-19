@@ -127,16 +127,20 @@ export function SmartGrid({
   const currentSelectedRows = selectedRows || internalSelectedRows;
   const handleSelectionChange = onSelectionChange || setInternalSelectedRows;
 
-  // Use the current state columns (which include sub-row updates) instead of props
-  const currentColumns = stateColumns.length > 0 ? stateColumns : columns;
+  // Use the direct props columns instead of state columns to avoid duplication
+  const currentColumns = columns;
 
   // Convert GridColumnConfig to Column format for useGridPreferences
-  const preferencesColumns = useMemo(() => currentColumns.map(col => ({
-    id: col.key,
-    header: col.label,
-    accessor: col.key,
-    mandatory: col.mandatory
-  })), [currentColumns]);
+  const preferencesColumns = useMemo(() => {
+    const converted = currentColumns.map(col => ({
+      id: col.key,
+      header: col.label,
+      accessor: col.key,
+      mandatory: col.mandatory
+    }));
+    console.log('preferencesColumns conversion:', converted.map(col => col.id));
+    return converted;
+  }, [currentColumns]);
 
   // Initialize preferences hook with proper async handling
   const {
@@ -167,6 +171,8 @@ export function SmartGrid({
 
   // Apply preferences to get ordered and visible columns - FILTER OUT SUB-ROW COLUMNS from main table
   const orderedColumns = useMemo(() => {
+    console.log('Creating orderedColumns from currentColumns:', currentColumns.map(col => ({ key: col.key, label: col.label, subRow: col.subRow })));
+    
     const columnMap = new Map(currentColumns.map(col => [col.key, col]));
     
     const visibleColumns = preferences.columnOrder
@@ -174,6 +180,8 @@ export function SmartGrid({
       .filter((col): col is GridColumnConfig => col !== undefined)
       .filter(col => !preferences.hiddenColumns.includes(col.key))
       .filter(col => !col.subRow); // Filter out sub-row columns from main table
+    
+    console.log('Ordered visible columns:', visibleColumns.map(col => ({ key: col.key, label: col.label, subRow: col.subRow })));
     
     const calculatedWidths = calculateColumnWidthsCallback(visibleColumns);
     
@@ -671,12 +679,14 @@ export function SmartGrid({
     }
   }, [data, onDataFetch, setGridData]);
 
-  // Initialize columns in state when props change
-  useEffect(() => {
-    if (columns.length > 0) {
-      setColumns(columns);
-    }
-  }, [columns, setColumns]);
+  // Remove the columns initialization in SmartGrid to avoid duplication
+  // useEffect(() => {
+  //   console.log('SmartGrid: Initializing columns from props');
+  //   console.log('Props columns:', columns.map(col => ({ key: col.key, label: col.label, subRow: col.subRow })));
+  //   if (columns.length > 0) {
+  //     setColumns(columns);
+  //   }
+  // }, [columns, setColumns]);
 
   // Initialize plugins
   useEffect(() => {
