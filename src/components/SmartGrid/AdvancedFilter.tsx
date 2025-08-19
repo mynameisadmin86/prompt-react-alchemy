@@ -78,17 +78,11 @@ export function AdvancedFilter({
     }
   }, [filterSets]);
 
-  // Auto-apply filters when activeFilters changes
+  // Only notify parent of filter changes, don't auto-apply
   useEffect(() => {
-    // Always notify parent component about filter changes
+    // Only update the filters state, don't trigger search automatically
     onFiltersChange(activeFilters);
-    
-    // For client-side search, apply filters immediately
-    // For server-side search, only apply filters when Search button is clicked
-    if (clientSideSearch && api) {
-      api.applyGridFilters(activeFilters);
-    }
-  }, [activeFilters, onFiltersChange, api, clientSideSearch]);
+  }, [activeFilters, onFiltersChange]);
 
   const loadFilterSets = async () => {
     if (!api) return;
@@ -283,7 +277,6 @@ export function AdvancedFilter({
               column={column as GridColumnConfig}
               value={activeFilters[columnKey]}
               onChange={(value) => handleFilterChange(columnKey, value)}
-              onApply={clientSideSearch ? onSearch : undefined}
             />
             {activeFilters[columnKey] && (
               <Button
@@ -321,9 +314,8 @@ export function AdvancedFilter({
             variant="default"
             size="sm"
             onClick={() => {
-              // For server-side search, trigger the search callback
-              // For client-side search, apply filters via API
-              if (clientSideSearch && api) {
+              // Apply filters and trigger search for both client-side and server-side
+              if (api) {
                 api.applyGridFilters(activeFilters);
               }
               onSearch();
@@ -332,7 +324,7 @@ export function AdvancedFilter({
             className="bg-blue-600 hover:bg-blue-700 text-white"
           >
             <Search className="h-4 w-4 mr-1" />
-            {clientSideSearch ? 'Apply Filters' : 'Search'}
+            Search
           </Button>
 
           {activeFilterCount > 0 && (
