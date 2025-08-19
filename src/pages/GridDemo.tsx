@@ -618,6 +618,14 @@ const GridDemo = () => {
             showCreateButton={true}
             searchPlaceholder="Search all columns..."
             clientSideSearch={false}
+            extraFilters={[
+              {
+                key: 'priority',
+                label: 'Priority Level',
+                type: 'select',
+                options: ['High Priority', 'Medium Priority', 'Low Priority']
+              }
+            ]}
           />
           
           {/* Footer with action buttons matching the screenshot style */}
