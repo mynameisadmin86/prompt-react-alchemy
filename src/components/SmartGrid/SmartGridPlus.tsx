@@ -66,13 +66,7 @@ export function SmartGridPlus({
   defaultRowValues = {},
   validationRules = {},
   addRowButtonLabel = "Add Row",
-  addRowButtonPosition = "top-left",
-  // Advanced Filter props
-  showAdvancedFilterDefault,
-  extraFilters,
-  onAdvancedSearch,
-  onAdvancedSaveSet,
-  advancedSavedSets
+  addRowButtonPosition = "top-left"
 }: SmartGridPlusProps) {
   const {
     gridData,

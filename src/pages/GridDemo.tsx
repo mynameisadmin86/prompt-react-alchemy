@@ -50,7 +50,6 @@ const GridDemo = () => {
       label: 'Trip Plan No',
       type: 'Link',
       sortable: true,
-      filterable: true,
       editable: false,
       mandatory: true,
       subRow: false,
@@ -61,7 +60,6 @@ const GridDemo = () => {
       label: 'Status',
       type: 'Badge',
       sortable: true,
-      filterable: true,
       editable: false,
       subRow: false
     },
@@ -70,7 +68,6 @@ const GridDemo = () => {
       label: 'Trip Billing Status',
       type: 'Badge',
       sortable: true,
-      filterable: true,
       editable: false,
       subRow: false
     },
@@ -79,7 +76,6 @@ const GridDemo = () => {
       label: 'Planned Start and End Date Time',
       type: 'EditableText',
       sortable: true,
-      filterable: true,
       editable: true,
       subRow: true
     },
@@ -88,7 +84,6 @@ const GridDemo = () => {
       label: 'Actual Start and End Date Time',
       type: 'DateTimeRange',
       sortable: true,
-      filterable: true,
       editable: false,
       subRow: true
     },
@@ -97,7 +92,6 @@ const GridDemo = () => {
       label: 'Departure Point',
       type: 'TextWithTooltip',
       sortable: true,
-      filterable: true,
       editable: false,
       infoTextField: 'departurePointDetails',
       subRow: true
@@ -107,7 +101,6 @@ const GridDemo = () => {
       label: 'Arrival Point',
       type: 'TextWithTooltip',
       sortable: true,
-      filterable: true,
       editable: false,
       infoTextField: 'arrivalPointDetails',
       subRow: true
@@ -117,7 +110,6 @@ const GridDemo = () => {
       label: 'Customer',
       type: 'ExpandableCount',
       sortable: true,
-      filterable: true,
       editable: false,
       renderExpandedContent: (row: SampleData) => (
         <div className="space-y-3">
@@ -144,7 +136,6 @@ const GridDemo = () => {
       label: 'Resources',
       type: 'ExpandableCount',
       sortable: true,
-      filterable: true,
       editable: false,
       renderExpandedContent: (row: SampleData) => (
         <div className="space-y-3">
@@ -170,6 +161,19 @@ const GridDemo = () => {
     }
   ];
 
+  // Initialize columns and data in the grid state
+  useEffect(() => {
+    console.log('Initializing columns in GridDemo');
+    gridState.setColumns(initialColumns);
+    gridState.setGridData(processedData);
+  }, []);
+
+  // Log when columns change
+  useEffect(() => {
+    console.log('Columns changed in GridDemo:', gridState.columns);
+    console.log('Sub-row columns:', gridState.columns.filter(col => col.subRow).map(col => col.key));
+  }, [gridState.columns, gridState.forceUpdate]);
+  
   const { toast } = useToast();
 
   const sampleData: SampleData[] = [
@@ -485,21 +489,6 @@ const GridDemo = () => {
     }));
   }, []);
 
-  // Remove GridDemo column initialization to avoid duplication
-  // useEffect(() => {
-  //   console.log('Initializing columns in GridDemo');
-  //   console.log('Initial columns:', initialColumns.map(col => ({ key: col.key, label: col.label, subRow: col.subRow })));
-  //   if (gridState.columns.length === 0) {
-  //     gridState.setColumns(initialColumns);
-  //   }
-  // }, [initialColumns]);
-
-  // Log when columns change
-  useEffect(() => {
-    console.log('Columns changed in GridDemo:', gridState.columns);
-    console.log('Sub-row columns:', gridState.columns.filter(col => col.subRow).map(col => col.key));
-  }, [gridState.columns, gridState.forceUpdate]);
-
   // Configurable buttons for the grid toolbar
   const configurableButtons: ConfigurableButtonConfig[] = [
     {
@@ -607,8 +596,8 @@ const GridDemo = () => {
           `}</style>
           <SmartGridWithGrouping
             key={`grid-${gridState.forceUpdate}`}
-            columns={initialColumns}
-            data={processedData}
+            columns={gridState.columns}
+            data={gridState.gridData.length > 0 ? gridState.gridData : processedData}
             groupableColumns={['id','status', 'tripBillingStatus', 'departurePoint', 'arrivalPoint']}
             showGroupingDropdown={true}
             editableColumns={['plannedStartEndDateTime']}
@@ -625,38 +614,9 @@ const GridDemo = () => {
             configurableButtons={configurableButtons}
             showDefaultConfigurableButton={false}
             gridTitle="Trip Plans"
-            recordCount={processedData.length}
+            recordCount={gridState.gridData.length > 0 ? gridState.gridData.length : processedData.length}
             showCreateButton={true}
             searchPlaceholder="Search all columns..."
-            showAdvancedFilterDefault={true}
-            extraFilters={[
-              {
-                key: 'priority',
-                label: 'Priority',
-                type: 'select',
-                options: ['High', 'Medium', 'Low']
-              },
-              {
-                key: 'region',
-                label: 'Region',
-                type: 'text',
-                placeholder: 'Enter region...'
-              }
-            ]}
-            onAdvancedSearch={(filters) => {
-              console.log('Advanced search filters:', filters);
-              toast({
-                title: "Advanced Search",
-                description: `Applied ${Object.keys(filters).length} advanced filters`,
-              });
-            }}
-            onAdvancedSaveSet={(filters, name) => {
-              console.log('Save advanced filter set:', name, filters);
-              toast({
-                title: "Filter Set Saved",
-                description: `Saved filter set "${name}" with ${Object.keys(filters).length} filters`,
-              });
-            }}
           />
           
           {/* Footer with action buttons matching the screenshot style */}

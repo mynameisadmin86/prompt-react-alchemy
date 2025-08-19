@@ -25,7 +25,8 @@ import { GridToolbar } from './GridToolbar';
 import { PluginRenderer, PluginRowActions } from './PluginRenderer';
 import { ColumnFilter } from './ColumnFilter';
 import { DraggableSubRow } from './DraggableSubRow';
-import { AdvancedFilter } from './AdvancedFilter';
+import { FilterSystem } from './FilterSystem';
+import { mockFilterAPI } from '@/utils/mockFilterAPI';
 import { cn } from '@/lib/utils';
 
 export function SmartGrid({
@@ -58,13 +59,7 @@ export function SmartGrid({
   groupByField,
   onGroupByChange,
   groupableColumns,
-  showGroupingDropdown,
-  // Advanced Filter props
-  showAdvancedFilterDefault,
-  extraFilters,
-  onAdvancedSearch,
-  onAdvancedSaveSet,
-  advancedSavedSets
+  showGroupingDropdown
 }: SmartGridProps) {
   const {
     gridData,
@@ -119,28 +114,24 @@ export function SmartGrid({
   } = useSmartGridState();
 
   const [pageSize] = useState(10);
-  const [showAdvancedFilter, setShowAdvancedFilter] = useState(showAdvancedFilterDefault || false);
-  const [advancedFilters, setAdvancedFilters] = useState<Record<string, any>>({});
+  const [showFilterRow, setShowFilterRow] = useState(false);
+  const [filterSystemFilters, setFilterSystemFilters] = useState<Record<string, any>>({});
   const { toast } = useToast();
 
   // Use external selectedRows if provided, otherwise use internal state
   const currentSelectedRows = selectedRows || internalSelectedRows;
   const handleSelectionChange = onSelectionChange || setInternalSelectedRows;
 
-  // Use the direct props columns instead of state columns to avoid duplication
-  const currentColumns = columns;
+  // Use the current state columns (which include sub-row updates) instead of props
+  const currentColumns = stateColumns.length > 0 ? stateColumns : columns;
 
   // Convert GridColumnConfig to Column format for useGridPreferences
-  const preferencesColumns = useMemo(() => {
-    const converted = currentColumns.map(col => ({
-      id: col.key,
-      header: col.label,
-      accessor: col.key,
-      mandatory: col.mandatory
-    }));
-    console.log('preferencesColumns conversion:', converted.map(col => col.id));
-    return converted;
-  }, [currentColumns]);
+  const preferencesColumns = useMemo(() => currentColumns.map(col => ({
+    id: col.key,
+    header: col.label,
+    accessor: col.key,
+    mandatory: col.mandatory
+  })), [currentColumns]);
 
   // Initialize preferences hook with proper async handling
   const {
@@ -171,8 +162,6 @@ export function SmartGrid({
 
   // Apply preferences to get ordered and visible columns - FILTER OUT SUB-ROW COLUMNS from main table
   const orderedColumns = useMemo(() => {
-    console.log('Creating orderedColumns from currentColumns:', currentColumns.map(col => ({ key: col.key, label: col.label, subRow: col.subRow })));
-    
     const columnMap = new Map(currentColumns.map(col => [col.key, col]));
     
     const visibleColumns = preferences.columnOrder
@@ -180,8 +169,6 @@ export function SmartGrid({
       .filter((col): col is GridColumnConfig => col !== undefined)
       .filter(col => !preferences.hiddenColumns.includes(col.key))
       .filter(col => !col.subRow); // Filter out sub-row columns from main table
-    
-    console.log('Ordered visible columns:', visibleColumns.map(col => ({ key: col.key, label: col.label, subRow: col.subRow })));
     
     const calculatedWidths = calculateColumnWidthsCallback(visibleColumns);
     
@@ -309,15 +296,45 @@ export function SmartGrid({
     return processGridData(data, globalFilter, filters, sort, currentColumns, onDataFetch);
   }, [data, globalFilter, filters, sort, currentColumns, onDataFetch]);
 
-  // Handle advanced filter changes
-  const handleAdvancedFiltersChange = useCallback((newFilters: Record<string, any>) => {
-    setAdvancedFilters(newFilters);
-    onAdvancedSearch?.(newFilters);
-  }, [onAdvancedSearch]);
-
-  const handleAdvancedSaveSet = useCallback((filters: Record<string, any>, name: string) => {
-    onAdvancedSaveSet?.(filters, name);
-  }, [onAdvancedSaveSet]);
+  // Handle filter system changes
+  const handleFiltersChange = useCallback((newFilters: Record<string, any>) => {
+    setFilterSystemFilters(newFilters);
+    // Convert filter system filters to legacy format if needed
+    const legacyFilters = Object.entries(newFilters).map(([column, filterValue]) => ({
+      column,
+      value: filterValue.value,
+      operator: filterValue.operator || 'contains'
+    }));
+    
+    // Check if any filters require server-side processing
+    const serverFilters = legacyFilters.filter(filter => {
+      const column = currentColumns.find(col => col.key === filter.column);
+      return column?.filterMode === 'server';
+    });
+    
+    const localFilters = legacyFilters.filter(filter => {
+      const column = currentColumns.find(col => col.key === filter.column);
+      return column?.filterMode !== 'server';
+    });
+    
+    // Apply server-side filters if any and onServerFilter is provided
+    if (serverFilters.length > 0 && onServerFilter) {
+      onServerFilter(serverFilters).catch(error => {
+        console.error('Server-side filtering failed:', error);
+        toast({
+          title: "Error",
+          description: "Failed to apply server-side filters",
+          variant: "destructive"
+        });
+      });
+    }
+    
+    // Set local filters only
+    setFilters(localFilters);
+    
+    // Reset to page 1 when filters change
+    setCurrentPage(1);
+  }, [setFilters, currentColumns, onServerFilter, toast, setCurrentPage]);
 
   // Define handleExport and handleResetPreferences after processedData and orderedColumns
  const handleExport = useCallback((format: 'csv' | 'xlsx') => {
@@ -679,14 +696,12 @@ export function SmartGrid({
     }
   }, [data, onDataFetch, setGridData]);
 
-  // Remove the columns initialization in SmartGrid to avoid duplication
-  // useEffect(() => {
-  //   console.log('SmartGrid: Initializing columns from props');
-  //   console.log('Props columns:', columns.map(col => ({ key: col.key, label: col.label, subRow: col.subRow })));
-  //   if (columns.length > 0) {
-  //     setColumns(columns);
-  //   }
-  // }, [columns, setColumns]);
+  // Initialize columns in state when props change
+  useEffect(() => {
+    if (columns.length > 0) {
+      setColumns(columns);
+    }
+  }, [columns, setColumns]);
 
   // Initialize plugins
   useEffect(() => {
@@ -754,20 +769,18 @@ export function SmartGrid({
         onGroupByChange={onGroupByChange}
         groupableColumns={groupableColumns}
         showGroupingDropdown={showGroupingDropdown}
-        showAdvancedFilter={showAdvancedFilter}
-        onToggleAdvancedFilter={() => setShowAdvancedFilter(!showAdvancedFilter)}
       />
 
-      {/* Advanced Filter System */}
-      <AdvancedFilter
-        columns={currentColumns}
+       {/* Advanced Filter System */}
+      <FilterSystem
+        columns={orderedColumns}
         subRowColumns={subRowColumns}
-        showAdvancedFilter={showAdvancedFilter}
-        onToggleAdvancedFilter={() => setShowAdvancedFilter(!showAdvancedFilter)}
-        extraFilters={extraFilters}
-        onSearch={handleAdvancedFiltersChange}
-        onSaveSet={handleAdvancedSaveSet}
-        savedSets={advancedSavedSets || []}
+        showFilterRow={showFilterRow}
+        onToggleFilterRow={() => setShowFilterRow(!showFilterRow)}
+        onFiltersChange={handleFiltersChange}
+        gridId="smart-grid"
+        userId="demo-user"
+        api={mockFilterAPI}
       />
       
       {/* Table Container with horizontal scroll prevention */}
@@ -923,8 +936,8 @@ export function SmartGrid({
                   )}
                 </TableRow>
                 
-                {/* Column Filter Row - Legacy support */}
-                {showColumnFilters && (
+                {/* Column Filter Row - Legacy support, hidden when using FilterSystem */}
+                {showColumnFilters && !showFilterRow && (
                   <TableRow className="hover:bg-transparent border-b border-gray-200">
                     {/* Checkbox column space */}
                     {showCheckboxes && (

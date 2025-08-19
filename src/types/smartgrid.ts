@@ -74,14 +74,6 @@ export interface FilterConfig {
   operator?: 'equals' | 'contains' | 'startsWith' | 'endsWith' | 'gt' | 'lt' | 'gte' | 'lte';
 }
 
-export interface ExtraFilter {
-  key: string;
-  label: string;
-  type: 'text' | 'select' | 'date' | 'dateRange' | 'time' | 'number' | 'boolean';
-  options?: string[];
-  placeholder?: string;
-}
-
 export interface GridPreferences {
   columnOrder: string[];
   hiddenColumns: string[];
@@ -152,12 +144,6 @@ export interface SmartGridProps {
   onGroupByChange?: (field: string | null) => void;
   groupableColumns?: string[];
   showGroupingDropdown?: boolean;
-  // Advanced Filter props
-  showAdvancedFilterDefault?: boolean;
-  extraFilters?: ExtraFilter[];
-  onAdvancedSearch?: (filters: Record<string, any>) => void;
-  onAdvancedSaveSet?: (filters: Record<string, any>, name: string) => void;
-  advancedSavedSets?: any[];
 }
 
 // Legacy interface for backward compatibility
