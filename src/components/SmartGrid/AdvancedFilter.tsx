@@ -80,6 +80,7 @@ export function AdvancedFilter({
 
   // Auto-apply filters when activeFilters changes
   useEffect(() => {
+    // Always notify parent component about filter changes
     onFiltersChange(activeFilters);
     
     // For client-side search, apply filters immediately
@@ -282,7 +283,7 @@ export function AdvancedFilter({
               column={column as GridColumnConfig}
               value={activeFilters[columnKey]}
               onChange={(value) => handleFilterChange(columnKey, value)}
-              onApply={onSearch}
+              onApply={clientSideSearch ? onSearch : undefined}
             />
             {activeFilters[columnKey] && (
               <Button
