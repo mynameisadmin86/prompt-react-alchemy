@@ -373,29 +373,11 @@ export function AdvancedFilter({
       <div className="bg-white border rounded shadow-sm">
         {/* Main Column Filters */}
         {filterableColumns.length > 0 && (
-          <Collapsible open={isMainFiltersOpen} onOpenChange={setIsMainFiltersOpen}>
-            <CollapsibleTrigger asChild>
-              <div className="bg-gray-50/50 px-3 py-2 cursor-pointer hover:bg-gray-50 transition-colors border-b">
-                <div className="flex items-center justify-between">
-                  <div className="text-sm font-medium text-gray-700">
-                    Column Filters
-                  </div>
-                  {isMainFiltersOpen ? (
-                    <ChevronUp className="h-4 w-4 text-gray-600" />
-                  ) : (
-                    <ChevronDown className="h-4 w-4 text-gray-600" />
-                  )}
-                </div>
-              </div>
-            </CollapsibleTrigger>
-            <CollapsibleContent>
-              <div className="p-3">
-                <div className="grid gap-2" style={{ gridTemplateColumns: `repeat(${Math.min(filterableColumns.length, 4)}, 1fr)` }}>
-                  {renderFilterInputs(filterableColumns)}
-                </div>
-              </div>
-            </CollapsibleContent>
-          </Collapsible>
+          <div className="p-3 border-b">
+            <div className="grid gap-2" style={{ gridTemplateColumns: `repeat(${Math.min(filterableColumns.length, 4)}, 1fr)` }}>
+              {renderFilterInputs(filterableColumns)}
+            </div>
+          </div>
         )}
 
         {/* Extra Filters */}
