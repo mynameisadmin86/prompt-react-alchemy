@@ -11,6 +11,7 @@ export { DraggableSubRow } from './DraggableSubRow';
 export { GridToolbar } from './GridToolbar';
 export { PluginRenderer, PluginRowActions } from './PluginRenderer';
 export { FilterSystem } from './FilterSystem';
+export { AdvancedFilter } from './AdvancedFilter';
 export { ColumnFilterInput } from './ColumnFilterInput';
 export { FilterSetModal } from './FilterSetModal';
 export { FilterSetDropdown } from './FilterSetDropdown';

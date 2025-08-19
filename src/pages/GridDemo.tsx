@@ -617,6 +617,27 @@ const GridDemo = () => {
             recordCount={gridState.gridData.length > 0 ? gridState.gridData.length : processedData.length}
             showCreateButton={true}
             searchPlaceholder="Search all columns..."
+            showAdvancedFilterDefault={true}
+            extraFilters={[
+              { field: 'priority', label: 'Priority', type: 'select', options: ['High', 'Medium', 'Low'] },
+              { field: 'region', label: 'Region', type: 'select', options: ['North', 'South', 'East', 'West'] },
+              { field: 'dateRange', label: 'Date Range', type: 'date' },
+              { field: 'amount', label: 'Amount', type: 'number' }
+            ]}
+            onAdvancedFiltersSearch={(filters) => {
+              console.log('Advanced filters applied:', filters);
+              toast({
+                title: "Advanced Filters Applied",
+                description: `Applied ${Object.keys(filters).length} advanced filters`,
+              });
+            }}
+            onAdvancedFiltersClear={() => {
+              console.log('Advanced filters cleared');
+              toast({
+                title: "Advanced Filters Cleared",
+                description: "All advanced filters have been cleared",
+              });
+            }}
           />
           
           {/* Footer with action buttons matching the screenshot style */}
