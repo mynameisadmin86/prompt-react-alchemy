@@ -170,19 +170,6 @@ const GridDemo = () => {
     }
   ];
 
-  // Initialize columns and data in the grid state
-  useEffect(() => {
-    console.log('Initializing columns in GridDemo');
-    gridState.setColumns(initialColumns);
-    gridState.setGridData(processedData);
-  }, []);
-
-  // Log when columns change
-  useEffect(() => {
-    console.log('Columns changed in GridDemo:', gridState.columns);
-    console.log('Sub-row columns:', gridState.columns.filter(col => col.subRow).map(col => col.key));
-  }, [gridState.columns, gridState.forceUpdate]);
-  
   const { toast } = useToast();
 
   const sampleData: SampleData[] = [
@@ -498,6 +485,20 @@ const GridDemo = () => {
     }));
   }, []);
 
+  // Initialize columns and data in the grid state
+  useEffect(() => {
+    console.log('Initializing columns in GridDemo');
+    if (gridState.columns.length === 0) {
+      gridState.setColumns(initialColumns);
+    }
+  }, [initialColumns]);
+
+  // Log when columns change
+  useEffect(() => {
+    console.log('Columns changed in GridDemo:', gridState.columns);
+    console.log('Sub-row columns:', gridState.columns.filter(col => col.subRow).map(col => col.key));
+  }, [gridState.columns, gridState.forceUpdate]);
+
   // Configurable buttons for the grid toolbar
   const configurableButtons: ConfigurableButtonConfig[] = [
     {
@@ -605,7 +606,7 @@ const GridDemo = () => {
           `}</style>
           <SmartGridWithGrouping
             key={`grid-${gridState.forceUpdate}`}
-            columns={gridState.columns}
+            columns={initialColumns}
             data={gridState.gridData.length > 0 ? gridState.gridData : processedData}
             groupableColumns={['id','status', 'tripBillingStatus', 'departurePoint', 'arrivalPoint']}
             showGroupingDropdown={true}
