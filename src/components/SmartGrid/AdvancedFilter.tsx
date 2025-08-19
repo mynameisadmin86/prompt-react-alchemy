@@ -54,6 +54,7 @@ export function AdvancedFilter({
   clientSideSearch = false
 }: AdvancedFilterProps) {
   const [activeFilters, setActiveFilters] = useState<Record<string, FilterValue>>({});
+  const [pendingFilters, setPendingFilters] = useState<Record<string, FilterValue>>({});
   const [filterSets, setFilterSets] = useState<FilterSet[]>([]);
   const [showSaveModal, setShowSaveModal] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -78,9 +79,8 @@ export function AdvancedFilter({
     }
   }, [filterSets]);
 
-  // Only notify parent of filter changes, don't auto-apply
+  // Only notify parent of filter changes when filters are actually applied
   useEffect(() => {
-    // Only update the filters state, don't trigger search automatically
     onFiltersChange(activeFilters);
   }, [activeFilters, onFiltersChange]);
 
@@ -104,7 +104,7 @@ export function AdvancedFilter({
   };
 
   const handleFilterChange = useCallback((columnKey: string, value: FilterValue | undefined) => {
-    setActiveFilters(prev => {
+    setPendingFilters(prev => {
       const newFilters = { ...prev };
       
       if (value === undefined) {
@@ -138,7 +138,7 @@ export function AdvancedFilter({
         await Promise.all(promises);
       }
 
-      const newSet = await api.saveUserFilterSet(userId, name, activeFilters, isDefault);
+      const newSet = await api.saveUserFilterSet(userId, name, pendingFilters, isDefault);
       setFilterSets(prev => [...prev.map(set => ({ ...set, isDefault: false })), newSet]);
       
       toast({
@@ -158,8 +158,8 @@ export function AdvancedFilter({
   };
 
   const applyFilterSet = (filterSet: FilterSet) => {
+    setPendingFilters(filterSet.filters);
     setActiveFilters(filterSet.filters);
-    onFiltersChange(filterSet.filters);
     
     if (api) {
       api.applyGridFilters(filterSet.filters);
@@ -251,6 +251,7 @@ export function AdvancedFilter({
   };
 
   const clearAllFilters = () => {
+    setPendingFilters({});
     setActiveFilters({});
     onFiltersChange({});
     
@@ -259,7 +260,7 @@ export function AdvancedFilter({
     }
   };
 
-  const activeFilterCount = Object.keys(activeFilters).length;
+  const activeFilterCount = Object.keys(pendingFilters).length;
   const filterableColumns = columns.filter(col => col.filterable !== false);
   const filterableSubRowColumns = subRowColumns.filter(col => col.filterable !== false);
 
@@ -275,10 +276,10 @@ export function AdvancedFilter({
           <div className="relative">
             <ColumnFilterInput
               column={column as GridColumnConfig}
-              value={activeFilters[columnKey]}
+              value={pendingFilters[columnKey]}
               onChange={(value) => handleFilterChange(columnKey, value)}
             />
-            {activeFilters[columnKey] && (
+            {pendingFilters[columnKey] && (
               <Button
                 variant="ghost"
                 size="sm"
@@ -314,9 +315,12 @@ export function AdvancedFilter({
             variant="default"
             size="sm"
             onClick={() => {
+              // Apply pending filters to active filters
+              setActiveFilters(pendingFilters);
+              
               // Apply filters and trigger search for both client-side and server-side
               if (api) {
-                api.applyGridFilters(activeFilters);
+                api.applyGridFilters(pendingFilters);
               }
               onSearch();
             }}
@@ -452,7 +456,7 @@ export function AdvancedFilter({
         isOpen={showSaveModal}
         onClose={() => setShowSaveModal(false)}
         onSave={handleSaveFilterSet}
-        activeFilters={activeFilters}
+        activeFilters={pendingFilters}
         existingNames={filterSets.map(set => set.name)}
       />
     </div>
