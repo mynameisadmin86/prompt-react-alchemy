@@ -1,7 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
-import { Star, X, ChevronDown, ChevronUp, Search } from 'lucide-react';
+import { Star, X, ChevronDown, ChevronUp, Search, Settings } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
 import { ColumnFilterInput } from './ColumnFilterInput';
 import { FilterSetModal } from './FilterSetModal';
 import { FilterSetDropdown } from './FilterSetDropdown';
@@ -61,6 +64,12 @@ export function AdvancedFilter({
   const [isMainFiltersOpen, setIsMainFiltersOpen] = useState(true);
   const [isExtraFiltersOpen, setIsExtraFiltersOpen] = useState(true);
   const [isSubRowFiltersOpen, setIsSubRowFiltersOpen] = useState(true);
+  
+  // Filter section visibility settings
+  const [showMainFilters, setShowMainFilters] = useState(true);
+  const [showExtraFilters, setShowExtraFilters] = useState(true);
+  const [showSubRowFilters, setShowSubRowFilters] = useState(true);
+  const [showSettingsDialog, setShowSettingsDialog] = useState(false);
   
   const { toast } = useToast();
 
@@ -363,13 +372,62 @@ export function AdvancedFilter({
             onRename={handleRename}
             onDelete={handleDelete}
           />
+
+          <Dialog open={showSettingsDialog} onOpenChange={setShowSettingsDialog}>
+            <DialogTrigger asChild>
+              <Button
+                variant="outline"
+                size="sm"
+                className="hover:bg-gray-50"
+              >
+                <Settings className="h-4 w-4" />
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-md">
+              <DialogHeader>
+                <DialogTitle>Filter Visibility Settings</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="main-filters">Main Row Filters</Label>
+                  <Switch
+                    id="main-filters"
+                    checked={showMainFilters}
+                    onCheckedChange={setShowMainFilters}
+                  />
+                </div>
+                
+                {extraFilters.length > 0 && (
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="extra-filters">Extra Filters</Label>
+                    <Switch
+                      id="extra-filters"
+                      checked={showExtraFilters}
+                      onCheckedChange={setShowExtraFilters}
+                    />
+                  </div>
+                )}
+                
+                {(filterableSubRowColumns.length > 0 || subRowFilters.length > 0) && (
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="subrow-filters">Sub-row Filters</Label>
+                    <Switch
+                      id="subrow-filters"
+                      checked={showSubRowFilters}
+                      onCheckedChange={setShowSubRowFilters}
+                    />
+                  </div>
+                )}
+              </div>
+            </DialogContent>
+          </Dialog>
         </div>
       </div>
 
       {/* Filter Panel - Always expanded when visible */}
       <div className="bg-white border rounded shadow-sm">
         {/* Main Column Filters */}
-        {filterableColumns.length > 0 && (
+        {filterableColumns.length > 0 && showMainFilters && (
           <Collapsible open={isMainFiltersOpen} onOpenChange={setIsMainFiltersOpen}>
             <CollapsibleTrigger asChild>
               <div className="bg-gray-50/50 px-3 py-2 cursor-pointer hover:bg-gray-50 transition-colors border-b">
@@ -396,7 +454,7 @@ export function AdvancedFilter({
         )}
 
         {/* Extra Filters */}
-        {extraFilters.length > 0 && (
+        {extraFilters.length > 0 && showExtraFilters && (
           <Collapsible open={isExtraFiltersOpen} onOpenChange={setIsExtraFiltersOpen}>
             <CollapsibleTrigger asChild>
               <div className="bg-green-50/50 px-3 py-2 cursor-pointer hover:bg-green-50 transition-colors border-b">
@@ -423,7 +481,7 @@ export function AdvancedFilter({
         )}
 
         {/* Sub-row Filters */}
-        {(filterableSubRowColumns.length > 0 || subRowFilters.length > 0) && (
+        {(filterableSubRowColumns.length > 0 || subRowFilters.length > 0) && showSubRowFilters && (
           <Collapsible open={isSubRowFiltersOpen} onOpenChange={setIsSubRowFiltersOpen}>
             <CollapsibleTrigger asChild>
               <div className="bg-blue-50/50 px-3 py-2 cursor-pointer hover:bg-blue-50 transition-colors">
