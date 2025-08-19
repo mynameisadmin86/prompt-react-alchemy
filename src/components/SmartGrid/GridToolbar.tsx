@@ -193,7 +193,7 @@ export function GridToolbar({
               showAdvancedFilter && "bg-purple-50 text-purple-600"
             )}
           >
-            <Search className="h-4 w-4" />
+            <Filter className="h-4 w-4" />
           </Button>
         )}
 

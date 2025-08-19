@@ -45,7 +45,7 @@ export function AdvancedFilter({
   
   const { toast } = useToast();
 
-  // Get filterable columns (including hidden ones)
+  // Get filterable columns (including hidden ones) - independent of column visibility
   const filterableColumns = columns.filter(col => col.filterable !== false);
   const filterableSubRowColumns = subRowColumns.filter(col => col.filterable !== false);
 
