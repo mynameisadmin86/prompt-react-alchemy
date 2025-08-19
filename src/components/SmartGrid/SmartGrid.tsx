@@ -25,9 +25,7 @@ import { GridToolbar } from './GridToolbar';
 import { PluginRenderer, PluginRowActions } from './PluginRenderer';
 import { ColumnFilter } from './ColumnFilter';
 import { DraggableSubRow } from './DraggableSubRow';
-import { FilterSystem } from './FilterSystem';
 import { AdvancedFilter } from './AdvancedFilter';
-import { mockFilterAPI } from '@/utils/mockFilterAPI';
 import { cn } from '@/lib/utils';
 
 export function SmartGrid({
@@ -121,8 +119,6 @@ export function SmartGrid({
   } = useSmartGridState();
 
   const [pageSize] = useState(10);
-  const [showFilterRow, setShowFilterRow] = useState(false);
-  const [filterSystemFilters, setFilterSystemFilters] = useState<Record<string, any>>({});
   const [showAdvancedFilter, setShowAdvancedFilter] = useState(showAdvancedFilterDefault || false);
   const [advancedFilters, setAdvancedFilters] = useState<Record<string, any>>({});
   const { toast } = useToast();
@@ -304,46 +300,6 @@ export function SmartGrid({
   const processedData = useMemo(() => {
     return processGridData(data, globalFilter, filters, sort, currentColumns, onDataFetch);
   }, [data, globalFilter, filters, sort, currentColumns, onDataFetch]);
-
-  // Handle filter system changes
-  const handleFiltersChange = useCallback((newFilters: Record<string, any>) => {
-    setFilterSystemFilters(newFilters);
-    // Convert filter system filters to legacy format if needed
-    const legacyFilters = Object.entries(newFilters).map(([column, filterValue]) => ({
-      column,
-      value: filterValue.value,
-      operator: filterValue.operator || 'contains'
-    }));
-    
-    // Check if any filters require server-side processing
-    const serverFilters = legacyFilters.filter(filter => {
-      const column = currentColumns.find(col => col.key === filter.column);
-      return column?.filterMode === 'server';
-    });
-    
-    const localFilters = legacyFilters.filter(filter => {
-      const column = currentColumns.find(col => col.key === filter.column);
-      return column?.filterMode !== 'server';
-    });
-    
-    // Apply server-side filters if any and onServerFilter is provided
-    if (serverFilters.length > 0 && onServerFilter) {
-      onServerFilter(serverFilters).catch(error => {
-        console.error('Server-side filtering failed:', error);
-        toast({
-          title: "Error",
-          description: "Failed to apply server-side filters",
-          variant: "destructive"
-        });
-      });
-    }
-    
-    // Set local filters only
-    setFilters(localFilters);
-    
-    // Reset to page 1 when filters change
-    setCurrentPage(1);
-  }, [setFilters, currentColumns, onServerFilter, toast, setCurrentPage]);
 
   // Handle advanced filter changes
   const handleAdvancedFiltersChange = useCallback((newFilters: Record<string, any>) => {
@@ -803,18 +759,6 @@ export function SmartGrid({
         onSaveSet={handleAdvancedSaveSet}
         savedSets={advancedSavedSets || []}
       />
-
-       {/* Legacy Filter System */}
-      <FilterSystem
-        columns={orderedColumns}
-        subRowColumns={subRowColumns}
-        showFilterRow={showFilterRow}
-        onToggleFilterRow={() => setShowFilterRow(!showFilterRow)}
-        onFiltersChange={handleFiltersChange}
-        gridId="smart-grid"
-        userId="demo-user"
-        api={mockFilterAPI}
-      />
       
       {/* Table Container with horizontal scroll prevention */}
       <div className="bg-white rounded-lg border shadow-sm">
@@ -969,8 +913,8 @@ export function SmartGrid({
                   )}
                 </TableRow>
                 
-                {/* Column Filter Row - Legacy support, hidden when using FilterSystem */}
-                {showColumnFilters && !showFilterRow && (
+                {/* Column Filter Row - Legacy support */}
+                {showColumnFilters && (
                   <TableRow className="hover:bg-transparent border-b border-gray-200">
                     {/* Checkbox column space */}
                     {showCheckboxes && (
