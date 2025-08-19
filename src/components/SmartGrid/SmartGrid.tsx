@@ -26,6 +26,7 @@ import { PluginRenderer, PluginRowActions } from './PluginRenderer';
 import { ColumnFilter } from './ColumnFilter';
 import { DraggableSubRow } from './DraggableSubRow';
 import { FilterSystem } from './FilterSystem';
+import { AdvancedFilter } from './AdvancedFilter';
 import { mockFilterAPI } from '@/utils/mockFilterAPI';
 import { cn } from '@/lib/utils';
 
@@ -59,7 +60,13 @@ export function SmartGrid({
   groupByField,
   onGroupByChange,
   groupableColumns,
-  showGroupingDropdown
+  showGroupingDropdown,
+  // Advanced Filter props
+  showAdvancedFilterDefault,
+  extraFilters,
+  onAdvancedSearch,
+  onAdvancedSaveSet,
+  advancedSavedSets
 }: SmartGridProps) {
   const {
     gridData,
@@ -116,6 +123,8 @@ export function SmartGrid({
   const [pageSize] = useState(10);
   const [showFilterRow, setShowFilterRow] = useState(false);
   const [filterSystemFilters, setFilterSystemFilters] = useState<Record<string, any>>({});
+  const [showAdvancedFilter, setShowAdvancedFilter] = useState(showAdvancedFilterDefault || false);
+  const [advancedFilters, setAdvancedFilters] = useState<Record<string, any>>({});
   const { toast } = useToast();
 
   // Use external selectedRows if provided, otherwise use internal state
@@ -335,6 +344,16 @@ export function SmartGrid({
     // Reset to page 1 when filters change
     setCurrentPage(1);
   }, [setFilters, currentColumns, onServerFilter, toast, setCurrentPage]);
+
+  // Handle advanced filter changes
+  const handleAdvancedFiltersChange = useCallback((newFilters: Record<string, any>) => {
+    setAdvancedFilters(newFilters);
+    onAdvancedSearch?.(newFilters);
+  }, [onAdvancedSearch]);
+
+  const handleAdvancedSaveSet = useCallback((filters: Record<string, any>, name: string) => {
+    onAdvancedSaveSet?.(filters, name);
+  }, [onAdvancedSaveSet]);
 
   // Define handleExport and handleResetPreferences after processedData and orderedColumns
  const handleExport = useCallback((format: 'csv' | 'xlsx') => {
@@ -769,9 +788,23 @@ export function SmartGrid({
         onGroupByChange={onGroupByChange}
         groupableColumns={groupableColumns}
         showGroupingDropdown={showGroupingDropdown}
+        showAdvancedFilter={showAdvancedFilter}
+        onToggleAdvancedFilter={() => setShowAdvancedFilter(!showAdvancedFilter)}
       />
 
-       {/* Advanced Filter System */}
+      {/* Advanced Filter System */}
+      <AdvancedFilter
+        columns={orderedColumns}
+        subRowColumns={subRowColumns}
+        showAdvancedFilter={showAdvancedFilter}
+        onToggleAdvancedFilter={() => setShowAdvancedFilter(!showAdvancedFilter)}
+        extraFilters={extraFilters}
+        onSearch={handleAdvancedFiltersChange}
+        onSaveSet={handleAdvancedSaveSet}
+        savedSets={advancedSavedSets || []}
+      />
+
+       {/* Legacy Filter System */}
       <FilterSystem
         columns={orderedColumns}
         subRowColumns={subRowColumns}

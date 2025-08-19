@@ -50,6 +50,7 @@ const GridDemo = () => {
       label: 'Trip Plan No',
       type: 'Link',
       sortable: true,
+      filterable: true,
       editable: false,
       mandatory: true,
       subRow: false,
@@ -60,6 +61,7 @@ const GridDemo = () => {
       label: 'Status',
       type: 'Badge',
       sortable: true,
+      filterable: true,
       editable: false,
       subRow: false
     },
@@ -68,6 +70,7 @@ const GridDemo = () => {
       label: 'Trip Billing Status',
       type: 'Badge',
       sortable: true,
+      filterable: true,
       editable: false,
       subRow: false
     },
@@ -76,6 +79,7 @@ const GridDemo = () => {
       label: 'Planned Start and End Date Time',
       type: 'EditableText',
       sortable: true,
+      filterable: true,
       editable: true,
       subRow: true
     },
@@ -84,6 +88,7 @@ const GridDemo = () => {
       label: 'Actual Start and End Date Time',
       type: 'DateTimeRange',
       sortable: true,
+      filterable: true,
       editable: false,
       subRow: true
     },
@@ -92,6 +97,7 @@ const GridDemo = () => {
       label: 'Departure Point',
       type: 'TextWithTooltip',
       sortable: true,
+      filterable: true,
       editable: false,
       infoTextField: 'departurePointDetails',
       subRow: true
@@ -101,6 +107,7 @@ const GridDemo = () => {
       label: 'Arrival Point',
       type: 'TextWithTooltip',
       sortable: true,
+      filterable: true,
       editable: false,
       infoTextField: 'arrivalPointDetails',
       subRow: true
@@ -110,6 +117,7 @@ const GridDemo = () => {
       label: 'Customer',
       type: 'ExpandableCount',
       sortable: true,
+      filterable: true,
       editable: false,
       renderExpandedContent: (row: SampleData) => (
         <div className="space-y-3">
@@ -136,6 +144,7 @@ const GridDemo = () => {
       label: 'Resources',
       type: 'ExpandableCount',
       sortable: true,
+      filterable: true,
       editable: false,
       renderExpandedContent: (row: SampleData) => (
         <div className="space-y-3">
@@ -617,6 +626,35 @@ const GridDemo = () => {
             recordCount={gridState.gridData.length > 0 ? gridState.gridData.length : processedData.length}
             showCreateButton={true}
             searchPlaceholder="Search all columns..."
+            showAdvancedFilterDefault={true}
+            extraFilters={[
+              {
+                key: 'priority',
+                label: 'Priority',
+                type: 'select',
+                options: ['High', 'Medium', 'Low']
+              },
+              {
+                key: 'region',
+                label: 'Region',
+                type: 'text',
+                placeholder: 'Enter region...'
+              }
+            ]}
+            onAdvancedSearch={(filters) => {
+              console.log('Advanced search filters:', filters);
+              toast({
+                title: "Advanced Search",
+                description: `Applied ${Object.keys(filters).length} advanced filters`,
+              });
+            }}
+            onAdvancedSaveSet={(filters, name) => {
+              console.log('Save advanced filter set:', name, filters);
+              toast({
+                title: "Filter Set Saved",
+                description: `Saved filter set "${name}" with ${Object.keys(filters).length} filters`,
+              });
+            }}
           />
           
           {/* Footer with action buttons matching the screenshot style */}
