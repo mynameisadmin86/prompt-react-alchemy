@@ -49,7 +49,7 @@ export function ColumnFilterInput({
   const handleValueChange = (newValue: any) => {
     setLocalValue(newValue);
     
-    if (newValue === '' || newValue == null) {
+    if (newValue === '' || newValue == null || newValue === '__all__') {
       onChange(undefined);
     } else {
       onChange({
@@ -131,7 +131,7 @@ export function ColumnFilterInput({
               <SelectValue placeholder="All" />
             </SelectTrigger>
             <SelectContent className="bg-white border shadow-lg z-50">
-              <SelectItem value="" className="text-xs">All</SelectItem>
+              <SelectItem value="__all__" className="text-xs">All</SelectItem>
               {column.options?.map(option => (
                 <SelectItem key={option} value={option} className="text-xs">
                   {option}
