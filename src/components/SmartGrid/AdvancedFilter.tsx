@@ -45,13 +45,13 @@ export function AdvancedFilter({
   
   const { toast } = useToast();
 
-  // Get main-row filterable columns (only non-subRow columns that are filterable and not hidden)
+  // Get main-row filterable columns (only non-subRow columns that are filterable) - ALL columns regardless of visibility
   const mainRowFilterableColumns = columns.filter(col => 
     col.filterable !== false && 
     col.subRow !== true
   );
   
-  // Get sub-row filterable columns (only subRow columns that are filterable)
+  // Get sub-row filterable columns (only subRow columns that are filterable) - ALL columns regardless of visibility
   const subRowFilterableColumns = columns.filter(col => 
     col.filterable !== false && 
     col.subRow === true
