@@ -65,11 +65,35 @@ export function AdvancedFilter({
   const [isExtraFiltersOpen, setIsExtraFiltersOpen] = useState(true);
   const [isSubRowFiltersOpen, setIsSubRowFiltersOpen] = useState(true);
   
-  // Filter section visibility settings
-  const [showMainFilters, setShowMainFilters] = useState(true);
-  const [showExtraFilters, setShowExtraFilters] = useState(true);
-  const [showSubRowFilters, setShowSubRowFilters] = useState(true);
+  // Filter field visibility settings
+  const [visibleFields, setVisibleFields] = useState<Record<string, boolean>>({});
   const [showSettingsDialog, setShowSettingsDialog] = useState(false);
+
+  // Initialize all fields as visible by default
+  useEffect(() => {
+    const allFields: Record<string, boolean> = {};
+    
+    // Main column filters
+    filterableColumns.forEach(col => {
+      allFields[col.key] = true;
+    });
+    
+    // Extra filters
+    extraFilters.forEach(filter => {
+      allFields[`extra-${filter.key}`] = true;
+    });
+    
+    // Sub-row filters
+    filterableSubRowColumns.forEach(col => {
+      allFields[`subrow-${col.key}`] = true;
+    });
+    
+    subRowFilters.forEach(filter => {
+      allFields[`subrowfilter-${filter.key}`] = true;
+    });
+    
+    setVisibleFields(allFields);
+  }, [columns, subRowColumns, extraFilters, subRowFilters]);
   
   const { toast } = useToast();
 
@@ -275,33 +299,38 @@ export function AdvancedFilter({
 
   // Helper function to render filter inputs
   const renderFilterInputs = (filterColumns: GridColumnConfig[] | ExtraFilter[] | SubRowFilter[], keyPrefix = '') => {
-    return filterColumns.map((column) => {
-      const columnKey = keyPrefix ? `${keyPrefix}${column.key}` : column.key;
-      return (
-        <div key={columnKey} className="space-y-1">
-          <div className="text-xs font-medium text-gray-600 truncate">
-            {column.label}
+    return filterColumns
+      .filter((column) => {
+        const columnKey = keyPrefix ? `${keyPrefix}${column.key}` : column.key;
+        return visibleFields[columnKey] !== false;
+      })
+      .map((column) => {
+        const columnKey = keyPrefix ? `${keyPrefix}${column.key}` : column.key;
+        return (
+          <div key={columnKey} className="space-y-1">
+            <div className="text-xs font-medium text-gray-600 truncate">
+              {column.label}
+            </div>
+            <div className="relative">
+              <ColumnFilterInput
+                column={column as GridColumnConfig}
+                value={pendingFilters[columnKey]}
+                onChange={(value) => handleFilterChange(columnKey, value)}
+              />
+              {pendingFilters[columnKey] && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => handleFilterChange(columnKey, undefined)}
+                  className="absolute right-1 top-1/2 transform -translate-y-1/2 h-6 w-6 p-0 hover:bg-gray-100"
+                >
+                  <X className="h-3 w-3" />
+                </Button>
+              )}
+            </div>
           </div>
-          <div className="relative">
-            <ColumnFilterInput
-              column={column as GridColumnConfig}
-              value={pendingFilters[columnKey]}
-              onChange={(value) => handleFilterChange(columnKey, value)}
-            />
-            {pendingFilters[columnKey] && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => handleFilterChange(columnKey, undefined)}
-                className="absolute right-1 top-1/2 transform -translate-y-1/2 h-6 w-6 p-0 hover:bg-gray-100"
-              >
-                <X className="h-3 w-3" />
-              </Button>
-            )}
-          </div>
-        </div>
-      );
-    });
+        );
+      });
   };
 
   if (!visible) return null;
@@ -383,39 +412,84 @@ export function AdvancedFilter({
                 <Settings className="h-4 w-4" />
               </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-md">
+            <DialogContent className="sm:max-w-lg max-h-[80vh] overflow-y-auto">
               <DialogHeader>
-                <DialogTitle>Filter Visibility Settings</DialogTitle>
+                <DialogTitle>Search Field Visibility Settings</DialogTitle>
               </DialogHeader>
-              <div className="space-y-4 py-4">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="main-filters">Main Row Filters</Label>
-                  <Switch
-                    id="main-filters"
-                    checked={showMainFilters}
-                    onCheckedChange={setShowMainFilters}
-                  />
-                </div>
-                
-                {extraFilters.length > 0 && (
-                  <div className="flex items-center justify-between">
-                    <Label htmlFor="extra-filters">Extra Filters</Label>
-                    <Switch
-                      id="extra-filters"
-                      checked={showExtraFilters}
-                      onCheckedChange={setShowExtraFilters}
-                    />
+              <div className="space-y-6 py-4">
+                {/* Main Column Filters */}
+                {filterableColumns.length > 0 && (
+                  <div>
+                    <h4 className="text-sm font-medium text-gray-900 mb-3">Main Row Filters</h4>
+                    <div className="space-y-2">
+                      {filterableColumns.map(col => (
+                        <div key={col.key} className="flex items-center justify-between">
+                          <Label htmlFor={`field-${col.key}`} className="text-sm">{col.label}</Label>
+                          <Switch
+                            id={`field-${col.key}`}
+                            checked={visibleFields[col.key] !== false}
+                            onCheckedChange={(checked) => 
+                              setVisibleFields(prev => ({ ...prev, [col.key]: checked }))
+                            }
+                          />
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 )}
                 
+                {/* Extra Filters */}
+                {extraFilters.length > 0 && (
+                  <div>
+                    <h4 className="text-sm font-medium text-green-700 mb-3">Extra Filters</h4>
+                    <div className="space-y-2">
+                      {extraFilters.map(filter => (
+                        <div key={`extra-${filter.key}`} className="flex items-center justify-between">
+                          <Label htmlFor={`field-extra-${filter.key}`} className="text-sm">{filter.label}</Label>
+                          <Switch
+                            id={`field-extra-${filter.key}`}
+                            checked={visibleFields[`extra-${filter.key}`] !== false}
+                            onCheckedChange={(checked) => 
+                              setVisibleFields(prev => ({ ...prev, [`extra-${filter.key}`]: checked }))
+                            }
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                
+                {/* Sub-row Filters */}
                 {(filterableSubRowColumns.length > 0 || subRowFilters.length > 0) && (
-                  <div className="flex items-center justify-between">
-                    <Label htmlFor="subrow-filters">Sub-row Filters</Label>
-                    <Switch
-                      id="subrow-filters"
-                      checked={showSubRowFilters}
-                      onCheckedChange={setShowSubRowFilters}
-                    />
+                  <div>
+                    <h4 className="text-sm font-medium text-blue-700 mb-3">Sub-row Filters</h4>
+                    <div className="space-y-2">
+                      {filterableSubRowColumns.map(col => (
+                        <div key={`subrow-${col.key}`} className="flex items-center justify-between">
+                          <Label htmlFor={`field-subrow-${col.key}`} className="text-sm">{col.label}</Label>
+                          <Switch
+                            id={`field-subrow-${col.key}`}
+                            checked={visibleFields[`subrow-${col.key}`] !== false}
+                            onCheckedChange={(checked) => 
+                              setVisibleFields(prev => ({ ...prev, [`subrow-${col.key}`]: checked }))
+                            }
+                          />
+                        </div>
+                      ))}
+                      
+                      {subRowFilters.map(filter => (
+                        <div key={`subrowfilter-${filter.key}`} className="flex items-center justify-between">
+                          <Label htmlFor={`field-subrowfilter-${filter.key}`} className="text-sm">{filter.label}</Label>
+                          <Switch
+                            id={`field-subrowfilter-${filter.key}`}
+                            checked={visibleFields[`subrowfilter-${filter.key}`] !== false}
+                            onCheckedChange={(checked) => 
+                              setVisibleFields(prev => ({ ...prev, [`subrowfilter-${filter.key}`]: checked }))
+                            }
+                          />
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 )}
               </div>
@@ -427,7 +501,7 @@ export function AdvancedFilter({
       {/* Filter Panel - Always expanded when visible */}
       <div className="bg-white border rounded shadow-sm">
         {/* Main Column Filters */}
-        {filterableColumns.length > 0 && showMainFilters && (
+        {filterableColumns.length > 0 && (
           <Collapsible open={isMainFiltersOpen} onOpenChange={setIsMainFiltersOpen}>
             <CollapsibleTrigger asChild>
               <div className="bg-gray-50/50 px-3 py-2 cursor-pointer hover:bg-gray-50 transition-colors border-b">
@@ -454,7 +528,7 @@ export function AdvancedFilter({
         )}
 
         {/* Extra Filters */}
-        {extraFilters.length > 0 && showExtraFilters && (
+        {extraFilters.length > 0 && (
           <Collapsible open={isExtraFiltersOpen} onOpenChange={setIsExtraFiltersOpen}>
             <CollapsibleTrigger asChild>
               <div className="bg-green-50/50 px-3 py-2 cursor-pointer hover:bg-green-50 transition-colors border-b">
@@ -481,7 +555,7 @@ export function AdvancedFilter({
         )}
 
         {/* Sub-row Filters */}
-        {(filterableSubRowColumns.length > 0 || subRowFilters.length > 0) && showSubRowFilters && (
+        {(filterableSubRowColumns.length > 0 || subRowFilters.length > 0) && (
           <Collapsible open={isSubRowFiltersOpen} onOpenChange={setIsSubRowFiltersOpen}>
             <CollapsibleTrigger asChild>
               <div className="bg-blue-50/50 px-3 py-2 cursor-pointer hover:bg-blue-50 transition-colors">
