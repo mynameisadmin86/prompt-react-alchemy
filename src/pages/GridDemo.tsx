@@ -626,6 +626,7 @@ const GridDemo = () => {
                 options: ['High Priority', 'Medium Priority', 'Low Priority']
               }
             ]}
+            showSubHeaders={true}
           />
           
           {/* Footer with action buttons matching the screenshot style */}

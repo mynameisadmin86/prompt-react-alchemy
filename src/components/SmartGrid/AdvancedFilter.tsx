@@ -39,6 +39,7 @@ interface AdvancedFilterProps {
   userId: string;
   api?: FilterSystemAPI;
   clientSideSearch?: boolean;
+  showSubHeaders?: boolean;
 }
 
 export function AdvancedFilter({
@@ -53,7 +54,8 @@ export function AdvancedFilter({
   gridId,
   userId,
   api,
-  clientSideSearch = false
+  clientSideSearch = false,
+  showSubHeaders = true
 }: AdvancedFilterProps) {
   const [activeFilters, setActiveFilters] = useState<Record<string, FilterValue>>({});
   const [pendingFilters, setPendingFilters] = useState<Record<string, FilterValue>>({});
@@ -400,22 +402,24 @@ export function AdvancedFilter({
         {/* Main Column Filters */}
         {filterableColumns.length > 0 && (
           <Collapsible open={isMainFiltersOpen} onOpenChange={setIsMainFiltersOpen}>
-            <CollapsibleTrigger asChild>
-              <div className="bg-gray-50/50 px-3 py-2 cursor-pointer hover:bg-gray-50 transition-colors border-b">
-                <div className="flex items-center justify-between">
-                  <div className="text-sm font-medium text-gray-700">
-                    Main-row filters
+            {showSubHeaders && (
+              <CollapsibleTrigger asChild>
+                <div className="bg-gray-50/50 px-3 py-2 cursor-pointer hover:bg-gray-50 transition-colors border-b">
+                  <div className="flex items-center justify-between">
+                    <div className="text-sm font-medium text-gray-700">
+                      Main-row filters
+                    </div>
+                    {isMainFiltersOpen ? (
+                      <ChevronUp className="h-4 w-4 text-gray-600" />
+                    ) : (
+                      <ChevronDown className="h-4 w-4 text-gray-600" />
+                    )}
                   </div>
-                  {isMainFiltersOpen ? (
-                    <ChevronUp className="h-4 w-4 text-gray-600" />
-                  ) : (
-                    <ChevronDown className="h-4 w-4 text-gray-600" />
-                  )}
                 </div>
-              </div>
-            </CollapsibleTrigger>
+              </CollapsibleTrigger>
+            )}
             <CollapsibleContent>
-              <div className="p-3">
+              <div className={cn("p-3", !showSubHeaders && "border-b")}>
                 <div className="grid gap-2" style={{ gridTemplateColumns: `repeat(${Math.min(filterableColumns.length, 4)}, 1fr)` }}>
                   {renderFilterInputs(filterableColumns)}
                 </div>
@@ -427,22 +431,24 @@ export function AdvancedFilter({
         {/* Extra Filters */}
         {extraFilters.length > 0 && (
           <Collapsible open={isExtraFiltersOpen} onOpenChange={setIsExtraFiltersOpen}>
-            <CollapsibleTrigger asChild>
-              <div className="bg-green-50/50 px-3 py-2 cursor-pointer hover:bg-green-50 transition-colors border-b">
-                <div className="flex items-center justify-between">
-                  <div className="text-sm font-medium text-green-700">
-                    Extra Filters
+            {showSubHeaders && (
+              <CollapsibleTrigger asChild>
+                <div className="bg-green-50/50 px-3 py-2 cursor-pointer hover:bg-green-50 transition-colors border-b">
+                  <div className="flex items-center justify-between">
+                    <div className="text-sm font-medium text-green-700">
+                      Extra Filters
+                    </div>
+                    {isExtraFiltersOpen ? (
+                      <ChevronUp className="h-4 w-4 text-green-600" />
+                    ) : (
+                      <ChevronDown className="h-4 w-4 text-green-600" />
+                    )}
                   </div>
-                  {isExtraFiltersOpen ? (
-                    <ChevronUp className="h-4 w-4 text-green-600" />
-                  ) : (
-                    <ChevronDown className="h-4 w-4 text-green-600" />
-                  )}
                 </div>
-              </div>
-            </CollapsibleTrigger>
+              </CollapsibleTrigger>
+            )}
             <CollapsibleContent>
-              <div className="bg-green-50/30 p-3">
+              <div className={cn("bg-green-50/30 p-3", !showSubHeaders && "border-b")}>
                 <div className="grid gap-2" style={{ gridTemplateColumns: `repeat(${Math.min(extraFilters.length, 4)}, 1fr)` }}>
                   {renderFilterInputs(extraFilters, 'extra-')}
                 </div>
@@ -454,20 +460,22 @@ export function AdvancedFilter({
         {/* Sub-row Filters */}
         {(filterableSubRowColumns.length > 0 || subRowFilters.length > 0) && (
           <Collapsible open={isSubRowFiltersOpen} onOpenChange={setIsSubRowFiltersOpen}>
-            <CollapsibleTrigger asChild>
-              <div className="bg-blue-50/50 px-3 py-2 cursor-pointer hover:bg-blue-50 transition-colors">
-                <div className="flex items-center justify-between">
-                  <div className="text-sm font-medium text-blue-700">
-                    Sub-row Filters
+            {showSubHeaders && (
+              <CollapsibleTrigger asChild>
+                <div className="bg-blue-50/50 px-3 py-2 cursor-pointer hover:bg-blue-50 transition-colors">
+                  <div className="flex items-center justify-between">
+                    <div className="text-sm font-medium text-blue-700">
+                      Sub-row Filters
+                    </div>
+                    {isSubRowFiltersOpen ? (
+                      <ChevronUp className="h-4 w-4 text-blue-600" />
+                    ) : (
+                      <ChevronDown className="h-4 w-4 text-blue-600" />
+                    )}
                   </div>
-                  {isSubRowFiltersOpen ? (
-                    <ChevronUp className="h-4 w-4 text-blue-600" />
-                  ) : (
-                    <ChevronDown className="h-4 w-4 text-blue-600" />
-                  )}
                 </div>
-              </div>
-            </CollapsibleTrigger>
+              </CollapsibleTrigger>
+            )}
             <CollapsibleContent>
               <div className="bg-blue-50/30 p-3">
                 <div className="grid gap-2" style={{ gridTemplateColumns: `repeat(${Math.min(filterableSubRowColumns.length + subRowFilters.length, 4)}, 1fr)` }}>

@@ -63,7 +63,8 @@ export function SmartGrid({
   onGroupByChange,
   groupableColumns,
   showGroupingDropdown,
-  clientSideSearch = false
+  clientSideSearch = false,
+  showSubHeaders = true
 }: SmartGridProps) {
   const {
     gridData,
@@ -803,20 +804,21 @@ export function SmartGrid({
       />
 
        {/* Advanced Filter System */}
-      <AdvancedFilter
-        columns={orderedColumns}
-        subRowColumns={subRowColumns}
-        extraFilters={extraFilters}
-        subRowFilters={subRowFilters}
-        visible={showAdvancedFilter}
-        onToggle={() => setShowAdvancedFilter(!showAdvancedFilter)}
-        onFiltersChange={handleFiltersChange}
-        onSearch={handleAdvancedFilterSearch}
-        gridId="smart-grid"
-        userId="demo-user"
-        clientSideSearch={clientSideSearch}
-        api={mockFilterAPI}
-      />
+        <AdvancedFilter
+          columns={orderedColumns}
+          subRowColumns={subRowColumns}
+          extraFilters={extraFilters}
+          subRowFilters={subRowFilters}
+          visible={showAdvancedFilter}
+          onToggle={() => setShowAdvancedFilter(!showAdvancedFilter)}
+          onFiltersChange={handleFiltersChange}
+          onSearch={handleAdvancedFilterSearch}
+          gridId="smart-grid"
+          userId="demo-user"
+          clientSideSearch={clientSideSearch}
+          api={mockFilterAPI}
+          showSubHeaders={showSubHeaders}
+        />
       
       {/* Table Container with horizontal scroll prevention */}
       <div className="bg-white rounded-lg border shadow-sm">

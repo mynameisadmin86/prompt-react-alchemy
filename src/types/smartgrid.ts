@@ -163,6 +163,8 @@ export interface SmartGridProps {
   showGroupingDropdown?: boolean;
   // Search mode props
   clientSideSearch?: boolean;
+  // Advanced Filter sub-header props
+  showSubHeaders?: boolean;
 }
 
 // Legacy interface for backward compatibility
