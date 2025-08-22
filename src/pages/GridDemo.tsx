@@ -7,6 +7,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useSmartGridState } from '@/hooks/useSmartGridState';
 import { DraggableSubRow } from '@/components/SmartGrid/DraggableSubRow';
 import { ConfigurableButtonConfig } from '@/components/ui/configurable-button';
+import { tripService } from '@/api/services/tripService';
 import {
   Breadcrumb,
   BreadcrumbList,
@@ -42,6 +43,9 @@ interface SampleData {
 
 const GridDemo = () => {
   const [selectedRows, setSelectedRows] = useState<Set<number>>(new Set());
+  const [currentFilters, setCurrentFilters] = useState<Record<string, any>>({});
+  const [apiData, setApiData] = useState<SampleData[]>([]);
+  const [loading, setLoading] = useState(false);
   const gridState = useSmartGridState();
   
   const initialColumns: GridColumnConfig[] = [
@@ -549,10 +553,58 @@ const GridDemo = () => {
 
   const handleFiltersChange = (filters: Record<string, any>) => {
     console.log('Advanced Filters Changed:', filters);
-    // Here you can access the filter keys and values when the search button is clicked
+    // Store filters for later use when search is clicked
+    setCurrentFilters(filters);
     Object.entries(filters).forEach(([key, value]) => {
       console.log(`Filter - Key: ${key}, Value:`, value);
     });
+  };
+
+  const handleSearch = async () => {
+    console.log('Search button clicked with filters:', currentFilters);
+    setLoading(true);
+    
+    try {
+      // Convert filters to API format
+      const apiFilters: Record<string, any> = {};
+      Object.entries(currentFilters).forEach(([key, filterValue]) => {
+        if (filterValue && filterValue.value) {
+          apiFilters[key] = filterValue.value;
+        }
+      });
+
+      // Call the trip service API with filters
+      const response = await tripService.getTrips({
+        page: 1,
+        limit: 50,
+        filters: apiFilters
+      });
+
+      // Transform API data to match SampleData structure if needed
+      // For now, we'll use the API data or fallback to sample data
+      console.log('API Response:', response);
+      
+      // If API returns data, use it, otherwise keep sample data
+      if (response.data && response.data.length > 0) {
+        setApiData(response.data as any);
+        gridState.setGridData(response.data as any);
+      }
+
+      toast({
+        title: "Success",
+        description: `Found ${response.data?.length || 0} results`
+      });
+
+    } catch (error) {
+      console.error('API call failed:', error);
+      toast({
+        title: "Error",
+        description: "Failed to fetch data from server",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const renderSubRow = (row: any, rowIndex: number) => {
@@ -616,7 +668,8 @@ const GridDemo = () => {
             selectedRows={selectedRows}
             onSelectionChange={handleRowSelection}
             onFiltersChange={handleFiltersChange}
-            rowClassName={(row: any, index: number) => 
+            onServerFilter={handleSearch}
+            rowClassName={(row: any, index: number) =>
               selectedRows.has(index) ? 'smart-grid-row-selected' : ''
             }
             nestedRowRenderer={renderSubRow}
