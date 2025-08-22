@@ -34,7 +34,7 @@ interface AdvancedFilterProps {
   visible: boolean;
   onToggle: () => void;
   onFiltersChange: (filters: Record<string, FilterValue>) => void;
-  onSearch: () => void;
+  onSearch: (filters: Record<string, FilterValue>) => void;
   gridId: string;
   userId: string;
   api?: FilterSystemAPI;
@@ -369,7 +369,7 @@ export function AdvancedFilter({
               if (api) {
                 api.applyGridFilters(cleanFilters);
               }
-              onSearch();
+              onSearch(cleanFilters);
             }}
             disabled={loading}
             className="bg-blue-600 hover:bg-blue-700 text-white"

@@ -306,15 +306,19 @@ export function SmartGrid({
   }, [data, globalFilter, filters, sort, currentColumns, onDataFetch, clientSideSearch]);
 
   // Handle advanced filter search
-  const handleAdvancedFilterSearch = useCallback(() => {
+  const handleAdvancedFilterSearch = useCallback((filters: Record<string, any>) => {
     // Reset to page 1 when search is performed
     setCurrentPage(1);
     
+    // Log the search filters for debugging or further processing
+    console.log('Advanced filter search triggered with filters:', filters);
+    
     // If we have server-side filtering, call the server
-    const serverFilters = filters.filter(filter => {
-      const column = currentColumns.find(col => col.key === filter.column);
-      return column?.filterMode === 'server';
-    });
+    const serverFilters = Object.entries(filters).map(([column, value]) => ({
+      column,
+      value,
+      operator: 'contains' as const // Type-safe operator
+    }));
     
     if (serverFilters.length > 0 && onServerFilter) {
       onServerFilter(serverFilters).catch(error => {
@@ -326,7 +330,15 @@ export function SmartGrid({
         });
       });
     }
-  }, [filters, currentColumns, onServerFilter, toast, setCurrentPage]);
+    
+    // Make filter data available to parent component through window event or callback
+    // This allows the parent page to access the filter data
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('advancedFilterSearch', { 
+        detail: { filters } 
+      }));
+    }
+  }, [onServerFilter, toast, setCurrentPage]);
 
   // Handle filter system changes
   const handleFiltersChange = useCallback((newFilters: Record<string, any>) => {
