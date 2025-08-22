@@ -370,7 +370,7 @@ export function SmartGrid({
     
     // Reset to page 1 when filters change
     setCurrentPage(1);
-  }, [setFilters, currentColumns, onServerFilter, toast, setCurrentPage]);
+  }, [onFiltersChange, setFilters, currentColumns, onServerFilter, toast, setCurrentPage]);
 
   // Define handleExport and handleResetPreferences after processedData and orderedColumns
  const handleExport = useCallback((format: 'csv' | 'xlsx') => {
