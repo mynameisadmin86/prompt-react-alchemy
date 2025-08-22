@@ -64,7 +64,10 @@ export function SmartGrid({
   groupableColumns,
   showGroupingDropdown,
   clientSideSearch = false,
-  showSubHeaders = true
+  showSubHeaders = true,
+  showMainRowFilters = true,
+  showExtraFilters = true,
+  showSubRowFilters = true
 }: SmartGridProps) {
   const {
     gridData,
@@ -818,6 +821,9 @@ export function SmartGrid({
           clientSideSearch={clientSideSearch}
           api={mockFilterAPI}
           showSubHeaders={showSubHeaders}
+          showMainRowFilters={showMainRowFilters}
+          showExtraFilters={showExtraFilters}
+          showSubRowFilters={showSubRowFilters}
         />
       
       {/* Table Container with horizontal scroll prevention */}

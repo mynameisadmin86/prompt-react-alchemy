@@ -165,6 +165,10 @@ export interface SmartGridProps {
   clientSideSearch?: boolean;
   // Advanced Filter sub-header props
   showSubHeaders?: boolean;
+  // Advanced Filter visibility props
+  showMainRowFilters?: boolean;
+  showExtraFilters?: boolean;
+  showSubRowFilters?: boolean;
 }
 
 // Legacy interface for backward compatibility
