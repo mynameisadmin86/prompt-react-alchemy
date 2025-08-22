@@ -40,6 +40,7 @@ export function SmartGrid({
   onPreferenceSave,
   onDataFetch,
   onUpdate,
+  onFiltersChange,
   onLinkClick,
   onSubRowToggle,
   onServerFilter,
@@ -331,6 +332,9 @@ export function SmartGrid({
   // Handle filter system changes
   const handleFiltersChange = useCallback((newFilters: Record<string, any>) => {
     setFilterSystemFilters(newFilters);
+    
+    // Call parent's onFiltersChange callback with the filter data
+    onFiltersChange?.(newFilters);
     // Convert filter system filters to legacy format if needed
     const legacyFilters = Object.entries(newFilters).map(([column, filterValue]) => ({
       column,
