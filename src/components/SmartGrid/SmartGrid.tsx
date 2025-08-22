@@ -313,14 +313,33 @@ export function SmartGrid({
     
     // Call server-side filter if onServerFilter is provided
     if (onServerFilter) {
-      // Convert filterSystemFilters to FilterConfig[] format
-      const serverFilters: FilterConfig[] = Object.entries(filterSystemFilters).map(([column, filterValue]) => ({
-        column,
-        value: filterValue?.value || filterValue,
-        operator: filterValue?.operator || 'contains'
-      }));
+      // Combine all active filters: advanced filters + column filters + global search
+      const allFilters: FilterConfig[] = [];
       
-      onServerFilter(serverFilters).catch(error => {
+      // Add advanced search filters (filterSystemFilters)
+      Object.entries(filterSystemFilters).forEach(([column, filterValue]) => {
+        if (filterValue && (filterValue.value !== undefined && filterValue.value !== '')) {
+          allFilters.push({
+            column,
+            value: filterValue.value || filterValue,
+            operator: filterValue.operator || 'contains'
+          });
+        }
+      });
+      
+      // Add existing column filters
+      allFilters.push(...filters);
+      
+      // Add global search as a filter if it exists
+      if (globalFilter && globalFilter.trim()) {
+        allFilters.push({
+          column: '_global',
+          value: globalFilter,
+          operator: 'contains'
+        });
+      }
+      
+      onServerFilter(allFilters).catch(error => {
         console.error('Server-side filtering failed:', error);
         toast({
           title: "Error",
@@ -329,7 +348,7 @@ export function SmartGrid({
         });
       });
     }
-  }, [filterSystemFilters, onServerFilter, toast, setCurrentPage]);
+  }, [filterSystemFilters, filters, globalFilter, onServerFilter, toast, setCurrentPage]);
 
   // Handle filter system changes
   const handleFiltersChange = useCallback((newFilters: Record<string, any>) => {
