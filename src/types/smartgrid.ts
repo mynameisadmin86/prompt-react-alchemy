@@ -136,6 +136,7 @@ export interface SmartGridProps {
   onPreferenceSave?(preferences: any): Promise<void>;
   onDataFetch?(page: number, pageSize: number): Promise<any[]>;
   onUpdate?(row: any): Promise<void>;
+  onFiltersChange?(filters: Record<string, any>): void;
   onLinkClick?(rowData: any, columnKey: string): void;
   onSubRowToggle?(columnKey: string): void;
   onServerFilter?(filters: FilterConfig[]): Promise<void>;

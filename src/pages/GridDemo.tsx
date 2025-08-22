@@ -547,6 +547,14 @@ const GridDemo = () => {
     setSelectedRows(selectedRowIndices);
   };
 
+  const handleFiltersChange = (filters: Record<string, any>) => {
+    console.log('Advanced Filters Changed:', filters);
+    // Here you can access the filter keys and values when the search button is clicked
+    Object.entries(filters).forEach(([key, value]) => {
+      console.log(`Filter - Key: ${key}, Value:`, value);
+    });
+  };
+
   const renderSubRow = (row: any, rowIndex: number) => {
     return (
       <DraggableSubRow
@@ -607,6 +615,7 @@ const GridDemo = () => {
             onSubRowToggle={gridState.handleSubRowToggle}
             selectedRows={selectedRows}
             onSelectionChange={handleRowSelection}
+            onFiltersChange={handleFiltersChange}
             rowClassName={(row: any, index: number) => 
               selectedRows.has(index) ? 'smart-grid-row-selected' : ''
             }
