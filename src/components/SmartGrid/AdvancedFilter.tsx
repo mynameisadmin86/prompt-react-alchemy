@@ -456,7 +456,7 @@ export function AdvancedFilter({
             <CollapsibleContent>
               <div className={cn("bg-green-50/30 p-3", !showSubHeaders && "border-b")}>
                 <div className="grid gap-2" style={{ gridTemplateColumns: `repeat(${Math.min(extraFilters.length, 4)}, 1fr)` }}>
-                  {renderFilterInputs(extraFilters)}
+                  {renderFilterInputs(extraFilters, 'extra-')}
                 </div>
               </div>
             </CollapsibleContent>
@@ -485,8 +485,8 @@ export function AdvancedFilter({
             <CollapsibleContent>
               <div className="bg-blue-50/30 p-3">
                 <div className="grid gap-2" style={{ gridTemplateColumns: `repeat(${Math.min(filterableSubRowColumns.length + subRowFilters.length, 4)}, 1fr)` }}>
-                  {renderFilterInputs(filterableSubRowColumns)}
-                  {renderFilterInputs(subRowFilters)}
+                  {renderFilterInputs(filterableSubRowColumns, 'subrow-')}
+                  {renderFilterInputs(subRowFilters, 'subrowfilter-')}
                 </div>
               </div>
             </CollapsibleContent>
