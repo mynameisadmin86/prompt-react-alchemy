@@ -311,13 +311,15 @@ export function SmartGrid({
     // Reset to page 1 when search is performed
     setCurrentPage(1);
     
-    // If we have server-side filtering, call the server
-    const serverFilters = filters.filter(filter => {
-      const column = currentColumns.find(col => col.key === filter.column);
-      return column?.filterMode === 'server';
-    });
-    
-    if (serverFilters.length > 0 && onServerFilter) {
+    // Call server-side filter if onServerFilter is provided
+    if (onServerFilter) {
+      // Convert filterSystemFilters to FilterConfig[] format
+      const serverFilters: FilterConfig[] = Object.entries(filterSystemFilters).map(([column, filterValue]) => ({
+        column,
+        value: filterValue?.value || filterValue,
+        operator: filterValue?.operator || 'contains'
+      }));
+      
       onServerFilter(serverFilters).catch(error => {
         console.error('Server-side filtering failed:', error);
         toast({
@@ -327,7 +329,7 @@ export function SmartGrid({
         });
       });
     }
-  }, [filters, currentColumns, onServerFilter, toast, setCurrentPage]);
+  }, [filterSystemFilters, onServerFilter, toast, setCurrentPage]);
 
   // Handle filter system changes
   const handleFiltersChange = useCallback((newFilters: Record<string, any>) => {
