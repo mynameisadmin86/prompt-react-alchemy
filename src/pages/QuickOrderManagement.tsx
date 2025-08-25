@@ -363,7 +363,7 @@ const QuickOrderManagement: React.FC = () => {
           showCreateButton={true}
           searchPlaceholder="Search orders..."
           clientSideSearch={false}
-          clientSideColumnFilter={false}
+          clientSideColumnFilter={true}
           extraFilters={extraFilters}
           showSubHeaders={false}
         />
