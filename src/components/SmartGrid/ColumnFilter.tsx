@@ -11,9 +11,10 @@ interface ColumnFilterProps {
   column: GridColumnConfig;
   currentFilter?: FilterConfig;
   onFilterChange: (filter: FilterConfig | null) => void;
+  clientSideColumnFilter?: boolean;
 }
 
-export function ColumnFilter({ column, currentFilter, onFilterChange }: ColumnFilterProps) {
+export function ColumnFilter({ column, currentFilter, onFilterChange, clientSideColumnFilter = true }: ColumnFilterProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [value, setValue] = useState('');
 

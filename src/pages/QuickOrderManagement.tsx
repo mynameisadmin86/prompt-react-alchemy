@@ -274,7 +274,7 @@ const QuickOrderManagement: React.FC = () => {
           console.warn('API returned invalid data format:', response);
           console.warn('Expected array but got:', typeof data, data);
           if (isMounted) {
-            gridState.setGridData(processedData);
+            gridState.setGridData([]);
             gridState.setLoading(false);
             setApiStatus('error');
           }
@@ -363,6 +363,7 @@ const QuickOrderManagement: React.FC = () => {
           showCreateButton={true}
           searchPlaceholder="Search orders..."
           clientSideSearch={false}
+          clientSideColumnFilter={false}
           extraFilters={extraFilters}
           showSubHeaders={false}
         />

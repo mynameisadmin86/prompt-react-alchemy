@@ -65,6 +65,7 @@ export function SmartGrid({
   groupableColumns,
   showGroupingDropdown,
   clientSideSearch = false,
+  clientSideColumnFilter = true,
   showSubHeaders = true,
   showMainRowFilters = true,
   showExtraFilters = true,
@@ -1026,19 +1027,20 @@ export function SmartGrid({
                             minWidth: `${Math.max(80, column.width * 0.8)}px`
                           }}
                         >
-                          {column.filterable && (
-                            <ColumnFilter
-                              column={column}
-                              currentFilter={currentFilter}
-                              onFilterChange={(filter) => {
-                                if (filter) {
-                                  handleColumnFilterChange(filter, column, onServerFilter);
-                                } else {
-                                  handleClearColumnFilter(column.key);
-                                }
-                              }}
-                            />
-                          )}
+                           {column.filterable && (
+                             <ColumnFilter
+                               column={column}
+                               currentFilter={currentFilter}
+                               clientSideColumnFilter={clientSideColumnFilter}
+                               onFilterChange={(filter) => {
+                                 if (filter) {
+                                   handleColumnFilterChange(filter, column, clientSideColumnFilter ? undefined : onServerFilter);
+                                 } else {
+                                   handleClearColumnFilter(column.key);
+                                 }
+                               }}
+                             />
+                           )}
                         </TableHead>
                       );
                     })}
