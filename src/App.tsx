@@ -19,6 +19,7 @@ import BillingDemo from "./pages/BillingDemo";
 import FileUploadDemo from "./pages/FileUploadDemo";
 import SmartGridGroupingDemo from "./pages/SmartGridGroupingDemo";
 import NotFound from "./pages/NotFound";
+import DynamicCardView from "./pages/DynamicCardView";
 
 const queryClient = new QueryClient();
 
@@ -35,6 +36,7 @@ const App = () => (
           <Route path="/trip-plans-search-hub-api" element={<TripPlansSearchHubAPI />} />
           <Route path="/dynamic-panel-demo" element={<DynamicPanelDemo />} />
           <Route path="/dynamic-panel-demo-clone" element={<DynamicPanelDemoClone />} />
+          <Route path="/card-view" element={<DynamicCardView />} />
           <Route path="/flex-grid-demo" element={<FlexGridDemo />} />
           <Route path="/flex-grid-layout-page" element={<FlexGridLayoutPage />} />
           <Route path="/trip-execution" element={<TripExecution />} />

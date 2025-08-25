@@ -89,7 +89,14 @@ const Index = () => {
       icon: Layers,
       path: "/smart-grid-grouping-demo",
       color: "text-violet-600"
-    }
+    },
+    {
+      title: "Dynamic Card View",
+      description: "Card view",
+      icon: PanelLeft,
+      path: "/card-view",
+      color: "text-amber-600"
+    },
   ];
 
   return (

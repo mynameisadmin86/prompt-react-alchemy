@@ -8,6 +8,9 @@ import { FieldRenderer } from './FieldRenderer';
 import { EnhancedFieldVisibilityModal } from './EnhancedFieldVisibilityModal';
 import { PanelStatusIndicator } from './PanelStatusIndicator';
 import { DynamicPanelProps, PanelConfig, PanelSettings } from '@/types/dynamicPanel';
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
+import ConfirmSwitch from '../../assets/images/ConfirmSwitch.png';
+import { combineInputDropdownValue, InputDropdownValue, splitInputDropdownValue } from '@/utils/inputDropdown';
 
 export interface DynamicPanelRef {
   getFormValues: () => any;
@@ -18,6 +21,7 @@ export const DynamicPanel = forwardRef<DynamicPanelRef, DynamicPanelProps>(({
   panelOrder = 1,
   startingTabIndex = 1,
   panelTitle: initialPanelTitle,
+  panelIcon: initialPanelIcon,
   panelConfig: initialPanelConfig,
   formName,
   initialData = {},
@@ -30,10 +34,14 @@ export const DynamicPanel = forwardRef<DynamicPanelRef, DynamicPanelProps>(({
   userId = 'default-user',
   panelWidth = 'full',
   collapsible = false,
-  showPreview = false
+  showPreview = false,
+  onScrollPanel = false,
+  className = '',
+  panelSubTitle = '',
 }, ref) => {
   const [panelConfig, setPanelConfig] = useState<PanelConfig>(initialPanelConfig);
   const [panelTitle, setPanelTitle] = useState(initialPanelTitle);
+  const [panelIcon, setPanelIcon] = useState(initialPanelIcon);
   const [currentPanelWidth, setCurrentPanelWidth] = useState<'full' | 'half' | 'third' | 'quarter' | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12>(panelWidth);
   const [isCollapsible, setIsCollapsible] = useState(collapsible);
   const [panelVisible, setPanelVisible] = useState(true);
@@ -50,6 +58,15 @@ export const DynamicPanel = forwardRef<DynamicPanelRef, DynamicPanelProps>(({
       if (config.value !== undefined && config.value !== '') {
         defaults[fieldId] = config.value;
       }
+      // Force split for UnitPrice for debugging
+      // if (fieldId === 'UnitPrice' && typeof defaults[fieldId] === 'string') {
+      //   console.log('Forcing split for UnitPrice:', defaults[fieldId]);
+      //   defaults[fieldId] = splitInputDropdownValue(defaults[fieldId]);
+      // }
+      // Or keep your generic logic for all inputdropdowns
+      if (config.fieldType === 'inputdropdown' && typeof defaults[fieldId] === 'string') {
+        defaults[fieldId] = splitInputDropdownValue(defaults[fieldId]);
+      }
     });
     return defaults;
   }, [initialData, panelConfig]);
@@ -61,11 +78,22 @@ export const DynamicPanel = forwardRef<DynamicPanelRef, DynamicPanelProps>(({
   });
 
   const { control, watch, setValue, getValues } = form;
+  const [isSwitchModalOpen, setSwitchModalOpen] = useState(false);
 
   // Expose getFormValues method via ref
   useImperativeHandle(ref, () => ({
-    getFormValues: () => getValues()
-  }), [getValues]);
+    getFormValues: () => {
+      const values = getValues();
+      // Convert all inputdropdown fields to string using the utility
+      const result: Record<string, any> = { ...values };
+      Object.entries(panelConfig).forEach(([fieldId, config]) => {
+        if (config.fieldType === 'inputdropdown' && result[fieldId]) {
+          result[fieldId] = combineInputDropdownValue(result[fieldId] as InputDropdownValue);
+        }
+      });
+      return result;
+    }
+  }), [getValues, panelConfig]);
 
   // Load user configuration on mount
   useEffect(() => {
@@ -215,7 +243,10 @@ export const DynamicPanel = forwardRef<DynamicPanelRef, DynamicPanelProps>(({
     <form name={formName}>
       <div className="grid grid-cols-12 gap-4">
         {visibleFields.map(({ fieldId, config, tabIndex }) => (
-          <div key={fieldId} className={`space-y-1 ${getFieldWidthClass(config.width)}`}>
+          <div
+            key={fieldId}
+            className={`space-y-1 ${getFieldWidthClass(config.width)}`}
+          >
             <label className="text-xs font-medium text-gray-600 block">
               {config.label}
               {config.mandatory && (
@@ -227,6 +258,8 @@ export const DynamicPanel = forwardRef<DynamicPanelRef, DynamicPanelProps>(({
               control={control}
               fieldId={fieldId}
               tabIndex={tabIndex}
+              // Pass mandatory info
+              // mandatory={config.mandatory}
             />
           </div>
         ))}
@@ -266,7 +299,7 @@ export const DynamicPanel = forwardRef<DynamicPanelRef, DynamicPanelProps>(({
           e.stopPropagation();
           setIsConfigModalOpen(true);
         }}
-        className="h-6 w-6 text-gray-400 hover:text-gray-600"
+        className="h-5 w-5 text-gray-400 hover:text-gray-600"
       >
         <Settings className="h-3 w-3" />
       </Button>
@@ -282,19 +315,30 @@ export const DynamicPanel = forwardRef<DynamicPanelRef, DynamicPanelProps>(({
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
-        <Card className="border border-gray-200 shadow-sm">
+        <Card className="border border-gray-200 shadow-sm mb-6">
           {showHeader ? (
             <CollapsibleTrigger asChild>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3 px-4 pt-4 cursor-pointer hover:bg-gray-50">
+              <CardHeader className="flex border-b border-gray-300 flex-row items-center justify-between space-y-0 pb-3 px-4 pt-4 cursor-pointer hover:bg-gray-50">
                 <div className="flex items-center gap-2">
-                  <div className="w-5 h-5 border-2 border-purple-500 rounded"></div>
+                  {/* <div className="w-5 h-5 border-2 border-purple-500 rounded"></div> */}
+                  <div className="">{panelIcon}</div>
                   <CardTitle className="text-sm font-medium text-gray-700">{panelTitle}</CardTitle>
-                   <PanelStatusIndicator 
+                  {/* {isEditQuickOrder && quickOrder && (
+                    <>
+                      <span className="px-2 py-0.5 rounded bg-blue-100 text-blue-700 text-xs font-semibold border border-blue-200">
+                        {quickOrder.QuickUniqueID || "QO/00001/2025"}
+                      </span>
+                      <span className="px-2 py-0.5 rounded bg-green-100 text-green-700 text-xs font-semibold border border-green-200">
+                        {quickOrder.Status || "Confirmed"}
+                      </span>
+                    </>
+                  )} */}
+                  <PanelStatusIndicator 
                      panelConfig={panelConfig}
                      formData={getValues() || {}}
                      showStatus={showStatusIndicator}
                    />
-                  {showPreview && (
+                  {panelSubTitle && (
                     <span className="text-xs text-blue-600 font-medium">DB000023/42</span>
                   )}
                 </div>

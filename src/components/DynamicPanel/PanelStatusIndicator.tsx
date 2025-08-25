@@ -33,21 +33,21 @@ export const PanelStatusIndicator: React.FC<PanelStatusIndicatorProps> = ({
 
   if (completedMandatory === totalMandatory) {
     status = 'complete';
-    icon = <Check className="h-4 w-4" />;
-    colorClass = 'text-green-600 bg-green-100';
+    icon = <Check className="h-3.5 w-3.5" />;
+    colorClass = 'text-white bg-green-600';
   } else if (completedMandatory > 0) {
     status = 'partial';
-    icon = <Clock className="h-4 w-4" />;
-    colorClass = 'text-amber-600 bg-amber-100';
+    icon = <Check className="h-3.5 w-3.5" />;
+    colorClass = 'text-white bg-amber-600';
   } else {
     status = 'empty';
-    icon = <X className="h-4 w-4" />;
-    colorClass = 'text-red-600 bg-red-100';
+    icon = <Check className="h-3.5 w-3.5" />;
+    colorClass = 'text-gray-600 bg-gray-100 border border-gray-300';
   }
 
   return (
     <div 
-      className={`inline-flex items-center justify-center w-6 h-6 rounded-full ${colorClass}`}
+      className={`inline-flex items-center justify-center w-5 h-5 rounded-full ${colorClass}`}
       title={`${completedMandatory}/${totalMandatory} mandatory fields completed`}
     >
       {icon}
