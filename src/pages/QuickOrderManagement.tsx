@@ -230,7 +230,7 @@ const QuickOrderManagement: React.FC = () => {
 
       console.log('Processed Search Data:', processedData);
       
-      //gridState.setGridData(processedData);
+      gridState.setGridData(processedData);
       gridState.setLoading(false);
       setApiStatus('success');
       
