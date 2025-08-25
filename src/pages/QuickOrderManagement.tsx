@@ -3,7 +3,11 @@ import { SmartGridWithGrouping } from '@/components/SmartGrid';
 import { GridColumnConfig, FilterConfig } from '@/types/smartgrid';
 import { useToast } from '@/hooks/use-toast';
 import { quickOrderService } from '@/api/services/quickOrderService';
+import { useSmartGridState } from '@/hooks/useSmartGridState';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
+import { Eye, GitPullRequest } from 'lucide-react';
+
+const GitPullActionButton = () => <GitPullRequest className="h-4 w-4" />;
 
 interface QuickOrderData {
   id: string;
@@ -39,225 +43,198 @@ interface QuickOrderData {
 }
 
 const QuickOrderManagement: React.FC = () => {
-  const [data, setData] = useState<QuickOrderData[]>([]);
-  const [loading, setLoading] = useState(false);
   const [selectedRows, setSelectedRows] = useState<Set<number>>(new Set());
   const [currentFilters, setCurrentFilters] = useState<Record<string, any>>({});
+  const [apiStatus, setApiStatus] = useState<'loading' | 'success' | 'error'>('loading');
+  const [resourceGroups, setResourceGroups] = useState<any[]>([]);
+  const [cardData, setCardData] = useState<any[]>([]);
+  const [groupLevelModalOpen, setGroupLevelModalOpen] = useState(false);
   const { toast } = useToast();
+  const gridState = useSmartGridState();
 
   const initialColumns: GridColumnConfig[] = [
     {
-      key: 'quickOrderNo',
-      label: 'Quick Order No',
+      key: 'QuickOrderNo',
+      label: 'Quick Order No.',
       type: 'Link',
-      width: 140,
       sortable: true,
-      filterable: true,
-      onClick: (rowData: any) => {
-        console.log('Quick Order clicked:', rowData);
-      }
+      editable: false,
+      mandatory: true,
+      subRow: false
     },
     {
-      key: 'orderType',
+      key: 'QuickOrderDate',
+      label: 'Quick Order Date',
+      type: 'Date',
+      sortable: true,
+      editable: false,
+      subRow: false
+    },
+    {
+      key: 'Status',
+      label: 'Status',
+      type: 'Badge',
+      sortable: true,
+      editable: false,
+      subRow: false
+    },
+    {
+      key: 'CustomerOrVendor',
+      label: 'Customer/Supplier',
+      type: 'EditableText',
+      sortable: true,
+      editable: false,
+      subRow: false
+    },
+    {
+      key: 'Customer_Supplier_RefNo',
+      label: 'Cust/Sup. Ref. No.',
+      type: 'Text',
+      sortable: true,
+      editable: false,
+      subRow: false
+    },
+    {
+      key: 'Contract',
+      label: 'Contract',
+      type: 'Text',
+      sortable: true,
+      editable: false,
+      subRow: false
+    },
+    {
+      key: 'OrderType',
       label: 'Order Type',
       type: 'Text',
-      width: 120,
       sortable: true,
-      filterable: true
+      editable: false,
+      subRow: false
     },
     {
-      key: 'supplier',
-      label: 'Supplier',
+      key: 'TotalNet',
+      label: 'Total Net',
       type: 'Text',
-      width: 150,
       sortable: true,
-      filterable: true
+      editable: false,
+      subRow: false
     },
     {
-      key: 'customer',
-      label: 'Customer',
+      key: 'actions',
+      label: '',
       type: 'Text',
-      width: 150,
-      sortable: true,
-      filterable: true
-    },
-    {
-      key: 'draftBillStatus',
-      label: 'Draft Bill Status',
-      type: 'Badge',
-      width: 130,
-      sortable: true,
-      filterable: true,
-      statusMap: {
-        'draft': 'Draft',
-        'pending': 'Pending',
-        'approved': 'Approved',
-        'rejected': 'Rejected'
-      }
-    },
-    {
-      key: 'invoiceStatus',
-      label: 'Invoice Status',
-      type: 'Badge',
-      width: 120,
-      sortable: true,
-      filterable: true,
-      statusMap: {
-        'pending': 'Pending',
-        'paid': 'Paid',
-        'overdue': 'Overdue'
-      }
-    },
-    {
-      key: 'serviceFromDate',
-      label: 'Service From Date',
-      type: 'Date',
-      width: 140,
-      sortable: true,
-      filterable: true
-    },
-    {
-      key: 'serviceToDate',
-      label: 'Service To Date',
-      type: 'Date',
-      width: 140,
-      sortable: true,
-      filterable: true
-    },
-    {
-      key: 'departurePoint',
-      label: 'Departure Point',
-      type: 'Text',
-      width: 150,
-      sortable: true,
-      filterable: true
-    },
-    {
-      key: 'arrivalPoint',
-      label: 'Arrival Point',
-      type: 'Text',
-      width: 150,
-      sortable: true,
-      filterable: true
-    },
-    {
-      key: 'isBillingFailed',
-      label: 'Is Billing Failed',
-      type: 'Badge',
-      width: 130,
-      sortable: true,
-      filterable: true,
-      statusMap: {
-        'true': 'Failed',
-        'false': 'Success'
+      sortable: false,
+      editable: false,
+      subRow: false,
+      width: 80,
+      onClick: async (rowData: any) => {
+        console.log('clicked for:', rowData);
+        if (rowData.QuickUniqueID) {
+          try {
+            const resourceGroupAsyncFetch: any = await quickOrderService.screenFetchQuickOrder(rowData.QuickUniqueID);
+            const jsonParsedData: any = JSON.parse(resourceGroupAsyncFetch?.data?.ResponseData);
+            console.log('Parsed Data:', jsonParsedData);
+            setResourceGroups(jsonParsedData?.ResponseResult[0] ? [jsonParsedData.ResponseResult[0]] : []);
+            setCardData(jsonParsedData?.ResponseResult[0]?.ResourceGroup || []);
+            setGroupLevelModalOpen(true);
+          } catch (error) {
+            console.error('Error fetching resource group:', error);
+            toast({
+              title: "Error",
+              description: "Failed to fetch resource group data",
+              variant: "destructive",
+            });
+          }
+        }
       }
     }
   ];
 
   const extraFilters = [
-    { key: 'orderType', label: 'Order Type', type: 'text' as const },
-    { key: 'supplier', label: 'Supplier', type: 'text' as const },
-    { key: 'contract', label: 'Contract', type: 'text' as const },
-    { key: 'cluster', label: 'Cluster', type: 'text' as const },
-    { key: 'customer', label: 'Customer', type: 'text' as const },
-    { key: 'customerSupplierRefNo', label: 'Customer Supplier Ref No', type: 'text' as const },
-    { key: 'draftBillNo', label: 'Draft Bill No', type: 'text' as const },
-    { key: 'departurePoint', label: 'Departure Point', type: 'text' as const },
-    { key: 'arrivalPoint', label: 'Arrival Point', type: 'text' as const },
-    { key: 'serviceType', label: 'Service Type', type: 'text' as const },
-    { key: 'serviceFromDate', label: 'Service From Date', type: 'date' as const },
-    { key: 'serviceToDate', label: 'Service To Date', type: 'date' as const },
-    { key: 'quickUniqueId', label: 'Quick Unique ID', type: 'text' as const },
-    { key: 'quickOrderNo', label: 'Quick Order No', type: 'text' as const },
-    { key: 'draftBillStatus', label: 'Draft Bill Status', type: 'text' as const },
-    { key: 'isBillingFailed', label: 'Is Billing Failed', type: 'select' as const, 
-      options: ['', 'true', 'false']
-    },
-    { key: 'subService', label: 'Sub Service', type: 'text' as const },
-    { key: 'wbs', label: 'WBS', type: 'text' as const },
-    { key: 'operationalLocation', label: 'Operational Location', type: 'text' as const },
-    { key: 'primaryRefDoc', label: 'Primary Ref Doc', type: 'text' as const },
-    { key: 'createdBy', label: 'Created By', type: 'text' as const },
-    { key: 'secondaryDoc', label: 'Secondary Doc', type: 'text' as const },
-    { key: 'invoiceNo', label: 'Invoice No', type: 'text' as const },
-    { key: 'invoiceStatus', label: 'Invoice Status', type: 'text' as const },
-    { key: 'resourceType', label: 'Resource Type', type: 'text' as const },
-    { key: 'wagon', label: 'Wagon', type: 'text' as const },
-    { key: 'container', label: 'Container', type: 'text' as const },
-    { key: 'fromOrderDate', label: 'From Order Date', type: 'date' as const }
+    { key: 'QuickOrderNo', label: 'Quick Order No', type: 'text' as const },
+    { key: 'QuickOrderDate', label: 'Quick Order Date', type: 'date' as const },
+    { key: 'Status', label: 'Status', type: 'text' as const },
+    { key: 'CustomerOrVendor', label: 'Customer/Supplier', type: 'text' as const },
+    { key: 'Customer_Supplier_RefNo', label: 'Cust/Sup. Ref. No.', type: 'text' as const },
+    { key: 'Contract', label: 'Contract', type: 'text' as const },
+    { key: 'OrderType', label: 'Order Type', type: 'text' as const },
+    { key: 'TotalNet', label: 'Total Net', type: 'text' as const }
   ];
 
-  const handleSearch = async (filters: FilterConfig[]) => {
-    try {
-      setLoading(true);
-      
-      // Convert filters to API format
-      const filterParams: Record<string, any> = {};
-      filters.forEach(filter => {
-        if (filter.value !== undefined && filter.value !== null && filter.value !== '') {
-          filterParams[filter.column] = filter.value;
-        }
-      });
-
-      // Add any current advanced filters
-      Object.keys(currentFilters).forEach(key => {
-        if (currentFilters[key] !== undefined && currentFilters[key] !== null && currentFilters[key] !== '') {
-          filterParams[key] = currentFilters[key];
-        }
-      });
-
-      console.log('Searching with filters:', filterParams);
-      
-      const response = await quickOrderService.searchOrders(filterParams);
-      console.log('Search response:', response);
-      
-      if (response && response.success && Array.isArray(response.data)) {
-        setData(response.data);
-        toast({
-          title: "Success",
-          description: `Found ${response.data.length} orders`,
-        });
-      } else {
-        setData([]);
-        toast({
-          title: "No Results",
-          description: "No orders found matching your criteria",
-        });
-      }
-    } catch (error) {
-      console.error('Search failed:', error);
-      toast({
-        title: "Error",
-        description: "Failed to search orders. Please try again.",
-        variant: "destructive",
-      });
-      setData([]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleFiltersChange = (filters: Record<string, any>) => {
-    setCurrentFilters(filters);
-  };
-
-  const handleRowSelection = (selectedRowIds: Set<number>) => {
-    setSelectedRows(selectedRowIds);
-  };
-
-  const processedData = useMemo(() => {
-    return data.map(item => ({
-      ...item,
-      isBillingFailed: {
-        value: item.isBillingFailed,
-        variant: item.isBillingFailed ? 'destructive' : 'default'
-      }
-    }));
-  }, [data]);
-
-  // Initial load with empty filters
   useEffect(() => {
-    handleSearch([]);
+    gridState.setColumns(initialColumns);
+    gridState.setLoading(true);
+    setApiStatus('loading');
+
+    let isMounted = true;
+    let searchFilters = [];
+
+    quickOrderService.getQuickOrders({
+      filters: searchFilters
+    })
+      .then((response: any) => {
+        if (!isMounted) return;
+
+        console.log('API Response:', response);
+
+        const parsedResponse = JSON.parse(response?.data?.ResponseData || '{}');
+        const data = parsedResponse.ResponseResult;
+
+        if (!data || !Array.isArray(data)) {
+          console.warn('API returned invalid data format:', response);
+          console.warn('Expected array but got:', typeof data, data);
+          if (isMounted) {
+            gridState.setGridData([]);
+            gridState.setLoading(false);
+            setApiStatus('error');
+          }
+          return;
+        }
+
+        const processedData = data.map((row: any) => {
+          const getStatusColorLocal = (status: string) => {
+            const statusColors: Record<string, string> = {
+              'Released': 'badge-fresh-green rounded-2xl',
+              'Under Execution': 'badge-purple rounded-2xl',
+              'Fresh': 'badge-blue rounded-2xl',
+              'Cancelled': 'badge-red rounded-2xl',
+              'Deleted': 'badge-red rounded-2xl',
+              'Save': 'badge-green rounded-2xl',
+              'Under Amendment': 'badge-orange rounded-2xl',
+              'Confirmed': 'badge-green rounded-2xl',
+              'Initiated': 'badge-blue rounded-2xl',
+            };
+            return statusColors[status] || "bg-gray-100 text-gray-800 border-gray-300";
+          };
+
+          return {
+            ...row,
+            Status: {
+              value: row.Status,
+              variant: getStatusColorLocal(row.Status),
+            },
+          };
+        });
+
+        console.log('Processed Data:', processedData);
+
+        if (isMounted) {
+          gridState.setGridData(processedData);
+          gridState.setLoading(false);
+          setApiStatus('success');
+        }
+      })
+      .catch((error: any) => {
+        console.error("Quick order fetch failed:", error);
+        if (isMounted) {
+          gridState.setGridData([]);
+          gridState.setLoading(false);
+          setApiStatus('error');
+        }
+      });
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   return (
@@ -281,17 +258,16 @@ const QuickOrderManagement: React.FC = () => {
       <div className="flex-1 overflow-hidden">
         <SmartGridWithGrouping
           columns={initialColumns}
-          data={processedData}
-          groupableColumns={['orderType', 'supplier', 'draftBillStatus', 'invoiceStatus', 'departurePoint', 'arrivalPoint']}
+          data={gridState.gridData}
+          groupableColumns={['OrderType', 'CustomerOrVendor', 'Status', 'Contract']}
           showGroupingDropdown={true}
           paginationMode="pagination"
-          onServerFilter={handleSearch}
-          onFiltersChange={handleFiltersChange}
+          onFiltersChange={setCurrentFilters}
           selectedRows={selectedRows}
-          onSelectionChange={handleRowSelection}
+          onSelectionChange={setSelectedRows}
           configurableButtons={[]}
-          gridTitle="Quick Order"
-          recordCount={data.length}
+          gridTitle="Quick Order Management"
+          recordCount={gridState.gridData.length}
           showCreateButton={true}
           searchPlaceholder="Search orders..."
           clientSideSearch={false}

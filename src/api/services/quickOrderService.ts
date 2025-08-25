@@ -3,6 +3,7 @@ import { ApiResponse, PaginatedResponse } from '@/api/types';
 
 export interface QuickOrderSearchParams {
   [key: string]: any;
+  filters?: any[];
   orderType?: string;
   supplier?: string;
   contract?: string;
@@ -203,10 +204,36 @@ class QuickOrderService {
     }
   }
 
-  async deleteOrder(id: string): Promise<ApiResponse<void>> {
+  async getQuickOrders(params: QuickOrderSearchParams = {}): Promise<any> {
     try {
-      const response = await fetch(`${this.baseUrl}/${id}`, {
-        method: 'DELETE',
+      console.log('Making API call to get quick orders with params:', params);
+      
+      const response = await fetch(`${this.baseUrl}/search`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(params)
+      });
+
+      if (!response.ok) {
+        throw new Error(`API call failed with status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('QuickOrderService.getQuickOrders error:', error);
+      throw error;
+    }
+  }
+
+  async screenFetchQuickOrder(quickUniqueId: string): Promise<any> {
+    try {
+      console.log('Fetching quick order details for ID:', quickUniqueId);
+      
+      const response = await fetch(`${this.baseUrl}/details/${quickUniqueId}`, {
+        method: 'GET',
         headers: {
           'Content-Type': 'application/json',
         }
@@ -219,7 +246,7 @@ class QuickOrderService {
       const data = await response.json();
       return data;
     } catch (error) {
-      console.error('QuickOrderService.deleteOrder error:', error);
+      console.error('QuickOrderService.screenFetchQuickOrder error:', error);
       throw error;
     }
   }
