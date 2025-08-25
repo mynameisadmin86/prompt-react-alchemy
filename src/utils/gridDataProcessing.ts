@@ -8,7 +8,8 @@ export function processGridData(
   sort: SortConfig | undefined,
   columns: GridColumnConfig[],
   onDataFetch?: any,
-  clientSideSearch: boolean = true
+  clientSideSearch: boolean = true,
+  clientSideColumnFilter: boolean = true
 ) {
   if (onDataFetch) {
     // For lazy loading, return data as-is (sorting/filtering handled server-side)
@@ -33,8 +34,8 @@ export function processGridData(
     );
   }
 
-  // Apply column filters (only local filters - server filters are handled separately)
-  if (filters.length > 0) {
+  // Apply column filters (only if clientSideColumnFilter is enabled)
+  if (filters.length > 0 && clientSideColumnFilter) {
     result = result.filter(row => {
       return filters.every(filter => {
         // Only process filters that are for local filtering

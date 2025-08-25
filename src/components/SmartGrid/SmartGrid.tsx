@@ -304,8 +304,8 @@ export function SmartGrid({
 
   // Process data with sorting and filtering (only if not using lazy loading)
   const processedData = useMemo(() => {
-    return processGridData(data, globalFilter, filters, sort, currentColumns, onDataFetch, clientSideSearch);
-  }, [data, globalFilter, filters, sort, currentColumns, onDataFetch, clientSideSearch]);
+    return processGridData(data, globalFilter, filters, sort, currentColumns, onDataFetch, clientSideSearch, clientSideColumnFilter);
+  }, [data, globalFilter, filters, sort, currentColumns, onDataFetch, clientSideSearch, clientSideColumnFilter]);
 
   // Handle advanced filter search
   const handleAdvancedFilterSearch = useCallback(() => {
