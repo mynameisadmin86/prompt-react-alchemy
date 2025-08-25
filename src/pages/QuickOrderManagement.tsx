@@ -165,25 +165,10 @@ const QuickOrderManagement: React.FC = () => {
       gridState.setLoading(true);
       setApiStatus('loading');
       
-      // Convert filters to API format
-      const filterParams: Record<string, any> = {};
-      filters.forEach(filter => {
-        if (filter.value !== undefined && filter.value !== null && filter.value !== '') {
-          filterParams[filter.column] = filter.value;
-        }
-      });
-
-      // Add any current advanced filters
-      Object.keys(currentFilters).forEach(key => {
-        if (currentFilters[key] !== undefined && currentFilters[key] !== null && currentFilters[key] !== '') {
-          filterParams[key] = currentFilters[key];
-        }
-      });
-
-      console.log('Searching with filters:', filterParams);
+      console.log('Loading all orders without filters');
       
       const response = await quickOrderService.getQuickOrders({
-        filters: [filterParams]
+        filters: []
       });
       
       console.log('Search API Response:', response);
@@ -198,7 +183,7 @@ const QuickOrderManagement: React.FC = () => {
         setApiStatus('error');
         toast({
           title: "No Results",
-          description: "No orders found matching your criteria",
+          description: "No orders found",
         });
         return;
       }
@@ -236,7 +221,7 @@ const QuickOrderManagement: React.FC = () => {
       
       toast({
         title: "Success",
-        description: `Found ${processedData.length} orders`,
+        description: `Loaded ${processedData.length} orders`,
       });
       
     } catch (error) {
@@ -246,7 +231,7 @@ const QuickOrderManagement: React.FC = () => {
       setApiStatus('error');
       toast({
         title: "Error",
-        description: "Failed to search orders. Please try again.",
+        description: "Failed to load orders. Please try again.",
         variant: "destructive",
       });
     }
