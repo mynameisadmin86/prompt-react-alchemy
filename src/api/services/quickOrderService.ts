@@ -96,9 +96,22 @@ class QuickOrderService {
       }
 
       const data = await response.json();
+      console.log('API Response:', data);
       
-      // Handle different response formats
-      if (data.success !== undefined) {
+      // Handle ResponseData/ResponseResult structure
+      if (data.ResponseData && data.ResponseData.ResponseResult) {
+        return {
+          success: true,
+          data: data.ResponseData.ResponseResult,
+          message: 'Orders retrieved successfully'
+        };
+      } else if (data.ResponseResult && Array.isArray(data.ResponseResult)) {
+        return {
+          success: true,
+          data: data.ResponseResult,
+          message: 'Orders retrieved successfully'
+        };
+      } else if (data.success !== undefined) {
         return data;
       } else if (Array.isArray(data)) {
         return {

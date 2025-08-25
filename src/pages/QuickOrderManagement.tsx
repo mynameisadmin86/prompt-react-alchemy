@@ -209,8 +209,9 @@ const QuickOrderManagement: React.FC = () => {
       console.log('Searching with filters:', filterParams);
       
       const response = await quickOrderService.searchOrders(filterParams);
+      console.log('Search response:', response);
       
-      if (response && Array.isArray(response.data)) {
+      if (response && response.success && Array.isArray(response.data)) {
         setData(response.data);
         toast({
           title: "Success",
