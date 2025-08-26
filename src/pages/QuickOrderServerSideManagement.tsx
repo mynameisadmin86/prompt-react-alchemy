@@ -211,7 +211,7 @@ const QuickOrderServerSideManagement: React.FC = () => {
             'Fresh': 'badge-blue rounded-2xl',
             'Cancelled': 'badge-red rounded-2xl',
             'Deleted': 'badge-red rounded-2xl',
-            'Save': 'badge-green rounded-2xl',
+            'Save': 'badge-green rounded-2xl bg-blue-600',
             'Under Amendment': 'badge-orange rounded-2xl',
             'Confirmed': 'badge-green rounded-2xl',
             'Initiated': 'badge-blue rounded-2xl',
