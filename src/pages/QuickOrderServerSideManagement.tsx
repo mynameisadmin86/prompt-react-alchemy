@@ -211,12 +211,12 @@ const QuickOrderServerSideManagement: React.FC = () => {
             'Fresh': 'badge-blue rounded-2xl',
             'Cancelled': 'badge-red rounded-2xl',
             'Deleted': 'badge-red rounded-2xl',
-            'Save': 'badge-green rounded-2xl bg-blue-600',
+            'Save': 'badge-green rounded-2xl',
             'Under Amendment': 'badge-orange rounded-2xl',
             'Confirmed': 'badge-green rounded-2xl',
             'Initiated': 'badge-blue rounded-2xl',
           };
-          return statusColors[status] || "bg-gray-200 text-gray-800 border-gray-300";
+          return statusColors[status] || "bg-gray-100 text-gray-800 border-gray-300";
         };
 
         return {
