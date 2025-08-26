@@ -150,17 +150,6 @@ const QuickOrderManagement: React.FC = () => {
     }
   ];
 
-  const extraFilters = [
-    { key: 'QuickOrderNo', label: 'Quick Order No', type: 'text' as const },
-    { key: 'QuickOrderDate', label: 'Quick Order Date', type: 'date' as const },
-    { key: 'Status', label: 'Status', type: 'text' as const },
-    { key: 'CustomerOrVendor', label: 'Customer/Supplier', type: 'text' as const },
-    { key: 'Customer_Supplier_RefNo', label: 'Cust/Sup. Ref. No.', type: 'text' as const },
-    { key: 'Contract', label: 'Contract', type: 'text' as const },
-    { key: 'OrderType', label: 'Order Type', type: 'text' as const },
-    { key: 'TotalNet', label: 'Total Net', type: 'text' as const }
-  ];
-
   // Server-side filters for the new ServersideFilter component
   const serverFilters: ServerFilter[] = [
     { key: 'QuickOrderNo', label: 'Quick Order No', type: 'text' },
@@ -457,7 +446,6 @@ const QuickOrderManagement: React.FC = () => {
           showCreateButton={true}
           searchPlaceholder="Search orders..."
           clientSideSearch={false}
-          extraFilters={extraFilters}
           showSubHeaders={false}
           // Server-side filter props
           serverFilters={serverFilters}
