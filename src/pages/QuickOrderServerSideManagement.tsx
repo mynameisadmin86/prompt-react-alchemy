@@ -216,7 +216,7 @@ const QuickOrderServerSideManagement: React.FC = () => {
             'Confirmed': 'badge-green rounded-2xl',
             'Initiated': 'badge-blue rounded-2xl',
           };
-          return statusColors[status] || "bg-gray-100 text-gray-800 border-gray-300";
+          return statusColors[status] || "bg-gray-200 text-gray-800 border-gray-300";
         };
 
         return {
