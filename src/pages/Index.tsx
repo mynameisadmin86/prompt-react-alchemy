@@ -104,6 +104,13 @@ const Index = () => {
       path: "/quick-order-management",
       color: "text-blue-500"
     },
+    {
+      title: "Quick Order Server-Side Management",
+      description: "Server-side filtering quick order management with optimized API integration",
+      icon: ShoppingCart,
+      path: "/quick-order-server-side-management",
+      color: "text-emerald-500"
+    },
   ];
 
   return (

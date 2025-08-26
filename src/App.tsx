@@ -21,6 +21,7 @@ import SmartGridGroupingDemo from "./pages/SmartGridGroupingDemo";
 import NotFound from "./pages/NotFound";
 import DynamicCardView from "./pages/DynamicCardView";
 import QuickOrderManagement from "./pages/QuickOrderManagement";
+import QuickOrderServerSideManagement from "./pages/QuickOrderServerSideManagement";
 
 const queryClient = new QueryClient();
 
@@ -47,6 +48,7 @@ const App = () => (
           <Route path="/file-upload-demo" element={<FileUploadDemo />} />
           <Route path="/smart-grid-grouping-demo" element={<SmartGridGroupingDemo />} />
           <Route path="/quick-order-management" element={<QuickOrderManagement />} />
+          <Route path="/quick-order-server-side-management" element={<QuickOrderServerSideManagement />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
