@@ -359,7 +359,6 @@ export function ServersideFilter({
       {/* Filter Panel - Always expanded when visible */}
       <div className="bg-white border rounded shadow-sm">
         <div className="p-3">
-          <div className="text-sm font-medium text-gray-700 mb-3">Filters</div>
           <div className="grid gap-2" style={{ gridTemplateColumns: `repeat(${Math.min(serverFilters.length, 4)}, 1fr)` }}>
             {renderFilterInputs(serverFilters)}
           </div>
