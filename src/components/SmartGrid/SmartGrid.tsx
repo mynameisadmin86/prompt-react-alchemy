@@ -65,7 +65,6 @@ export function SmartGrid({
   groupableColumns,
   showGroupingDropdown,
   clientSideSearch = false,
-  clientSideColumnFilter = true,
   showSubHeaders = true,
   showMainRowFilters = true,
   showExtraFilters = true,
@@ -304,8 +303,8 @@ export function SmartGrid({
 
   // Process data with sorting and filtering (only if not using lazy loading)
   const processedData = useMemo(() => {
-    return processGridData(data, globalFilter, filters, sort, currentColumns, onDataFetch, clientSideSearch, clientSideColumnFilter);
-  }, [data, globalFilter, filters, sort, currentColumns, onDataFetch, clientSideSearch, clientSideColumnFilter]);
+    return processGridData(data, globalFilter, filters, sort, currentColumns, onDataFetch, clientSideSearch);
+  }, [data, globalFilter, filters, sort, currentColumns, onDataFetch, clientSideSearch]);
 
   // Handle advanced filter search
   const handleAdvancedFilterSearch = useCallback(() => {
@@ -1027,20 +1026,19 @@ export function SmartGrid({
                             minWidth: `${Math.max(80, column.width * 0.8)}px`
                           }}
                         >
-                           {column.filterable && (
-                             <ColumnFilter
-                               column={column}
-                               currentFilter={currentFilter}
-                               clientSideColumnFilter={clientSideColumnFilter}
-                               onFilterChange={(filter) => {
-                                 if (filter) {
-                                   handleColumnFilterChange(filter, column, clientSideColumnFilter ? undefined : onServerFilter);
-                                 } else {
-                                   handleClearColumnFilter(column.key);
-                                 }
-                               }}
-                             />
-                           )}
+                          {column.filterable && (
+                            <ColumnFilter
+                              column={column}
+                              currentFilter={currentFilter}
+                              onFilterChange={(filter) => {
+                                if (filter) {
+                                  handleColumnFilterChange(filter, column, onServerFilter);
+                                } else {
+                                  handleClearColumnFilter(column.key);
+                                }
+                              }}
+                            />
+                          )}
                         </TableHead>
                       );
                     })}

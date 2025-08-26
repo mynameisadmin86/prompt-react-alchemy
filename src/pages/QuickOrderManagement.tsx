@@ -180,7 +180,7 @@ const QuickOrderManagement: React.FC = () => {
         }
       });
 
-      console.log('Searching with server-side filters:', filterParams);
+      console.log('Searching with filters:', filterParams);
       
       const response = await quickOrderService.getQuickOrders({
         filters: [filterParams]
@@ -198,7 +198,7 @@ const QuickOrderManagement: React.FC = () => {
         setApiStatus('error');
         toast({
           title: "No Results",
-          description: "No orders found",
+          description: "No orders found matching your criteria",
         });
         return;
       }
@@ -236,7 +236,7 @@ const QuickOrderManagement: React.FC = () => {
       
       toast({
         title: "Success",
-        description: `Loaded ${processedData.length} orders`,
+        description: `Found ${processedData.length} orders`,
       });
       
     } catch (error) {
@@ -246,7 +246,7 @@ const QuickOrderManagement: React.FC = () => {
       setApiStatus('error');
       toast({
         title: "Error",
-        description: "Failed to load orders. Please try again.",
+        description: "Failed to search orders. Please try again.",
         variant: "destructive",
       });
     }
@@ -363,7 +363,6 @@ const QuickOrderManagement: React.FC = () => {
           showCreateButton={true}
           searchPlaceholder="Search orders..."
           clientSideSearch={false}
-          clientSideColumnFilter={true}
           extraFilters={extraFilters}
           showSubHeaders={false}
         />
