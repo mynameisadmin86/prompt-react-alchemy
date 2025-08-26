@@ -833,6 +833,9 @@ export function SmartGrid({
         onGroupByChange={onGroupByChange}
         groupableColumns={groupableColumns}
         showGroupingDropdown={showGroupingDropdown}
+        // Server-side filter props
+        showServersideFilter={showServersideFilter}
+        onToggleServersideFilter={onToggleServersideFilter}
       />
 
        {/* Advanced Filter System - Only show when not using server-side filters */}
