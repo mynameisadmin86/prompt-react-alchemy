@@ -352,7 +352,7 @@ const QuickOrderServerSideManagement: React.FC = () => {
           hideAdvancedFilter={true}
           // Server-side filter props
           serverFilters={serverFilters}
-          showFilterTypeDropdown={true}
+          showFilterTypeDropdown={false}
           showServersideFilter={showServersideFilter}
           onToggleServersideFilter={() => setShowServersideFilter(prev => !prev)}
         />
