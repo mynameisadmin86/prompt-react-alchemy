@@ -182,6 +182,8 @@ export interface SmartGridProps {
   showServersideFilter?: boolean;
   onToggleServersideFilter?: () => void;
   onSearch?: () => void;
+  // Control whether to show AdvancedFilter (disabled when using server-side filters)
+  hideAdvancedFilter?: boolean;
 }
 
 // Legacy interface for backward compatibility

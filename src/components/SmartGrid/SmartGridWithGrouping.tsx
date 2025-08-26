@@ -22,6 +22,7 @@ interface SmartGridWithGroupingProps extends SmartGridProps {
   showFilterTypeDropdown?: boolean;
   showServersideFilter?: boolean;
   onToggleServersideFilter?: () => void;
+  hideAdvancedFilter?: boolean;
 }
 
 export function SmartGridWithGrouping({
@@ -35,6 +36,7 @@ export function SmartGridWithGrouping({
   showFilterTypeDropdown = false,
   showServersideFilter = false,
   onToggleServersideFilter,
+  hideAdvancedFilter = false,
   ...props
 }: SmartGridWithGroupingProps) {
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
@@ -249,6 +251,7 @@ export function SmartGridWithGrouping({
         // Pass server-side filter props
         showServersideFilter={showServersideFilter}
         onToggleServersideFilter={onToggleServersideFilter}
+        hideAdvancedFilter={hideAdvancedFilter}
       />
     </div>
   );

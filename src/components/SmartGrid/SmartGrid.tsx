@@ -68,7 +68,11 @@ export function SmartGrid({
   showSubHeaders = true,
   showMainRowFilters = true,
   showExtraFilters = true,
-  showSubRowFilters = true
+  showSubRowFilters = true,
+  // Server-side filter props
+  showServersideFilter = false,
+  onToggleServersideFilter,
+  hideAdvancedFilter = false,
 }: SmartGridProps) {
   const {
     gridData,
@@ -823,7 +827,7 @@ export function SmartGrid({
         recordCount={recordCount}
         showCreateButton={showCreateButton}
         searchPlaceholder={searchPlaceholder}
-        showAdvancedFilter={showAdvancedFilter}
+        showAdvancedFilter={showAdvancedFilter && !hideAdvancedFilter}
         onToggleAdvancedFilter={() => setShowAdvancedFilter(!showAdvancedFilter)}
         groupByField={groupByField}
         onGroupByChange={onGroupByChange}
@@ -831,25 +835,27 @@ export function SmartGrid({
         showGroupingDropdown={showGroupingDropdown}
       />
 
-       {/* Advanced Filter System */}
-        <AdvancedFilter
-          columns={orderedColumns}
-          subRowColumns={subRowColumns}
-          extraFilters={extraFilters}
-          subRowFilters={subRowFilters}
-          visible={showAdvancedFilter}
-          onToggle={() => setShowAdvancedFilter(!showAdvancedFilter)}
-          onFiltersChange={handleFiltersChange}
-          onSearch={handleAdvancedFilterSearch}
-          gridId="smart-grid"
-          userId="demo-user"
-          clientSideSearch={clientSideSearch}
-          api={mockFilterAPI}
-          showSubHeaders={showSubHeaders}
-          showMainRowFilters={showMainRowFilters}
-          showExtraFilters={showExtraFilters}
-          showSubRowFilters={showSubRowFilters}
-        />
+       {/* Advanced Filter System - Only show when not using server-side filters */}
+        {!hideAdvancedFilter && (
+          <AdvancedFilter
+            columns={orderedColumns}
+            subRowColumns={subRowColumns}
+            extraFilters={extraFilters}
+            subRowFilters={subRowFilters}
+            visible={showAdvancedFilter}
+            onToggle={() => setShowAdvancedFilter(!showAdvancedFilter)}
+            onFiltersChange={handleFiltersChange}
+            onSearch={handleAdvancedFilterSearch}
+            gridId="smart-grid"
+            userId="demo-user"
+            clientSideSearch={clientSideSearch}
+            api={mockFilterAPI}
+            showSubHeaders={showSubHeaders}
+            showMainRowFilters={showMainRowFilters}
+            showExtraFilters={showExtraFilters}
+            showSubRowFilters={showSubRowFilters}
+          />
+        )}
       
       {/* Table Container with horizontal scroll prevention */}
       <div className="bg-white rounded-lg border shadow-sm">

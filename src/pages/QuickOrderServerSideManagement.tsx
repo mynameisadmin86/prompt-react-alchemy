@@ -349,6 +349,7 @@ const QuickOrderServerSideManagement: React.FC = () => {
           searchPlaceholder="Search orders..."
           clientSideSearch={false}
           showSubHeaders={false}
+          hideAdvancedFilter={true}
           // Server-side filter props
           serverFilters={serverFilters}
           showFilterTypeDropdown={true}
