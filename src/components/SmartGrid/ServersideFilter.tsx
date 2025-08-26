@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
-import { Star, X, Search } from 'lucide-react';
+import { Star, X, Search, Settings } from 'lucide-react';
 import { ColumnFilterInput } from './ColumnFilterInput';
 import { FilterSetModal } from './FilterSetModal';
 import { FilterSetDropdown } from './FilterSetDropdown';
+import { ServerFilterFieldModal } from './ServerFilterFieldModal';
 import { GridColumnConfig } from '@/types/smartgrid';
 import { FilterValue, FilterSet, FilterSystemAPI } from '@/types/filterSystem';
 import { useToast } from '@/hooks/use-toast';
@@ -43,9 +44,21 @@ export function ServersideFilter({
   const [pendingFilters, setPendingFilters] = useState<Record<string, FilterValue>>({});
   const [filterSets, setFilterSets] = useState<FilterSet[]>([]);
   const [showSaveModal, setShowSaveModal] = useState(false);
+  const [showFieldModal, setShowFieldModal] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [visibleFields, setVisibleFields] = useState<string[]>([]);
+  const [fieldOrder, setFieldOrder] = useState<string[]>([]);
   
   const { toast } = useToast();
+
+  // Initialize field visibility and order
+  useEffect(() => {
+    if (serverFilters.length > 0 && visibleFields.length === 0) {
+      const allFieldKeys = serverFilters.map(f => f.key);
+      setVisibleFields(allFieldKeys);
+      setFieldOrder(allFieldKeys);
+    }
+  }, [serverFilters]);
 
   // Load saved filter sets on mount
   useEffect(() => {
@@ -245,9 +258,20 @@ export function ServersideFilter({
 
   const activeFilterCount = Object.keys(pendingFilters).length;
 
+  const handleFieldVisibilitySave = (newVisibleFields: string[], newFieldOrder: string[]) => {
+    setVisibleFields(newVisibleFields);
+    setFieldOrder(newFieldOrder);
+  };
+
   // Helper function to render filter inputs
   const renderFilterInputs = (filters: ServerFilter[]) => {
-    return filters.map((filter) => {
+    // Filter and order based on visibility settings
+    const orderedVisibleFilters = fieldOrder
+      .map(fieldKey => filters.find(f => f.key === fieldKey))
+      .filter((filter): filter is ServerFilter => 
+        filter !== undefined && visibleFields.includes(filter.key)
+      );
+    return orderedVisibleFilters.map((filter) => {
       // Convert ServerFilter to GridColumnConfig for compatibility with ColumnFilterInput
       const columnConfig: GridColumnConfig = {
         key: filter.key,
@@ -301,6 +325,15 @@ export function ServersideFilter({
         </div>
 
         <div className="flex items-center space-x-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setShowFieldModal(true)}
+            className="hover:bg-muted"
+          >
+            <Settings className="h-4 w-4" />
+          </Button>
+
           <Button
             variant="default"
             size="sm"
@@ -359,7 +392,7 @@ export function ServersideFilter({
       {/* Filter Panel - Always expanded when visible */}
       <div className="bg-white border rounded shadow-sm">
         <div className="p-3">
-          <div className="grid gap-2" style={{ gridTemplateColumns: `repeat(${Math.min(serverFilters.length, 4)}, 1fr)` }}>
+          <div className="grid gap-2" style={{ gridTemplateColumns: `repeat(${Math.min(visibleFields.length, 4)}, 1fr)` }}>
             {renderFilterInputs(serverFilters)}
           </div>
         </div>
@@ -372,6 +405,16 @@ export function ServersideFilter({
         onSave={handleSaveFilterSet}
         activeFilters={pendingFilters}
         existingNames={filterSets.map(set => set.name)}
+      />
+
+      {/* Server Filter Field Configuration Modal */}
+      <ServerFilterFieldModal
+        open={showFieldModal}
+        onClose={() => setShowFieldModal(false)}
+        serverFilters={serverFilters}
+        visibleFields={visibleFields}
+        fieldOrder={fieldOrder}
+        onSave={handleFieldVisibilitySave}
       />
     </div>
   );
