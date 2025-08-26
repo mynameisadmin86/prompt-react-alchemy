@@ -292,7 +292,7 @@ export function ServersideFilter({
       {/* Filter Controls */}
       <div className="flex items-center justify-between bg-gray-50 p-2 rounded border">
         <div className="flex items-center space-x-2">
-          <div className="text-sm font-medium text-gray-700">Server-side Filters</div>
+          <div className="text-sm font-medium text-gray-700">Search</div>
           {activeFilterCount > 0 && (
             <span className="text-xs bg-blue-100 text-blue-700 rounded-full px-2 py-0.5">
               {activeFilterCount}
