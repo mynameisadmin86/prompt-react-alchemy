@@ -112,6 +112,14 @@ export interface GridPlugin {
   destroy?: () => void;
 }
 
+// Server-side filter interface
+export interface ServerFilter {
+  key: string;
+  label: string;
+  type?: 'text' | 'select' | 'date' | 'dateRange' | 'time' | 'number' | 'boolean';
+  options?: string[];
+}
+
 export interface ExtraFilter {
   key: string;
   label: string;
@@ -170,6 +178,10 @@ export interface SmartGridProps {
   showMainRowFilters?: boolean;
   showExtraFilters?: boolean;
   showSubRowFilters?: boolean;
+  // Server-side filter props
+  showServersideFilter?: boolean;
+  onToggleServersideFilter?: () => void;
+  onSearch?: () => void;
 }
 
 // Legacy interface for backward compatibility

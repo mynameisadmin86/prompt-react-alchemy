@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { SmartGridWithGrouping } from '@/components/SmartGrid';
-import { GridColumnConfig, FilterConfig } from '@/types/smartgrid';
+import { GridColumnConfig, FilterConfig, ServerFilter } from '@/types/smartgrid';
 import { useToast } from '@/hooks/use-toast';
 import { quickOrderService } from '@/api/services/quickOrderService';
 import { useSmartGridState } from '@/hooks/useSmartGridState';
@@ -48,6 +48,7 @@ const QuickOrderManagement: React.FC = () => {
   const [apiStatus, setApiStatus] = useState<'loading' | 'success' | 'error'>('loading');
   const [resourceGroups, setResourceGroups] = useState<any[]>([]);
   const [cardData, setCardData] = useState<any[]>([]);
+  const [showServersideFilter, setShowServersideFilter] = useState<boolean>(false);
   const [groupLevelModalOpen, setGroupLevelModalOpen] = useState(false);
   const { toast } = useToast();
   const gridState = useSmartGridState();
@@ -159,6 +160,22 @@ const QuickOrderManagement: React.FC = () => {
     { key: 'OrderType', label: 'Order Type', type: 'text' as const },
     { key: 'TotalNet', label: 'Total Net', type: 'text' as const }
   ];
+
+  // Server-side filters for the new ServersideFilter component
+  const serverFilters: ServerFilter[] = [
+    { key: 'QuickOrderNo', label: 'Quick Order No', type: 'text' },
+    { key: 'Status', label: 'Status', type: 'select', options: ['Released', 'Under Execution', 'Fresh', 'Cancelled', 'Deleted', 'Save', 'Under Amendment', 'Confirmed', 'Initiated'] },
+    { key: 'CustomerOrVendor', label: 'Customer/Supplier', type: 'text' },
+    { key: 'Contract', label: 'Contract', type: 'text' },
+    { key: 'OrderType', label: 'Order Type', type: 'text' },
+    { key: 'QuickOrderDate', label: 'Quick Order Date', type: 'date' }
+  ];
+
+  const handleSimpleSearch = () => {
+    // For server-side filter, we'll call handleSearch with empty filters
+    // The actual filters will be managed by the ServersideFilter component
+    handleSearch([]);
+  };
 
   const handleSearch = async (filters: FilterConfig[]) => {
     try {
@@ -355,6 +372,7 @@ const QuickOrderManagement: React.FC = () => {
           paginationMode="pagination"
           onServerFilter={handleSearch}
           onFiltersChange={setCurrentFilters}
+          onSearch={handleSimpleSearch}
           selectedRows={selectedRows}
           onSelectionChange={setSelectedRows}
           configurableButtons={[]}
@@ -365,6 +383,11 @@ const QuickOrderManagement: React.FC = () => {
           clientSideSearch={false}
           extraFilters={extraFilters}
           showSubHeaders={false}
+          // Server-side filter props
+          serverFilters={serverFilters}
+          showFilterTypeDropdown={true}
+          showServersideFilter={showServersideFilter}
+          onToggleServersideFilter={() => setShowServersideFilter(prev => !prev)}
         />
       </div>
     </div>

@@ -11,7 +11,8 @@ import {
   List,
   Plus,
   ChevronDown,
-  Group
+  Group,
+  Zap
 } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
@@ -59,6 +60,9 @@ interface GridToolbarProps {
   onGroupByChange?: (field: string | null) => void;
   groupableColumns?: string[];
   showGroupingDropdown?: boolean;
+  // Server-side filter props
+  showServersideFilter?: boolean;
+  onToggleServersideFilter?: () => void;
 }
 
 export function GridToolbar({
@@ -92,7 +96,9 @@ export function GridToolbar({
   groupByField,
   onGroupByChange,
   groupableColumns,
-  showGroupingDropdown = false
+  showGroupingDropdown = false,
+  showServersideFilter = false,
+  onToggleServersideFilter
 }: GridToolbarProps) {
   // Default configurable button configuration
   const defaultConfigurableButton: ConfigurableButtonConfig = {
@@ -198,6 +204,23 @@ export function GridToolbar({
         >
           <Search className="h-4 w-4" />
         </Button>
+
+        {/* Server-side Filter Toggle */}
+        {onToggleServersideFilter && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onToggleServersideFilter}
+            disabled={loading}
+            title="Toggle Server-side Filters"
+            className={cn(
+              "w-8 h-8 flex items-center justify-center rounded hover:bg-gray-100 p-0",
+              showServersideFilter && "bg-purple-50 text-purple-600"
+            )}
+          >
+            <Zap className="h-4 w-4" />
+          </Button>
+        )}
 
         <Button 
           variant="ghost"
