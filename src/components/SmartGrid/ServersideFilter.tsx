@@ -326,15 +326,6 @@ export function ServersideFilter({
 
         <div className="flex items-center space-x-2">
           <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setShowFieldModal(true)}
-            className="hover:bg-muted"
-          >
-            <Settings className="h-4 w-4" />
-          </Button>
-
-          <Button
             variant="default"
             size="sm"
             onClick={() => {
@@ -386,6 +377,15 @@ export function ServersideFilter({
             onRename={handleRename}
             onDelete={handleDelete}
           />
+
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setShowFieldModal(true)}
+            className="hover:bg-muted"
+          >
+            <Settings className="h-4 w-4" />
+          </Button>
         </div>
       </div>
 
