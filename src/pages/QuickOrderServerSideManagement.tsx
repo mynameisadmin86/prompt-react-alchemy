@@ -167,7 +167,7 @@ const QuickOrderServerSideManagement: React.FC = () => {
       
       // Convert filters to API format
       const filterParams: Record<string, any> = {};
-      filters.forEach(filter => {
+      currentFilters.forEach(filter => {
         if (filter.value !== undefined && filter.value !== null && filter.value !== '') {
           filterParams[filter.column] = filter.value;
         }
