@@ -167,7 +167,7 @@ const QuickOrderServerSideManagement: React.FC = () => {
       
       // Convert filters to API format
       const filterParams: Record<string, any> = {};
-      currentFilters.forEach(filter => {
+      filters.forEach(filter => {
         if (filter.value !== undefined && filter.value !== null && filter.value !== '') {
           filterParams[filter.column] = filter.value;
         }
@@ -206,15 +206,15 @@ const QuickOrderServerSideManagement: React.FC = () => {
       const processedData = data.map((row: any) => {
         const getStatusColorLocal = (status: string) => {
           const statusColors: Record<string, string> = {
-            'Released': 'badge-fresh-green rounded-2xl',
-            'Under Execution': 'badge-purple rounded-2xl',
-            'Fresh': 'badge-blue rounded-2xl',
-            'Cancelled': 'badge-red rounded-2xl',
-            'Deleted': 'badge-red rounded-2xl',
-            'Save': 'badge-green rounded-2xl',
-            'Under Amendment': 'badge-orange rounded-2xl',
-            'Confirmed': 'badge-green rounded-2xl',
-            'Initiated': 'badge-blue rounded-2xl',
+            'Released': 'badge-fresh-green rounded-2xl bg-blue-600',
+            'Under Execution': 'badge-purple rounded-2xl bg-blue-600',
+            'Fresh': 'badge-blue rounded-2xl bg-blue-600',
+            'Cancelled': 'badge-red rounded-2xl bg-blue-600',
+            'Deleted': 'badge-red rounded-2xl bg-blue-600',
+            'Save': 'badge-green rounded-2xl bg-blue-600',
+            'Under Amendment': 'badge-orange rounded-2xl bg-blue-600',
+            'Confirmed': 'badge-green rounded-2xl bg-blue-600',
+            'Initiated': 'badge-blue rounded-2xl bg-blue-600',
           };
           return statusColors[status] || "bg-gray-100 text-gray-800 border-gray-300";
         };
