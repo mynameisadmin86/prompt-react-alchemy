@@ -183,9 +183,9 @@ export function ColumnFilterInput({
   };
 
   const handleRangeChange = (from: string, to: string) => {
-    // Validate that to > from if both values are provided
-    if (from && to && parseFloat(to) <= parseFloat(from)) {
-      return; // Don't update if to is not greater than from
+    // Validate that to >= from if both values are provided
+    if (from && to && parseFloat(to) < parseFloat(from)) {
+      return; // Don't update if to is less than from
     }
     
     setRangeFrom(from);
@@ -241,9 +241,9 @@ export function ColumnFilterInput({
       [type]: date
     };
     
-    // Validate that to date > from date if both are provided
-    if (newValue.from && newValue.to && new Date(newValue.to) <= new Date(newValue.from)) {
-      return; // Don't update if to date is not greater than from date
+    // Validate that to date >= from date if both are provided
+    if (newValue.from && newValue.to && new Date(newValue.to) < new Date(newValue.from)) {
+      return; // Don't update if to date is less than from date
     }
     
     if (newValue.from === '' && newValue.to === '') {
