@@ -155,9 +155,11 @@ const QuickOrderServerSideManagement: React.FC = () => {
     { key: 'QuickOrderNo', label: 'Quick Order No', type: 'text' },
     { key: 'Status', label: 'Status', type: 'select', options: ['Released', 'Under Execution', 'Fresh', 'Cancelled', 'Deleted', 'Save', 'Under Amendment', 'Confirmed', 'Initiated'] },
     { key: 'CustomerOrVendor', label: 'Customer/Supplier', type: 'text' },
-    { key: 'Contract', label: 'Contract', type: 'text' },
+    { key: 'Contract', label: 'Contract', type: 'dropdownText', options: ['Service Contract', 'Purchase Contract', 'Rental Contract', 'Maintenance Contract', 'Logistics Contract'] },
     { key: 'OrderType', label: 'Order Type', type: 'text' },
-    { key: 'QuickOrderDate', label: 'Quick Order Date', type: 'date' }
+    { key: 'QuickOrderDate', label: 'Quick Order Date', type: 'date' },
+    { key: 'QuickOrderDateRange', label: 'Quick Order Date Range', type: 'dateRange' },
+    { key: 'amount', label: 'Amount', type: 'numberRange' }
   ];
 
   const handleServerSideSearch = async () => {
