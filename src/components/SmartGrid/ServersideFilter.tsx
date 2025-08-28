@@ -275,7 +275,8 @@ export function ServersideFilter({
               filter.type === 'select' ? 'Dropdown' :
               filter.type === 'date' ? 'Date' : 'Text',
         filterable: true,
-        options: filter.options
+        options: filter.options,
+        multiSelect: filter.multiSelect // Pass multiSelect flag
       };
 
       return (

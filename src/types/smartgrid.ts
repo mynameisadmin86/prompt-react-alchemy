@@ -31,6 +31,7 @@ export interface GridColumnConfig {
   order?: number;
   options?: string[];
   subRow?: boolean; // Property for sub-row display
+  multiSelect?: boolean; // Enable multi-select for dropdowns
   
   // Badge specific properties
   statusMap?: Record<string, string>;
@@ -121,6 +122,7 @@ export interface ServerFilter {
   label: string;
   type?: 'text' | 'select' | 'date' | 'dateRange' | 'numberRange' | 'dropdownText' | 'time' | 'number' | 'boolean';
   options?: string[];
+  multiSelect?: boolean; // Enable multi-select for dropdown/select types
 }
 
 export interface ExtraFilter {

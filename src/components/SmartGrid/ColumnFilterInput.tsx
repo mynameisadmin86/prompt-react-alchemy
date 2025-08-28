@@ -6,7 +6,8 @@ import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { CalendarIcon, X } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
+import { CalendarIcon, X, ChevronDown } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { FilterValue } from '@/types/filterSystem';
@@ -39,10 +40,21 @@ export function ColumnFilterInput({
   const [dropdownValue, setDropdownValue] = useState<string>('');
   const [textValue, setTextValue] = useState<string>('');
   const [dropdownMode, setDropdownMode] = useState<'dropdown' | 'text'>('dropdown');
+  const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
+  const [isMultiSelectOpen, setIsMultiSelectOpen] = useState(false);
 
   useEffect(() => {
     setLocalValue(value?.value || '');
     setOperator(value?.operator || getDefaultOperator());
+    
+    // Initialize multi-select values
+    if (column.multiSelect && column.type === 'Dropdown') {
+      if (value?.value && Array.isArray(value.value)) {
+        setSelectedOptions(value.value);
+      } else {
+        setSelectedOptions([]);
+      }
+    }
     
     // Initialize complex field values
     if (value?.value && typeof value.value === 'object') {
@@ -78,7 +90,7 @@ export function ColumnFilterInput({
       setRangeFrom('');
       setRangeTo('');
     }
-  }, [value, column.type, column.options]);
+  }, [value, column.type, column.options, column.multiSelect]);
 
   function getDefaultOperator(): string {
     switch (column.type) {
@@ -146,6 +158,7 @@ export function ColumnFilterInput({
     setDropdownValue('');
     setTextValue('');
     setDropdownMode('dropdown');
+    setSelectedOptions([]);
     onChange(undefined);
     // onApply will be called automatically when the parent updates filters
   };
@@ -262,21 +275,102 @@ export function ColumnFilterInput({
   const renderFilterInput = () => {
     switch (column.type) {
       case 'Dropdown':
-        return (
-          <Select value={localValue || "__all__"} onValueChange={(value) => handleValueChange(value === "__all__" ? "" : value)}>
-            <SelectTrigger className="h-7 text-xs">
-              <SelectValue placeholder="All" />
-            </SelectTrigger>
-            <SelectContent className="bg-white border shadow-lg z-50">
-              <SelectItem value="__all__" className="text-xs">All</SelectItem>
-              {column.options?.map(option => (
-                <SelectItem key={option} value={option} className="text-xs">
-                  {option}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        );
+        if (column.multiSelect) {
+          // Multi-select dropdown
+          const handleMultiSelectChange = (option: string, checked: boolean) => {
+            let newSelected: string[];
+            if (checked) {
+              newSelected = [...selectedOptions, option];
+            } else {
+              newSelected = selectedOptions.filter(item => item !== option);
+            }
+            
+            setSelectedOptions(newSelected);
+            
+            if (newSelected.length === 0) {
+              onChange(undefined);
+            } else {
+              onChange({
+                value: newSelected,
+                operator: 'contains' as any,
+                type: 'select'
+              });
+            }
+          };
+
+          return (
+            <Popover open={isMultiSelectOpen} onOpenChange={setIsMultiSelectOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={cn(
+                    "h-7 text-xs justify-between text-left font-normal",
+                    selectedOptions.length === 0 && "text-muted-foreground"
+                  )}
+                >
+                  <span className="truncate">
+                    {selectedOptions.length === 0 
+                      ? "Select options..." 
+                      : `${selectedOptions.length} selected`
+                    }
+                  </span>
+                  <ChevronDown className="ml-2 h-3 w-3" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-60 p-0 bg-white border shadow-lg z-[100]" align="start">
+                <div className="p-2 space-y-2 max-h-60 overflow-y-auto">
+                  {column.options?.map(option => (
+                    <div key={option} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`multi-${option}`}
+                        checked={selectedOptions.includes(option)}
+                        onCheckedChange={(checked) => handleMultiSelectChange(option, checked as boolean)}
+                      />
+                      <label 
+                        htmlFor={`multi-${option}`} 
+                        className="text-xs cursor-pointer flex-1 select-none"
+                      >
+                        {option}
+                      </label>
+                    </div>
+                  ))}
+                  {selectedOptions.length > 0 && (
+                    <div className="pt-2 border-t">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          setSelectedOptions([]);
+                          onChange(undefined);
+                        }}
+                        className="h-6 text-xs w-full"
+                      >
+                        Clear All
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </PopoverContent>
+            </Popover>
+          );
+        } else {
+          // Single select dropdown (original functionality)
+          return (
+            <Select value={localValue || "__all__"} onValueChange={(value) => handleValueChange(value === "__all__" ? "" : value)}>
+              <SelectTrigger className="h-7 text-xs">
+                <SelectValue placeholder="All" />
+              </SelectTrigger>
+              <SelectContent className="bg-white border shadow-lg z-50">
+                <SelectItem value="__all__" className="text-xs">All</SelectItem>
+                {column.options?.map(option => (
+                  <SelectItem key={option} value={option} className="text-xs">
+                    {option}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          );
+        }
 
       case 'Date':
       case 'DateTimeRange':
@@ -482,7 +576,7 @@ export function ColumnFilterInput({
         {renderFilterInput()}
       </div>
       
-      {((localValue !== '' && localValue != null) || rangeFrom !== '' || rangeTo !== '' || dropdownValue !== '' || textValue !== '' || (localValue?.from || localValue?.to)) && (
+      {((localValue !== '' && localValue != null) || rangeFrom !== '' || rangeTo !== '' || dropdownValue !== '' || textValue !== '' || (localValue?.from || localValue?.to) || selectedOptions.length > 0) && (
         <Button
           variant="ghost"
           size="sm"
