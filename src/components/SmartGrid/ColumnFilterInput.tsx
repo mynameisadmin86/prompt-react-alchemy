@@ -49,17 +49,36 @@ export function ColumnFilterInput({
       if (column.type === 'NumberRange') {
         setRangeFrom(value.value.from || '');
         setRangeTo(value.value.to || '');
-      } else if (column.type === 'DropdownText') {
-        setDropdownValue(value.value.dropdown || '');
-        setTextValue(value.value.text || '');
+      } else if (column.type === 'DateRange') {
+        // Date range uses object with from/to
+        setLocalValue(value.value);
       }
     } else {
+      // For simple values (text, dropdown, dropdownText)
+      if (column.type === 'DropdownText') {
+        // DropdownText now uses simple string value
+        if (value?.value) {
+          // Check if it's a dropdown option or free text
+          const isDropdownOption = column.options?.includes(value.value);
+          if (isDropdownOption) {
+            setDropdownValue(value.value);
+            setTextValue('');
+            setDropdownMode('dropdown');
+          } else {
+            setDropdownValue('');
+            setTextValue(value.value);
+            setDropdownMode('text');
+          }
+        } else {
+          setDropdownValue('');
+          setTextValue('');
+          setDropdownMode('dropdown');
+        }
+      }
       setRangeFrom('');
       setRangeTo('');
-      setDropdownValue('');
-      setTextValue('');
     }
-  }, [value, column.type]);
+  }, [value, column.type, column.options]);
 
   function getDefaultOperator(): string {
     switch (column.type) {
