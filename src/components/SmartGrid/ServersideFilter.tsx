@@ -329,11 +329,18 @@ export function ServersideFilter({
               // Apply pending filters to active filters
               setActiveFilters(pendingFilters);
               
+              // Update parent component with current filters first
+              onFiltersChange(pendingFilters);
+              
               // Apply filters and trigger search
               if (api) {
                 api.applyGridFilters(pendingFilters);
               }
-              onSearch();
+              
+              // Small delay to ensure state is updated before search
+              setTimeout(() => {
+                onSearch();
+              }, 0);
             }}
             disabled={loading}
             className="bg-blue-600 hover:bg-blue-700 text-white"
