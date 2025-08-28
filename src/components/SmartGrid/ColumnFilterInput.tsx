@@ -191,12 +191,12 @@ export function ColumnFilterInput({
     switch (column.type) {
       case 'Dropdown':
         return (
-          <Select value={localValue} onValueChange={handleValueChange}>
+          <Select value={localValue || "__all__"} onValueChange={(value) => handleValueChange(value === "__all__" ? "" : value)}>
             <SelectTrigger className="h-7 text-xs">
               <SelectValue placeholder="All" />
             </SelectTrigger>
             <SelectContent className="bg-white border shadow-lg z-50">
-              <SelectItem value="" className="text-xs">All</SelectItem>
+              <SelectItem value="__all__" className="text-xs">All</SelectItem>
               {column.options?.map(option => (
                 <SelectItem key={option} value={option} className="text-xs">
                   {option}
@@ -307,12 +307,12 @@ export function ColumnFilterInput({
       case 'DropdownText':
         return (
           <div className="flex items-center gap-1">
-            <Select value={dropdownValue} onValueChange={(value) => handleDropdownTextChange(value, textValue)}>
+            <Select value={dropdownValue || "__all__"} onValueChange={(value) => handleDropdownTextChange(value === "__all__" ? "" : value, textValue)}>
               <SelectTrigger className="h-7 text-xs flex-1">
                 <SelectValue placeholder="Select" />
               </SelectTrigger>
               <SelectContent className="bg-white border shadow-lg z-50">
-                <SelectItem value="" className="text-xs">All</SelectItem>
+                <SelectItem value="__all__" className="text-xs">All</SelectItem>
                 {column.options?.map(option => (
                   <SelectItem key={option} value={option} className="text-xs">
                     {option}
