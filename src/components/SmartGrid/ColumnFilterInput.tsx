@@ -11,6 +11,7 @@ import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { FilterValue } from '@/types/filterSystem';
 import { GridColumnConfig } from '@/types/smartgrid';
+import { DateRange } from 'react-day-picker';
 
 interface ColumnFilterInputProps {
   column: GridColumnConfig;
@@ -32,17 +33,41 @@ export function ColumnFilterInput({
   const [localValue, setLocalValue] = useState<any>(value?.value || '');
   const [operator, setOperator] = useState<string>(value?.operator || getDefaultOperator());
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showDateRangePicker, setShowDateRangePicker] = useState(false);
+  const [rangeFrom, setRangeFrom] = useState<string>('');
+  const [rangeTo, setRangeTo] = useState<string>('');
+  const [dropdownValue, setDropdownValue] = useState<string>('');
+  const [textValue, setTextValue] = useState<string>('');
 
   useEffect(() => {
     setLocalValue(value?.value || '');
     setOperator(value?.operator || getDefaultOperator());
-  }, [value]);
+    
+    // Initialize complex field values
+    if (value?.value && typeof value.value === 'object') {
+      if (column.type === 'NumberRange') {
+        setRangeFrom(value.value.from || '');
+        setRangeTo(value.value.to || '');
+      } else if (column.type === 'DropdownText') {
+        setDropdownValue(value.value.dropdown || '');
+        setTextValue(value.value.text || '');
+      }
+    } else {
+      setRangeFrom('');
+      setRangeTo('');
+      setDropdownValue('');
+      setTextValue('');
+    }
+  }, [value, column.type]);
 
   function getDefaultOperator(): string {
     switch (column.type) {
       case 'Date':
       case 'DateTimeRange':
+      case 'DateRange':
         return 'equals';
+      case 'NumberRange':
+        return 'between';
       default:
         return 'contains';
     }
@@ -78,6 +103,10 @@ export function ColumnFilterInput({
       case 'Date':
       case 'DateTimeRange':
         return 'date';
+      case 'DateRange':
+        return 'dateRange';
+      case 'NumberRange':
+        return 'number';
       case 'Dropdown':
         return 'select';
       default:
@@ -107,6 +136,11 @@ export function ColumnFilterInput({
           { value: 'gte', label: 'Greater or equal (>=)', symbol: '>=' },
           { value: 'lte', label: 'Less or equal (<=)', symbol: '<=' },
         ];
+      case 'DateRange':
+      case 'NumberRange':
+        return [
+          { value: 'between', label: 'Between', symbol: '⟷' },
+        ];
       default:
         return [
           { value: 'contains', label: 'Contains', symbol: '⊃' },
@@ -121,6 +155,36 @@ export function ColumnFilterInput({
     const operators = getAvailableOperators();
     const current = operators.find(op => op.value === operator);
     return current?.symbol || '⊃';
+  };
+
+  const handleRangeChange = (from: string, to: string) => {
+    setRangeFrom(from);
+    setRangeTo(to);
+    
+    if (from === '' && to === '') {
+      onChange(undefined);
+    } else {
+      onChange({
+        value: { from, to },
+        operator: 'between' as any,
+        type: 'number'
+      });
+    }
+  };
+
+  const handleDropdownTextChange = (dropdown: string, text: string) => {
+    setDropdownValue(dropdown);
+    setTextValue(text);
+    
+    if (dropdown === '' && text === '') {
+      onChange(undefined);
+    } else {
+      onChange({
+        value: { dropdown, text },
+        operator: 'contains' as any,
+        type: 'text'
+      });
+    }
   };
 
   const renderFilterInput = () => {
@@ -167,9 +231,102 @@ export function ColumnFilterInput({
                   setShowDatePicker(false);
                 }}
                 initialFocus
+                className={cn("p-3 pointer-events-auto")}
               />
             </PopoverContent>
           </Popover>
+        );
+
+      case 'DateRange':
+        return (
+          <Popover open={showDateRangePicker} onOpenChange={setShowDateRangePicker}>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                className={cn(
+                  "h-7 text-xs justify-start text-left font-normal",
+                  !localValue && "text-muted-foreground"
+                )}
+              >
+                <CalendarIcon className="mr-2 h-3 w-3" />
+                {localValue?.from && localValue?.to 
+                  ? `${format(new Date(localValue.from), "MMM dd")} - ${format(new Date(localValue.to), "MMM dd, yyyy")}`
+                  : "Pick date range"
+                }
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0 bg-white border shadow-lg z-50" align="start">
+              <Calendar
+                mode="range"
+                selected={localValue?.from && localValue?.to ? {
+                  from: new Date(localValue.from),
+                  to: new Date(localValue.to)
+                } : undefined}
+                onSelect={(range) => {
+                  if (range?.from && range?.to) {
+                    handleValueChange({
+                      from: range.from.toISOString(),
+                      to: range.to.toISOString()
+                    });
+                  } else {
+                    handleValueChange(undefined);
+                  }
+                  if (range?.from && range?.to) {
+                    setShowDateRangePicker(false);
+                  }
+                }}
+                numberOfMonths={2}
+                initialFocus
+                className={cn("p-3 pointer-events-auto")}
+              />
+            </PopoverContent>
+          </Popover>
+        );
+
+      case 'NumberRange':
+        return (
+          <div className="flex items-center gap-1">
+            <Input
+              value={rangeFrom}
+              onChange={(e) => handleRangeChange(e.target.value, rangeTo)}
+              placeholder="From"
+              className="h-7 text-xs flex-1"
+              type="number"
+            />
+            <span className="text-xs text-muted-foreground">-</span>
+            <Input
+              value={rangeTo}
+              onChange={(e) => handleRangeChange(rangeFrom, e.target.value)}
+              placeholder="To"
+              className="h-7 text-xs flex-1"
+              type="number"
+            />
+          </div>
+        );
+
+      case 'DropdownText':
+        return (
+          <div className="flex items-center gap-1">
+            <Select value={dropdownValue} onValueChange={(value) => handleDropdownTextChange(value, textValue)}>
+              <SelectTrigger className="h-7 text-xs flex-1">
+                <SelectValue placeholder="Select" />
+              </SelectTrigger>
+              <SelectContent className="bg-white border shadow-lg z-50">
+                <SelectItem value="" className="text-xs">All</SelectItem>
+                {column.options?.map(option => (
+                  <SelectItem key={option} value={option} className="text-xs">
+                    {option}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Input
+              value={textValue}
+              onChange={(e) => handleDropdownTextChange(dropdownValue, e.target.value)}
+              placeholder="Text..."
+              className="h-7 text-xs flex-1"
+            />
+          </div>
         );
 
       default:
@@ -225,7 +382,7 @@ export function ColumnFilterInput({
         {renderFilterInput()}
       </div>
       
-      {(localValue !== '' && localValue != null) && (
+      {((localValue !== '' && localValue != null) || rangeFrom !== '' || rangeTo !== '' || dropdownValue !== '' || textValue !== '') && (
         <Button
           variant="ghost"
           size="sm"

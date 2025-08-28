@@ -10,6 +10,9 @@ export type GridColumnType =
   | 'ExpandableCount'      // "+N" style count, expandable to view details
   | 'Text'                 // Standard text cell
   | 'Date'                 // Formatted date
+  | 'DateRange'            // Date range picker
+  | 'NumberRange'          // Number range with from/to inputs
+  | 'DropdownText'         // Dropdown + Text combination
   | 'Dropdown'             // Selectable value from list (for edit or filter)
   | 'EditableText'         // Inline editable text
   | 'SubRow';              // Sub-row expandable content
@@ -116,7 +119,7 @@ export interface GridPlugin {
 export interface ServerFilter {
   key: string;
   label: string;
-  type?: 'text' | 'select' | 'date' | 'dateRange' | 'time' | 'number' | 'boolean';
+  type?: 'text' | 'select' | 'date' | 'dateRange' | 'numberRange' | 'dropdownText' | 'time' | 'number' | 'boolean';
   options?: string[];
 }
 
