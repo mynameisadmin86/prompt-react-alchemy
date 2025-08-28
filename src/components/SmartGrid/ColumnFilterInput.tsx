@@ -38,6 +38,7 @@ export function ColumnFilterInput({
   const [rangeTo, setRangeTo] = useState<string>('');
   const [dropdownValue, setDropdownValue] = useState<string>('');
   const [textValue, setTextValue] = useState<string>('');
+  const [dropdownMode, setDropdownMode] = useState<'dropdown' | 'text'>('dropdown');
 
   useEffect(() => {
     setLocalValue(value?.value || '');
@@ -121,6 +122,11 @@ export function ColumnFilterInput({
 
   const handleClear = () => {
     setLocalValue('');
+    setRangeFrom('');
+    setRangeTo('');
+    setDropdownValue('');
+    setTextValue('');
+    setDropdownMode('dropdown');
     onChange(undefined);
     // onApply will be called automatically when the parent updates filters
   };
@@ -172,15 +178,25 @@ export function ColumnFilterInput({
     }
   };
 
-  const handleDropdownTextChange = (dropdown: string, text: string) => {
-    setDropdownValue(dropdown);
-    setTextValue(text);
+  const handleDropdownTextChange = (dropdown: string, text: string, mode?: 'dropdown' | 'text') => {
+    if (mode) setDropdownMode(mode);
     
-    if (dropdown === '' && text === '') {
+    let finalValue = '';
+    if (mode === 'dropdown' || dropdownMode === 'dropdown') {
+      finalValue = dropdown;
+      setDropdownValue(dropdown);
+      setTextValue(''); // Clear text when using dropdown
+    } else {
+      finalValue = text;
+      setTextValue(text);
+      setDropdownValue(''); // Clear dropdown when using text
+    }
+    
+    if (finalValue === '') {
       onChange(undefined);
     } else {
       onChange({
-        value: { dropdown, text },
+        value: finalValue,
         operator: 'contains' as any,
         type: 'text'
       });
@@ -244,7 +260,7 @@ export function ColumnFilterInput({
               <Button
                 variant="outline"
                 className={cn(
-                  "h-7 text-xs justify-start text-left font-normal",
+                  "h-7 text-xs justify-start text-left font-normal w-full",
                   !localValue && "text-muted-foreground"
                 )}
               >
@@ -255,7 +271,7 @@ export function ColumnFilterInput({
                 }
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-auto p-0 bg-white border shadow-lg z-50" align="start">
+            <PopoverContent className="w-auto p-0 bg-white border shadow-lg z-[100]" align="start">
               <Calendar
                 mode="range"
                 selected={localValue?.from && localValue?.to ? {
@@ -263,16 +279,24 @@ export function ColumnFilterInput({
                   to: new Date(localValue.to)
                 } : undefined}
                 onSelect={(range) => {
-                  if (range?.from && range?.to) {
-                    handleValueChange({
-                      from: range.from.toISOString(),
-                      to: range.to.toISOString()
-                    });
+                  if (range?.from) {
+                    if (range?.to) {
+                      // Both dates selected
+                      handleValueChange({
+                        from: range.from.toISOString(),
+                        to: range.to.toISOString()
+                      });
+                      setShowDateRangePicker(false);
+                    } else {
+                      // Only from date selected, keep picker open
+                      handleValueChange({
+                        from: range.from.toISOString(),
+                        to: ''
+                      });
+                    }
                   } else {
+                    // Clear selection
                     handleValueChange(undefined);
-                  }
-                  if (range?.from && range?.to) {
-                    setShowDateRangePicker(false);
                   }
                 }}
                 numberOfMonths={2}
@@ -307,8 +331,15 @@ export function ColumnFilterInput({
       case 'DropdownText':
         return (
           <div className="flex items-center gap-1">
-            <Select value={dropdownValue || "__all__"} onValueChange={(value) => handleDropdownTextChange(value === "__all__" ? "" : value, textValue)}>
-              <SelectTrigger className="h-7 text-xs flex-1">
+            <Select 
+              value={dropdownMode === 'dropdown' ? (dropdownValue || "__all__") : "__all__"} 
+              onValueChange={(value) => {
+                const newValue = value === "__all__" ? "" : value;
+                handleDropdownTextChange(newValue, textValue, 'dropdown');
+              }}
+              disabled={dropdownMode === 'text'}
+            >
+              <SelectTrigger className={cn("h-7 text-xs flex-1", dropdownMode === 'text' && "opacity-50")}>
                 <SelectValue placeholder="Select" />
               </SelectTrigger>
               <SelectContent className="bg-white border shadow-lg z-50">
@@ -320,11 +351,13 @@ export function ColumnFilterInput({
                 ))}
               </SelectContent>
             </Select>
+            <div className="text-xs text-muted-foreground">OR</div>
             <Input
-              value={textValue}
-              onChange={(e) => handleDropdownTextChange(dropdownValue, e.target.value)}
-              placeholder="Text..."
-              className="h-7 text-xs flex-1"
+              value={dropdownMode === 'text' ? textValue : ''}
+              onChange={(e) => handleDropdownTextChange(dropdownValue, e.target.value, 'text')}
+              placeholder="Type text..."
+              className={cn("h-7 text-xs flex-1", dropdownMode === 'dropdown' && "opacity-50")}
+              disabled={dropdownMode === 'dropdown'}
             />
           </div>
         );
