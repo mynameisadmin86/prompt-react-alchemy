@@ -3,6 +3,7 @@ import { SmartGridWithGrouping } from '@/components/SmartGrid';
 import { GridColumnConfig, FilterConfig, ServerFilter } from '@/types/smartgrid';
 import { useToast } from '@/hooks/use-toast';
 import { quickOrderService } from '@/api/services/quickOrderService';
+import { filterService } from '@/api/services/filterService';
 import { useSmartGridState } from '@/hooks/useSmartGridState';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
 import { Eye, GitPullRequest } from 'lucide-react';
@@ -372,6 +373,7 @@ const QuickOrderServerSideManagement: React.FC = () => {
           showFilterTypeDropdown={false}
           showServersideFilter={showServersideFilter}
           onToggleServersideFilter={() => setShowServersideFilter(prev => !prev)}
+          api={filterService}
         />
       </div>
     </div>
