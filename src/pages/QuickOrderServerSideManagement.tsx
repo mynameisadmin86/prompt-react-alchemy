@@ -156,6 +156,21 @@ const QuickOrderServerSideManagement: React.FC = () => {
     { key: 'QuickOrderNo', label: 'Quick Order No', type: 'text' },
     { key: 'Status', label: 'Status', type: 'select', options: ['Released', 'Under Execution', 'Fresh', 'Cancelled', 'Deleted', 'Save', 'Under Amendment', 'Confirmed', 'Initiated'], multiSelect: true },
     { key: 'CustomerOrVendor', label: 'Customer/Supplier', type: 'text' },
+    {
+      key: 'customer',
+      label: 'Customer',
+      type: 'lazyselect', // lazy-loaded dropdown
+      fetchOptions: async ({ searchTerm, offset, limit }) => {
+        const res = await fetch(
+          `/api/customers?search=${searchTerm}&offset=${offset}&limit=${limit}`
+        );
+        const data = await res.json();
+        return data.items.map((item: any) => ({
+          label: item.customerName,
+          value: item.customerId
+        }));
+      }
+    },
     { key: 'Contract', label: 'Contract', type: 'dropdownText', options: ['Service Contract', 'Purchase Contract', 'Rental Contract', 'Maintenance Contract', 'Logistics Contract'] },
     { key: 'OrderType', label: 'Order Type', type: 'text' },
     { key: 'QuickOrderDate', label: 'Quick Order Date', type: 'date' },
@@ -373,6 +388,8 @@ const QuickOrderServerSideManagement: React.FC = () => {
           showFilterTypeDropdown={false}
           showServersideFilter={showServersideFilter}
           onToggleServersideFilter={() => setShowServersideFilter(prev => !prev)}
+          gridId="quick-order-management"
+          userId="current-user"
           api={filterService}
         />
       </div>
