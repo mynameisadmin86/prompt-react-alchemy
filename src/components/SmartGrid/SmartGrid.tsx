@@ -13,7 +13,7 @@ import {
   ChevronRight, 
   ChevronDown, 
 } from 'lucide-react';
-import { SmartGridProps, GridColumnConfig, SortConfig, FilterConfig, GridAPI } from '@/types/smartgrid';
+import { SmartGridProps, GridColumnConfig, SortConfig, FilterConfig, GridAPI, ServerFilter } from '@/types/smartgrid';
 import { exportToCSV, exportToExcel } from '@/utils/gridExport';
 import { useToast } from '@/hooks/use-toast';
 import { useGridPreferences } from '@/hooks/useGridPreferences';
@@ -27,6 +27,7 @@ import { ColumnFilter } from './ColumnFilter';
 import { DraggableSubRow } from './DraggableSubRow';
 import { FilterSystem } from './FilterSystem';
 import { AdvancedFilter } from './AdvancedFilter';
+import { ServersideFilter } from './ServersideFilter';
 import { mockFilterAPI } from '@/utils/mockFilterAPI';
 import { cn } from '@/lib/utils';
 
@@ -73,6 +74,12 @@ export function SmartGrid({
   showServersideFilter = false,
   onToggleServersideFilter,
   hideAdvancedFilter = false,
+  serverFilters = [],
+  showFilterTypeDropdown = false,
+  gridId,
+  userId,
+  api,
+  onSearch,
 }: SmartGridProps) {
   const {
     gridData,
@@ -849,6 +856,21 @@ export function SmartGrid({
         showServersideFilter={showServersideFilter}
         onToggleServersideFilter={onToggleServersideFilter}
       />
+
+      {/* Server-side Filter */}
+      {showServersideFilter && (
+        <ServersideFilter
+          serverFilters={serverFilters}
+          showFilterTypeDropdown={showFilterTypeDropdown}
+          visible={showServersideFilter}
+          onToggle={onToggleServersideFilter || (() => {})}
+          onFiltersChange={onFiltersChange || (() => {})}
+          onSearch={onSearch || (() => {})}
+          gridId={gridId || gridTitle || 'default'}
+          userId={userId || 'default-user'}
+          api={api}
+        />
+      )}
 
        {/* Advanced Filter System - Only show when not using server-side filters */}
         {!hideAdvancedFilter && (

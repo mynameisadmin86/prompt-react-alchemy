@@ -220,21 +220,6 @@ export function SmartGridWithGrouping({
 
   return (
     <div className="space-y-2">
-      {/* Server-side Filter */}
-      {showServersideFilter && (
-        <ServersideFilter
-          serverFilters={serverFilters}
-          showFilterTypeDropdown={showFilterTypeDropdown}
-          visible={showServersideFilter}
-          onToggle={onToggleServersideFilter || (() => {})}
-          onFiltersChange={props.onFiltersChange || (() => {})}
-          onSearch={props.onSearch || (() => {})}
-          gridId={gridId || props.gridTitle || 'default'}
-          userId={userId || 'default-user'}
-          api={api}
-        />
-      )}
-      
       <SmartGrid
         {...props}
         data={displayData}
@@ -258,6 +243,11 @@ export function SmartGridWithGrouping({
         showServersideFilter={showServersideFilter}
         onToggleServersideFilter={onToggleServersideFilter}
         hideAdvancedFilter={hideAdvancedFilter}
+        serverFilters={serverFilters}
+        showFilterTypeDropdown={showFilterTypeDropdown}
+        gridId={gridId || props.gridTitle || 'default'}
+        userId={userId || 'default-user'}
+        api={api}
       />
     </div>
   );

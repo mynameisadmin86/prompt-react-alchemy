@@ -187,7 +187,12 @@ export interface SmartGridProps {
   // Server-side filter props
   showServersideFilter?: boolean;
   onToggleServersideFilter?: () => void;
-  onSearch?: () => void;
+  onSearch?: (filters?: any) => void;
+  serverFilters?: ServerFilter[];
+  showFilterTypeDropdown?: boolean;
+  gridId?: string;
+  userId?: string;
+  api?: any;
   // Control whether to show AdvancedFilter (disabled when using server-side filters)
   hideAdvancedFilter?: boolean;
 }
