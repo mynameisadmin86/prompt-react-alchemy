@@ -1,4 +1,35 @@
 
+// New simplified config for easier usage
+export type PanelFieldConfig = 
+  | {
+      fieldType: 'text' | 'search' | 'currency' | 'date' | 'time' | 'textarea';
+      key: string;
+      label: string;
+      placeholder?: string;
+      onChange?: (value: string) => void;
+      onClick?: () => void;
+    }
+  | {
+      fieldType: 'select' | 'radio';
+      key: string;
+      label: string;
+      options: { label: string; value: string }[];
+      onChange?: (value: string) => void;
+      onClick?: () => void;
+    }
+  | {
+      fieldType: 'lazyselect';
+      key: string;
+      label: string;
+      fetchOptions: (params: {
+        searchTerm: string;
+        offset: number;
+        limit: number;
+      }) => Promise<{ label: string; value: string }[]>;
+      onChange?: (selected: { label: string; value: string } | null) => void;
+      onClick?: () => void;
+    };
+
 export interface FieldConfig {
   id: string;
   label: string;
@@ -59,7 +90,8 @@ export interface DynamicPanelProps {
   startingTabIndex?: number; // Starting tabIndex for sequential navigation across panels
   panelTitle: string;
   panelIcon?: React.ReactNode;
-  panelConfig: PanelConfig;
+  panelConfig?: PanelConfig; // Original format (optional for backward compatibility)
+  config?: PanelFieldConfig[]; // New simplified format
   formName?: string; // Form name for the panel form element
   initialData?: Record<string, any>;
   onDataChange?: (updatedData: Record<string, any>) => void;
