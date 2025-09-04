@@ -1,8 +1,9 @@
 
 import React, { useState, useCallback } from 'react';
 import { GridColumnConfig, GridPreferences } from '@/types/smartgrid';
-import { GripVertical } from 'lucide-react';
-import { CellRenderer } from './CellRenderer';
+import { GripVertical, Edit2 } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 
 interface DraggableSubRowProps {
@@ -32,6 +33,7 @@ export const DraggableSubRow: React.FC<DraggableSubRowProps> = ({
 }) => {
   const [draggedColumn, setDraggedColumn] = useState<string | null>(null);
   const [dragOverColumn, setDragOverColumn] = useState<string | null>(null);
+  const [tempValue, setTempValue] = useState<string>('');
 
   // Get sub-row columns and apply custom ordering
   const subRowColumns = columns.filter(col => col.subRow === true);
@@ -89,25 +91,113 @@ export const DraggableSubRow: React.FC<DraggableSubRowProps> = ({
     setDragOverColumn(null);
   }, []);
 
-  const renderSubRowCellValue = useCallback((value: any, column: GridColumnConfig, columnIndex: number) => {
+  const handleEdit = useCallback((columnKey: string) => {
+    const currentValue = row[columnKey];
+    setTempValue(String(currentValue || ''));
+    onSubRowEditStart(rowIndex, columnKey);
+  }, [row, rowIndex, onSubRowEditStart]);
+
+  const handleSave = useCallback((columnKey: string) => {
+    onSubRowEdit(rowIndex, columnKey, tempValue);
+    setTempValue('');
+  }, [rowIndex, tempValue, onSubRowEdit]);
+
+  const handleCancel = useCallback(() => {
+    onSubRowEditCancel();
+    setTempValue('');
+  }, [onSubRowEditCancel]);
+
+  const handleKeyDown = useCallback((e: React.KeyboardEvent, columnKey: string) => {
+    if (e.key === 'Enter') {
+      handleSave(columnKey);
+    } else if (e.key === 'Escape') {
+      handleCancel();
+    }
+  }, [handleSave, handleCancel]);
+
+  const renderSubRowCellValue = useCallback((value: any, column: GridColumnConfig) => {
     const isEditing = editingCell?.rowIndex === rowIndex && editingCell?.columnKey === column.key;
     const isEditable = column.editable;
 
-    return (
-      <CellRenderer
-        value={value}
-        row={row}
-        column={column}
-        rowIndex={rowIndex}
-        columnIndex={columnIndex}
-        isEditing={isEditing}
-        isEditable={isEditable || false}
-        onEdit={onSubRowEdit}
-        onEditStart={onSubRowEditStart}
-        onEditCancel={onSubRowEditCancel}
-      />
-    );
-  }, [editingCell, rowIndex, row, onSubRowEdit, onSubRowEditStart, onSubRowEditCancel]);
+    if (isEditing) {
+      return (
+        <Input
+          value={tempValue}
+          onChange={(e) => setTempValue(e.target.value)}
+          onBlur={() => handleSave(column.key)}
+          onKeyDown={(e) => handleKeyDown(e, column.key)}
+          className="w-full h-8 text-sm"
+          autoFocus
+        />
+      );
+    }
+
+    if (value === null || value === undefined) {
+      return <span className="text-gray-400">-</span>;
+    }
+
+    const displayContent = (() => {
+      switch (column.type) {
+        case 'Badge':
+          let displayValue: string;
+          let statusColor: string;
+
+          if (typeof value === 'object' && value !== null && 'value' in value) {
+            displayValue = value.value;
+            statusColor = value.variant || 'bg-gray-50 text-gray-600 border border-gray-200';
+          } else {
+            displayValue = String(value || '');
+            statusColor = 'bg-gray-50 text-gray-600 border border-gray-200';
+          }
+
+          return (
+            <Badge className={cn("text-xs", statusColor)}>
+              {displayValue}
+            </Badge>
+          );
+        case 'DateTimeRange':
+          const dateTimeString = String(value);
+          if (dateTimeString.includes('\n')) {
+            const [startDateTime, endDateTime] = dateTimeString.split('\n');
+            return (
+              <div className="space-y-1">
+                <div className="text-xs text-gray-500">Start:</div>
+                <div className="font-medium text-sm">{startDateTime}</div>
+                <div className="text-xs text-gray-500">End:</div>
+                <div className="font-medium text-sm">{endDateTime}</div>
+              </div>
+            );
+          }
+          return <div className="font-medium text-sm">{dateTimeString}</div>;
+        case 'Date':
+          try {
+            const date = new Date(value);
+            return <div className="font-medium text-sm">{date.toLocaleDateString()}</div>;
+          } catch {
+            return <div className="font-medium text-sm">{String(value)}</div>;
+          }
+        default:
+          return <div className="font-medium text-sm break-words">{String(value)}</div>;
+      }
+    })();
+
+    if (isEditable) {
+      return (
+        <div className="group relative">
+          {displayContent}
+          <button
+            onClick={() => handleEdit(column.key)}
+            className="absolute top-0 right-0 opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-gray-100 rounded"
+            title="Edit"
+          >
+            <Edit2 className="h-3 w-3 text-gray-500" />
+          </button>
+        </div>
+      );
+    }
+
+    return displayContent;
+  }, [editingCell, rowIndex, tempValue, handleSave, handleKeyDown, handleEdit]);
 
   if (orderedSubRowColumns.length === 0) {
     return (
@@ -120,7 +210,7 @@ export const DraggableSubRow: React.FC<DraggableSubRowProps> = ({
   return (
     <div className="bg-gray-50 p-2 border-t border-gray-200">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
-        {orderedSubRowColumns.map((column, columnIndex) => {
+        {orderedSubRowColumns.map((column) => {
           const value = row[column.key];
           const isDragged = draggedColumn === column.key;
           const isDragOver = dragOverColumn === column.key;
@@ -151,7 +241,7 @@ export const DraggableSubRow: React.FC<DraggableSubRowProps> = ({
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between mb-1">
-                    <div className="text-xs text-gray-500 tracking-wide font-medium">
+                    <div className="text-xs text-gray-500 uppercase tracking-wide font-medium">
                       {preferences?.columnHeaders[column.key] || column.label}
                     </div>
                     {column.editable && (
@@ -161,7 +251,7 @@ export const DraggableSubRow: React.FC<DraggableSubRowProps> = ({
                     )}
                   </div>
                   <div className="text-sm text-gray-900">
-                    {renderSubRowCellValue(value, column, columnIndex)}
+                    {renderSubRowCellValue(value, column)}
                   </div>
                 </div>
               </div>
