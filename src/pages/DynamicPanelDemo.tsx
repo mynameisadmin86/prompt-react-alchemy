@@ -58,22 +58,33 @@ const DynamicPanelDemo = () => {
       order: 1
     },
     customer: {
-    fieldType: 'lazyselect',
-    id: 'customer',
-    label: 'Customer',
-    fetchOptions: async ({ searchTerm, offset, limit }) => {
-      const res = await fetch(
-        `/api/customers?search=${searchTerm}&offset=${offset}&limit=${limit}`
-      );
-      const data = await res.json();
-      return data.items.map((item: any) => ({
-        label: item.customerName,
-        value: item.customerId
-      }));
+      fieldType: 'lazyselect',
+      id: 'customer',
+      label: 'Customer',
+      value: '',
+      mandatory: true,
+      visible: true,
+      editable: true,
+      order: 1,
+      fetchOptions: async ({ searchTerm, offset, limit }) => {
+        const res = await fetch(
+          `/api/customers?search=${searchTerm}&offset=${offset}&limit=${limit}`
+        );
+        const data = await res.json();
+        return data.items.map((item: any) => ({
+          label: item.customerName,
+          value: item.customerId
+        }));
+      },
+      events: {
+        onChange: (selected, event) => {
+          console.log('Customer changed:', selected);
+        },
+        onClick: (event, value) => {
+          console.log('Customer dropdown clicked:', { event, value });
+        }
+      }
     },
-    onChange: (val) => console.log('Customer changed:', val),
-    onClick: () => console.log('Customer dropdown clicked')
-  },
     customerName: {
       id: 'customerName',
       label: 'Customer Name',
