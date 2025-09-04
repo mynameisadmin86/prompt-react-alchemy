@@ -151,7 +151,7 @@ export const DraggableSubRow: React.FC<DraggableSubRowProps> = ({
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between mb-1">
-                    <div className="text-xs text-gray-500 uppercase tracking-wide font-medium">
+                    <div className="text-xs text-gray-500 tracking-wide font-medium">
                       {preferences?.columnHeaders[column.key] || column.label}
                     </div>
                     {column.editable && (
