@@ -5,6 +5,7 @@ import { InputDropdown } from '@/components/ui/input-dropdown';
 import { Textarea } from '@/components/ui/textarea';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
+import { LazySelect } from '@/components/SmartGrid/LazySelect';
 import { Search, Calendar, Clock } from 'lucide-react';
 import { FieldConfig } from '@/types/dynamicPanel';
 
@@ -250,6 +251,51 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                     </svg>
                   </div>
+                </div>
+              </div>
+            );
+          }}
+        />
+      );
+
+    case 'lazyselect':
+      return (
+        <Controller
+          name={fieldId}
+          control={control}
+          render={({ field }) => {
+            const fetchOptions = config.fetchOptions;
+            if (!fetchOptions) {
+              return (
+                <div>
+                  <div className="text-xs text-blue-600 mb-1">TabIndex: {tabIndex}</div>
+                  <div className="text-xs text-red-600 bg-red-50 p-2 rounded border">
+                    fetchOptions is required for lazyselect field type
+                  </div>
+                </div>
+              );
+            }
+
+            return (
+              <div>
+                <div className="text-xs text-blue-600 mb-1">TabIndex: {tabIndex}</div>
+                <div
+                  onClick={events?.onClick ? (e) => events.onClick!(e, field.value) : undefined}
+                  className="focus-within:z-50 relative"
+                >
+                  <LazySelect
+                    fetchOptions={fetchOptions}
+                    value={field.value}
+                    onChange={(value) => {
+                      field.onChange(value);
+                      if (events?.onChange) {
+                        const selectedOption = value ? { label: '', value } : null;
+                        events.onChange(selectedOption, { target: { value } } as any);
+                      }
+                    }}
+                    placeholder={placeholder || 'Select...'}
+                    className="h-8 text-xs border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:z-50 focus:relative focus:outline-none"
+                  />
                 </div>
               </div>
             );

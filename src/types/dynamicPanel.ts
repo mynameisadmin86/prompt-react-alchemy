@@ -2,7 +2,7 @@
 export interface FieldConfig {
   id: string;
   label: string;
-  fieldType: 'text' | 'select' | 'search' | 'currency' | 'date' | 'time' | 'textarea' | 'radio' | 'card' | 'inputdropdown';
+  fieldType: 'text' | 'select' | 'search' | 'currency' | 'date' | 'time' | 'textarea' | 'radio' | 'card' | 'inputdropdown' | 'lazyselect';
   value: any;
   mandatory: boolean;
   visible: boolean;
@@ -16,6 +16,12 @@ export interface FieldConfig {
   labelFlag?: boolean; // Flag to indicate if label should be displayed
   color?: string; // For card field type background color
   fieldColour?: string; // For card field type color
+  // For lazyselect field type
+  fetchOptions?: (params: {
+    searchTerm: string;
+    offset: number;
+    limit: number;
+  }) => Promise<{ label: string; value: string }[]>;
   // Event handlers for field interactions
   events?: {
     onClick?: (event: React.MouseEvent, value: any) => void;
