@@ -60,24 +60,51 @@ const DynamicPanelDemo = () => {
     customerName: {
       id: 'customerName',
       label: 'Customer Name',
-      fieldType: 'select',
+      fieldType: 'lazyselect',
       value: '',
       mandatory: true,
       visible: true,
       editable: true,
       order: 2,
-      options: [
-        { label: 'DB Cargo', value: 'db-cargo' },
-        { label: 'ABC Rail Goods', value: 'abc-rail' },
-        { label: 'Wave Cargo', value: 'wave-cargo' }
-      ],
+      fetchOptions: async ({ searchTerm, offset, limit }) => {
+        // Simulate API delay
+        await new Promise(resolve => setTimeout(resolve, 300));
+        
+        // Mock customer data
+        const allCustomers = [
+          { label: 'DB Cargo AG', value: 'db-cargo-ag' },
+          { label: 'ABC Rail Goods Ltd', value: 'abc-rail-ltd' },
+          { label: 'Wave Cargo Solutions', value: 'wave-cargo-sol' },
+          { label: 'European Transport Co', value: 'european-transport' },
+          { label: 'Global Freight Systems', value: 'global-freight' },
+          { label: 'Metro Rail Services', value: 'metro-rail' },
+          { label: 'Continental Logistics', value: 'continental-log' },
+          { label: 'Express Railway Corp', value: 'express-railway' },
+          { label: 'Prime Shipping Inc', value: 'prime-shipping' },
+          { label: 'United Cargo Group', value: 'united-cargo' },
+          { label: 'Swift Transport Ltd', value: 'swift-transport' },
+          { label: 'Rapid Rail Solutions', value: 'rapid-rail' },
+        ];
+        
+        // Filter by search term
+        const filtered = searchTerm 
+          ? allCustomers.filter(customer => 
+              customer.label.toLowerCase().includes(searchTerm.toLowerCase())
+            )
+          : allCustomers;
+        
+        // Paginate results
+        const results = filtered.slice(offset, offset + limit);
+        
+        return results;
+      },
       events: {
-        onChange: (value, event) => {
-          console.log('Customer changed:', value);
+        onChange: (selected, event) => {
+          console.log('Customer changed:', selected);
           console.log('Event:', event);
         },
-        onFocus: (event) => {
-          console.log('Customer field focused');
+        onClick: (event, value) => {
+          console.log('Customer dropdown clicked:', { event, value });
         }
       }
     },
