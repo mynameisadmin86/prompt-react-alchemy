@@ -196,17 +196,26 @@ export function ColumnFilterInput({
   };
 
   const handleRangeChange = (from: string, to: string) => {
-    // Validate that to >= from if both values are provided
-    if (from && to && parseFloat(to) < parseFloat(from)) {
-      return; // Don't update if to is less than from
-    }
-    
+    // Always update the state to allow typing
     setRangeFrom(from);
     setRangeTo(to);
     
+    // Only validate and send onChange when both values are valid numbers
+    // or when clearing the fields
     if (from === '' && to === '') {
       onChange(undefined);
     } else {
+      // Allow partial input, only validate when both are non-empty numbers
+      const fromNum = parseFloat(from);
+      const toNum = parseFloat(to);
+      
+      // If both are valid numbers and to < from, don't send the change
+      // but still allow the user to continue typing
+      if (from && to && !isNaN(fromNum) && !isNaN(toNum) && toNum < fromNum) {
+        // Don't send onChange, but allow the UI state to update
+        return;
+      }
+      
       onChange({
         value: { from, to },
         operator: 'between' as any,
