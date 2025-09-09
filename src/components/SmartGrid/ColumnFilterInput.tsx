@@ -256,6 +256,8 @@ export function ColumnFilterInput({
     }
   };
 
+  const [toDateButtonRef, setToDateButtonRef] = useState<HTMLButtonElement | null>(null);
+
   const handleDateRangeChange = (type: 'from' | 'to', date: string) => {
     const currentValue = localValue || { from: '', to: '' };
     const newValue = {
@@ -269,14 +271,28 @@ export function ColumnFilterInput({
     if (newValue.from === '' && newValue.to === '') {
       onChange(undefined);
     } else {
-      // Only validate when both dates are provided and valid
-      if (newValue.from && newValue.to) {
+      // Special handling for 'to' date validation
+      if (type === 'to' && newValue.from && newValue.to) {
         const fromDate = new Date(newValue.from);
         const toDate = new Date(newValue.to);
         
-        // If both are valid dates and to < from, don't send the change
+        // If both are valid dates and to < from, clear todate and refocus
         if (!isNaN(fromDate.getTime()) && !isNaN(toDate.getTime()) && toDate < fromDate) {
-          // Don't send onChange, but allow the UI state to update
+          // Clear the to date
+          const clearedValue = { ...newValue, to: '' };
+          setLocalValue(clearedValue);
+          
+          // Focus back on the to date button after a brief delay
+          setTimeout(() => {
+            toDateButtonRef?.focus();
+          }, 100);
+          
+          // Send the cleared value
+          onChange({
+            value: clearedValue,
+            operator: 'between' as any,
+            type: 'dateRange'
+          });
           return;
         }
       }
@@ -455,6 +471,7 @@ export function ColumnFilterInput({
             <Popover>
               <PopoverTrigger asChild>
                 <Button
+                  ref={setToDateButtonRef}
                   variant="outline"
                   className={cn(
                     "h-7 text-xs justify-start text-left font-normal flex-1",
