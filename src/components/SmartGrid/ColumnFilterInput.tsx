@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
@@ -42,6 +42,7 @@ export function ColumnFilterInput({
   const [dropdownMode, setDropdownMode] = useState<'dropdown' | 'text'>('dropdown');
   const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
   const [isMultiSelectOpen, setIsMultiSelectOpen] = useState(false);
+  const toNumberInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     setLocalValue(value?.value || '');
@@ -487,8 +488,18 @@ export function ColumnFilterInput({
             />
             <span className="text-xs text-muted-foreground">-</span>
             <Input
+              ref={toNumberInputRef}
               value={rangeTo}
               onChange={(e) => handleRangeChange(rangeFrom, e.target.value)}
+              onBlur={() => {
+                if (rangeFrom && rangeTo && parseFloat(rangeTo) < parseFloat(rangeFrom)) {
+                  setRangeTo('');
+                  handleRangeChange(rangeFrom, '');
+                  setTimeout(() => {
+                    toNumberInputRef.current?.focus();
+                  }, 0);
+                }
+              }}
               placeholder="To"
               className="h-7 text-xs flex-1"
               type="number"
