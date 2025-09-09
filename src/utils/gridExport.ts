@@ -99,7 +99,19 @@ export function exportToExcel(
 
     // Create workbook and worksheet
     const workbook = XLSX.utils.book_new();
-    const worksheet = XLSX.utils.json_to_sheet(processedData);
+    
+    // If no data, create empty worksheet with headers only
+    let worksheet;
+    if (processedData.length === 0) {
+      // Create empty row with column headers
+      const headerRow: Record<string, any> = {};
+      columns.forEach(col => {
+        headerRow[col.label] = '';
+      });
+      worksheet = XLSX.utils.json_to_sheet([headerRow]);
+    } else {
+      worksheet = XLSX.utils.json_to_sheet(processedData);
+    }
 
     // Add worksheet to workbook
     XLSX.utils.book_append_sheet(workbook, worksheet, 'Data');
