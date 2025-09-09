@@ -124,6 +124,7 @@ export interface ServerFilter {
   options?: string[];
   multiSelect?: boolean; // Enable multi-select for dropdown/select types
   fetchOptions?: (params: { searchTerm: string; offset: number; limit: number }) => Promise<{ label: string; value: string }[]>;
+  defaultValue?: any; // Default value for the filter field
 }
 
 export interface ExtraFilter {

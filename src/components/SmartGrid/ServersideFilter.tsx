@@ -50,12 +50,37 @@ export function ServersideFilter({
   // Get current grid's active filters
   const currentActiveFilters = activeFilters[gridId] || {};
   
-  // Initialize pending filters from active filters when component mounts
+  // Initialize pending filters from active filters OR default values when component mounts
   useEffect(() => {
-    if (Object.keys(pendingFilters).length === 0 && Object.keys(currentActiveFilters).length > 0) {
-      setPendingFilters(currentActiveFilters);
+    if (Object.keys(pendingFilters).length === 0) {
+      if (Object.keys(currentActiveFilters).length > 0) {
+        // Use existing active filters
+        setPendingFilters(currentActiveFilters);
+      } else {
+        // Initialize with default values from serverFilters
+        const defaultFilters: Record<string, FilterValue> = {};
+        serverFilters.forEach(filter => {
+          if (filter.defaultValue !== undefined && filter.defaultValue !== null && filter.defaultValue !== '') {
+            defaultFilters[filter.key] = {
+              value: filter.defaultValue,
+              operator: 'equals'
+            };
+          }
+        });
+        
+        if (Object.keys(defaultFilters).length > 0) {
+          setPendingFilters(defaultFilters);
+          setActiveFilters(gridId, defaultFilters);
+          onFiltersChange(defaultFilters);
+          
+          // Trigger initial search with default values
+          setTimeout(() => {
+            onSearch();
+          }, 100);
+        }
+      }
     }
-  }, [currentActiveFilters]);
+  }, [currentActiveFilters, serverFilters, gridId]);
 
   // Initialize field visibility and order
   useEffect(() => {
