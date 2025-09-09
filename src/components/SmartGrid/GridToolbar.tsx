@@ -25,6 +25,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { Badge } from '@/components/ui/badge';
+import { useFilterStore } from '@/stores/filterStore';
 
 interface GridToolbarProps {
   globalFilter: string;
@@ -63,6 +65,7 @@ interface GridToolbarProps {
   // Server-side filter props
   showServersideFilter?: boolean;
   onToggleServersideFilter?: () => void;
+  gridId?: string;
 }
 
 export function GridToolbar({
@@ -98,7 +101,8 @@ export function GridToolbar({
   groupableColumns,
   showGroupingDropdown = false,
   showServersideFilter = false,
-  onToggleServersideFilter
+  onToggleServersideFilter,
+  gridId
 }: GridToolbarProps) {
   // Default configurable button configuration
   const defaultConfigurableButton: ConfigurableButtonConfig = {
@@ -125,6 +129,11 @@ export function GridToolbar({
     const newGroupBy = value === 'none' ? null : value;
     onGroupByChange?.(newGroupBy);
   };
+
+  // Get active serverside filters from store
+  const { activeFilters } = useFilterStore();
+  const currentActiveFilters = activeFilters[gridId || 'default'] || {};
+  const hasActiveServersideFilters = Object.keys(currentActiveFilters).length > 0;
 
   return (
     <div className="flex items-center justify-between w-full py-2 bg-gray-50">
@@ -207,19 +216,30 @@ export function GridToolbar({
 
         {/* Server-side Filter Toggle */}
         {onToggleServersideFilter && (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onToggleServersideFilter}
-            disabled={loading}
-            title="Toggle Server-side Filters"
-            className={cn(
-              "w-8 h-8 flex items-center justify-center rounded hover:bg-gray-100 p-0",
-              showServersideFilter && "bg-purple-50 text-purple-600"
+          <div className="relative">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onToggleServersideFilter}
+              disabled={loading}
+              title="Toggle Server-side Filters"
+              className={cn(
+                "w-8 h-8 flex items-center justify-center rounded hover:bg-gray-100 p-0",
+                showServersideFilter && "bg-purple-50 text-purple-600"
+              )}
+            >
+              <Zap className="h-4 w-4" />
+            </Button>
+            {/* Server-side Filter Badge - Show when filters are hidden but active */}
+            {!showServersideFilter && hasActiveServersideFilters && (
+              <Badge 
+                variant="secondary" 
+                className="absolute -top-1 -right-1 h-5 min-w-5 text-xs bg-purple-500 text-white rounded-full flex items-center justify-center p-0"
+              >
+                {Object.keys(currentActiveFilters).length}
+              </Badge>
             )}
-          >
-            <Zap className="h-4 w-4" />
-          </Button>
+          </div>
         )}
 
         <Button 

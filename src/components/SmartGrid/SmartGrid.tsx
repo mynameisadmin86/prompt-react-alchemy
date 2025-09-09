@@ -855,6 +855,7 @@ export function SmartGrid({
         // Server-side filter props
         showServersideFilter={showServersideFilter}
         onToggleServersideFilter={onToggleServersideFilter}
+        gridId={gridId}
       />
 
       {/* Server-side Filter */}
