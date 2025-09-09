@@ -263,16 +263,24 @@ export function ColumnFilterInput({
       [type]: date
     };
     
-    // Validate that to date >= from date if both are provided
-    if (newValue.from && newValue.to && new Date(newValue.to) < new Date(newValue.from)) {
-      return; // Don't update if to date is less than from date
-    }
+    // Always update the local state to allow typing
+    setLocalValue(newValue);
     
     if (newValue.from === '' && newValue.to === '') {
-      setLocalValue(undefined);
       onChange(undefined);
     } else {
-      setLocalValue(newValue);
+      // Only validate when both dates are provided and valid
+      if (newValue.from && newValue.to) {
+        const fromDate = new Date(newValue.from);
+        const toDate = new Date(newValue.to);
+        
+        // If both are valid dates and to < from, don't send the change
+        if (!isNaN(fromDate.getTime()) && !isNaN(toDate.getTime()) && toDate < fromDate) {
+          // Don't send onChange, but allow the UI state to update
+          return;
+        }
+      }
+      
       onChange({
         value: newValue,
         operator: 'between' as any,
