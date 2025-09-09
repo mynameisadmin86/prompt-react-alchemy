@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { format, subDays } from 'date-fns';
 import { SmartGridWithGrouping } from '@/components/SmartGrid';
 import { GridColumnConfig, FilterConfig, ServerFilter } from '@/types/smartgrid';
 import { useToast } from '@/hooks/use-toast';
@@ -174,7 +175,15 @@ const QuickOrderServerSideManagement: React.FC = () => {
     { key: 'Contract', label: 'Contract', type: 'dropdownText', options: ['Service Contract', 'Purchase Contract', 'Rental Contract', 'Maintenance Contract', 'Logistics Contract'] },
     { key: 'OrderType', label: 'Order Type', type: 'text' },
     { key: 'QuickOrderDate', label: 'Quick Order Date', type: 'date' },
-    { key: 'QuickOrderDateRange', label: 'Quick Order Date Range', type: 'dateRange' },
+    { 
+      key: 'QuickOrderDateRange', 
+      label: 'Quick Order Date Range', 
+      type: 'dateRange',
+      defaultValue: {
+        from: format(subDays(new Date(), 30), 'yyyy-MM-dd'),
+        to: format(new Date(), 'yyyy-MM-dd')
+      }
+    },
     { key: 'amount', label: 'Amount', type: 'numberRange' }
   ];
 
