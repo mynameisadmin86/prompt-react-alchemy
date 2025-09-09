@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
@@ -256,19 +256,23 @@ export function ColumnFilterInput({
     }
   };
 
-  const [toDateButtonRef, setToDateButtonRef] = useState<HTMLButtonElement | null>(null);
+  const toDateButtonRef = useRef<HTMLButtonElement>(null);
 
   const handleDateRangeChange = (type: 'from' | 'to', date: string) => {
+    console.log('handleDateRangeChange called:', { type, date });
     const currentValue = localValue || { from: '', to: '' };
     const newValue = {
       ...currentValue,
       [type]: date
     };
     
+    console.log('Date range values:', { currentValue, newValue });
+    
     // Always update the local state to allow typing
     setLocalValue(newValue);
     
     if (newValue.from === '' && newValue.to === '') {
+      console.log('Both dates empty, clearing filter');
       onChange(undefined);
     } else {
       // Special handling for 'to' date validation
@@ -276,15 +280,23 @@ export function ColumnFilterInput({
         const fromDate = new Date(newValue.from);
         const toDate = new Date(newValue.to);
         
+        console.log('Validating dates:', { 
+          fromDate: fromDate.toISOString(), 
+          toDate: toDate.toISOString(),
+          toDateLessThanFromDate: toDate < fromDate 
+        });
+        
         // If both are valid dates and to < from, clear todate and refocus
         if (!isNaN(fromDate.getTime()) && !isNaN(toDate.getTime()) && toDate < fromDate) {
+          console.log('To date is less than from date, clearing to date');
           // Clear the to date
           const clearedValue = { ...newValue, to: '' };
           setLocalValue(clearedValue);
           
           // Focus back on the to date button after a brief delay
           setTimeout(() => {
-            toDateButtonRef?.focus();
+            console.log('Attempting to focus to date button:', toDateButtonRef.current);
+            toDateButtonRef.current?.focus();
           }, 100);
           
           // Send the cleared value
@@ -297,6 +309,7 @@ export function ColumnFilterInput({
         }
       }
       
+      console.log('Sending valid date range');
       onChange({
         value: newValue,
         operator: 'between' as any,
@@ -471,7 +484,7 @@ export function ColumnFilterInput({
             <Popover>
               <PopoverTrigger asChild>
                 <Button
-                  ref={setToDateButtonRef}
+                  ref={toDateButtonRef}
                   variant="outline"
                   className={cn(
                     "h-7 text-xs justify-start text-left font-normal flex-1",
