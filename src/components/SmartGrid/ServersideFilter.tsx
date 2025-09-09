@@ -9,6 +9,7 @@ import { ServerFilterFieldModal } from './ServerFilterFieldModal';
 import { GridColumnConfig, ServerFilter } from '@/types/smartgrid';
 import { FilterValue, FilterSet, FilterSystemAPI } from '@/types/filterSystem';
 import { useToast } from '@/hooks/use-toast';
+import { useFilterStore } from '@/stores/filterStore';
 import { cn } from '@/lib/utils';
 
 interface ServersideFilterProps {
@@ -34,7 +35,8 @@ export function ServersideFilter({
   userId,
   api
 }: ServersideFilterProps) {
-  const [activeFilters, setActiveFilters] = useState<Record<string, FilterValue>>({});
+  // Use persistent filter store to maintain state across component unmount/mount
+  const { activeFilters, setActiveFilters } = useFilterStore();
   const [pendingFilters, setPendingFilters] = useState<Record<string, FilterValue>>({});
   const [filterSets, setFilterSets] = useState<FilterSet[]>([]);
   const [showSaveModal, setShowSaveModal] = useState(false);
@@ -44,6 +46,16 @@ export function ServersideFilter({
   const [fieldOrder, setFieldOrder] = useState<string[]>([]);
   
   const { toast } = useToast();
+  
+  // Get current grid's active filters
+  const currentActiveFilters = activeFilters[gridId] || {};
+  
+  // Initialize pending filters from active filters when component mounts
+  useEffect(() => {
+    if (Object.keys(pendingFilters).length === 0 && Object.keys(currentActiveFilters).length > 0) {
+      setPendingFilters(currentActiveFilters);
+    }
+  }, [currentActiveFilters]);
 
   // Initialize field visibility and order
   useEffect(() => {
@@ -64,15 +76,15 @@ export function ServersideFilter({
   // Apply default filter set on load
   useEffect(() => {
     const defaultSet = filterSets.find(set => set.isDefault);
-    if (defaultSet && Object.keys(activeFilters).length === 0) {
+    if (defaultSet && Object.keys(currentActiveFilters).length === 0) {
       applyFilterSet(defaultSet);
     }
-  }, [filterSets]);
+  }, [filterSets, currentActiveFilters]);
 
   // Only notify parent of filter changes when filters are actually applied
   useEffect(() => {
-    onFiltersChange(activeFilters);
-  }, [activeFilters, onFiltersChange]);
+    onFiltersChange(currentActiveFilters);
+  }, [currentActiveFilters, onFiltersChange]);
 
   const loadFilterSets = async () => {
     if (!api) return;
@@ -149,7 +161,7 @@ export function ServersideFilter({
 
   const applyFilterSet = (filterSet: FilterSet) => {
     setPendingFilters(filterSet.filters);
-    setActiveFilters(filterSet.filters);
+    setActiveFilters(gridId, filterSet.filters);
     
     if (api) {
       api.applyGridFilters(filterSet.filters);
@@ -242,7 +254,7 @@ export function ServersideFilter({
 
   const clearAllFilters = () => {
     setPendingFilters({});
-    setActiveFilters({});
+    setActiveFilters(gridId, {});
     onFiltersChange({});
     
     if (api) {
@@ -369,7 +381,7 @@ export function ServersideFilter({
             size="sm"
             onClick={() => {
               // Apply pending filters to active filters
-              setActiveFilters(pendingFilters);
+              setActiveFilters(gridId, pendingFilters);
               
               // Update parent component with current filters first
               onFiltersChange(pendingFilters);
