@@ -18,6 +18,7 @@ import SideDrawerDemo from "./pages/SideDrawerDemo";
 import SmartGridPlusDemo from "./pages/SmartGridPlusDemo";
 import BillingDemo from "./pages/BillingDemo";
 import FileUploadDemo from "./pages/FileUploadDemo";
+import BulkUploadDemo from "./pages/BulkUploadDemo";
 import SmartGridGroupingDemo from "./pages/SmartGridGroupingDemo";
 import NotFound from "./pages/NotFound";
 import DynamicCardView from "./pages/DynamicCardView";
@@ -48,6 +49,7 @@ const App = () => (
           <Route path="/smart-grid-plus-demo" element={<SmartGridPlusDemo />} />
           <Route path="/billing-demo" element={<BillingDemo />} />
           <Route path="/file-upload-demo" element={<FileUploadDemo />} />
+          <Route path="/bulk-upload-demo" element={<BulkUploadDemo />} />
           <Route path="/smart-grid-grouping-demo" element={<SmartGridGroupingDemo />} />
           <Route path="/quick-order-management" element={<QuickOrderManagement />} />
           <Route path="/quick-order-server-side-management" element={<QuickOrderServerSideManagement />} />

@@ -84,6 +84,13 @@ const Index = () => {
       color: "text-rose-600"
     },
     {
+      title: "Bulk Upload Demo",
+      description: "Step-by-step bulk upload with column mapping, validation, and error correction",
+      icon: Upload,
+      path: "/bulk-upload-demo",
+      color: "text-red-600"
+    },
+    {
       title: "SmartGrid Grouping Demo",
       description: "Advanced grid with row grouping functionality and expandable groups",
       icon: Layers,
