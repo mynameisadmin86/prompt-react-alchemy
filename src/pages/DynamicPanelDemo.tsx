@@ -1,8 +1,11 @@
-import React, { useState, useCallback } from 'react';
-import { DynamicPanel } from '@/components/DynamicPanel';
+import React, { useState, useCallback, useRef } from 'react';
+import { DynamicPanel, DynamicPanelRef } from '@/components/DynamicPanel';
 import { PanelVisibilityManager } from '@/components/DynamicPanel/PanelVisibilityManager';
 import { PanelConfig, PanelSettings } from '@/types/dynamicPanel';
-import { EyeOff } from 'lucide-react';
+import { EyeOff, CheckCircle, AlertTriangle } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { useToast } from '@/hooks/use-toast';
 import {
   Breadcrumb,
   BreadcrumbList,
@@ -16,6 +19,120 @@ const DynamicPanelDemo = () => {
   const [basicDetailsData, setBasicDetailsData] = useState({});
   const [operationalDetailsData, setOperationalDetailsData] = useState({});
   const [billingDetailsData, setBillingDetailsData] = useState({});
+
+  // Panel refs for validation
+  const basicDetailsRef = useRef<DynamicPanelRef>(null);
+  const operationalDetailsRef = useRef<DynamicPanelRef>(null);
+  const billingDetailsRef = useRef<DynamicPanelRef>(null);
+
+  // Validation state
+  const [validationResults, setValidationResults] = useState<Record<string, { isValid: boolean; errors: Record<string, string>; mandatoryFieldsEmpty: string[] }>>({});
+  const { toast } = useToast();
+
+  // Get form values from all panels
+  const handleGetAllFormValues = () => {
+    const allFormValues: Record<string, any> = {};
+
+    if (basicDetailsVisible && basicDetailsRef.current) {
+      allFormValues.basicDetails = basicDetailsRef.current.getFormValues();
+    }
+
+    if (operationalDetailsVisible && operationalDetailsRef.current) {
+      allFormValues.operationalDetails = operationalDetailsRef.current.getFormValues();
+    }
+
+    if (billingDetailsVisible && billingDetailsRef.current) {
+      allFormValues.billingDetails = billingDetailsRef.current.getFormValues();
+    }
+
+    console.log('All Form Values:', allFormValues);
+    
+    toast({
+      title: "Form Values Retrieved",
+      description: "Check the console for all form values.",
+      variant: "default",
+    });
+
+    return allFormValues;
+  };
+
+  // Submit handler (example)
+  const handleSubmitForm = () => {
+    const isValid = handleValidateAllPanels();
+    
+    if (isValid) {
+      const formValues = handleGetAllFormValues();
+      
+      // Here you would typically send the data to your API
+      console.log('Submitting form data:', formValues);
+      
+      toast({
+        title: "Form Submitted Successfully!",
+        description: "All panels validated and data submitted.",
+        variant: "default",
+      });
+    } else {
+      toast({
+        title: "Validation Failed",
+        description: "Please fix validation errors before submitting.",
+        variant: "destructive",
+      });
+    }
+  };
+  const handleValidateAllPanels = () => {
+    const results: Record<string, { isValid: boolean; errors: Record<string, string>; mandatoryFieldsEmpty: string[] }> = {};
+    let overallValid = true;
+    let totalErrors = 0;
+
+    // Validate Basic Details
+    if (basicDetailsVisible && basicDetailsRef.current) {
+      const basicValidation = basicDetailsRef.current.doValidation();
+      results['basic-details'] = basicValidation;
+      if (!basicValidation.isValid) {
+        overallValid = false;
+        totalErrors += Object.keys(basicValidation.errors).length;
+      }
+    }
+
+    // Validate Operational Details
+    if (operationalDetailsVisible && operationalDetailsRef.current) {
+      const operationalValidation = operationalDetailsRef.current.doValidation();
+      results['operational-details'] = operationalValidation;
+      if (!operationalValidation.isValid) {
+        overallValid = false;
+        totalErrors += Object.keys(operationalValidation.errors).length;
+      }
+    }
+
+    // Validate Billing Details
+    if (billingDetailsVisible && billingDetailsRef.current) {
+      const billingValidation = billingDetailsRef.current.doValidation();
+      results['billing-details'] = billingValidation;
+      if (!billingValidation.isValid) {
+        overallValid = false;
+        totalErrors += Object.keys(billingValidation.errors).length;
+      }
+    }
+
+    setValidationResults(results);
+
+    // Show toast notification
+    if (overallValid) {
+      toast({
+        title: "Validation Successful",
+        description: "All mandatory fields are filled and valid.",
+        variant: "default",
+      });
+    } else {
+      toast({
+        title: "Validation Failed",
+        description: `${totalErrors} validation error(s) found. Please check the highlighted fields.`,
+        variant: "destructive",
+      });
+    }
+
+    return overallValid;
+  };
 
   // Panel titles state
   const [basicDetailsTitle, setBasicDetailsTitle] = useState('Basic Details');
@@ -438,11 +555,71 @@ const DynamicPanelDemo = () => {
               Configure field visibility, ordering, and labels for each panel
             </p>
           </div>
-          <PanelVisibilityManager
-            panels={panels}
-            onVisibilityChange={handlePanelVisibilityChange}
-          />
+          <div className="flex items-center gap-3">
+            <Button 
+              onClick={handleGetAllFormValues}
+              variant="secondary"
+              className="flex items-center gap-2"
+            >
+              Get Form Values
+            </Button>
+            <Button 
+              onClick={handleValidateAllPanels}
+              variant="outline"
+              className="flex items-center gap-2"
+            >
+              <CheckCircle className="h-4 w-4" />
+              Validate All Panels
+            </Button>
+            <Button 
+              onClick={handleSubmitForm}
+              className="flex items-center gap-2"
+            >
+              Submit Form
+            </Button>
+            <PanelVisibilityManager
+              panels={panels}
+              onVisibilityChange={handlePanelVisibilityChange}
+            />
+          </div>
         </div>
+
+        {/* Validation Results */}
+        {Object.keys(validationResults).length > 0 && (
+          <div className="space-y-3">
+            {Object.entries(validationResults).map(([panelId, result]) => (
+              <Alert key={panelId} variant={result.isValid ? "default" : "destructive"}>
+                {result.isValid ? (
+                  <CheckCircle className="h-4 w-4" />
+                ) : (
+                  <AlertTriangle className="h-4 w-4" />
+                )}
+                <AlertDescription>
+                  <div className="flex items-center justify-between">
+                    <span className="font-medium">
+                      {panelId === 'basic-details' && basicDetailsTitle}
+                      {panelId === 'operational-details' && operationalDetailsTitle}
+                      {panelId === 'billing-details' && billingDetailsTitle}
+                    </span>
+                    <span className={`text-sm ${result.isValid ? 'text-green-600' : 'text-red-600'}`}>
+                      {result.isValid ? 'Valid' : `${Object.keys(result.errors).length} error(s)`}
+                    </span>
+                  </div>
+                  {!result.isValid && result.mandatoryFieldsEmpty.length > 0 && (
+                    <div className="mt-2 text-sm">
+                      <span className="font-medium">Missing mandatory fields:</span>
+                      <ul className="list-disc list-inside ml-4 mt-1">
+                        {result.mandatoryFieldsEmpty.map((field, index) => (
+                          <li key={index}>{field}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </AlertDescription>
+              </Alert>
+            ))}
+          </div>
+        )}
 
         {/* Dynamic Panels in 12-column grid */}
         <div className="grid grid-cols-12 gap-6">
@@ -456,6 +633,7 @@ const DynamicPanelDemo = () => {
               panels.push(
                 <DynamicPanel
                   key="basic-details"
+                  ref={basicDetailsRef}
                   panelId="basic-details"
                   panelOrder={1}
                   startingTabIndex={currentTabIndex}
@@ -480,6 +658,7 @@ const DynamicPanelDemo = () => {
               panels.push(
                 <DynamicPanel
                   key="operational-details"
+                  ref={operationalDetailsRef}
                   panelId="operational-details"
                   panelOrder={2}
                   startingTabIndex={currentTabIndex}
@@ -503,6 +682,7 @@ const DynamicPanelDemo = () => {
               panels.push(
                 <DynamicPanel
                   key="billing-details"
+                  ref={billingDetailsRef}
                   panelId="billing-details"
                   panelOrder={3}
                   startingTabIndex={currentTabIndex}
