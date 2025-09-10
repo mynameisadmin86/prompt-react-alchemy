@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { 
   Upload, 
   Download, 
@@ -20,7 +21,8 @@ import {
   ChevronLeft, 
   ChevronRight,
   Trash2,
-  Edit2
+  Edit2,
+  Info
 } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import { cn } from '@/lib/utils';
@@ -33,7 +35,7 @@ import {
   UploadError
 } from '@/types/bulkUpload';
 
-type UploadStep = 'information' | 'upload' | 'mapping' | 'review' | 'completion';
+type UploadStep = 'information' | 'upload' | 'review' | 'completion';
 
 export default function DynamicBulkUpload({
   acceptedFileTypes = ['.csv', '.xlsx', '.xls'],
@@ -44,7 +46,7 @@ export default function DynamicBulkUpload({
   onValidate,
   onImportComplete,
   allowMultipleFiles = false,
-  enableMapping = true,
+  enableMapping = false,
   className,
   isOpen,
   onClose
@@ -57,6 +59,7 @@ export default function DynamicBulkUpload({
   const [uploadSummary, setUploadSummary] = useState<UploadSummary | null>(null);
   const [editingData, setEditingData] = useState<any[]>([]);
   const [showErrorsOnly, setShowErrorsOnly] = useState(false);
+  const [editingCell, setEditingCell] = useState<{rowIndex: number, field: string} | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileUpload = useCallback(async (selectedFiles: FileList) => {
@@ -244,7 +247,7 @@ export default function DynamicBulkUpload({
     const allData = files.flatMap(f => f.data || []);
     const result = onValidate(allData, columnsConfig);
     setValidationResult(result);
-    setEditingData([...result.invalidRows]);
+    setEditingData([...allData]);
   };
 
   const handleNext = () => {
@@ -254,22 +257,9 @@ export default function DynamicBulkUpload({
         break;
       case 'upload':
         if (files.length > 0 && files.every(f => f.status === 'completed')) {
-          if (enableMapping) {
-            const firstFile = files[0];
-            if (firstFile.data && firstFile.data.length > 0) {
-              const headers = Object.keys(firstFile.data[0]);
-              autoMapColumns(headers);
-            }
-            setCurrentStep('mapping');
-          } else {
-            validateData();
-            setCurrentStep('review');
-          }
+          validateData();
+          setCurrentStep('review');
         }
-        break;
-      case 'mapping':
-        validateData();
-        setCurrentStep('review');
         break;
       case 'review':
         const summary: UploadSummary = {
@@ -291,11 +281,8 @@ export default function DynamicBulkUpload({
       case 'upload':
         setCurrentStep('information');
         break;
-      case 'mapping':
-        setCurrentStep('upload');
-        break;
       case 'review':
-        setCurrentStep(enableMapping ? 'mapping' : 'upload');
+        setCurrentStep('upload');
         break;
       case 'completion':
         setCurrentStep('review');
@@ -309,8 +296,6 @@ export default function DynamicBulkUpload({
         return true;
       case 'upload':
         return files.length > 0 && files.every(f => f.status === 'completed');
-      case 'mapping':
-        return columnMappings.length > 0;
       case 'review':
         return validationResult !== null;
       case 'completion':
@@ -330,8 +315,7 @@ export default function DynamicBulkUpload({
     switch (currentStep) {
       case 'information': return 'Bulk Upload Information';
       case 'upload': return 'File Upload';
-      case 'mapping': return 'Column Mapping';
-      case 'review': return 'Data Review';
+      case 'review': return 'Data Review & Error Correction';
       case 'completion': return 'Upload Complete';
     }
   };
@@ -459,73 +443,82 @@ export default function DynamicBulkUpload({
     </div>
   );
 
-  const renderMappingStep = () => {
-    const firstFile = files[0];
-    const fileHeaders = firstFile?.data && firstFile.data.length > 0 ? Object.keys(firstFile.data[0]) : [];
+  const updateCellValue = (rowIndex: number, field: string, value: any) => {
+    setEditingData(prev => {
+      const newData = [...prev];
+      newData[rowIndex] = { ...newData[rowIndex], [field]: value };
+      return newData;
+    });
     
+    // Re-validate after edit
+    const updatedResult = onValidate(editingData, columnsConfig);
+    setValidationResult(updatedResult);
+  };
+
+  const getCellError = (rowIndex: number, field: string): string | null => {
+    if (!validationResult?.errors) return null;
+    
+    const error = validationResult.errors.find(err => 
+      err.row === rowIndex + 1 && err.column === field
+    );
+    return error?.error || null;
+  };
+
+  const hasRowError = (rowIndex: number): boolean => {
+    if (!validationResult?.errors) return false;
+    return validationResult.errors.some(err => err.row === rowIndex + 1);
+  };
+
+  const getFilteredData = () => {
+    if (!showErrorsOnly) return editingData;
+    
+    return editingData.filter((_, index) => hasRowError(index));
+  };
+
+  const renderEditableCell = (row: any, field: string, rowIndex: number) => {
+    const error = getCellError(rowIndex, field);
+    const isEditing = editingCell?.rowIndex === rowIndex && editingCell?.field === field;
+    const cellValue = row[field] || '';
+
+    if (isEditing) {
+      return (
+        <Input
+          value={cellValue}
+          onChange={(e) => updateCellValue(rowIndex, field, e.target.value)}
+          onBlur={() => setEditingCell(null)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === 'Escape') {
+              setEditingCell(null);
+            }
+          }}
+          className="h-8"
+          autoFocus
+        />
+      );
+    }
+
     return (
-      <div className="space-y-6">
-        <Alert>
-          <AlertTriangle className="h-4 w-4" />
-          <AlertDescription>
-            Map your file columns to the required fields. Auto-mapping has been applied where possible.
-          </AlertDescription>
-        </Alert>
-        
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Column Mapping</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {fileHeaders.map((header) => {
-                const mapping = columnMappings.find(m => m.sourceColumn === header);
-                return (
-                  <div key={header} className="flex items-center gap-4 p-3 border rounded-lg">
-                    <div className="flex-1">
-                      <p className="font-medium">{header}</p>
-                      <p className="text-sm text-muted-foreground">Source Column</p>
-                    </div>
-                    <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                    <div className="flex-1">
-                      <Select
-                        value={mapping?.targetColumn || ''}
-                        onValueChange={(value) => {
-                          setColumnMappings(prev => {
-                            const existing = prev.find(m => m.sourceColumn === header);
-                            if (existing) {
-                              return prev.map(m => 
-                                m.sourceColumn === header 
-                                  ? { ...m, targetColumn: value, confidence: 1.0 }
-                                  : m
-                              );
-                            } else {
-                              return [...prev, { sourceColumn: header, targetColumn: value, confidence: 1.0 }];
-                            }
-                          });
-                        }}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select target column" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {columnsConfig.map((config) => (
-                            <SelectItem key={config.fieldName} value={config.fieldName}>
-                              {config.displayName}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      {mapping && mapping.confidence < 1.0 && (
-                        <p className="text-xs text-amber-600 mt-1">Auto-mapped (confidence: {Math.round(mapping.confidence * 100)}%)</p>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </CardContent>
-        </Card>
+      <div
+        className={cn(
+          "min-h-8 flex items-center cursor-pointer p-1 rounded",
+          error && "bg-red-50 border border-red-200",
+          "hover:bg-muted"
+        )}
+        onClick={() => setEditingCell({ rowIndex, field })}
+      >
+        <span className={cn(error && "text-red-700")}>{String(cellValue)}</span>
+        {error && (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Info className="h-3 w-3 text-red-500 ml-1 cursor-help" />
+              </TooltipTrigger>
+              <TooltipContent>
+                <p className="text-sm">{error}</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        )}
       </div>
     );
   };
@@ -546,14 +539,14 @@ export default function DynamicBulkUpload({
             <CardContent className="pt-6">
               <div className="text-center">
                 <p className="text-2xl font-bold text-red-600">{validationResult.invalidRows.length}</p>
-                <p className="text-sm text-muted-foreground">Errors</p>
+                <p className="text-sm text-muted-foreground">Records with Errors</p>
               </div>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="pt-6">
               <div className="text-center">
-                <p className="text-2xl font-bold">{validationResult.validRows.length + validationResult.invalidRows.length}</p>
+                <p className="text-2xl font-bold">{editingData.length}</p>
                 <p className="text-sm text-muted-foreground">Total Records</p>
               </div>
             </CardContent>
@@ -561,51 +554,87 @@ export default function DynamicBulkUpload({
         </div>
       )}
 
-      {validationResult && validationResult.errors.length > 0 && (
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-base">Data Issues</CardTitle>
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-base">Data Preview & Error Correction</CardTitle>
+            <div className="flex gap-2">
               <Button
-                variant="outline"
+                variant={showErrorsOnly ? "default" : "outline"}
                 size="sm"
                 onClick={() => setShowErrorsOnly(!showErrorsOnly)}
               >
-                {showErrorsOnly ? 'Show All' : 'Show Errors Only'}
+                {showErrorsOnly ? 'Show All Rows' : 'Show Errors Only'}
               </Button>
+              <Badge variant="secondary">
+                {getFilteredData().length} of {editingData.length} rows
+              </Badge>
             </div>
-          </CardHeader>
-          <CardContent>
-            <ScrollArea className="h-64">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Row</TableHead>
-                    <TableHead>Column</TableHead>
-                    <TableHead>Error</TableHead>
-                    <TableHead>Value</TableHead>
-                    <TableHead>Action</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {validationResult.errors.map((error, index) => (
-                    <TableRow key={index}>
-                      <TableCell>{error.row}</TableCell>
-                      <TableCell>{error.column}</TableCell>
-                      <TableCell className="text-red-600">{error.error}</TableCell>
-                      <TableCell>{String(error.value)}</TableCell>
-                      <TableCell>
-                        <Button variant="ghost" size="sm">
-                          <Edit2 className="h-3 w-3" />
-                        </Button>
-                      </TableCell>
-                    </TableRow>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="text-xs text-muted-foreground mb-3">
+            Click on any cell to edit. Cells with errors are highlighted in red.
+          </div>
+          <ScrollArea className="h-96 w-full">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-12">#</TableHead>
+                  {columnsConfig.map((config) => (
+                    <TableHead key={config.fieldName} className="min-w-32">
+                      {config.displayName}
+                      {config.validationRules?.required && (
+                        <span className="text-red-500 ml-1">*</span>
+                      )}
+                    </TableHead>
                   ))}
-                </TableBody>
-              </Table>
-            </ScrollArea>
-          </CardContent>
-        </Card>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {getFilteredData().map((row, index) => {
+                  const originalIndex = showErrorsOnly 
+                    ? editingData.findIndex(item => item === row)
+                    : index;
+                  const rowHasError = hasRowError(originalIndex);
+                  
+                  return (
+                    <TableRow
+                      key={originalIndex}
+                      className={cn(
+                        rowHasError && "bg-red-50/50 hover:bg-red-50"
+                      )}
+                    >
+                      <TableCell className="font-mono text-xs">
+                        <div className="flex items-center gap-1">
+                          {originalIndex + 1}
+                          {rowHasError && (
+                            <AlertTriangle className="h-3 w-3 text-red-500" />
+                          )}
+                        </div>
+                      </TableCell>
+                      {columnsConfig.map((config) => (
+                        <TableCell key={config.fieldName}>
+                          {renderEditableCell(row, config.fieldName, originalIndex)}
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </ScrollArea>
+        </CardContent>
+      </Card>
+
+      {validationResult && validationResult.errors.length > 0 && (
+        <Alert>
+          <AlertTriangle className="h-4 w-4" />
+          <AlertDescription>
+            Found {validationResult.errors.length} validation errors. 
+            Click on highlighted cells to correct the data before proceeding.
+          </AlertDescription>
+        </Alert>
       )}
     </div>
   );
@@ -664,7 +693,6 @@ export default function DynamicBulkUpload({
         <div className="flex-1 overflow-auto">
           {currentStep === 'information' && renderInformationStep()}
           {currentStep === 'upload' && renderUploadStep()}
-          {currentStep === 'mapping' && renderMappingStep()}
           {currentStep === 'review' && renderReviewStep()}
           {currentStep === 'completion' && renderCompletionStep()}
         </div>
