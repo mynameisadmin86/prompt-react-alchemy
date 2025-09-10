@@ -5,4 +5,5 @@ export { FieldRenderer } from './FieldRenderer';
 export { FieldVisibilityModal } from './FieldVisibilityModal';
 export { EnhancedFieldVisibilityModal } from './EnhancedFieldVisibilityModal';
 export { DynamicPanelPreview } from './DynamicPanelPreview';
+export { SimpleDynamicPanel } from './SimpleDynamicPanel';
 export * from '@/types/dynamicPanel';
