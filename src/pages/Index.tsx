@@ -70,6 +70,13 @@ const Index = () => {
       color: "text-sky-600"
     },
     {
+      title: "Create Trip Execution", 
+      description: "Trip creation interface with dynamic grid and hover popups",
+      icon: Workflow,
+      path: "/create-trip-execution",
+      color: "text-emerald-600"
+    },
+    {
       title: "Side Drawer Demo",
       description: "Configurable side drawer with various width options and content",
       icon: PanelLeft,
