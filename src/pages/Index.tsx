@@ -63,6 +63,13 @@ const Index = () => {
       color: "text-cyan-600"
     },
     {
+      title: "Trip Execution Page", 
+      description: "Enhanced trip execution page with activities and summary cards",
+      icon: Workflow,
+      path: "/trip-execution-page",
+      color: "text-sky-600"
+    },
+    {
       title: "Side Drawer Demo",
       description: "Configurable side drawer with various width options and content",
       icon: PanelLeft,
