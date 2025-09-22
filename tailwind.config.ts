@@ -52,6 +52,20 @@ export default {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
 				},
+				status: {
+					released: 'hsl(var(--status-released))',
+					draft: 'hsl(var(--status-draft))',
+					success: 'hsl(var(--status-success))',
+					warning: 'hsl(var(--status-warning))'
+				},
+				behavior: {
+					pickup: 'hsl(var(--behavior-pickup))',
+					'pickup-text': 'hsl(var(--behavior-pickup-text))',
+					via: 'hsl(var(--behavior-via))',
+					'via-text': 'hsl(var(--behavior-via-text))',
+					bhub: 'hsl(var(--behavior-bhub))',
+					'bhub-text': 'hsl(var(--behavior-bhub-text))'
+				},
 				sidebar: {
 					DEFAULT: 'hsl(var(--sidebar-background))',
 					foreground: 'hsl(var(--sidebar-foreground))',

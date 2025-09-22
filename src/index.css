@@ -13,8 +13,8 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 214 76% 50%;
+    --primary-foreground: 0 0% 100%;
 
     --secondary: 210 40% 96.1%;
     --secondary-foreground: 222.2 47.4% 11.2%;
@@ -30,9 +30,23 @@
 
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --ring: 214 76% 50%;
 
     --radius: 0.5rem;
+    
+    /* Status colors */
+    --status-released: 142 76% 36%;
+    --status-draft: 32 95% 44%;
+    --status-success: 142 76% 36%;
+    --status-warning: 32 95% 44%;
+    
+    /* Behavior badge colors */
+    --behavior-pickup: 214 95% 93%;
+    --behavior-pickup-text: 214 84% 56%;
+    --behavior-via: 316 73% 52%;
+    --behavior-via-text: 316 73% 52%;
+    --behavior-bhub: 173 58% 39%;
+    --behavior-bhub-text: 173 58% 39%;
 
     --sidebar-background: 0 0% 98%;
 
