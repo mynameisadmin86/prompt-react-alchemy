@@ -691,7 +691,7 @@ const DynamicPanelDemo = () => {
         )}
 
         {/* Dynamic Panels in 12-column grid */}
-        <div className="grid grid-cols-12 gap-6">
+        <div className="grid grid-cols-12 gap-6 animate-fade-in">
           {(() => {
             let currentTabIndex = 1;
             const panels = [];
@@ -700,24 +700,25 @@ const DynamicPanelDemo = () => {
             if (basicDetailsVisible) {
               const basicDetailsVisibleCount = Object.values(basicDetailsConfig).filter(config => config.visible).length;
               panels.push(
-                <DynamicPanel
-                  key="basic-details"
-                  ref={basicDetailsRef}
-                  panelId="basic-details"
-                  panelOrder={1}
-                  startingTabIndex={currentTabIndex}
-                  panelTitle={basicDetailsTitle}
-                  panelConfig={basicDetailsConfig}
-                  initialData={basicDetailsData}
-                  onDataChange={handleBasicDetailsDataChange}
-                  onTitleChange={setBasicDetailsTitle}
-                  onWidthChange={setBasicDetailsWidth}
-                  getUserPanelConfig={getUserPanelConfig}
-                  saveUserPanelConfig={saveUserPanelConfig}
-                  userId="current-user"
-                  panelWidth={basicDetailsWidth}
-                  validationErrors={validationResults['basic-details']?.errors || {}}
-                />
+                <div key="basic-details" className="animate-fade-in animate-scale-in">
+                  <DynamicPanel
+                    ref={basicDetailsRef}
+                    panelId="basic-details"
+                    panelOrder={1}
+                    startingTabIndex={currentTabIndex}
+                    panelTitle={basicDetailsTitle}
+                    panelConfig={basicDetailsConfig}
+                    initialData={basicDetailsData}
+                    onDataChange={handleBasicDetailsDataChange}
+                    onTitleChange={setBasicDetailsTitle}
+                    onWidthChange={setBasicDetailsWidth}
+                    getUserPanelConfig={getUserPanelConfig}
+                    saveUserPanelConfig={saveUserPanelConfig}
+                    userId="current-user"
+                    panelWidth={basicDetailsWidth}
+                    validationErrors={validationResults['basic-details']?.errors || {}}
+                  />
+                </div>
               );
               currentTabIndex += basicDetailsVisibleCount;
             }
@@ -726,24 +727,25 @@ const DynamicPanelDemo = () => {
             if (operationalDetailsVisible) {
               const operationalDetailsVisibleCount = Object.values(operationalDetailsConfig).filter(config => config.visible).length;
               panels.push(
-                <DynamicPanel
-                  key="operational-details"
-                  ref={operationalDetailsRef}
-                  panelId="operational-details"
-                  panelOrder={2}
-                  startingTabIndex={currentTabIndex}
-                  panelTitle={operationalDetailsTitle}
-                  panelConfig={operationalDetailsConfig}
-                  initialData={operationalDetailsData}
-                  onDataChange={handleOperationalDetailsDataChange}
-                  onTitleChange={setOperationalDetailsTitle}
-                  onWidthChange={setOperationalDetailsWidth}
-                  getUserPanelConfig={getUserPanelConfig}
-                  saveUserPanelConfig={saveUserPanelConfig}
-                  userId="current-user"
-                  panelWidth={operationalDetailsWidth}
-                  validationErrors={validationResults['operational-details']?.errors || {}}
-                />
+                <div key="operational-details" className="animate-fade-in animate-scale-in">
+                  <DynamicPanel
+                    ref={operationalDetailsRef}
+                    panelId="operational-details"
+                    panelOrder={2}
+                    startingTabIndex={currentTabIndex}
+                    panelTitle={operationalDetailsTitle}
+                    panelConfig={operationalDetailsConfig}
+                    initialData={operationalDetailsData}
+                    onDataChange={handleOperationalDetailsDataChange}
+                    onTitleChange={setOperationalDetailsTitle}
+                    onWidthChange={setOperationalDetailsWidth}
+                    getUserPanelConfig={getUserPanelConfig}
+                    saveUserPanelConfig={saveUserPanelConfig}
+                    userId="current-user"
+                    panelWidth={operationalDetailsWidth}
+                    validationErrors={validationResults['operational-details']?.errors || {}}
+                  />
+                </div>
               );
               currentTabIndex += operationalDetailsVisibleCount;
             }
@@ -751,24 +753,25 @@ const DynamicPanelDemo = () => {
             // Panel 3: Billing Details
             if (billingDetailsVisible) {
               panels.push(
-                <DynamicPanel
-                  key="billing-details"
-                  ref={billingDetailsRef}
-                  panelId="billing-details"
-                  panelOrder={3}
-                  startingTabIndex={currentTabIndex}
-                  panelTitle={billingDetailsTitle}
-                  panelConfig={billingDetailsConfig}
-                  initialData={billingDetailsData}
-                  onDataChange={handleBillingDetailsDataChange}
-                  onTitleChange={setBillingDetailsTitle}
-                  onWidthChange={setBillingDetailsWidth}
-                  getUserPanelConfig={getUserPanelConfig}
-                  saveUserPanelConfig={saveUserPanelConfig}
-                  userId="current-user"
-                  panelWidth={billingDetailsWidth}
-                  validationErrors={validationResults['billing-details']?.errors || {}}
-                />
+                <div key="billing-details" className="animate-fade-in animate-scale-in">
+                  <DynamicPanel
+                    ref={billingDetailsRef}
+                    panelId="billing-details"
+                    panelOrder={3}
+                    startingTabIndex={currentTabIndex}
+                    panelTitle={billingDetailsTitle}
+                    panelConfig={billingDetailsConfig}
+                    initialData={billingDetailsData}
+                    onDataChange={handleBillingDetailsDataChange}
+                    onTitleChange={setBillingDetailsTitle}
+                    onWidthChange={setBillingDetailsWidth}
+                    getUserPanelConfig={getUserPanelConfig}
+                    saveUserPanelConfig={saveUserPanelConfig}
+                    userId="current-user"
+                    panelWidth={billingDetailsWidth}
+                    validationErrors={validationResults['billing-details']?.errors || {}}
+                  />
+                </div>
               );
             }
 
