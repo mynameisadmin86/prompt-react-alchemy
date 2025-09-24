@@ -303,62 +303,6 @@ export function ServersideFilter({
         filter !== undefined && visibleFields.includes(filter.key)
       );
     return orderedVisibleFilters.map((filter) => {
-      // Handle cascading select type specially
-      if (filter.type === 'cascadingSelect') {
-        return (
-          <div key={filter.key} className="space-y-1">
-            <div className="text-xs font-medium text-gray-600 truncate">
-              {filter.label}
-            </div>
-            <div className="relative">
-              <select
-                value={pendingFilters[filter.key]?.value || ''}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  if (value === '') {
-                    handleFilterChange(filter.key, undefined);
-                  } else {
-                    handleFilterChange(filter.key, {
-                      value: value,
-                      operator: 'equals',
-                      type: 'select'
-                    });
-                    
-                    // Trigger cascade change if handler exists
-                    if (filter.onCascadeChange) {
-                      filter.onCascadeChange(value);
-                    }
-                  }
-                }}
-                className="w-full px-3 py-2 text-sm border border-input bg-background rounded-md focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
-                disabled={filter.dependsOn && !pendingFilters[filter.dependsOn]?.value}
-              >
-                <option value="">Select {filter.label.toLowerCase()}...</option>
-                {Array.isArray(filter.options) && filter.options.map((option) => {
-                  const optionValue = typeof option === 'string' ? option : option.value;
-                  const optionLabel = typeof option === 'string' ? option : option.label;
-                  return (
-                    <option key={optionValue} value={optionValue}>
-                      {optionLabel}
-                    </option>
-                  );
-                })}
-              </select>
-              {pendingFilters[filter.key] && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handleFilterChange(filter.key, undefined)}
-                  className="absolute right-1 top-1/2 transform -translate-y-1/2 h-6 w-6 p-0 hover:bg-gray-100 z-10"
-                >
-                  <X className="h-3 w-3" />
-                </Button>
-              )}
-            </div>
-          </div>
-        );
-      }
-
       // Handle lazyselect type specially
       if (filter.type === 'lazyselect' && filter.fetchOptions) {
         return (
@@ -409,9 +353,7 @@ export function ServersideFilter({
               filter.type === 'select' ? 'Dropdown' :
               filter.type === 'date' ? 'Date' : 'Text',
         filterable: true,
-        options: Array.isArray(filter.options) 
-          ? filter.options.map(option => typeof option === 'string' ? option : option.label)
-          : undefined,
+        options: filter.options,
         multiSelect: filter.multiSelect // Pass multiSelect flag
       };
 

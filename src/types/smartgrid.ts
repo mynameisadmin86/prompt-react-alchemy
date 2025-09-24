@@ -120,13 +120,11 @@ export interface GridPlugin {
 export interface ServerFilter {
   key: string;
   label: string;
-  type?: 'text' | 'select' | 'date' | 'dateRange' | 'numberRange' | 'dropdownText' | 'time' | 'number' | 'boolean' | 'lazyselect' | 'cascadingSelect';
-  options?: string[] | {label: string; value: string}[];
+  type?: 'text' | 'select' | 'date' | 'dateRange' | 'numberRange' | 'dropdownText' | 'time' | 'number' | 'boolean' | 'lazyselect';
+  options?: string[];
   multiSelect?: boolean; // Enable multi-select for dropdown/select types
   fetchOptions?: (params: { searchTerm: string; offset: number; limit: number }) => Promise<{ label: string; value: string }[]>;
   defaultValue?: any; // Default value for the filter field
-  onCascadeChange?: (value: string) => void; // Callback for cascading dropdowns
-  dependsOn?: string; // Key of the filter this one depends on
 }
 
 export interface ExtraFilter {
