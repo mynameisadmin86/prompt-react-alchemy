@@ -144,12 +144,7 @@ export function ServersideFilter({
       
       return newFilters;
     });
-
-    // Call the dropdown change callback if provided
-    if (onDropdownChange) {
-      onDropdownChange(columnKey, value);
-    }
-  }, [onDropdownChange]);
+  }, []);
 
   const handleSaveFilterSet = async (name: string, isDefault: boolean) => {
     if (!api) {
@@ -375,6 +370,7 @@ export function ServersideFilter({
               value={pendingFilters[filter.key]}
               onChange={(value) => handleFilterChange(filter.key, value)}
               showFilterTypeDropdown={showFilterTypeDropdown}
+              onDropdownChange={onDropdownChange}
             />
             {pendingFilters[filter.key] && (
               <Button

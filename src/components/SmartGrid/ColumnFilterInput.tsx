@@ -21,6 +21,7 @@ interface ColumnFilterInputProps {
   onApply?: () => void;
   isSubRow?: boolean;
   showFilterTypeDropdown?: boolean;
+  onDropdownChange?: (fieldKey: string, value: FilterValue | undefined) => void;
 }
 
 export function ColumnFilterInput({ 
@@ -29,7 +30,8 @@ export function ColumnFilterInput({
   onChange, 
   onApply,
   isSubRow = false,
-  showFilterTypeDropdown = true
+  showFilterTypeDropdown = true,
+  onDropdownChange
 }: ColumnFilterInputProps) {
   const [localValue, setLocalValue] = useState<any>(value?.value || '');
   const [operator, setOperator] = useState<string>(value?.operator || getDefaultOperator());
@@ -366,7 +368,19 @@ export function ColumnFilterInput({
         } else {
           // Single select dropdown (original functionality)
           return (
-            <Select value={localValue || "__all__"} onValueChange={(value) => handleValueChange(value === "__all__" ? "" : value)}>
+            <Select value={localValue || "__all__"} onValueChange={(value) => {
+              const finalValue = value === "__all__" ? "" : value;
+              handleValueChange(finalValue);
+              
+              // Call onDropdownChange if provided
+              if (onDropdownChange) {
+                onDropdownChange(column.key, finalValue ? {
+                  value: finalValue,
+                  operator: operator as any,
+                  type: getFilterType()
+                } : undefined);
+              }
+            }}>
               <SelectTrigger className="h-7 text-xs">
                 <SelectValue placeholder="All" />
               </SelectTrigger>
