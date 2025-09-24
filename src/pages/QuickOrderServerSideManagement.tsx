@@ -7,7 +7,6 @@ import { quickOrderService } from '@/api/services/quickOrderService';
 import { filterService } from '@/api/services/filterService';
 import { useSmartGridState } from '@/hooks/useSmartGridState';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Eye, GitPullRequest } from 'lucide-react';
 
 const GitPullActionButton = () => <GitPullRequest className="h-4 w-4" />;
@@ -53,19 +52,6 @@ const QuickOrderServerSideManagement: React.FC = () => {
   const [cardData, setCardData] = useState<any[]>([]);
   const [showServersideFilter, setShowServersideFilter] = useState<boolean>(false);
   const [groupLevelModalOpen, setGroupLevelModalOpen] = useState(false);
-  
-  // Cascading dropdown states
-  const [firstDropdownValue, setFirstDropdownValue] = useState<string>('');
-  const [secondDropdownValue, setSecondDropdownValue] = useState<string>('');
-  const [firstDropdownOptions] = useState([
-    { value: 'region', label: 'Region' },
-    { value: 'country', label: 'Country' },
-    { value: 'department', label: 'Department' },
-    { value: 'category', label: 'Category' }
-  ]);
-  const [secondDropdownOptions, setSecondDropdownOptions] = useState<Array<{ value: string; label: string }>>([]);
-  const [loadingSecondDropdown, setLoadingSecondDropdown] = useState(false);
-  
   const { toast } = useToast();
   const gridState = useSmartGridState();
 
@@ -369,81 +355,6 @@ const QuickOrderServerSideManagement: React.FC = () => {
     };
   }, []);
 
-  // Function to fetch second dropdown options based on first dropdown selection
-  const fetchSecondDropdownOptions = async (firstValue: string) => {
-    if (!firstValue) {
-      setSecondDropdownOptions([]);
-      return;
-    }
-
-    setLoadingSecondDropdown(true);
-    try {
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      // Mock data based on first dropdown selection
-      const optionsMap: Record<string, Array<{ value: string; label: string }>> = {
-        region: [
-          { value: 'north', label: 'North Region' },
-          { value: 'south', label: 'South Region' },
-          { value: 'east', label: 'East Region' },
-          { value: 'west', label: 'West Region' }
-        ],
-        country: [
-          { value: 'usa', label: 'United States' },
-          { value: 'canada', label: 'Canada' },
-          { value: 'uk', label: 'United Kingdom' },
-          { value: 'germany', label: 'Germany' }
-        ],
-        department: [
-          { value: 'it', label: 'IT Department' },
-          { value: 'hr', label: 'HR Department' },
-          { value: 'finance', label: 'Finance Department' },
-          { value: 'operations', label: 'Operations Department' }
-        ],
-        category: [
-          { value: 'electronics', label: 'Electronics' },
-          { value: 'machinery', label: 'Machinery' },
-          { value: 'raw_materials', label: 'Raw Materials' },
-          { value: 'office_supplies', label: 'Office Supplies' }
-        ]
-      };
-
-      setSecondDropdownOptions(optionsMap[firstValue] || []);
-      
-      toast({
-        title: "Success",
-        description: `Loaded options for ${firstDropdownOptions.find(opt => opt.value === firstValue)?.label}`,
-      });
-    } catch (error) {
-      console.error('Error fetching second dropdown options:', error);
-      toast({
-        title: "Error",
-        description: "Failed to load options. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setLoadingSecondDropdown(false);
-    }
-  };
-
-  // Handle first dropdown change
-  const handleFirstDropdownChange = (value: string) => {
-    setFirstDropdownValue(value);
-    setSecondDropdownValue(''); // Reset second dropdown
-    fetchSecondDropdownOptions(value);
-  };
-
-  // Handle second dropdown change
-  const handleSecondDropdownChange = (value: string) => {
-    setSecondDropdownValue(value);
-    
-    toast({
-      title: "Selection Made",
-      description: `Selected: ${secondDropdownOptions.find(opt => opt.value === value)?.label}`,
-    });
-  };
-
   return (
     <div className="flex flex-col h-screen bg-background">
       <div className="flex-shrink-0 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -459,55 +370,6 @@ const QuickOrderServerSideManagement: React.FC = () => {
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
-        </div>
-      </div>
-
-      {/* Cascading Dropdowns Section */}
-      <div className="flex-shrink-0 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="flex h-16 items-center px-4 gap-4">
-          <div className="flex items-center gap-2">
-            <label className="text-sm font-medium text-foreground/70">Category:</label>
-            <Select value={firstDropdownValue} onValueChange={handleFirstDropdownChange}>
-              <SelectTrigger className="w-48">
-                <SelectValue placeholder="Select category" />
-              </SelectTrigger>
-              <SelectContent>
-                {firstDropdownOptions.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          
-          <div className="flex items-center gap-2">
-            <label className="text-sm font-medium text-foreground/70">Subcategory:</label>
-            <Select 
-              value={secondDropdownValue} 
-              onValueChange={handleSecondDropdownChange}
-              disabled={!firstDropdownValue || loadingSecondDropdown}
-            >
-              <SelectTrigger className="w-48">
-                <SelectValue 
-                  placeholder={
-                    loadingSecondDropdown 
-                      ? "Loading..." 
-                      : firstDropdownValue 
-                        ? "Select subcategory" 
-                        : "Select category first"
-                  } 
-                />
-              </SelectTrigger>
-              <SelectContent>
-                {secondDropdownOptions.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
         </div>
       </div>
 
