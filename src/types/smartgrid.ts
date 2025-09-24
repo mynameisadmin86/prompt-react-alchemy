@@ -189,6 +189,7 @@ export interface SmartGridProps {
   showServersideFilter?: boolean;
   onToggleServersideFilter?: () => void;
   onSearch?: (filters?: any) => void;
+  onDropdownChange?: (fieldKey: string, value: any) => void;
   serverFilters?: ServerFilter[];
   showFilterTypeDropdown?: boolean;
   gridId?: string;

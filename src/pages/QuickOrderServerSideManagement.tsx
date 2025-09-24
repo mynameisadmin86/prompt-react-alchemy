@@ -187,6 +187,17 @@ const QuickOrderServerSideManagement: React.FC = () => {
     { key: 'amount', label: 'Amount', type: 'numberRange' }
   ];
 
+  const handleDropdownChange = (fieldKey: string, value: any) => {
+    console.log(`Dropdown changed - Field: ${fieldKey}, Value:`, value);
+    toast({
+      title: "Dropdown Changed",
+      description: `${fieldKey} changed to: ${value?.value || value}`,
+    });
+    
+    // Handle cascading dropdown logic here if needed
+    // For example, if fieldKey is 'firstDropdown', update secondDropdown options
+  };
+
   const handleServerSideSearch = async () => {
     try {
       gridState.setLoading(true);
@@ -382,6 +393,7 @@ const QuickOrderServerSideManagement: React.FC = () => {
           paginationMode="pagination"
           onFiltersChange={setCurrentFilters}
           onSearch={handleServerSideSearch}
+          onDropdownChange={handleDropdownChange}
           selectedRows={selectedRows}
           onSelectionChange={setSelectedRows}
           configurableButtons={[]}

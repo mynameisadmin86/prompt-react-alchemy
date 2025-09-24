@@ -80,6 +80,7 @@ export function SmartGrid({
   userId,
   api,
   onSearch,
+  onDropdownChange,
 }: SmartGridProps) {
   const {
     gridData,
@@ -866,6 +867,7 @@ export function SmartGrid({
           visible={showServersideFilter}
           onToggle={onToggleServersideFilter || (() => {})}
           onFiltersChange={onFiltersChange || (() => {})}
+          onDropdownChange={onDropdownChange}
           onSearch={onSearch || (() => {})}
           gridId={gridId || gridTitle || 'default'}
           userId={userId || 'default-user'}

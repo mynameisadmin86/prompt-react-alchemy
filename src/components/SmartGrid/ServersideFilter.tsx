@@ -18,6 +18,7 @@ interface ServersideFilterProps {
   visible: boolean;
   onToggle: () => void;
   onFiltersChange: (filters: Record<string, FilterValue>) => void;
+  onDropdownChange?: (fieldKey: string, value: FilterValue | undefined) => void;
   onSearch: () => void;
   gridId: string;
   userId: string;
@@ -30,6 +31,7 @@ export function ServersideFilter({
   visible,
   onToggle,
   onFiltersChange,
+  onDropdownChange,
   onSearch,
   gridId,
   userId,
@@ -142,7 +144,12 @@ export function ServersideFilter({
       
       return newFilters;
     });
-  }, []);
+
+    // Call the dropdown change callback if provided
+    if (onDropdownChange) {
+      onDropdownChange(columnKey, value);
+    }
+  }, [onDropdownChange]);
 
   const handleSaveFilterSet = async (name: string, isDefault: boolean) => {
     if (!api) {
