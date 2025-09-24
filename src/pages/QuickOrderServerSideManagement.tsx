@@ -9,7 +9,7 @@ import { useSmartGridState } from '@/hooks/useSmartGridState';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
 import { Eye, GitPullRequest } from 'lucide-react';
 
-const GitPullActionButton = () => <GitPullRequest className="h-4 w-4" />;
+  const GitPullActionButton = () => <GitPullRequest className="h-4 w-4" />;
 
 interface QuickOrderData {
   id: string;
@@ -52,8 +52,36 @@ const QuickOrderServerSideManagement: React.FC = () => {
   const [cardData, setCardData] = useState<any[]>([]);
   const [showServersideFilter, setShowServersideFilter] = useState<boolean>(false);
   const [groupLevelModalOpen, setGroupLevelModalOpen] = useState(false);
+  const [firstDropdownOptions, setFirstDropdownOptions] = useState<{label: string; value: string}[]>([]);
+  const [secondDropdownOptions, setSecondDropdownOptions] = useState<{label: string; value: string}[]>([]);
   const { toast } = useToast();
   const gridState = useSmartGridState();
+
+  // Cascading dropdown handlers
+  const handleFirstDropdownChange = async (value: string) => {
+    try {
+      // Mock API call - replace with actual service call
+      const mockSecondOptions = [
+        { label: `Option A for ${value}`, value: `${value}_a` },
+        { label: `Option B for ${value}`, value: `${value}_b` },
+        { label: `Option C for ${value}`, value: `${value}_c` }
+      ];
+      
+      setSecondDropdownOptions(mockSecondOptions);
+      
+      toast({
+        title: "Second dropdown updated",
+        description: `Loaded options for ${value}`,
+      });
+    } catch (error) {
+      console.error('Error loading second dropdown options:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load second dropdown options",
+        variant: "destructive",
+      });
+    }
+  };
 
   const initialColumns: GridColumnConfig[] = [
     {
@@ -184,7 +212,21 @@ const QuickOrderServerSideManagement: React.FC = () => {
         to: format(new Date(), 'yyyy-MM-dd')
       }
     },
-    { key: 'amount', label: 'Amount', type: 'numberRange' }
+    { key: 'amount', label: 'Amount', type: 'numberRange' },
+    {
+      key: 'firstDropdown',
+      label: 'First Category',
+      type: 'cascadingSelect',
+      options: firstDropdownOptions,
+      onCascadeChange: handleFirstDropdownChange
+    },
+    {
+      key: 'secondDropdown',
+      label: 'Second Category',
+      type: 'cascadingSelect',
+      options: secondDropdownOptions,
+      dependsOn: 'firstDropdown'
+    }
   ];
 
   const handleServerSideSearch = async () => {
@@ -278,6 +320,16 @@ const QuickOrderServerSideManagement: React.FC = () => {
       });
     }
   };
+
+  // Initialize first dropdown options
+  useEffect(() => {
+    const mockFirstOptions = [
+      { label: 'Category A', value: 'cat_a' },
+      { label: 'Category B', value: 'cat_b' },
+      { label: 'Category C', value: 'cat_c' }
+    ];
+    setFirstDropdownOptions(mockFirstOptions);
+  }, []);
 
   // Load initial data without filters
   useEffect(() => {
