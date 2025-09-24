@@ -6,6 +6,7 @@ import { EyeOff, CheckCircle, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
+import { DynamicTabs, DynamicTab } from '@/components/ui/dynamic-tabs';
 import {
   Breadcrumb,
   BreadcrumbList,
@@ -506,6 +507,61 @@ const DynamicPanelDemo = () => {
     console.log(`Saved config for panel ${panelId}:`, settings);
   };
 
+  // Tab management
+  const [activeTab, setActiveTab] = useState('template');
+
+  const tabs: DynamicTab[] = [
+    { id: 'template', label: 'Template' },
+    { id: 'cim-report', label: 'CIM/CUV Report' },
+    { id: 'general', label: 'General' },
+    { id: 'declarations', label: 'Declarations' },
+    { id: 'route', label: 'Route' },
+    { id: 'wagon-info', label: 'Wagon Info' }
+  ];
+
+  const handleTabChange = (tabId: string) => {
+    setActiveTab(tabId);
+    console.log('Tab changed to:', tabId);
+    
+    // Example of conditional panel visibility based on active tab
+    switch (tabId) {
+      case 'template':
+        setBasicDetailsVisible(true);
+        setOperationalDetailsVisible(true);
+        setBillingDetailsVisible(false);
+        break;
+      case 'cim-report':
+        setBasicDetailsVisible(true);
+        setOperationalDetailsVisible(false);
+        setBillingDetailsVisible(true);
+        break;
+      case 'general':
+        setBasicDetailsVisible(true);
+        setOperationalDetailsVisible(true);
+        setBillingDetailsVisible(true);
+        break;
+      case 'declarations':
+        setBasicDetailsVisible(false);
+        setOperationalDetailsVisible(true);
+        setBillingDetailsVisible(true);
+        break;
+      case 'route':
+        setBasicDetailsVisible(false);
+        setOperationalDetailsVisible(true);
+        setBillingDetailsVisible(false);
+        break;
+      case 'wagon-info':
+        setBasicDetailsVisible(true);
+        setOperationalDetailsVisible(false);
+        setBillingDetailsVisible(false);
+        break;
+      default:
+        setBasicDetailsVisible(true);
+        setOperationalDetailsVisible(true);
+        setBillingDetailsVisible(true);
+    }
+  };
+
   // Panel visibility management
   const panels = [
     { id: 'basic-details', title: basicDetailsTitle, visible: basicDetailsVisible },
@@ -581,6 +637,19 @@ const DynamicPanelDemo = () => {
               panels={panels}
               onVisibilityChange={handlePanelVisibilityChange}
             />
+          </div>
+        </div>
+
+        {/* Dynamic Tabs */}
+        <div className="flex items-center justify-between">
+          <DynamicTabs
+            tabs={tabs}
+            activeTab={activeTab}
+            onChange={handleTabChange}
+            className="bg-white shadow-sm"
+          />
+          <div className="text-sm text-muted-foreground">
+            Active Tab: <span className="font-medium">{tabs.find(tab => tab.id === activeTab)?.label}</span>
           </div>
         </div>
 
