@@ -14,13 +14,15 @@ interface FieldRendererProps {
   control: Control<any>;
   fieldId: string;
   tabIndex?: number;
+  validationErrors?: Record<string, string>;
 }
 
 export const FieldRenderer: React.FC<FieldRendererProps> = ({
   config,
   control,
   fieldId,
-  tabIndex
+  tabIndex,
+  validationErrors = {}
 }) => {
   const { fieldType, editable, placeholder, options, color, fieldColour, events } = config;
 
@@ -58,7 +60,12 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
     );
   }
 
-  const baseInputClasses = "h-8 text-xs border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:z-50 focus:relative focus:outline-none";
+  const hasError = validationErrors[fieldId];
+  const baseInputClasses = `h-8 text-xs focus:ring-1 focus:z-50 focus:relative focus:outline-none ${
+    hasError 
+      ? 'border-red-500 focus:border-red-500 focus:ring-red-500' 
+      : 'border-gray-300 focus:border-blue-500 focus:ring-blue-500'
+  }`;
 
 // --- UPDATED: search fieldType with suggestions ---
   if (fieldType === 'search') {
@@ -98,7 +105,11 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
                 onBlur={() => setTimeout(() => setShowSuggestions(false), 100)}
                 onFocus={() => setShowSuggestions(true)}
                 placeholder={placeholder || 'Search...'}
-                className={`pr-8 h-8 text-[13px] border-gray-300 focus:border-blue-500 rounded-md`}
+                className={`pr-8 h-8 text-[13px] rounded-md ${
+                  hasError 
+                    ? 'border-red-500 focus:border-red-500 focus:ring-red-500' 
+                    : 'border-gray-300 focus:border-blue-500'
+                }`}
                 tabIndex={tabIndex}
                 autoComplete="off"
               />
@@ -171,7 +182,11 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
                   {...field}
                   {...eventHandlers}
                   placeholder={placeholder}
-                  className="min-h-[60px] text-xs border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:z-50 focus:relative focus:outline-none"
+                  className={`min-h-[60px] text-xs focus:ring-1 focus:z-50 focus:relative focus:outline-none ${
+                    hasError 
+                      ? 'border-red-500 focus:border-red-500 focus:ring-red-500' 
+                      : 'border-gray-300 focus:border-blue-500 focus:ring-blue-500'
+                  }`}
                   tabIndex={tabIndex}
                 />
               </div>
@@ -236,7 +251,11 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
                   <select
                     {...field}
                     {...eventHandlers}
-                    className="w-full h-8 px-3 text-xs rounded-md border border-gray-300 bg-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:z-50 focus:relative focus:outline-none appearance-none"
+                    className={`w-full h-8 px-3 text-xs rounded-md border bg-white focus:ring-1 focus:z-50 focus:relative focus:outline-none appearance-none ${
+                      hasError 
+                        ? 'border-red-500 focus:border-red-500 focus:ring-red-500' 
+                        : 'border-gray-300 focus:border-blue-500 focus:ring-blue-500'
+                    }`}
                     tabIndex={tabIndex}
                   >
                     <option value="">Select...</option>
@@ -290,7 +309,11 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
                     }
                   }}
                   placeholder={placeholder || 'Select...'}
-                  className="h-8 text-xs border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                  className={`h-8 text-xs focus:ring-1 ${
+                    hasError 
+                      ? 'border-red-500 focus:border-red-500 focus:ring-red-500' 
+                      : 'border-gray-300 focus:border-blue-500 focus:ring-blue-500'
+                  }`}
                   tabIndex={tabIndex}
                   onClick={events?.onClick}
                   onFocus={events?.onFocus}

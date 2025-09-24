@@ -647,6 +647,7 @@ const DynamicPanelDemo = () => {
                   saveUserPanelConfig={saveUserPanelConfig}
                   userId="current-user"
                   panelWidth={basicDetailsWidth}
+                  validationErrors={validationResults['basic-details']?.errors || {}}
                 />
               );
               currentTabIndex += basicDetailsVisibleCount;
@@ -672,6 +673,7 @@ const DynamicPanelDemo = () => {
                   saveUserPanelConfig={saveUserPanelConfig}
                   userId="current-user"
                   panelWidth={operationalDetailsWidth}
+                  validationErrors={validationResults['operational-details']?.errors || {}}
                 />
               );
               currentTabIndex += operationalDetailsVisibleCount;
@@ -696,6 +698,7 @@ const DynamicPanelDemo = () => {
                   saveUserPanelConfig={saveUserPanelConfig}
                   userId="current-user"
                   panelWidth={billingDetailsWidth}
+                  validationErrors={validationResults['billing-details']?.errors || {}}
                 />
               );
             }
