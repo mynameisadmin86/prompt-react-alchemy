@@ -35,13 +35,14 @@ const DynamicTabs = React.forwardRef<
           onClick={() => !tab.disabled && onChange(tab.id)}
           disabled={tab.disabled}
           className={cn(
-            "inline-flex items-center justify-center whitespace-nowrap rounded-md px-4 py-2 text-sm font-medium transition-all",
+            "inline-flex items-center justify-center whitespace-nowrap rounded-md px-4 py-2 text-sm font-medium",
+            "transition-all duration-300 ease-out transform hover:scale-105",
             "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
             "disabled:pointer-events-none disabled:opacity-50",
             variant === 'compact' && "px-3 py-1.5 text-xs",
             activeTab === tab.id
-              ? "bg-primary text-primary-foreground shadow-sm"
-              : "text-muted-foreground hover:bg-background hover:text-foreground"
+              ? "bg-primary text-primary-foreground shadow-md scale-105 animate-scale-in"
+              : "text-muted-foreground hover:bg-background hover:text-foreground hover:shadow-sm"
           )}
         >
           {tab.label}
