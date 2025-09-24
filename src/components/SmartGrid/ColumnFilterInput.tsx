@@ -21,6 +21,7 @@ interface ColumnFilterInputProps {
   onApply?: () => void;
   isSubRow?: boolean;
   showFilterTypeDropdown?: boolean;
+  onDropdownChange?: (fieldKey: string, value: any) => void;
 }
 
 export function ColumnFilterInput({ 
@@ -29,7 +30,8 @@ export function ColumnFilterInput({
   onChange, 
   onApply,
   isSubRow = false,
-  showFilterTypeDropdown = true
+  showFilterTypeDropdown = true,
+  onDropdownChange
 }: ColumnFilterInputProps) {
   const [localValue, setLocalValue] = useState<any>(value?.value || '');
   const [operator, setOperator] = useState<string>(value?.operator || getDefaultOperator());
