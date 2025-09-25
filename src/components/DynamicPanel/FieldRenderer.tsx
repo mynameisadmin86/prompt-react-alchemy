@@ -5,8 +5,13 @@ import { InputDropdown } from '@/components/ui/input-dropdown';
 import { Textarea } from '@/components/ui/textarea';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { DynamicLazySelect } from './DynamicLazySelect';
-import { Search, Calendar, Clock } from 'lucide-react';
+import { Search, Calendar as CalendarIcon, Clock } from 'lucide-react';
+import { format } from 'date-fns';
+import { cn } from '@/lib/utils';
 import { FieldConfig } from '@/types/dynamicPanel';
 
 interface FieldRendererProps {
@@ -331,19 +336,46 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
           name={fieldId}
           control={control}
           render={({ field }) => {
-            const eventHandlers = createEventHandlers(field);
+            const dateValue = field.value ? new Date(field.value) : undefined;
+            
             return (
               <div>
                 <div className="text-xs text-blue-600 mb-1">TabIndex: {tabIndex}</div>
                 <div className="relative focus-within:z-50">
-                  <Input
-                    type="date"
-                    {...field}
-                    {...eventHandlers}
-                    className={baseInputClasses}
-                    tabIndex={tabIndex}
-                  />
-                  <Calendar className="absolute right-2 top-1/2 transform -translate-y-1/2 w-3 h-3 text-gray-400 pointer-events-none" />
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "w-full h-8 justify-start text-left font-normal text-xs px-3",
+                          !dateValue && "text-muted-foreground",
+                          hasError 
+                            ? 'border-red-500 focus:border-red-500 focus:ring-red-500' 
+                            : 'border-gray-300 focus:border-blue-500 focus:ring-blue-500'
+                        )}
+                        tabIndex={tabIndex}
+                        onClick={events?.onClick ? (e) => events.onClick!(e, field.value) : undefined}
+                        onFocus={events?.onFocus}
+                        onBlur={events?.onBlur}
+                      >
+                        <CalendarIcon className="mr-2 h-3 w-3" />
+                        {dateValue ? format(dateValue, "PPP") : <span>{placeholder || "Pick a date"}</span>}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={dateValue}
+                        onSelect={(date) => {
+                          const dateString = date ? format(date, 'yyyy-MM-dd') : '';
+                          field.onChange(dateString);
+                          events?.onChange?.(dateString, { target: { value: dateString } } as any);
+                        }}
+                        initialFocus
+                        className={cn("p-3 pointer-events-auto")}
+                      />
+                    </PopoverContent>
+                  </Popover>
                 </div>
               </div>
             );
