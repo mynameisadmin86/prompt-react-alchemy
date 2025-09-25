@@ -65,6 +65,7 @@ interface GridToolbarProps {
   // Server-side filter props
   showServersideFilter?: boolean;
   onToggleServersideFilter?: () => void;
+  hideCheckboxToggle?: boolean;
   gridId?: string;
 }
 
@@ -102,6 +103,7 @@ export function GridToolbar({
   showGroupingDropdown = false,
   showServersideFilter = false,
   onToggleServersideFilter,
+  hideCheckboxToggle = false,
   gridId
 }: GridToolbarProps) {
   // Default configurable button configuration
@@ -242,19 +244,21 @@ export function GridToolbar({
           </div>
         )}
 
-        <Button 
-          variant="ghost"
-          size="sm" 
-          onClick={() => setShowCheckboxes(!showCheckboxes)}
-          disabled={loading}
-          title="Toggle Checkboxes"
-          className={cn(
-            "w-8 h-8 flex items-center justify-center rounded hover:bg-gray-100 p-0",
-            showCheckboxes && "bg-blue-50 text-blue-600"
-          )}
-        >
-          <CheckSquare className="h-4 w-4" />
-        </Button>
+        {!hideCheckboxToggle && (
+          <Button 
+            variant="ghost"
+            size="sm" 
+            onClick={() => setShowCheckboxes(!showCheckboxes)}
+            disabled={loading}
+            title="Toggle Checkboxes"
+            className={cn(
+              "w-8 h-8 flex items-center justify-center rounded hover:bg-gray-100 p-0",
+              showCheckboxes && "bg-blue-50 text-blue-600"
+            )}
+          >
+            <CheckSquare className="h-4 w-4" />
+          </Button>
+        )}
 
         <Button 
           variant="ghost"

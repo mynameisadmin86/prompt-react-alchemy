@@ -198,6 +198,8 @@ export interface SmartGridProps {
   api?: any;
   // Control whether to show AdvancedFilter (disabled when using server-side filters)
   hideAdvancedFilter?: boolean;
+  // Control whether to show the checkbox toggle button in toolbar
+  hideCheckboxToggle?: boolean;
 }
 
 // Legacy interface for backward compatibility
