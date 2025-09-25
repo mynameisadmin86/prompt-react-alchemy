@@ -339,6 +339,7 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
           control={control}
           render={({ field }) => {
             const dateValue = field.value ? new Date(field.value) : undefined;
+            const dateFormat = config.dateFormat || "PPP"; // Default to "PPP" if no format specified
             
             return (
               <div>
@@ -361,7 +362,7 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
                         onBlur={events?.onBlur}
                       >
                         <CalendarIcon className="mr-2 h-3 w-3" />
-                        {dateValue ? format(dateValue, "PPP") : <span>{placeholder || "Pick a date"}</span>}
+                        {dateValue ? format(dateValue, dateFormat) : <span>{placeholder || "Pick a date"}</span>}
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0" align="start">
