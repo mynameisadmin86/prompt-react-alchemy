@@ -187,25 +187,6 @@ const QuickOrderServerSideManagement: React.FC = () => {
     { key: 'amount', label: 'Amount', type: 'numberRange' }
   ];
 
-  const handleDropdownChange = (fieldKey: string, value: any) => {
-    console.log(`Dropdown changed - Field: ${fieldKey}, Value:`, value);
-    
-    // Extract the actual value from FilterValue structure for lazyselect
-    const actualValue = value?.value || value;
-    
-    toast({
-      title: "Dropdown Changed", 
-      description: `${fieldKey} changed to: ${Array.isArray(actualValue) ? actualValue.join(', ') : actualValue}`,
-    });
-    
-    // Handle cascading dropdown logic here if needed
-    // For example, if fieldKey is 'customer', update related dropdowns
-    if (fieldKey === 'customer') {
-      console.log('Customer selection changed, could trigger cascading updates');
-      // Add cascading logic here
-    }
-  };
-
   const handleServerSideSearch = async () => {
     try {
       gridState.setLoading(true);
@@ -401,7 +382,6 @@ const QuickOrderServerSideManagement: React.FC = () => {
           paginationMode="pagination"
           onFiltersChange={setCurrentFilters}
           onSearch={handleServerSideSearch}
-          onDropdownChange={handleDropdownChange}
           selectedRows={selectedRows}
           onSelectionChange={setSelectedRows}
           configurableButtons={[]}

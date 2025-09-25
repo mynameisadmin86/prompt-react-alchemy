@@ -18,7 +18,6 @@ interface ServersideFilterProps {
   visible: boolean;
   onToggle: () => void;
   onFiltersChange: (filters: Record<string, FilterValue>) => void;
-  onDropdownChange?: (fieldKey: string, value: FilterValue | undefined) => void;
   onSearch: () => void;
   gridId: string;
   userId: string;
@@ -31,7 +30,6 @@ export function ServersideFilter({
   visible,
   onToggle,
   onFiltersChange,
-  onDropdownChange,
   onSearch,
   gridId,
   userId,
@@ -144,12 +142,7 @@ export function ServersideFilter({
       
       return newFilters;
     });
-
-    // Call the dropdown change callback if provided
-    if (onDropdownChange) {
-      onDropdownChange(columnKey, value);
-    }
-  }, [onDropdownChange]);
+  }, []);
 
   const handleSaveFilterSet = async (name: string, isDefault: boolean) => {
     if (!api) {
@@ -318,30 +311,20 @@ export function ServersideFilter({
               {filter.label}
             </div>
             <div className="relative">
-            <LazySelect
-              fetchOptions={filter.fetchOptions}
-              value={pendingFilters[filter.key]?.value}
-              onChange={(value) => {
-                if (value === undefined) {
-                  handleFilterChange(filter.key, undefined);
-                  // Call onDropdownChange specifically for lazyselect types
-                  if (onDropdownChange) {
-                    onDropdownChange(filter.key, undefined);
+              <LazySelect
+                fetchOptions={filter.fetchOptions}
+                value={pendingFilters[filter.key]?.value}
+                onChange={(value) => {
+                  if (value === undefined) {
+                    handleFilterChange(filter.key, undefined);
+                  } else {
+                    handleFilterChange(filter.key, {
+                      value: value,
+                      operator: 'equals',
+                      type: filter.multiSelect ? 'select' : 'text'
+                    });
                   }
-                } else {
-                  const filterValue = {
-                    value: value,
-                    operator: 'equals' as const,
-                    type: filter.multiSelect ? ('select' as const) : ('text' as const)
-                  };
-                  handleFilterChange(filter.key, filterValue);
-                  
-                  // Call onDropdownChange specifically for lazyselect types
-                  if (onDropdownChange) {
-                    onDropdownChange(filter.key, filterValue);
-                  }
-                }
-              }}
+                }}
                 multiSelect={filter.multiSelect}
                 placeholder={`Select ${filter.label.toLowerCase()}...`}
               />
