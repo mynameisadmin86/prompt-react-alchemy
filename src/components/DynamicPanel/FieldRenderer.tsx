@@ -324,6 +324,7 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
                   onFocus={events?.onFocus}
                   onBlur={events?.onBlur}
                   hideSearch={config.hideSearch}
+                  disableLazyLoading={config.disableLazyLoading}
                 />
               </div>
             );

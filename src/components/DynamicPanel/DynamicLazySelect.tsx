@@ -24,6 +24,7 @@ interface DynamicLazySelectProps {
   onFocus?: (e: React.FocusEvent) => void;
   onBlur?: (e: React.FocusEvent) => void;
   hideSearch?: boolean;
+  disableLazyLoading?: boolean;
 }
 
 const ITEMS_PER_PAGE = 50;
@@ -40,7 +41,8 @@ export function DynamicLazySelect({
   onClick,
   onFocus,
   onBlur,
-  hideSearch = false
+  hideSearch = false,
+  disableLazyLoading = false
 }: DynamicLazySelectProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [options, setOptions] = useState<LazySelectOption[]>([]);
@@ -124,13 +126,13 @@ export function DynamicLazySelect({
   };
 
   const handleScroll = useCallback(() => {
-    if (!scrollRef.current || loading || !hasMore) return;
+    if (!scrollRef.current || loading || !hasMore || disableLazyLoading) return;
 
     const { scrollTop, scrollHeight, clientHeight } = scrollRef.current;
     if (scrollTop + clientHeight >= scrollHeight - 10) {
       loadOptions(false);
     }
-  }, [loading, hasMore, loadOptions]);
+  }, [loading, hasMore, loadOptions, disableLazyLoading]);
 
   const handleSelect = (selectedValue: string) => {
     if (multiSelect) {
