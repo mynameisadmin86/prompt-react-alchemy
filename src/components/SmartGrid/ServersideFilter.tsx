@@ -327,6 +327,7 @@ export function ServersideFilter({
                 }}
                 multiSelect={filter.multiSelect}
                 placeholder={`Select ${filter.label.toLowerCase()}...`}
+                hideSearch={filter.hideSearch}
               />
               {pendingFilters[filter.key] && (
                 <Button

@@ -125,6 +125,7 @@ export interface ServerFilter {
   multiSelect?: boolean; // Enable multi-select for dropdown/select types
   fetchOptions?: (params: { searchTerm: string; offset: number; limit: number }) => Promise<{ label: string; value: string }[]>;
   defaultValue?: any; // Default value for the filter field
+  hideSearch?: boolean; // Hide search box in lazy select
 }
 
 export interface ExtraFilter {
