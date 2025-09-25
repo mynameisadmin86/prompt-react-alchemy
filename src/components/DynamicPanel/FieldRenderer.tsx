@@ -323,6 +323,7 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
                   onClick={events?.onClick}
                   onFocus={events?.onFocus}
                   onBlur={events?.onBlur}
+                  hideSearch={config.hideSearch}
                 />
               </div>
             );

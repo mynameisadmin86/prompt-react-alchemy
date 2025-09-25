@@ -53,6 +53,7 @@ export interface FieldConfig {
     offset: number;
     limit: number;
   }) => Promise<{ label: string; value: string }[]>;
+  hideSearch?: boolean; // Hide search box in lazyselect
   // Event handlers for field interactions
   events?: {
     onClick?: (event: React.MouseEvent, value: any) => void;

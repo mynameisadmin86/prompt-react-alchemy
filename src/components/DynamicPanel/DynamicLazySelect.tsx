@@ -23,6 +23,7 @@ interface DynamicLazySelectProps {
   onClick?: (e: React.MouseEvent, value: any) => void;
   onFocus?: (e: React.FocusEvent) => void;
   onBlur?: (e: React.FocusEvent) => void;
+  hideSearch?: boolean;
 }
 
 const ITEMS_PER_PAGE = 50;
@@ -38,7 +39,8 @@ export function DynamicLazySelect({
   tabIndex,
   onClick,
   onFocus,
-  onBlur
+  onBlur,
+  hideSearch = false
 }: DynamicLazySelectProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [options, setOptions] = useState<LazySelectOption[]>([]);
@@ -218,14 +220,16 @@ export function DynamicLazySelect({
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[--radix-popover-trigger-width] p-0 z-50" align="start">
-        <div className="p-2 border-b">
-          <Input
-            placeholder="Search..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="h-8"
-          />
-        </div>
+        {!hideSearch && (
+          <div className="p-2 border-b">
+            <Input
+              placeholder="Search..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="h-8"
+            />
+          </div>
+        )}
         <div
           ref={scrollRef}
           className="max-h-60 overflow-y-auto"
@@ -233,7 +237,7 @@ export function DynamicLazySelect({
         >
           {options.length === 0 && !loading ? (
             <div className="py-6 text-center text-sm text-muted-foreground">
-              {debouncedSearchTerm ? 'No results found.' : 'Start typing to search...'}
+              {hideSearch ? 'No options available.' : (debouncedSearchTerm ? 'No results found.' : 'Start typing to search...')}
             </div>
           ) : (
             options.map((option) => (
