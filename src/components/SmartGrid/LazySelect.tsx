@@ -20,6 +20,7 @@ interface LazySelectProps {
   disabled?: boolean;
   className?: string;
   hideSearch?: boolean;
+  disableLazyLoading?: boolean;
 }
 
 const ITEMS_PER_PAGE = 50;
@@ -32,7 +33,8 @@ export function LazySelect({
   multiSelect = false,
   disabled = false,
   className,
-  hideSearch = false
+  hideSearch = false,
+  disableLazyLoading = false
 }: LazySelectProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [options, setOptions] = useState<LazySelectOption[]>([]);
@@ -116,13 +118,13 @@ export function LazySelect({
   };
 
   const handleScroll = useCallback(() => {
-    if (!scrollRef.current || loading || !hasMore) return;
+    if (!scrollRef.current || loading || !hasMore || disableLazyLoading) return;
 
     const { scrollTop, scrollHeight, clientHeight } = scrollRef.current;
     if (scrollTop + clientHeight >= scrollHeight - 10) {
       loadOptions(false);
     }
-  }, [loading, hasMore, loadOptions]);
+  }, [loading, hasMore, loadOptions, disableLazyLoading]);
 
   const handleSelect = (selectedValue: string) => {
     if (multiSelect) {

@@ -126,6 +126,7 @@ export interface ServerFilter {
   fetchOptions?: (params: { searchTerm: string; offset: number; limit: number }) => Promise<{ label: string; value: string }[]>;
   defaultValue?: any; // Default value for the filter field
   hideSearch?: boolean; // Hide search box in lazy select
+  disableLazyLoading?: boolean; // Disable infinite scroll in lazy select
 }
 
 export interface ExtraFilter {
