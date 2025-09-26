@@ -93,7 +93,7 @@ const BillingDemo = () => {
 
     switch (billingType) {
       case 'standard':
-        contractPrice = '€ 800.00';
+        contractPrice = '€ 1000.00';
         netAmount = '€ 3720.00';
         contractColor = '#10b981';
         contractTextColor = '#047857';
@@ -101,7 +101,7 @@ const BillingDemo = () => {
         netTextColor = '#6d28d9';
         break;
       case 'premium':
-        contractPrice = '€ 1500.00';
+        contractPrice = '€ 2000.00';
         netAmount = '€ 6975.00';
         contractColor = '#f59e0b';
         contractTextColor = '#d97706';
@@ -109,7 +109,7 @@ const BillingDemo = () => {
         netTextColor = '#dc2626';
         break;
       case 'enterprise':
-        contractPrice = '€ 2500.00';
+        contractPrice = '€ 3000.00';
         netAmount = '€ 11625.00';
         contractColor = '#6366f1';
         contractTextColor = '#4f46e5';
