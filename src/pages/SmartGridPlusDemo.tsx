@@ -162,6 +162,12 @@ const columns: GridColumnConfig[] = [
 
 export default function SmartGridPlusDemo() {
   const [data, setData] = useState(initialData);
+  const [selectedRows, setSelectedRows] = useState<Set<number>>(new Set());
+
+  const handleRowSelection = (selectedRowIndices: Set<number>) => {
+    console.log('Selected rows changed:', selectedRowIndices);
+    setSelectedRows(selectedRowIndices);
+  };
 
   const handleAddRow = async (newRow: any) => {
     console.log('Adding new row:', newRow);
@@ -283,6 +289,11 @@ export default function SmartGridPlusDemo() {
             addRowButtonLabel="Add Product"
             addRowButtonPosition="top-left"
             paginationMode="pagination"
+            selectedRows={selectedRows}
+            onSelectionChange={handleRowSelection}
+            rowClassName={(row: any, index: number) => 
+              selectedRows.has(index) ? 'bg-blue-50 border-l-4 border-l-blue-500' : ''
+            }
           />
         </CardContent>
       </Card>
