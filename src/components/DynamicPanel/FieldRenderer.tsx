@@ -289,15 +289,12 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
           control={control}
           render={({ field }) => {
             const fetchOptions = config.fetchOptions;
-            const useLocalData = config.useLocalData;
-            const localData = config.localData;
-            
-            if (!fetchOptions && !useLocalData) {
+            if (!fetchOptions) {
               return (
                 <div>
                   <div className="text-xs text-blue-600 mb-1">TabIndex: {tabIndex}</div>
                   <div className="text-xs text-red-600 bg-red-50 p-2 rounded border">
-                    fetchOptions or localData is required for lazyselect field type
+                    fetchOptions is required for lazyselect field type
                   </div>
                 </div>
               );
@@ -328,8 +325,6 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
                   onBlur={events?.onBlur}
                   hideSearch={config.hideSearch}
                   disableLazyLoading={config.disableLazyLoading}
-                  useLocalData={useLocalData}
-                  localData={localData}
                 />
               </div>
             );
