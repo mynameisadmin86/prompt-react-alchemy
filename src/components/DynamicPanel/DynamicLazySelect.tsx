@@ -150,6 +150,7 @@ export function DynamicLazySelect({
   const handleClear = (e: React.MouseEvent) => {
     e.stopPropagation();
     onChange(undefined);
+    setSearchTerm(''); // Clear the search box as well
   };
 
   const handleButtonClick = (e: React.MouseEvent) => {
