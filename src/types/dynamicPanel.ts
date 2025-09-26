@@ -28,12 +28,20 @@ export type PanelFieldConfig =
       }) => Promise<{ label: string; value: string }[]>;
       onChange?: (selected: { label: string; value: string } | null) => void;
       onClick?: () => void;
+    }
+  | {
+      fieldType: 'searchableselect';
+      key: string;
+      label: string;
+      options: { label: string; value: string }[];
+      onChange?: (selected: { label: string; value: string } | null) => void;
+      onClick?: () => void;
     };
 
 export interface FieldConfig {
   id: string;
   label: string;
-  fieldType: 'text' | 'select' | 'search' | 'currency' | 'date' | 'time' | 'textarea' | 'radio' | 'card' | 'inputdropdown' | 'lazyselect';
+  fieldType: 'text' | 'select' | 'search' | 'currency' | 'date' | 'time' | 'textarea' | 'radio' | 'card' | 'inputdropdown' | 'lazyselect' | 'searchableselect';
   value: any;
   mandatory: boolean;
   visible: boolean;
@@ -56,6 +64,8 @@ export interface FieldConfig {
   }) => Promise<{ label: string; value: string }[]>;
   hideSearch?: boolean; // Hide search box in lazyselect
   disableLazyLoading?: boolean; // Disable lazy loading on scroll in lazyselect
+  // For searchableselect field type
+  localOptions?: { label: string; value: string }[]; // Local data array for searchableselect
   // Event handlers for field interactions
   events?: {
     onClick?: (event: React.MouseEvent, value: any) => void;

@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { DynamicLazySelect } from './DynamicLazySelect';
+import { SearchableSelect } from './SearchableSelect';
 import { Search, Calendar as CalendarIcon, Clock } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
@@ -508,6 +509,53 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
                   onBlur={events?.onBlur}
                   onKeyDown={events?.onKeyDown}
                   onKeyUp={events?.onKeyUp}
+                />
+              </div>
+            );
+          }}
+        />
+      );
+
+    case 'searchableselect':
+      return (
+        <Controller
+          name={fieldId}
+          control={control}
+          render={({ field }) => {
+            const localOptions = config.localOptions;
+            if (!localOptions) {
+              return (
+                <div>
+                  <div className="text-xs text-blue-600 mb-1">TabIndex: {tabIndex}</div>
+                  <div className="text-xs text-red-600 bg-red-50 p-2 rounded border">
+                    localOptions is required for searchableselect field type
+                  </div>
+                </div>
+              );
+            }
+
+            return (
+              <div>
+                <div className="text-xs text-blue-600 mb-1">TabIndex: {tabIndex}</div>
+                <SearchableSelect
+                  options={localOptions}
+                  value={field.value}
+                  onChange={(value) => {
+                    field.onChange(value);
+                    if (events?.onChange) {
+                      events.onChange(value, { target: { value } } as any);
+                    }
+                  }}
+                  placeholder={placeholder || 'Select...'}
+                  className={`h-8 text-xs focus:ring-1 ${
+                    hasError 
+                      ? 'border-red-500 focus:border-red-500 focus:ring-red-500' 
+                      : 'border-gray-300 focus:border-blue-500 focus:ring-blue-500'
+                  }`}
+                  tabIndex={tabIndex}
+                  onClick={events?.onClick}
+                  onFocus={events?.onFocus}
+                  onBlur={events?.onBlur}
                 />
               </div>
             );

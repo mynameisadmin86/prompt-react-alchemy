@@ -1,4 +1,5 @@
 
+export { SearchableSelect } from './SearchableSelect';
 export { DynamicPanel } from './DynamicPanel';
 export type { DynamicPanelRef } from './DynamicPanel';
 export { FieldRenderer } from './FieldRenderer';
