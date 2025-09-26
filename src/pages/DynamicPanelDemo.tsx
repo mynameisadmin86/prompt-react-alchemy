@@ -304,6 +304,37 @@ const DynamicPanelDemo = () => {
         { label: 'Medium', value: 'medium' },
         { label: 'Low', value: 'low' }
       ]
+    },
+    category: {
+      id: 'category',
+      label: 'Category',
+      fieldType: 'searchableselect',
+      value: '',
+      mandatory: false,
+      visible: true,
+      editable: true,
+      order: 6,
+      placeholder: 'Select category...',
+      localOptions: [
+        { label: 'Rail Transport', value: 'rail-transport' },
+        { label: 'Road Transport', value: 'road-transport' },
+        { label: 'Intermodal Service', value: 'intermodal-service' },
+        { label: 'Container Handling', value: 'container-handling' },
+        { label: 'Last Mile Delivery', value: 'last-mile' },
+        { label: 'Bulk Cargo', value: 'bulk-cargo' },
+        { label: 'Express Service', value: 'express-service' },
+        { label: 'Cold Chain', value: 'cold-chain' },
+        { label: 'Hazardous Materials', value: 'hazmat' },
+        { label: 'Oversized Cargo', value: 'oversized' }
+      ],
+      events: {
+        onChange: (value, event) => {
+          console.log('Category changed:', value);
+        },
+        onClick: (event, value) => {
+          console.log('Category dropdown clicked:', { event, value });
+        }
+      }
     }
   };
 
