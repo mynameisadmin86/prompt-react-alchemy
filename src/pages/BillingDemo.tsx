@@ -37,52 +37,6 @@ const BillingDemo = () => {
     }
   });
 
-  const controlPanelConfig: PanelConfig = {
-    description: {
-      id: 'description',
-      label: 'Description',
-      fieldType: 'text',
-      value: '',
-      mandatory: false,
-      visible: true,
-      editable: true,
-      order: 1,
-      width: 'half'
-    },
-    notes: {
-      id: 'notes',
-      label: 'Notes',
-      fieldType: 'text',
-      value: '',
-      mandatory: false,
-      visible: true,
-      editable: true,
-      order: 2,
-      width: 'half'
-    },
-    billingType: {
-      id: 'billingType',
-      label: 'Billing Type',
-      fieldType: 'select',
-      value: '',
-      mandatory: false,
-      visible: true,
-      editable: true,
-      order: 3,
-      width: 'full',
-      options: [
-        { value: 'standard', label: 'Standard Billing' },
-        { value: 'premium', label: 'Premium Billing' },
-        { value: 'enterprise', label: 'Enterprise Billing' }
-      ],
-      events: {
-        onChange: (value: string) => {
-          handleBillingTypeChange(value);
-        }
-      }
-    }
-  };
-
   const handleBillingTypeChange = (billingType: string) => {
     let contractPrice = '€ 1200.00';
     let netAmount = '€ 5580.00';
@@ -135,6 +89,52 @@ const BillingDemo = () => {
         fieldColour: netTextColor
       }
     }));
+  };
+
+  const controlPanelConfig: PanelConfig = {
+    description: {
+      id: 'description',
+      label: 'Description',
+      fieldType: 'text',
+      value: '',
+      mandatory: false,
+      visible: true,
+      editable: true,
+      order: 1,
+      width: 'half'
+    },
+    notes: {
+      id: 'notes',
+      label: 'Notes',
+      fieldType: 'text',
+      value: '',
+      mandatory: false,
+      visible: true,
+      editable: true,
+      order: 2,
+      width: 'half'
+    },
+    billingType: {
+      id: 'billingType',
+      label: 'Billing Type',
+      fieldType: 'select',
+      value: '',
+      mandatory: false,
+      visible: true,
+      editable: true,
+      order: 3,
+      width: 'full',
+      options: [
+        { value: 'standard', label: 'Standard Billing' },
+        { value: 'premium', label: 'Premium Billing' },
+        { value: 'enterprise', label: 'Enterprise Billing' }
+      ],
+      events: {
+        onChange: (value: string) => {
+          handleBillingTypeChange(value);
+        }
+      }
+    }
   };
 
   return (
