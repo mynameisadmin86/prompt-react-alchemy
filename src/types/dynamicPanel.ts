@@ -56,6 +56,8 @@ export interface FieldConfig {
   }) => Promise<{ label: string; value: string }[]>;
   hideSearch?: boolean; // Hide search box in lazyselect
   disableLazyLoading?: boolean; // Disable lazy loading on scroll in lazyselect
+  localData?: { label: string; value: string }[]; // Local data array for lazyselect
+  useLocalData?: boolean; // Flag to use local data instead of API
   // Event handlers for field interactions
   events?: {
     onClick?: (event: React.MouseEvent, value: any) => void;

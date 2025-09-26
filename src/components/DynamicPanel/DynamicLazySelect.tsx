@@ -12,7 +12,7 @@ interface LazySelectOption {
 }
 
 interface DynamicLazySelectProps {
-  fetchOptions: (params: { searchTerm: string; offset: number; limit: number }) => Promise<LazySelectOption[]>;
+  fetchOptions?: (params: { searchTerm: string; offset: number; limit: number }) => Promise<LazySelectOption[]>;
   value?: string | string[];
   onChange: (value: string | string[] | undefined) => void;
   placeholder?: string;
@@ -25,6 +25,8 @@ interface DynamicLazySelectProps {
   onBlur?: (e: React.FocusEvent) => void;
   hideSearch?: boolean;
   disableLazyLoading?: boolean;
+  useLocalData?: boolean;
+  localData?: LazySelectOption[];
 }
 
 const ITEMS_PER_PAGE = 50;
@@ -42,7 +44,9 @@ export function DynamicLazySelect({
   onFocus,
   onBlur,
   hideSearch = false,
-  disableLazyLoading = false
+  disableLazyLoading = false,
+  useLocalData = false,
+  localData = []
 }: DynamicLazySelectProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [options, setOptions] = useState<LazySelectOption[]>([]);
@@ -73,22 +77,40 @@ export function DynamicLazySelect({
     };
   }, [searchTerm]);
 
-  // Load options when search term changes
+  // Load options when search term changes or when using local data
   useEffect(() => {
     if (isOpen) {
-      loadOptions(true);
+      if (useLocalData) {
+        loadLocalOptions();
+      } else {
+        loadOptions(true);
+      }
     }
-  }, [debouncedSearchTerm, isOpen]);
+  }, [debouncedSearchTerm, isOpen, useLocalData]);
+
+  const loadLocalOptions = useCallback(() => {
+    if (!useLocalData || !localData) {
+      setOptions([]);
+      return;
+    }
+
+    const filteredOptions = localData.filter(option =>
+      option.label.toLowerCase().includes(debouncedSearchTerm.toLowerCase())
+    );
+    
+    setOptions(filteredOptions);
+    setHasMore(false); // No pagination for local data
+  }, [useLocalData, localData, debouncedSearchTerm]);
 
   const loadOptions = useCallback(async (reset = false) => {
-    if (loadingRef.current) return;
+    if (loadingRef.current || useLocalData) return;
     
     loadingRef.current = true;
     setLoading(true);
 
     try {
       const currentOffset = reset ? 0 : offset;
-      const newOptions = await fetchOptions({
+      const newOptions = await fetchOptions!({
         searchTerm: debouncedSearchTerm,
         offset: currentOffset,
         limit: ITEMS_PER_PAGE
@@ -112,7 +134,7 @@ export function DynamicLazySelect({
       setLoading(false);
       loadingRef.current = false;
     }
-  }, [fetchOptions, debouncedSearchTerm, offset]);
+  }, [fetchOptions, debouncedSearchTerm, offset, useLocalData]);
 
   const handleOpenChange = (open: boolean) => {
     setIsOpen(open);
@@ -132,7 +154,7 @@ export function DynamicLazySelect({
     if (scrollTop + clientHeight >= scrollHeight - 10) {
       loadOptions(false);
     }
-  }, [loading, hasMore, loadOptions, disableLazyLoading]);
+  }, [loading, hasMore, loadOptions, disableLazyLoading, useLocalData]);
 
   const handleSelect = (selectedValue: string) => {
     if (multiSelect) {
