@@ -38,6 +38,7 @@ const BillingDemo = () => {
   });
 
   const handleBillingTypeChange = (billingType: string) => {
+    console.log('Billing type changed to:', billingType);
     let contractPrice = '€ 1200.00';
     let netAmount = '€ 5580.00';
     let contractColor = '#10b981';
@@ -74,21 +75,26 @@ const BillingDemo = () => {
         break;
     }
 
-    setSnippetPanelConfig(prev => ({
-      ...prev,
-      contractPrice: {
-        ...prev.contractPrice,
-        value: contractPrice,
-        color: contractColor,
-        fieldColour: contractTextColor
-      },
-      netAmount: {
-        ...prev.netAmount,
-        value: netAmount,
-        color: netColor,
-        fieldColour: netTextColor
-      }
-    }));
+    console.log('Updating prices:', { contractPrice, netAmount });
+    setSnippetPanelConfig(prev => {
+      const newConfig = {
+        ...prev,
+        contractPrice: {
+          ...prev.contractPrice,
+          value: contractPrice,
+          color: contractColor,
+          fieldColour: contractTextColor
+        },
+        netAmount: {
+          ...prev.netAmount,
+          value: netAmount,
+          color: netColor,
+          fieldColour: netTextColor
+        }
+      };
+      console.log('New snippet config:', newConfig);
+      return newConfig;
+    });
   };
 
   const controlPanelConfig: PanelConfig = {
@@ -164,6 +170,7 @@ const BillingDemo = () => {
           />
           
           <DynamicPanel
+            key={`billing-snippets-${JSON.stringify(snippetPanelConfig)}`}
             panelId="billing-snippets"
             panelOrder={2}
             panelTitle="Financial Snippets"
