@@ -1,7 +1,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowRight, Grid3x3, Layout, Search, Workflow, PanelLeft, Layers, Upload, ShoppingCart } from "lucide-react";
+import { ArrowRight, Grid3x3, Layout, Search, Workflow, PanelLeft, Layers, Upload, ShoppingCart, CreditCard } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const Index = () => {
@@ -131,6 +131,13 @@ const Index = () => {
       icon: ShoppingCart,
       path: "/quick-order-server-side-management",
       color: "text-emerald-500"
+    },
+    {
+      title: "Billing Demo",
+      description: "Dynamic billing interface with configurable pricing and financial snippets",
+      icon: CreditCard,
+      path: "/billing-demo",
+      color: "text-green-500"
     },
   ];
 
