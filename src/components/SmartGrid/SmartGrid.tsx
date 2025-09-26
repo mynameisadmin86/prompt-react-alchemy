@@ -913,12 +913,30 @@ export function SmartGrid({
                         onChange={(e) => {
                           const target = e.target as HTMLInputElement;
                           if (target.checked) {
-                            handleSelectionChange(new Set(Array.from({ length: paginatedData.length }, (_, i) => i)));
+                            // Select all rows on current page using their original indices
+                            const currentPageIndices = new Set(currentSelectedRows);
+                            paginatedData.forEach((_, index) => {
+                              const originalIndex = (currentPage - 1) * pageSize + index;
+                              currentPageIndices.add(originalIndex);
+                            });
+                            handleSelectionChange(currentPageIndices);
                           } else {
-                            handleSelectionChange(new Set());
+                            // Deselect all rows on current page
+                            const newSelection = new Set(currentSelectedRows);
+                            paginatedData.forEach((_, index) => {
+                              const originalIndex = (currentPage - 1) * pageSize + index;
+                              newSelection.delete(originalIndex);
+                            });
+                            handleSelectionChange(newSelection);
                           }
                         }}
-                        checked={currentSelectedRows.size === paginatedData.length && paginatedData.length > 0}
+                        checked={
+                          paginatedData.length > 0 && 
+                          paginatedData.every((_, index) => {
+                            const originalIndex = (currentPage - 1) * pageSize + index;
+                            return currentSelectedRows.has(originalIndex);
+                          })
+                        }
                       />
                     </TableHead>
                   )}
@@ -1155,13 +1173,14 @@ export function SmartGrid({
                               <input 
                                 type="checkbox" 
                                 className="rounded" 
-                                checked={currentSelectedRows.has(rowIndex)}
+                                checked={currentSelectedRows.has((currentPage - 1) * pageSize + rowIndex)}
                                 onChange={() => {
+                                  const originalRowIndex = (currentPage - 1) * pageSize + rowIndex;
                                   const newSet = new Set(currentSelectedRows);
-                                  if (newSet.has(rowIndex)) {
-                                    newSet.delete(rowIndex);
+                                  if (newSet.has(originalRowIndex)) {
+                                    newSet.delete(originalRowIndex);
                                   } else {
-                                    newSet.add(rowIndex);
+                                    newSet.add(originalRowIndex);
                                   }
                                   handleSelectionChange(newSet);
                                 }}
