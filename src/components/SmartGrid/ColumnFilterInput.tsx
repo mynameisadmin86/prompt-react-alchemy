@@ -390,23 +390,29 @@ export function ColumnFilterInput({
             return;
           }
           
-          // Validate year is exactly 4 digits
-          const yearMatch = dateString.match(/^(\d{4})-/);
-          if (yearMatch) {
-            const year = parseInt(yearMatch[1]);
-            if (year < 1000 || year > 9999) {
-              // Invalid year format, don't update
-              return;
+          // Allow partial dates during typing, only validate complete dates
+          if (dateString.length === 10) { // Complete date format: yyyy-mm-dd
+            const yearMatch = dateString.match(/^(\d{4})-/);
+            if (yearMatch) {
+              const year = parseInt(yearMatch[1]);
+              if (year < 1000 || year > 9999) {
+                // Invalid year format, don't update
+                return;
+              }
             }
-          } else if (dateString.length >= 4) {
-            // If no valid year pattern found but string is long enough, don't update
-            return;
-          }
-          
-          // Try to parse the input as a date
-          const parsedDate = new Date(dateString);
-          if (!isNaN(parsedDate.getTime())) {
-            handleValueChange(parsedDate.toISOString());
+            
+            // Try to parse the complete date
+            const parsedDate = new Date(dateString);
+            if (!isNaN(parsedDate.getTime())) {
+              handleValueChange(parsedDate.toISOString());
+            }
+          } else {
+            // For partial dates, allow the input but don't send to parent yet
+            // This preserves the user's typing experience
+            const parsedDate = new Date(dateString);
+            if (!isNaN(parsedDate.getTime())) {
+              handleValueChange(parsedDate.toISOString());
+            }
           }
         };
         
