@@ -1149,7 +1149,6 @@ export function SmartGrid({
                             "hover:bg-gray-50/50 transition-colors duration-150 border-b border-gray-100 cursor-pointer",
                             rowClassName ? rowClassName(row, rowIndex) : ''
                           )}
-                          data-row-id={row.id || rowIndex} // Add data attribute for unique styling
                           onClick={(e) => {
                             // Don't trigger row click if checkbox or button elements are clicked
                             if (e.target instanceof HTMLElement && 
