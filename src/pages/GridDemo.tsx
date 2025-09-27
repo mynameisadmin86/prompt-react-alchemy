@@ -548,7 +548,20 @@ const GridDemo = () => {
 
   const handleRowSelection = (selectedRowIndices: Set<number>) => {
     console.log('Selected rows changed:', selectedRowIndices);
+    console.log('Selected row data:', Array.from(selectedRowIndices).map(index => processedData[index]));
     setSelectedRows(selectedRowIndices);
+    
+    // Return selected values to parent component (if needed)
+    const selectedRowData = Array.from(selectedRowIndices).map(index => processedData[index]).filter(Boolean);
+    console.log('Selected row details:', selectedRowData);
+    
+    // You can call any callback here to notify parent of selection changes
+    // For example: onSelectionDataChange?.(selectedRowData);
+  };
+
+  // Utility function to get currently selected row data
+  const getSelectedRowData = () => {
+    return Array.from(selectedRows).map(index => processedData[index]).filter(Boolean);
   };
 
   const handleFiltersChange = (filters: Record<string, any>) => {

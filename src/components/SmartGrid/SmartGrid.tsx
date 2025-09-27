@@ -513,33 +513,8 @@ export function SmartGrid({
     document.addEventListener('mouseup', handleMouseUp);
   }, [orderedColumns, setResizingColumn, setResizeHoverColumn, setColumnWidths]);
 
-  // Create Grid API for plugins
-  const gridAPI: GridAPI = useMemo(() => ({
-    data: data,
-    filteredData: processedData,
-    selectedRows: Array.from(currentSelectedRows).map(index => processedData[index]).filter(Boolean),
-    columns: orderedColumns,
-    preferences,
-    actions: {
-      exportData: handleExport,
-      resetPreferences: handleResetPreferences,
-      toggleRowSelection: (rowIndex: number) => {
-        const newSet = new Set(currentSelectedRows);
-        if (newSet.has(rowIndex)) {
-          newSet.delete(rowIndex);
-        } else {
-          newSet.add(rowIndex);
-        }
-        handleSelectionChange(newSet);
-      },
-      selectAllRows: () => {
-        handleSelectionChange(new Set(Array.from({ length: processedData.length }, (_, i) => i)));
-      },
-      clearSelection: () => {
-        handleSelectionChange(new Set());
-      }
-    }
-  }), [data, processedData, currentSelectedRows, orderedColumns, preferences, handleExport, handleResetPreferences, handleSelectionChange]);
+  // Create Grid API for plugins - moved after paginatedData declaration
+  // This will be defined after paginatedData and helper functions
 
   // Pagination with auto-reset when current page has no data
   const paginatedData = useMemo(() => {
@@ -558,6 +533,73 @@ export function SmartGrid({
   }, [processedData, paginationMode, currentPage, pageSize, onDataFetch, setCurrentPage]);
 
   const totalPages = Math.ceil(processedData.length / pageSize);
+
+  // Convert selectedRows indices to row IDs for consistent selection across pages
+  const getRowId = useCallback((row: any, index: number) => {
+    // Try to use a unique identifier from the row, fallback to index
+    return row.id || row.key || row._id || `row-${index}`;
+  }, []);
+
+  // Get selected row IDs from current page
+  const selectedRowIds = useMemo(() => {
+    const ids = new Set<string>();
+    currentSelectedRows.forEach(index => {
+      const row = paginatedData[index];
+      if (row) {
+        ids.add(getRowId(row, index));
+      }
+    });
+    return ids;
+  }, [currentSelectedRows, paginatedData, getRowId]);
+
+  // Check if a row is selected by ID
+  const isRowSelected = useCallback((row: any, rowIndex: number) => {
+    const rowId = getRowId(row, rowIndex);
+    return selectedRowIds.has(rowId);
+  }, [selectedRowIds, getRowId]);
+
+  // Create Grid API for plugins
+  const gridAPI: GridAPI = useMemo(() => ({
+    data: data,
+    filteredData: processedData,
+    selectedRows: Array.from(currentSelectedRows).map(index => paginatedData[index]).filter(Boolean),
+    columns: orderedColumns,
+    preferences,
+    actions: {
+      exportData: handleExport,
+      resetPreferences: handleResetPreferences,
+      toggleRowSelection: (rowIndex: number) => {
+        const row = paginatedData[rowIndex];
+        if (!row) return;
+        
+        const rowId = getRowId(row, rowIndex);
+        const newSelectedIds = new Set(selectedRowIds);
+        
+        if (newSelectedIds.has(rowId)) {
+          newSelectedIds.delete(rowId);
+        } else {
+          newSelectedIds.add(rowId);
+        }
+        
+        // Convert back to indices for the current page
+        const newSet = new Set<number>();
+        paginatedData.forEach((pageRow, index) => {
+          const pageRowId = getRowId(pageRow, index);
+          if (newSelectedIds.has(pageRowId)) {
+            newSet.add(index);
+          }
+        });
+        
+        handleSelectionChange(newSet);
+      },
+      selectAllRows: () => {
+        handleSelectionChange(new Set(Array.from({ length: paginatedData.length }, (_, i) => i)));
+      },
+      clearSelection: () => {
+        handleSelectionChange(new Set());
+      }
+    }
+  }), [data, processedData, currentSelectedRows, orderedColumns, preferences, handleExport, handleResetPreferences, handleSelectionChange, paginatedData, getRowId, selectedRowIds]);
 
   // Handle header editing
   const handleHeaderEdit = useCallback((columnKey: string, newHeader: string) => {
@@ -918,7 +960,7 @@ export function SmartGrid({
                             handleSelectionChange(new Set());
                           }
                         }}
-                        checked={currentSelectedRows.size === paginatedData.length && paginatedData.length > 0}
+                        checked={paginatedData.length > 0 && paginatedData.every((row, index) => isRowSelected(row, index))}
                       />
                     </TableHead>
                   )}
@@ -1155,14 +1197,26 @@ export function SmartGrid({
                               <input 
                                 type="checkbox" 
                                 className="rounded" 
-                                checked={currentSelectedRows.has(rowIndex)}
+                                checked={isRowSelected(row, rowIndex)}
                                 onChange={() => {
-                                  const newSet = new Set(currentSelectedRows);
-                                  if (newSet.has(rowIndex)) {
-                                    newSet.delete(rowIndex);
+                                  const rowId = getRowId(row, rowIndex);
+                                  const newSelectedIds = new Set(selectedRowIds);
+                                  
+                                  if (newSelectedIds.has(rowId)) {
+                                    newSelectedIds.delete(rowId);
                                   } else {
-                                    newSet.add(rowIndex);
+                                    newSelectedIds.add(rowId);
                                   }
+                                  
+                                  // Convert back to indices for the current page
+                                  const newSet = new Set<number>();
+                                  paginatedData.forEach((pageRow, index) => {
+                                    const pageRowId = getRowId(pageRow, index);
+                                    if (newSelectedIds.has(pageRowId)) {
+                                      newSet.add(index);
+                                    }
+                                  });
+                                  
                                   handleSelectionChange(newSet);
                                 }}
                               />
