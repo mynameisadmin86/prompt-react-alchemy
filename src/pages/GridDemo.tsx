@@ -550,26 +550,56 @@ const GridDemo = () => {
 
   const handleRowSelection = (selectedRowIndices: Set<number>) => {
     console.log('Selected rows changed via checkbox:', selectedRowIndices);
-    setSelectedRows(selectedRowIndices);
     
-    // Update selected row objects and IDs using unique row identification
+    // Get current page data
     const currentData = gridState.gridData.length > 0 ? gridState.gridData : processedData;
-    const selectedObjects = Array.from(selectedRowIndices)
+    
+    // Convert indices to row objects for current page
+    const currentPageSelectedObjects = Array.from(selectedRowIndices)
       .map(index => currentData[index])
       .filter(Boolean);
     
-    // Create a new Set of unique row IDs
-    const newSelectedRowIds = new Set(selectedObjects.map(row => row.id));
+    // Create new sets/arrays based on current selections
+    const newSelectedRowIds = new Set(selectedRowIds);
+    const newSelectedRowObjects = [...selectedRowObjects];
     
-    // Update selected row objects to ensure uniqueness by ID
-    const uniqueSelectedObjects = selectedObjects.filter((row, index, self) => 
-      self.findIndex(r => r.id === row.id) === index
-    );
+    // Handle selections from current page
+    currentPageSelectedObjects.forEach(row => {
+      if (!newSelectedRowIds.has(row.id)) {
+        newSelectedRowIds.add(row.id);
+        newSelectedRowObjects.push(row);
+      }
+    });
     
+    // Handle deselections - remove rows that were previously selected but not in current selection
+    const currentPageRowIds = new Set(currentData.map(row => row.id));
+    const currentSelectedIds = new Set(currentPageSelectedObjects.map(row => row.id));
+    
+    // Remove rows that are on current page but not selected
+    currentPageRowIds.forEach(rowId => {
+      if (!currentSelectedIds.has(rowId) && newSelectedRowIds.has(rowId)) {
+        newSelectedRowIds.delete(rowId);
+        const objectIndex = newSelectedRowObjects.findIndex(obj => obj.id === rowId);
+        if (objectIndex > -1) {
+          newSelectedRowObjects.splice(objectIndex, 1);
+        }
+      }
+    });
+    
+    // Update the row indices set for current page display
+    const updatedRowIndices = new Set<number>();
+    currentData.forEach((row, index) => {
+      if (newSelectedRowIds.has(row.id)) {
+        updatedRowIndices.add(index);
+      }
+    });
+    
+    setSelectedRows(updatedRowIndices);
     setSelectedRowIds(newSelectedRowIds);
-    setSelectedRowObjects(uniqueSelectedObjects);
-    console.log('Selected row objects:', uniqueSelectedObjects);
-    console.log('Selected row IDs:', Array.from(newSelectedRowIds));
+    setSelectedRowObjects(newSelectedRowObjects);
+    
+    console.log('Selected row objects across all pages:', newSelectedRowObjects);
+    console.log('Selected row IDs across all pages:', Array.from(newSelectedRowIds));
   };
 
   const handleRowClick = (row: SampleData, index: number) => {
@@ -580,7 +610,7 @@ const GridDemo = () => {
     const newSelectedRowIds = new Set(selectedRowIds);
     const newSelectedRowObjects = [...selectedRowObjects];
     
-    // Check if this row is already selected by ID (not index)
+    // Check if this row is already selected by ID (persistent across pages)
     const isRowSelected = newSelectedRowIds.has(row.id);
     
     if (isRowSelected) {
@@ -591,7 +621,7 @@ const GridDemo = () => {
       if (objectIndex > -1) {
         newSelectedRowObjects.splice(objectIndex, 1);
       }
-      console.log('Removed row:', row.id);
+      console.log('Removed row from selection:', row.id);
     } else {
       // Add row: add to all tracking sets/arrays (ensure uniqueness)
       newSelectedRows.add(index);
@@ -600,7 +630,7 @@ const GridDemo = () => {
       if (!newSelectedRowObjects.some(obj => obj.id === row.id)) {
         newSelectedRowObjects.push(row);
       }
-      console.log('Added row:', row.id);
+      console.log('Added row to selection:', row.id);
     }
     
     // Update all state
@@ -608,9 +638,28 @@ const GridDemo = () => {
     setSelectedRowIds(newSelectedRowIds);
     setSelectedRowObjects(newSelectedRowObjects);
     
-    console.log('Selected row objects after click:', newSelectedRowObjects);
-    console.log('Selected row IDs after click:', Array.from(newSelectedRowIds));
+    console.log('Total selected rows across all pages:', newSelectedRowObjects.length);
+    console.log('Selected row IDs:', Array.from(newSelectedRowIds));
   };
+
+  // Effect to sync selectedRows indices with selectedRowIds when data changes (pagination, filtering, etc.)
+  useEffect(() => {
+    const currentData = gridState.gridData.length > 0 ? gridState.gridData : processedData;
+    const newSelectedRows = new Set<number>();
+    
+    // Find current page indices for selected row IDs
+    currentData.forEach((row, index) => {
+      if (selectedRowIds.has(row.id)) {
+        newSelectedRows.add(index);
+      }
+    });
+    
+    // Only update if there's a difference to avoid infinite loops
+    if (newSelectedRows.size !== selectedRows.size || 
+        !Array.from(newSelectedRows).every(index => selectedRows.has(index))) {
+      setSelectedRows(newSelectedRows);
+    }
+  }, [gridState.gridData, processedData, selectedRowIds]);
 
   const handleFiltersChange = (filters: Record<string, any>) => {
     console.log('Advanced Filters Changed:', filters);
@@ -725,6 +774,29 @@ const GridDemo = () => {
             .smart-grid-row-selected:hover {
               background-color: #dbeafe !important;
             }
+            
+            /* Unique styling for different selected rows based on row ID */
+            ${Array.from(selectedRowIds).map((rowId, index) => {
+              const colors = [
+                { bg: '#eff6ff', border: '#3b82f6', hover: '#dbeafe' }, // blue
+                { bg: '#f0fff4', border: '#10b981', hover: '#dcfce7' }, // green
+                { bg: '#fefce8', border: '#f59e0b', hover: '#fef3c7' }, // yellow
+                { bg: '#fdf2f8', border: '#ec4899', hover: '#fce7f3' }, // pink
+                { bg: '#f3e8ff', border: '#8b5cf6', hover: '#e9d5ff' }, // purple
+                { bg: '#fff7ed', border: '#f97316', hover: '#fed7aa' }, // orange
+              ];
+              const colorScheme = colors[index % colors.length];
+              
+              return `
+                .smart-grid-row-selected[data-row-id="${rowId}"] {
+                  background-color: ${colorScheme.bg} !important;
+                  border-left: 4px solid ${colorScheme.border} !important;
+                }
+                .smart-grid-row-selected[data-row-id="${rowId}"]:hover {
+                  background-color: ${colorScheme.hover} !important;
+                }
+              `;
+            }).join('\n')}
           `}</style>
           <SmartGridWithGrouping
             key={`grid-${gridState.forceUpdate}`}
@@ -743,8 +815,10 @@ const GridDemo = () => {
             onFiltersChange={handleFiltersChange}
             onServerFilter={handleSearch}
             rowClassName={(row: any, index: number) => {
-              const isSelected = selectedRowIds.has(row.id) || selectedRows.has(index);
-              return isSelected ? 'smart-grid-row-selected' : '';
+              const isSelected = selectedRowIds.has(row.id);
+              return isSelected 
+                ? `smart-grid-row-selected` 
+                : '';
             }}
             nestedRowRenderer={renderSubRow}
             configurableButtons={configurableButtons}
