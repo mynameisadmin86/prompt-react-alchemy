@@ -390,29 +390,10 @@ export function ColumnFilterInput({
             return;
           }
           
-          // Allow partial dates during typing, only validate complete dates
-          if (dateString.length === 10) { // Complete date format: yyyy-mm-dd
-            const yearMatch = dateString.match(/^(\d{4})-/);
-            if (yearMatch) {
-              const year = parseInt(yearMatch[1]);
-              if (year < 1000 || year > 9999) {
-                // Invalid year format, don't update
-                return;
-              }
-            }
-            
-            // Try to parse the complete date
-            const parsedDate = new Date(dateString);
-            if (!isNaN(parsedDate.getTime())) {
-              handleValueChange(parsedDate.toISOString());
-            }
-          } else {
-            // For partial dates, allow the input but don't send to parent yet
-            // This preserves the user's typing experience
-            const parsedDate = new Date(dateString);
-            if (!isNaN(parsedDate.getTime())) {
-              handleValueChange(parsedDate.toISOString());
-            }
+          // Try to parse the input as a date
+          const parsedDate = new Date(dateString);
+          if (!isNaN(parsedDate.getTime())) {
+            handleValueChange(parsedDate.toISOString());
           }
         };
         
@@ -423,8 +404,6 @@ export function ColumnFilterInput({
             placeholder="yyyy-mm-dd"
             className="h-7 text-xs"
             type="date"
-            min="1000-01-01"
-            max="9999-12-31"
           />
         );
 
