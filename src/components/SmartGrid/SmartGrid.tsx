@@ -1145,6 +1145,7 @@ export function SmartGrid({
                       ) : (
                         /* Regular Data Row */
                         <TableRow key={rowIndex}
+                          data-row-id={row.id || rowIndex}
                           className={cn(
                             "hover:bg-gray-50/50 transition-colors duration-150 border-b border-gray-100 cursor-pointer",
                             rowClassName ? rowClassName(row, rowIndex) : ''

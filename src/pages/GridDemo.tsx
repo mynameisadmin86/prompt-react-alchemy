@@ -167,11 +167,10 @@ const GridDemo = () => {
     }
   ];
 
-  // Initialize columns and data in the grid state
+  // Initialize columns only (data will be set after processedData is computed)
   useEffect(() => {
     console.log('Initializing columns in GridDemo');
     gridState.setColumns(initialColumns);
-    gridState.setGridData(processedData);
   }, []);
 
   // Log when columns change
@@ -495,6 +494,32 @@ const GridDemo = () => {
     }));
   }, []);
 
+  // Initialize columns and processed data in the grid state
+  useEffect(() => {
+    console.log('Initializing columns and data in GridDemo');
+    gridState.setColumns(initialColumns);
+    gridState.setGridData(processedData);
+  }, [processedData]);
+
+  // Update selected row indices based on current page data to maintain selection state
+  useEffect(() => {
+    const currentData = gridState.gridData.length > 0 ? gridState.gridData : processedData;
+    const newSelectedIndices = new Set<number>();
+    
+    // Find indices of currently selected row IDs in the current page data
+    currentData.forEach((row: SampleData, index: number) => {
+      if (selectedRowIds.has(row.id)) {
+        newSelectedIndices.add(index);
+      }
+    });
+    
+    // Only update if there's a difference to avoid infinite loops
+    if (newSelectedIndices.size !== selectedRows.size || 
+        !Array.from(newSelectedIndices).every(index => selectedRows.has(index))) {
+      setSelectedRows(newSelectedIndices);
+    }
+  }, [gridState.gridData, processedData, selectedRowIds]);
+
   // Configurable buttons for the grid toolbar
   const configurableButtons: ConfigurableButtonConfig[] = [
     {
@@ -718,13 +743,28 @@ const GridDemo = () => {
             </div>
           )}
           <style>{`
-            .smart-grid-row-selected {
-              background-color: #eff6ff !important;
-              border-left: 4px solid #3b82f6 !important;
-            }
-            .smart-grid-row-selected:hover {
-              background-color: #dbeafe !important;
-            }
+            ${Array.from(selectedRowIds).map((rowId, index) => {
+              const colors = [
+                { bg: '#eff6ff', border: '#3b82f6', hover: '#dbeafe' }, // Blue
+                { bg: '#f0fdf4', border: '#16a34a', hover: '#dcfce7' }, // Green
+                { bg: '#fef3c7', border: '#f59e0b', hover: '#fef3c7' }, // Yellow
+                { bg: '#fce7f3', border: '#ec4899', hover: '#fce7f3' }, // Pink
+                { bg: '#f3e8ff', border: '#a855f7', hover: '#f3e8ff' }, // Purple
+                { bg: '#ecfdf5', border: '#10b981', hover: '#d1fae5' }, // Emerald
+                { bg: '#fef2f2', border: '#ef4444', hover: '#fee2e2' }, // Red
+                { bg: '#f0f9ff', border: '#0ea5e9', hover: '#e0f2fe' }, // Sky
+              ];
+              const colorSet = colors[index % colors.length];
+              return `
+                tr[data-row-id="${rowId}"] {
+                  background-color: ${colorSet.bg} !important;
+                  border-left: 4px solid ${colorSet.border} !important;
+                }
+                tr[data-row-id="${rowId}"]:hover {
+                  background-color: ${colorSet.hover} !important;
+                }
+              `;
+            }).join('\n')}
           `}</style>
           <SmartGridWithGrouping
             key={`grid-${gridState.forceUpdate}`}
@@ -743,8 +783,7 @@ const GridDemo = () => {
             onFiltersChange={handleFiltersChange}
             onServerFilter={handleSearch}
             rowClassName={(row: any, index: number) => {
-              const isSelected = selectedRowIds.has(row.id) || selectedRows.has(index);
-              return isSelected ? 'smart-grid-row-selected' : '';
+              return selectedRowIds.has(row.id) ? 'selected' : '';
             }}
             nestedRowRenderer={renderSubRow}
             configurableButtons={configurableButtons}
