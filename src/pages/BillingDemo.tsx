@@ -9,6 +9,27 @@ const BillingDemo = () => {
   const navigate = useNavigate();
 
   const [snippetPanelConfig, setSnippetPanelConfig] = useState<PanelConfig>({
+    billingType: {
+      id: 'billingType',
+      label: 'Billing Type',
+      fieldType: 'select',
+      value: '',
+      mandatory: false,
+      visible: true,
+      editable: true,
+      order: 1,
+      width: 'full',
+      options: [
+        { value: 'standard', label: 'Standard Billing' },
+        { value: 'premium', label: 'Premium Billing' },
+        { value: 'enterprise', label: 'Enterprise Billing' }
+      ],
+      events: {
+        onChange: (value: string) => {
+          handleBillingTypeChange(value);
+        }
+      }
+    },
     contractPrice: {
       id: 'contractPrice',
       label: 'Contract Price',
@@ -17,7 +38,7 @@ const BillingDemo = () => {
       mandatory: false,
       visible: true,
       editable: true,
-      order: 1,
+      order: 2,
       width: 'half',
       color: '#10b981', // Emerald green background
       fieldColour: '#047857' // Dark emerald text
@@ -30,7 +51,7 @@ const BillingDemo = () => {
       mandatory: false,
       visible: true,
       editable: true,
-      order: 2,
+      order: 3,
       width: 'half',
       color: '#8b5cf6', // Purple background
       fieldColour: '#6d28d9' // Dark purple text
@@ -119,27 +140,6 @@ const BillingDemo = () => {
       editable: true,
       order: 2,
       width: 'half'
-    },
-    billingType: {
-      id: 'billingType',
-      label: 'Billing Type',
-      fieldType: 'select',
-      value: '',
-      mandatory: false,
-      visible: true,
-      editable: true,
-      order: 3,
-      width: 'full',
-      options: [
-        { value: 'standard', label: 'Standard Billing' },
-        { value: 'premium', label: 'Premium Billing' },
-        { value: 'enterprise', label: 'Enterprise Billing' }
-      ],
-      events: {
-        onChange: (value: string) => {
-          handleBillingTypeChange(value);
-        }
-      }
     }
   };
 
