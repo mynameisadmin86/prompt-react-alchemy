@@ -384,10 +384,6 @@ export function ColumnFilterInput({
 
       case 'Date':
       case 'DateTimeRange':
-        const currentYear = new Date().getFullYear();
-        const years = Array.from({ length: 21 }, (_, i) => currentYear - 10 + i);
-        const currentDate = localValue ? new Date(localValue) : new Date();
-        
         const handleDateInputChange = (dateString: string) => {
           if (dateString === '') {
             handleValueChange('');
@@ -401,14 +397,6 @@ export function ColumnFilterInput({
           }
         };
         
-        const handleYearChange = (year: string) => {
-          if (year === "__current__") return;
-          
-          const newDate = new Date(currentDate);
-          newDate.setFullYear(parseInt(year));
-          handleValueChange(newDate.toISOString());
-        };
-        
         return (
           <div className="flex items-center gap-1">
             {/* Editable date input */}
@@ -419,24 +407,6 @@ export function ColumnFilterInput({
               className="h-7 text-xs flex-1"
               type="date"
             />
-            
-            {/* Year dropdown */}
-            <Select 
-              value={localValue ? new Date(localValue).getFullYear().toString() : "__current__"} 
-              onValueChange={handleYearChange}
-            >
-              <SelectTrigger className="h-7 text-xs w-20">
-                <SelectValue placeholder="Year" />
-              </SelectTrigger>
-              <SelectContent className="bg-white border shadow-lg z-50 max-h-60 overflow-y-auto">
-                <SelectItem value="__current__" className="text-xs">Year</SelectItem>
-                {years.map(year => (
-                  <SelectItem key={year} value={year.toString()} className="text-xs">
-                    {year}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
             
             {/* Calendar picker button */}
             <Popover open={showDatePicker} onOpenChange={setShowDatePicker}>
@@ -459,6 +429,9 @@ export function ColumnFilterInput({
                   }}
                   initialFocus
                   className={cn("p-3 pointer-events-auto")}
+                  captionLayout="dropdown-buttons"
+                  fromYear={1900}
+                  toYear={2030}
                 />
               </PopoverContent>
             </Popover>
