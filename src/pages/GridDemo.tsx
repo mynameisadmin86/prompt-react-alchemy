@@ -514,8 +514,10 @@ const GridDemo = () => {
     });
     
     // Only update if there's a difference to avoid infinite loops
+    // Also prevent updates that might trigger unwanted side effects
     if (newSelectedIndices.size !== selectedRows.size || 
         !Array.from(newSelectedIndices).every(index => selectedRows.has(index))) {
+      console.log('Updating selected row indices without affecting pagination');
       setSelectedRows(newSelectedIndices);
     }
   }, [gridState.gridData, processedData, selectedRowIds]);

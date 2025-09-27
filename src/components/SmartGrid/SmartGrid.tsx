@@ -414,8 +414,10 @@ export function SmartGrid({
     // Set local filters only
     setFilters(localFilters);
     
-    // Reset to page 1 when filters change
-    setCurrentPage(1);
+    // Only reset to page 1 when actual filters change (not just row selections)
+    if (legacyFilters.length > 0) {
+      setCurrentPage(1);
+    }
   }, [onFiltersChange, setFilters, currentColumns, onServerFilter, toast, setCurrentPage]);
 
   // Define handleExport and handleResetPreferences after processedData and orderedColumns
