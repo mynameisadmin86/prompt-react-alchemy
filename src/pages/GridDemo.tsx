@@ -43,6 +43,7 @@ interface SampleData {
 
 const GridDemo = () => {
   const [selectedRows, setSelectedRows] = useState<Set<number>>(new Set());
+  const [selectedRowIds, setSelectedRowIds] = useState<Set<string>>(new Set());
   const [selectedRowObjects, setSelectedRowObjects] = useState<SampleData[]>([]);
   const [currentFilters, setCurrentFilters] = useState<Record<string, any>>({});
   const [apiData, setApiData] = useState<SampleData[]>([]);
@@ -548,34 +549,67 @@ const GridDemo = () => {
   };
 
   const handleRowSelection = (selectedRowIndices: Set<number>) => {
-    console.log('Selected rows changed:', selectedRowIndices);
+    console.log('Selected rows changed via checkbox:', selectedRowIndices);
     setSelectedRows(selectedRowIndices);
     
-    // Update selected row objects
+    // Update selected row objects and IDs using unique row identification
     const currentData = gridState.gridData.length > 0 ? gridState.gridData : processedData;
-    const selectedObjects = Array.from(selectedRowIndices).map(index => currentData[index]).filter(Boolean);
-    setSelectedRowObjects(selectedObjects);
-    console.log('Selected row objects:', selectedObjects);
+    const selectedObjects = Array.from(selectedRowIndices)
+      .map(index => currentData[index])
+      .filter(Boolean);
+    
+    // Create a new Set of unique row IDs
+    const newSelectedRowIds = new Set(selectedObjects.map(row => row.id));
+    
+    // Update selected row objects to ensure uniqueness by ID
+    const uniqueSelectedObjects = selectedObjects.filter((row, index, self) => 
+      self.findIndex(r => r.id === row.id) === index
+    );
+    
+    setSelectedRowIds(newSelectedRowIds);
+    setSelectedRowObjects(uniqueSelectedObjects);
+    console.log('Selected row objects:', uniqueSelectedObjects);
+    console.log('Selected row IDs:', Array.from(newSelectedRowIds));
   };
 
   const handleRowClick = (row: SampleData, index: number) => {
     console.log('Row clicked:', row, index);
     
-    // Toggle row selection
+    const currentData = gridState.gridData.length > 0 ? gridState.gridData : processedData;
     const newSelectedRows = new Set(selectedRows);
-    if (newSelectedRows.has(index)) {
+    const newSelectedRowIds = new Set(selectedRowIds);
+    const newSelectedRowObjects = [...selectedRowObjects];
+    
+    // Check if this row is already selected by ID (not index)
+    const isRowSelected = newSelectedRowIds.has(row.id);
+    
+    if (isRowSelected) {
+      // Remove row: remove from all tracking sets/arrays
       newSelectedRows.delete(index);
+      newSelectedRowIds.delete(row.id);
+      const objectIndex = newSelectedRowObjects.findIndex(obj => obj.id === row.id);
+      if (objectIndex > -1) {
+        newSelectedRowObjects.splice(objectIndex, 1);
+      }
+      console.log('Removed row:', row.id);
     } else {
+      // Add row: add to all tracking sets/arrays (ensure uniqueness)
       newSelectedRows.add(index);
+      newSelectedRowIds.add(row.id);
+      // Only add if not already in objects array (double-check uniqueness)
+      if (!newSelectedRowObjects.some(obj => obj.id === row.id)) {
+        newSelectedRowObjects.push(row);
+      }
+      console.log('Added row:', row.id);
     }
     
+    // Update all state
     setSelectedRows(newSelectedRows);
+    setSelectedRowIds(newSelectedRowIds);
+    setSelectedRowObjects(newSelectedRowObjects);
     
-    // Update selected row objects
-    const currentData = gridState.gridData.length > 0 ? gridState.gridData : processedData;
-    const selectedObjects = Array.from(newSelectedRows).map(idx => currentData[idx]).filter(Boolean);
-    setSelectedRowObjects(selectedObjects);
-    console.log('Selected row objects after click:', selectedObjects);
+    console.log('Selected row objects after click:', newSelectedRowObjects);
+    console.log('Selected row IDs after click:', Array.from(newSelectedRowIds));
   };
 
   const handleFiltersChange = (filters: Record<string, any>) => {
@@ -708,9 +742,10 @@ const GridDemo = () => {
             onRowClick={handleRowClick}
             onFiltersChange={handleFiltersChange}
             onServerFilter={handleSearch}
-            rowClassName={(row: any, index: number) =>
-              selectedRows.has(index) ? 'smart-grid-row-selected' : ''
-            }
+            rowClassName={(row: any, index: number) => {
+              const isSelected = selectedRowIds.has(row.id) || selectedRows.has(index);
+              return isSelected ? 'smart-grid-row-selected' : '';
+            }}
             nestedRowRenderer={renderSubRow}
             configurableButtons={configurableButtons}
             showDefaultConfigurableButton={false}
