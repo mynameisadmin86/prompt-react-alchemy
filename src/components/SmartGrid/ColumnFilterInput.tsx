@@ -404,6 +404,8 @@ export function ColumnFilterInput({
             placeholder="yyyy-mm-dd"
             className="h-7 text-xs"
             type="date"
+            min="1000-01-01"
+            max="9999-12-31"
           />
         );
 
