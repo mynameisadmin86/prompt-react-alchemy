@@ -440,6 +440,10 @@ export function ColumnFilterInput({
                     handleDateRangeChange('from', date ? date.toISOString() : '');
                   }}
                   initialFocus
+                  showOutsideDays={true}
+                  captionLayout="dropdown-buttons"
+                  fromYear={1000}
+                  toYear={9999}
                   className={cn("p-3 pointer-events-auto")}
                 />
               </PopoverContent>
@@ -469,6 +473,10 @@ export function ColumnFilterInput({
                     handleDateRangeChange('to', date ? date.toISOString() : '');
                   }}
                   initialFocus
+                  showOutsideDays={true}
+                  captionLayout="dropdown-buttons"
+                  fromYear={1000}
+                  toYear={9999}
                   className={cn("p-3 pointer-events-auto")}
                 />
               </PopoverContent>
