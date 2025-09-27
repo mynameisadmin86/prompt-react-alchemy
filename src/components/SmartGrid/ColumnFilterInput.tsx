@@ -384,33 +384,85 @@ export function ColumnFilterInput({
 
       case 'Date':
       case 'DateTimeRange':
+        const currentYear = new Date().getFullYear();
+        const years = Array.from({ length: 21 }, (_, i) => currentYear - 10 + i);
+        const currentDate = localValue ? new Date(localValue) : new Date();
+        
+        const handleDateInputChange = (dateString: string) => {
+          if (dateString === '') {
+            handleValueChange('');
+            return;
+          }
+          
+          // Try to parse the input as a date
+          const parsedDate = new Date(dateString);
+          if (!isNaN(parsedDate.getTime())) {
+            handleValueChange(parsedDate.toISOString());
+          }
+        };
+        
+        const handleYearChange = (year: string) => {
+          if (year === "__current__") return;
+          
+          const newDate = new Date(currentDate);
+          newDate.setFullYear(parseInt(year));
+          handleValueChange(newDate.toISOString());
+        };
+        
         return (
-          <Popover open={showDatePicker} onOpenChange={setShowDatePicker}>
-            <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                className={cn(
-                  "h-7 text-xs justify-start text-left font-normal",
-                  !localValue && "text-muted-foreground"
-                )}
-              >
-                <CalendarIcon className="mr-2 h-3 w-3" />
-                {localValue ? format(new Date(localValue), "MMM dd, yyyy") : "Pick date"}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0 bg-white border shadow-lg z-50" align="start">
-              <Calendar
-                mode="single"
-                selected={localValue ? new Date(localValue) : undefined}
-                onSelect={(date) => {
-                  handleValueChange(date ? date.toISOString() : '');
-                  setShowDatePicker(false);
-                }}
-                initialFocus
-                className={cn("p-3 pointer-events-auto")}
-              />
-            </PopoverContent>
-          </Popover>
+          <div className="flex items-center gap-1">
+            {/* Editable date input */}
+            <Input
+              value={localValue ? format(new Date(localValue), "yyyy-MM-dd") : ''}
+              onChange={(e) => handleDateInputChange(e.target.value)}
+              placeholder="yyyy-mm-dd"
+              className="h-7 text-xs flex-1"
+              type="date"
+            />
+            
+            {/* Year dropdown */}
+            <Select 
+              value={localValue ? new Date(localValue).getFullYear().toString() : "__current__"} 
+              onValueChange={handleYearChange}
+            >
+              <SelectTrigger className="h-7 text-xs w-20">
+                <SelectValue placeholder="Year" />
+              </SelectTrigger>
+              <SelectContent className="bg-white border shadow-lg z-50 max-h-60 overflow-y-auto">
+                <SelectItem value="__current__" className="text-xs">Year</SelectItem>
+                {years.map(year => (
+                  <SelectItem key={year} value={year.toString()} className="text-xs">
+                    {year}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            
+            {/* Calendar picker button */}
+            <Popover open={showDatePicker} onOpenChange={setShowDatePicker}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-7 w-7 p-0"
+                >
+                  <CalendarIcon className="h-3 w-3" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0 bg-white border shadow-lg z-50" align="start">
+                <Calendar
+                  mode="single"
+                  selected={localValue ? new Date(localValue) : undefined}
+                  onSelect={(date) => {
+                    handleValueChange(date ? date.toISOString() : '');
+                    setShowDatePicker(false);
+                  }}
+                  initialFocus
+                  className={cn("p-3 pointer-events-auto")}
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
         );
 
       case 'DateRange':
