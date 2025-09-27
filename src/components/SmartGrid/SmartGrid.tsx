@@ -221,27 +221,6 @@ export function SmartGrid({
     return calculateColumnWidths(visibleColumns, showCheckboxes, plugins, preferences, columnWidths);
   }, [preferences, showCheckboxes, plugins, columnWidths]);
 
-  // Apply preferences to get ordered and visible columns - FILTER OUT SUB-ROW COLUMNS from main table
-  const orderedColumns = useMemo(() => {
-    const columnMap = new Map(currentColumns.map(col => [col.key, col]));
-    
-    const visibleColumns = preferences.columnOrder
-      .map(id => columnMap.get(id))
-      .filter((col): col is GridColumnConfig => col !== undefined)
-      .filter(col => !preferences.hiddenColumns.includes(col.key))
-      .filter(col => !col.subRow); // Filter out sub-row columns from main table
-    
-    const calculatedWidths = calculateColumnWidthsCallback(visibleColumns);
-    
-    return visibleColumns.map(col => ({
-      ...col,
-      label: preferences.columnHeaders[col.key] || col.label,
-      hidden: preferences.hiddenColumns.includes(col.key),
-      width: calculatedWidths[col.key] || 100,
-      filterable: col.filterable !== false // Enable filtering by default
-    }));
-  }, [currentColumns, preferences, calculateColumnWidthsCallback]);
-
   // Get sub-row columns (columns marked with subRow: true) with preferences applied
   const subRowColumns = useMemo(() => {
     const columnMap = new Map(currentColumns.map(col => [col.key, col]));
@@ -363,6 +342,29 @@ export function SmartGrid({
 
   // Use sub-row renderer if we have sub-row columns, otherwise use collapsible or custom renderer
   const effectiveNestedRowRenderer = hasSubRowColumns ? renderSubRowContent : (hasCollapsibleColumns ? renderCollapsibleContent : nestedRowRenderer);
+
+  // Apply preferences to get ordered and visible columns - FILTER OUT SUB-ROW AND CHECKBOX COLUMNS from main table
+  const orderedColumns = useMemo(() => {
+    const columnMap = new Map(currentColumns.map(col => [col.key, col]));
+    const hasExpandableRows = effectiveNestedRowRenderer || hasCollapsibleColumns;
+    
+    const visibleColumns = preferences.columnOrder
+      .map(id => columnMap.get(id))
+      .filter((col): col is GridColumnConfig => col !== undefined)
+      .filter(col => !preferences.hiddenColumns.includes(col.key))
+      .filter(col => !col.subRow) // Filter out sub-row columns from main table
+      .filter(col => !(col.type === 'Checkbox' && hasExpandableRows)); // Filter out checkbox columns when embedded with expand button
+    
+    const calculatedWidths = calculateColumnWidthsCallback(visibleColumns);
+    
+    return visibleColumns.map(col => ({
+      ...col,
+      label: preferences.columnHeaders[col.key] || col.label,
+      hidden: preferences.hiddenColumns.includes(col.key),
+      width: calculatedWidths[col.key] || 100,
+      filterable: col.filterable !== false // Enable filtering by default
+    }));
+  }, [currentColumns, preferences, calculateColumnWidthsCallback, effectiveNestedRowRenderer, hasCollapsibleColumns]);
 
   // Process data with sorting and filtering (only if not using lazy loading)
   const processedData = useMemo(() => {
@@ -755,8 +757,28 @@ export function SmartGrid({
 
     if (columnIndex === 0 && (effectiveNestedRowRenderer || hasCollapsibleColumns) && !row.__isGroupHeader) {
       const isExpanded = expandedRows.has(rowIndex);
+      const hasCheckboxColumn = stateColumns.some(col => col.type === 'Checkbox');
+      
       return (
         <div className="flex items-center space-x-1 min-w-0">
+          {hasCheckboxColumn && (
+            <CellRenderer
+              value={null}
+              row={row}
+              column={{ key: 'checkbox', type: 'Checkbox', label: '', idKey: 'id' }}
+              rowIndex={rowIndex}
+              columnIndex={-1}
+              isEditing={false}
+              isEditable={false}
+              onEdit={handleCellEdit}
+              onEditStart={handleEditStart}
+              onEditCancel={handleEditCancel}
+              onLinkClick={onLinkClick}
+              loading={loading}
+              isCheckboxSelected={isCheckboxSelected(row)}
+              onCheckboxChange={handleCheckboxChange}
+            />
+          )}
           <Button
             variant="ghost"
             size="sm"
