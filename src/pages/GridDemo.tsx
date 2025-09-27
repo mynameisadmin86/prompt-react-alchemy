@@ -743,25 +743,14 @@ const GridDemo = () => {
             </div>
           )}
           <style>{`
-            ${Array.from(selectedRowIds).map((rowId, index) => {
-              const colors = [
-                { bg: '#eff6ff', border: '#3b82f6', hover: '#dbeafe' }, // Blue
-                { bg: '#f0fdf4', border: '#16a34a', hover: '#dcfce7' }, // Green
-                { bg: '#fef3c7', border: '#f59e0b', hover: '#fef3c7' }, // Yellow
-                { bg: '#fce7f3', border: '#ec4899', hover: '#fce7f3' }, // Pink
-                { bg: '#f3e8ff', border: '#a855f7', hover: '#f3e8ff' }, // Purple
-                { bg: '#ecfdf5', border: '#10b981', hover: '#d1fae5' }, // Emerald
-                { bg: '#fef2f2', border: '#ef4444', hover: '#fee2e2' }, // Red
-                { bg: '#f0f9ff', border: '#0ea5e9', hover: '#e0f2fe' }, // Sky
-              ];
-              const colorSet = colors[index % colors.length];
+            ${Array.from(selectedRowIds).map((rowId) => {
               return `
                 tr[data-row-id="${rowId}"] {
-                  background-color: ${colorSet.bg} !important;
-                  border-left: 4px solid ${colorSet.border} !important;
+                  background-color: #eff6ff !important;
+                  border-left: 4px solid #3b82f6 !important;
                 }
                 tr[data-row-id="${rowId}"]:hover {
-                  background-color: ${colorSet.hover} !important;
+                  background-color: #dbeafe !important;
                 }
               `;
             }).join('\n')}
