@@ -390,6 +390,19 @@ export function ColumnFilterInput({
             return;
           }
           
+          // Validate year is exactly 4 digits
+          const yearMatch = dateString.match(/^(\d{4})-/);
+          if (yearMatch) {
+            const year = parseInt(yearMatch[1]);
+            if (year < 1000 || year > 9999) {
+              // Invalid year format, don't update
+              return;
+            }
+          } else if (dateString.length >= 4) {
+            // If no valid year pattern found but string is long enough, don't update
+            return;
+          }
+          
           // Try to parse the input as a date
           const parsedDate = new Date(dateString);
           if (!isNaN(parsedDate.getTime())) {
@@ -404,6 +417,8 @@ export function ColumnFilterInput({
             placeholder="yyyy-mm-dd"
             className="h-7 text-xs"
             type="date"
+            min="1000-01-01"
+            max="9999-12-31"
           />
         );
 
