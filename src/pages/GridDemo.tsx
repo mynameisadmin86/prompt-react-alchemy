@@ -46,21 +46,9 @@ const GridDemo = () => {
   const [currentFilters, setCurrentFilters] = useState<Record<string, any>>({});
   const [apiData, setApiData] = useState<SampleData[]>([]);
   const [loading, setLoading] = useState(false);
-  const [selectedCheckboxes, setSelectedCheckboxes] = useState<SampleData[]>([]);
   const gridState = useSmartGridState();
   
   const initialColumns: GridColumnConfig[] = [
-    {
-      key: 'select',
-      label: 'Select',
-      type: 'Checkbox',
-      sortable: false,
-      editable: false,
-      mandatory: false,
-      subRow: false,
-      width: 50,
-      idKey: 'id'
-    },
     {
       key: 'id',
       label: 'Trip Plan No',
@@ -563,11 +551,6 @@ const GridDemo = () => {
     setSelectedRows(selectedRowIndices);
   };
 
-  const handleCheckboxSelectionChange = (selectedItems: SampleData[]) => {
-    console.log('Checkbox selection changed:', selectedItems);
-    setSelectedCheckboxes(selectedItems);
-  };
-
   const handleFiltersChange = (filters: Record<string, any>) => {
     console.log('Advanced Filters Changed:', filters);
     // Store filters for later use when search is clicked
@@ -684,8 +667,6 @@ const GridDemo = () => {
             onSubRowToggle={gridState.handleSubRowToggle}
             selectedRows={selectedRows}
             onSelectionChange={handleRowSelection}
-            selectedCheckboxes={selectedCheckboxes}
-            onCheckboxSelectionChange={handleCheckboxSelectionChange}
             onFiltersChange={handleFiltersChange}
             onServerFilter={handleSearch}
             rowClassName={(row: any, index: number) =>
