@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { SmartGridWithGrouping } from '@/components/SmartGrid';
 
 // Sample data with different categories
@@ -178,13 +178,7 @@ const columns = [
 ];
 
 export default function SmartGridGroupingDemo() {
-  const [groupByField, setGroupByField] = useState<string | null>('department');
-  const [selectedRows, setSelectedRows] = useState<Set<number>>(new Set());
-
-  const handleRowSelection = (selectedRowIndices: Set<number>) => {
-    console.log('Selected rows changed:', selectedRowIndices);
-    setSelectedRows(selectedRowIndices);
-  };
+  const [groupByField, setGroupByField] = React.useState<string | null>('department');
 
   return (
     <div className="container mx-auto p-6 space-y-6">
@@ -210,11 +204,6 @@ export default function SmartGridGroupingDemo() {
           recordCount={sampleData.length}
           editableColumns={true}
           paginationMode="pagination"
-          selectedRows={selectedRows}
-          onSelectionChange={handleRowSelection}
-          rowClassName={(row: any, index: number) => 
-            selectedRows.has(index) ? 'bg-blue-50 border-l-4 border-l-blue-500' : ''
-          }
         />
       </div>
 
