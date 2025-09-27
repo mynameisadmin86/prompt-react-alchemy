@@ -416,63 +416,51 @@ export function ColumnFilterInput({
       case 'DateRange':
         return (
           <div className="flex items-center gap-1">
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  className={cn(
-                    "h-7 text-xs justify-start text-left font-normal flex-1",
-                    !localValue?.from && "text-muted-foreground"
-                  )}
-                >
-                  <CalendarIcon className="mr-2 h-3 w-3" />
-                  {localValue?.from 
-                    ? format(new Date(localValue.from), "MMM dd, yyyy")
-                    : "From date"
+            <Input
+              value={localValue?.from ? format(new Date(localValue.from), "yyyy-MM-dd") : ''}
+              onChange={(e) => {
+                const dateValue = e.target.value;
+                if (dateValue === '') {
+                  handleDateRangeChange('from', '');
+                } else {
+                  // Validate date format and create ISO string
+                  try {
+                    const date = new Date(dateValue + 'T00:00:00.000Z');
+                    if (!isNaN(date.getTime())) {
+                      handleDateRangeChange('from', date.toISOString());
+                    }
+                  } catch (error) {
+                    // Invalid date, ignore
                   }
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0 bg-white border shadow-lg z-[100]" align="start">
-                <Calendar
-                  mode="single"
-                  selected={localValue?.from ? new Date(localValue.from) : undefined}
-                  onSelect={(date) => {
-                    handleDateRangeChange('from', date ? date.toISOString() : '');
-                  }}
-                  initialFocus
-                  className={cn("p-3 pointer-events-auto")}
-                />
-              </PopoverContent>
-            </Popover>
+                }
+              }}
+              placeholder="From date (YYYY-MM-DD)"
+              className="h-7 text-xs flex-1"
+              type="date"
+            />
             <span className="text-xs text-muted-foreground">to</span>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  className={cn(
-                    "h-7 text-xs justify-start text-left font-normal flex-1",
-                    !localValue?.to && "text-muted-foreground"
-                  )}
-                >
-                  <CalendarIcon className="mr-2 h-3 w-3" />
-                  {localValue?.to 
-                    ? format(new Date(localValue.to), "MMM dd, yyyy")
-                    : "To date"
+            <Input
+              value={localValue?.to ? format(new Date(localValue.to), "yyyy-MM-dd") : ''}
+              onChange={(e) => {
+                const dateValue = e.target.value;
+                if (dateValue === '') {
+                  handleDateRangeChange('to', '');
+                } else {
+                  // Validate date format and create ISO string
+                  try {
+                    const date = new Date(dateValue + 'T23:59:59.999Z');
+                    if (!isNaN(date.getTime())) {
+                      handleDateRangeChange('to', date.toISOString());
+                    }
+                  } catch (error) {
+                    // Invalid date, ignore
                   }
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0 bg-white border shadow-lg z-[100]" align="start">
-                <Calendar
-                  mode="single"
-                  selected={localValue?.to ? new Date(localValue.to) : undefined}
-                  onSelect={(date) => {
-                    handleDateRangeChange('to', date ? date.toISOString() : '');
-                  }}
-                  initialFocus
-                  className={cn("p-3 pointer-events-auto")}
-                />
-              </PopoverContent>
-            </Popover>
+                }
+              }}
+              placeholder="To date (YYYY-MM-DD)"
+              className="h-7 text-xs flex-1"
+              type="date"
+            />
           </div>
         );
 
