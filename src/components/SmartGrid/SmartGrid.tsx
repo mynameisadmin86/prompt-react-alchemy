@@ -51,6 +51,7 @@ export function SmartGrid({
   plugins = [],
   selectedRows,
   onSelectionChange,
+  onRowClick,
   rowClassName,
   configurableButtons,
   showDefaultConfigurableButton,
@@ -1145,9 +1146,19 @@ export function SmartGrid({
                         /* Regular Data Row */
                         <TableRow key={rowIndex}
                           className={cn(
-                            "hover:bg-gray-50/50 transition-colors duration-150 border-b border-gray-100",
+                            "hover:bg-gray-50/50 transition-colors duration-150 border-b border-gray-100 cursor-pointer",
                             rowClassName ? rowClassName(row, rowIndex) : ''
                           )}
+                          onClick={(e) => {
+                            // Don't trigger row click if checkbox or button elements are clicked
+                            if (e.target instanceof HTMLElement && 
+                                ((e.target as HTMLInputElement).type === 'checkbox' || 
+                                 e.target.closest('button') || 
+                                 e.target.closest('input'))) {
+                              return;
+                            }
+                            onRowClick?.(row, rowIndex);
+                          }}
                         >
                           {/* Checkbox cell */}
                           {showCheckboxes && (

@@ -43,6 +43,7 @@ interface SampleData {
 
 const GridDemo = () => {
   const [selectedRows, setSelectedRows] = useState<Set<number>>(new Set());
+  const [selectedRowObjects, setSelectedRowObjects] = useState<SampleData[]>([]);
   const [currentFilters, setCurrentFilters] = useState<Record<string, any>>({});
   const [apiData, setApiData] = useState<SampleData[]>([]);
   const [loading, setLoading] = useState(false);
@@ -549,6 +550,32 @@ const GridDemo = () => {
   const handleRowSelection = (selectedRowIndices: Set<number>) => {
     console.log('Selected rows changed:', selectedRowIndices);
     setSelectedRows(selectedRowIndices);
+    
+    // Update selected row objects
+    const currentData = gridState.gridData.length > 0 ? gridState.gridData : processedData;
+    const selectedObjects = Array.from(selectedRowIndices).map(index => currentData[index]).filter(Boolean);
+    setSelectedRowObjects(selectedObjects);
+    console.log('Selected row objects:', selectedObjects);
+  };
+
+  const handleRowClick = (row: SampleData, index: number) => {
+    console.log('Row clicked:', row, index);
+    
+    // Toggle row selection
+    const newSelectedRows = new Set(selectedRows);
+    if (newSelectedRows.has(index)) {
+      newSelectedRows.delete(index);
+    } else {
+      newSelectedRows.add(index);
+    }
+    
+    setSelectedRows(newSelectedRows);
+    
+    // Update selected row objects
+    const currentData = gridState.gridData.length > 0 ? gridState.gridData : processedData;
+    const selectedObjects = Array.from(newSelectedRows).map(idx => currentData[idx]).filter(Boolean);
+    setSelectedRowObjects(selectedObjects);
+    console.log('Selected row objects after click:', selectedObjects);
   };
 
   const handleFiltersChange = (filters: Record<string, any>) => {
@@ -645,6 +672,17 @@ const GridDemo = () => {
 
         {/* Grid Container */}
         <div className="bg-white rounded-lg shadow-sm">
+          {/* Selected rows indicator */}
+          {selectedRowObjects.length > 0 && (
+            <div className="px-6 py-3 bg-blue-50 border-b border-blue-200">
+              <div className="text-sm text-blue-700">
+                <span className="font-medium">{selectedRowObjects.length}</span> row{selectedRowObjects.length !== 1 ? 's' : ''} selected
+                <span className="ml-2 text-xs">
+                  ({selectedRowObjects.map(row => row.id).join(', ')})
+                </span>
+              </div>
+            </div>
+          )}
           <style>{`
             .smart-grid-row-selected {
               background-color: #eff6ff !important;
@@ -667,6 +705,7 @@ const GridDemo = () => {
             onSubRowToggle={gridState.handleSubRowToggle}
             selectedRows={selectedRows}
             onSelectionChange={handleRowSelection}
+            onRowClick={handleRowClick}
             onFiltersChange={handleFiltersChange}
             onServerFilter={handleSearch}
             rowClassName={(row: any, index: number) =>
