@@ -15,6 +15,7 @@ export type GridColumnType =
   | 'DropdownText'         // Dropdown + Text combination
   | 'Dropdown'             // Selectable value from list (for edit or filter)
   | 'EditableText'         // Inline editable text
+  | 'Checkbox'             // Checkbox for row selection
   | 'SubRow';              // Sub-row expandable content
 
 export interface GridColumnConfig {
@@ -44,6 +45,9 @@ export interface GridColumnConfig {
   
   // ExpandableCount specific properties
   renderExpandedContent?: (rowData: any) => React.ReactNode;
+  
+  // Checkbox specific properties
+  idKey?: string; // Key to use for checkbox value (defaults to 'id')
   
   // SubRow specific properties
   subRowColumns?: GridColumnConfig[];
@@ -163,6 +167,9 @@ export interface SmartGridProps {
   plugins?: GridPlugin[];
   selectedRows?: Set<number>;
   onSelectionChange?(selectedRows: Set<number>): void;
+  // Checkbox selection
+  selectedCheckboxes?: any[];
+  onCheckboxSelectionChange?(selectedCheckboxes: any[]): void;
   rowClassName?: (row: any, index: number) => string;
   configurableButtons?: ConfigurableButtonConfig[];
   showDefaultConfigurableButton?: boolean;

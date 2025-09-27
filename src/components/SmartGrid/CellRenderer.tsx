@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Info } from 'lucide-react';
@@ -22,6 +23,8 @@ interface CellRendererProps {
   onEditCancel: () => void;
   onLinkClick?: (rowData: any, columnKey: string) => void;
   loading?: boolean;
+  isCheckboxSelected?: boolean;
+  onCheckboxChange?: (checked: boolean, row: any) => void;
 }
 
 export const CellRenderer: React.FC<CellRendererProps> = ({
@@ -36,7 +39,9 @@ export const CellRenderer: React.FC<CellRendererProps> = ({
   onEditStart,
   onEditCancel,
   onLinkClick,
-  loading = false
+  loading = false,
+  isCheckboxSelected = false,
+  onCheckboxChange
 }) => {
   const [tempValue, setTempValue] = useState(value);
 
@@ -293,6 +298,20 @@ export const CellRenderer: React.FC<CellRendererProps> = ({
     }
   };
 
+  // Checkbox renderer
+  const renderCheckbox = () => {
+    return (
+      <Checkbox
+        checked={isCheckboxSelected}
+        onCheckedChange={(checked) => {
+          if (onCheckboxChange) {
+            onCheckboxChange(checked as boolean, row);
+          }
+        }}
+      />
+    );
+  };
+
   // Main renderer switch
   const renderCellContent = () => {
     switch (column.type) {
@@ -312,6 +331,8 @@ export const CellRenderer: React.FC<CellRendererProps> = ({
         return renderDropdown();
       case 'Date':
         return renderDate();
+      case 'Checkbox':
+        return renderCheckbox();
       case 'Text':
       default:
         return <span className="text-gray-900 truncate" title={String(value)}>{value}</span>;

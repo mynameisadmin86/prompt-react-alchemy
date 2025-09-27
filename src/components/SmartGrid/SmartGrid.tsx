@@ -81,6 +81,9 @@ export function SmartGrid({
   userId,
   api,
   onSearch,
+  // Checkbox selection props
+  selectedCheckboxes = [],
+  onCheckboxSelectionChange,
 }: SmartGridProps) {
   const {
     gridData,
@@ -143,6 +146,42 @@ export function SmartGrid({
   // Use external selectedRows if provided, otherwise use internal state
   const currentSelectedRows = selectedRows || internalSelectedRows;
   const handleSelectionChange = onSelectionChange || setInternalSelectedRows;
+
+  // Checkbox selection handling
+  const handleCheckboxChange = useCallback((checked: boolean, row: any) => {
+    if (!onCheckboxSelectionChange) return;
+    
+    const updatedSelection = [...selectedCheckboxes];
+    const checkboxColumns = stateColumns.filter(col => col.type === 'Checkbox');
+    
+    if (checkboxColumns.length > 0) {
+      const idKey = checkboxColumns[0].idKey || 'id';
+      const rowId = row[idKey];
+      
+      if (checked) {
+        if (!updatedSelection.some(item => item[idKey] === rowId)) {
+          updatedSelection.push(row);
+        }
+      } else {
+        const index = updatedSelection.findIndex(item => item[idKey] === rowId);
+        if (index > -1) {
+          updatedSelection.splice(index, 1);
+        }
+      }
+      
+      onCheckboxSelectionChange(updatedSelection);
+    }
+  }, [selectedCheckboxes, onCheckboxSelectionChange, stateColumns]);
+
+  const isCheckboxSelected = useCallback((row: any) => {
+    const checkboxColumns = stateColumns.filter(col => col.type === 'Checkbox');
+    if (checkboxColumns.length === 0) return false;
+    
+    const idKey = checkboxColumns[0].idKey || 'id';
+    const rowId = row[idKey];
+    
+    return selectedCheckboxes.some(item => item[idKey] === rowId);
+  }, [selectedCheckboxes, stateColumns]);
 
   // Use the current state columns (which include sub-row updates) instead of props
   const currentColumns = stateColumns.length > 0 ? stateColumns : columns;
@@ -744,6 +783,8 @@ export function SmartGrid({
               onEditCancel={handleEditCancel}
               onLinkClick={onLinkClick}
               loading={loading}
+              isCheckboxSelected={isCheckboxSelected(row)}
+              onCheckboxChange={handleCheckboxChange}
             />
           </div>
         </div>
@@ -765,6 +806,8 @@ export function SmartGrid({
           onEditCancel={handleEditCancel}
           onLinkClick={onLinkClick}
           loading={loading}
+          isCheckboxSelected={isCheckboxSelected(row)}
+          onCheckboxChange={handleCheckboxChange}
         />
       </div>
     );
