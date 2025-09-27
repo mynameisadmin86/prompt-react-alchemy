@@ -398,44 +398,13 @@ export function ColumnFilterInput({
         };
         
         return (
-          <div className="flex items-center gap-1">
-            {/* Editable date input */}
-            <Input
-              value={localValue ? format(new Date(localValue), "yyyy-MM-dd") : ''}
-              onChange={(e) => handleDateInputChange(e.target.value)}
-              placeholder="yyyy-mm-dd"
-              className="h-7 text-xs flex-1"
-              type="date"
-            />
-            
-            {/* Calendar picker button */}
-            <Popover open={showDatePicker} onOpenChange={setShowDatePicker}>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="h-7 w-7 p-0"
-                >
-                  <CalendarIcon className="h-3 w-3" />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0 bg-white border shadow-lg z-50" align="start">
-                <Calendar
-                  mode="single"
-                  selected={localValue ? new Date(localValue) : undefined}
-                  onSelect={(date) => {
-                    handleValueChange(date ? date.toISOString() : '');
-                    setShowDatePicker(false);
-                  }}
-                  initialFocus
-                  className={cn("p-3 pointer-events-auto")}
-                  captionLayout="dropdown-buttons"
-                  fromYear={1900}
-                  toYear={2030}
-                />
-              </PopoverContent>
-            </Popover>
-          </div>
+          <Input
+            value={localValue ? format(new Date(localValue), "yyyy-MM-dd") : ''}
+            onChange={(e) => handleDateInputChange(e.target.value)}
+            placeholder="yyyy-mm-dd"
+            className="h-7 text-xs"
+            type="date"
+          />
         );
 
       case 'DateRange':
