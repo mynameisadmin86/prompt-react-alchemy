@@ -551,6 +551,12 @@ const GridDemo = () => {
     setSelectedRows(selectedRowIndices);
   };
 
+  const handlePageChange = (page: number) => {
+    console.log('Page changed to:', page);
+    // Clear selected rows when page changes
+    setSelectedRows(new Set());
+  };
+
   const handleFiltersChange = (filters: Record<string, any>) => {
     console.log('Advanced Filters Changed:', filters);
     // Store filters for later use when search is clicked
@@ -667,6 +673,7 @@ const GridDemo = () => {
             onSubRowToggle={gridState.handleSubRowToggle}
             selectedRows={selectedRows}
             onSelectionChange={handleRowSelection}
+            onPageChange={handlePageChange}
             onFiltersChange={handleFiltersChange}
             onServerFilter={handleSearch}
             rowClassName={(row: any, index: number) =>

@@ -51,6 +51,7 @@ export function SmartGrid({
   plugins = [],
   selectedRows,
   onSelectionChange,
+  onPageChange,
   rowClassName,
   configurableButtons,
   showDefaultConfigurableButton,
@@ -1239,7 +1240,13 @@ export function SmartGrid({
             <PaginationContent>
               <PaginationItem>
                 <PaginationPrevious
-                  onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                  onClick={() => {
+                    const newPage = Math.max(1, currentPage - 1);
+                    if (newPage !== currentPage) {
+                      setCurrentPage(newPage);
+                      onPageChange?.(newPage);
+                    }
+                  }}
                   className={cn(
                     currentPage === 1 || loading ? 'pointer-events-none opacity-50' : 'cursor-pointer hover:bg-gray-100'
                   )}
@@ -1251,7 +1258,12 @@ export function SmartGrid({
                 return (
                   <PaginationItem key={pageNum}>
                     <PaginationLink
-                      onClick={() => setCurrentPage(pageNum)}
+                      onClick={() => {
+                        if (pageNum !== currentPage) {
+                          setCurrentPage(pageNum);
+                          onPageChange?.(pageNum);
+                        }
+                      }}
                       isActive={currentPage === pageNum}
                       className={cn(
                         "cursor-pointer transition-colors duration-150",
@@ -1267,7 +1279,13 @@ export function SmartGrid({
               
               <PaginationItem>
                 <PaginationNext
-                  onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                  onClick={() => {
+                    const newPage = Math.min(totalPages, currentPage + 1);
+                    if (newPage !== currentPage) {
+                      setCurrentPage(newPage);
+                      onPageChange?.(newPage);
+                    }
+                  }}
                   className={cn(
                     currentPage === totalPages || loading ? 'pointer-events-none opacity-50' : 'cursor-pointer hover:bg-gray-100'
                   )}
