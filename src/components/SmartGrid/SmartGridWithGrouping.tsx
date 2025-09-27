@@ -251,8 +251,6 @@ export function SmartGridWithGrouping({
         gridId={gridId || props.gridTitle || 'default'}
         userId={userId || 'default-user'}
         api={api}
-        // Pass through page change handler
-        onPageChange={props.onPageChange}
       />
     </div>
   );
