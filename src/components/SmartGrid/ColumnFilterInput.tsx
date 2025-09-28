@@ -477,11 +477,25 @@ export function ColumnFilterInput({
         );
 
       case 'NumberRange':
+        const handleNumberInput = (value: string) => {
+          // Remove periods/dots from the input
+          return value.replace(/\./g, '');
+        };
+
         return (
           <div className="flex items-center gap-1">
             <Input
               value={rangeFrom}
-              onChange={(e) => handleRangeChange(e.target.value, rangeTo)}
+              onChange={(e) => {
+                const cleanValue = handleNumberInput(e.target.value);
+                handleRangeChange(cleanValue, rangeTo);
+              }}
+              onKeyDown={(e) => {
+                // Prevent period/dot key
+                if (e.key === '.') {
+                  e.preventDefault();
+                }
+              }}
               placeholder="From"
               className="h-7 text-xs flex-1"
               type="number"
@@ -490,7 +504,16 @@ export function ColumnFilterInput({
             <Input
               ref={toNumberInputRef}
               value={rangeTo}
-              onChange={(e) => handleRangeChange(rangeFrom, e.target.value)}
+              onChange={(e) => {
+                const cleanValue = handleNumberInput(e.target.value);
+                handleRangeChange(rangeFrom, cleanValue);
+              }}
+              onKeyDown={(e) => {
+                // Prevent period/dot key
+                if (e.key === '.') {
+                  e.preventDefault();
+                }
+              }}
               onBlur={() => {
                 if (rangeFrom && rangeTo && parseFloat(rangeTo) < parseFloat(rangeFrom)) {
                   setRangeTo('');
