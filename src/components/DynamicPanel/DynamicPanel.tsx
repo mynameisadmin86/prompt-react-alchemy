@@ -64,6 +64,7 @@ export const DynamicPanel = forwardRef<DynamicPanelRef, DynamicPanelPropsExtende
   const [isOpen, setIsOpen] = useState(true);
   const [isConfigModalOpen, setIsConfigModalOpen] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
+  const [currentBadgeValue, setCurrentBadgeValue] = useState(badgeValue);
 
   // Create default values from panel config
   const createDefaultValues = useMemo(() => {
@@ -254,6 +255,11 @@ export const DynamicPanel = forwardRef<DynamicPanelRef, DynamicPanelPropsExtende
         console.error('Failed to save user panel config:', error);
       }
     }
+  };
+
+  const handleBadgeChange = (newValue: string) => {
+    setCurrentBadgeValue(newValue);
+    onBadgeChange?.(newValue);
   };
 
   // Determine panel width class based on 12-column grid system
@@ -449,8 +455,8 @@ export const DynamicPanel = forwardRef<DynamicPanelRef, DynamicPanelPropsExtende
               showStatus={showStatusIndicator}
             />
             <EditableBadge
-              value={badgeValue}
-              onSave={(newValue) => onBadgeChange?.(newValue)}
+              value={currentBadgeValue}
+              onSave={handleBadgeChange}
             />
           </div>
           <SettingsButton />

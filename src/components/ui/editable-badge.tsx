@@ -16,6 +16,11 @@ export const EditableBadge: React.FC<EditableBadgeProps> = ({
   const [editValue, setEditValue] = useState(value);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  // Sync editValue with value prop when it changes
+  useEffect(() => {
+    setEditValue(value);
+  }, [value]);
+
   useEffect(() => {
     if (isEditing && inputRef.current) {
       inputRef.current.focus();
