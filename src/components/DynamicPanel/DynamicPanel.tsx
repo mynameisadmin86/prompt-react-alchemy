@@ -11,6 +11,7 @@ import { DynamicPanelProps, PanelConfig, PanelSettings } from '@/types/dynamicPa
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import ConfirmSwitch from '../../assets/images/ConfirmSwitch.png';
 import { combineInputDropdownValue, InputDropdownValue, splitInputDropdownValue } from '@/utils/inputDropdown';
+import { EditableBadge } from '@/components/ui/editable-badge';
 
 export interface DynamicPanelRef {
   getFormValues: () => any;
@@ -21,7 +22,12 @@ export interface DynamicPanelRef {
   };
 }
 
-export const DynamicPanel = forwardRef<DynamicPanelRef, DynamicPanelProps>(({
+interface DynamicPanelPropsExtended extends DynamicPanelProps {
+  badgeValue?: string;
+  onBadgeChange?: (newValue: string) => void;
+}
+
+export const DynamicPanel = forwardRef<DynamicPanelRef, DynamicPanelPropsExtended>(({
   panelId,
   panelOrder = 1,
   startingTabIndex = 1,
@@ -43,7 +49,9 @@ export const DynamicPanel = forwardRef<DynamicPanelRef, DynamicPanelProps>(({
   onScrollPanel = false,
   className = '',
   panelSubTitle = '',
-  validationErrors = {}
+  validationErrors = {},
+  badgeValue = 'DB000023/42',
+  onBadgeChange
 }, ref) => {
   const [panelConfig, setPanelConfig] = useState<PanelConfig>(initialPanelConfig);
   const [panelTitle, setPanelTitle] = useState(initialPanelTitle);
@@ -440,9 +448,10 @@ export const DynamicPanel = forwardRef<DynamicPanelRef, DynamicPanelProps>(({
               formData={getValues() || {}}
               showStatus={showStatusIndicator}
             />
-            {/* {showPreview && ( */}
-              <span className="text-xs bg-blue-100 text-blue-600 border border-blue-300 font-semibold px-3 py-1 rounded-full cursor-pointer">DB000023/42</span>
-            {/* )} */}
+            <EditableBadge
+              value={badgeValue}
+              onSave={(newValue) => onBadgeChange?.(newValue)}
+            />
           </div>
           <SettingsButton />
         </CardHeader>
