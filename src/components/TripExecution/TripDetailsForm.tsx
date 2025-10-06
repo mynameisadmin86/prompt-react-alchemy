@@ -4,8 +4,14 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import { Trip } from '@/api/types';
 
-export const TripDetailsForm = () => {
+interface TripDetailsFormProps {
+  tripData?: Trip | null;
+  onFieldChange?: (field: keyof Trip, value: any) => void;
+}
+
+export const TripDetailsForm = ({ tripData, onFieldChange }: TripDetailsFormProps) => {
   return (
     <div className="space-y-6">
       {/* Trip Information Grid */}

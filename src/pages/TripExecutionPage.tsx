@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import { FlexGridLayout } from '@/components/FlexGridLayout';
 import { LayoutConfig } from '@/components/FlexGridLayout/types';
 import { 
@@ -9,9 +10,29 @@ import {
   EnhancedSmartGrid, 
   TripFooterActions 
 } from '@/components/TripExecution';
-
+import { useTripStore } from '@/datastore/tripStore';
+import { toast } from 'sonner';
 
 const TripExecutionPage = () => {
+  const { tripId } = useParams<{ tripId: string }>();
+  const { selectedTrip, loading, error, loadTripById, saveTrip, updateField, reset } = useTripStore();
+  
+  // Handle save draft
+  const handleSaveDraft = async () => {
+    if (selectedTrip) {
+      await saveTrip(selectedTrip, selectedTrip.id);
+      toast.success('Trip saved as draft');
+    }
+  };
+
+  // Handle confirm trip
+  const handleConfirmTrip = async () => {
+    if (selectedTrip) {
+      await saveTrip({ ...selectedTrip, status: 'approved' }, selectedTrip.id);
+      toast.success('Trip confirmed successfully');
+    }
+  };
+  
   const [layoutConfig, setLayoutConfig] = useState<LayoutConfig>({
     sections: {
       top: {
@@ -28,14 +49,25 @@ const TripExecutionPage = () => {
         collapsible: true,
         collapsed: false,
         minWidth: '0',
-        title: 'TRIP00000001',
+        title: selectedTrip?.id || 'Loading...',
         content: (
           <div className="h-full flex flex-col overflow-hidden">
-            <div className="flex-1 overflow-auto p-4 space-y-0">
-              <TripStatusBadge />
-              <TripDetailsForm />
-            </div>
-            <ActionIconBar />
+            {loading ? (
+              <div className="flex-1 flex items-center justify-center">
+                <div className="text-muted-foreground">Loading trip details...</div>
+              </div>
+            ) : (
+              <>
+                <div className="flex-1 overflow-auto p-4 space-y-0">
+                  <TripStatusBadge status={selectedTrip?.status} />
+                  <TripDetailsForm 
+                    tripData={selectedTrip} 
+                    onFieldChange={updateField}
+                  />
+                </div>
+                <ActionIconBar />
+              </>
+            )}
           </div>
         )
       },
@@ -71,7 +103,13 @@ const TripExecutionPage = () => {
         height: 'auto',
         collapsible: false,
         title: '',
-        content: <TripFooterActions />
+        content: (
+          <TripFooterActions 
+            onSaveDraft={handleSaveDraft}
+            onConfirmTrip={handleConfirmTrip}
+            loading={loading}
+          />
+        )
       }
     }
   });
@@ -89,7 +127,18 @@ const TripExecutionPage = () => {
     localStorage.setItem('tripExecutionPage', JSON.stringify(newConfig));
   };
 
-  // Load from localStorage on mount
+  // Load trip data on mount
+  useEffect(() => {
+    if (tripId) {
+      loadTripById(tripId);
+    }
+    
+    return () => {
+      reset();
+    };
+  }, [tripId, loadTripById, reset]);
+
+  // Load layout from localStorage on mount
   useEffect(() => {
     const saved = localStorage.getItem('tripExecutionPage');
     if (saved) {
@@ -101,6 +150,13 @@ const TripExecutionPage = () => {
       }
     }
   }, []);
+
+  // Handle errors
+  useEffect(() => {
+    if (error) {
+      toast.error(error);
+    }
+  }, [error]);
 
   return (
     <div className="h-screen bg-muted/10">
