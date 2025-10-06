@@ -139,6 +139,13 @@ const Index = () => {
       path: "/billing-demo",
       color: "text-green-500"
     },
+    {
+      title: "Order Management (Zustand Demo)",
+      description: "Complete order management with Zustand store, API integration, and data binding",
+      icon: ShoppingCart,
+      path: "/order-list",
+      color: "text-purple-500"
+    },
   ];
 
   return (

@@ -109,3 +109,34 @@ export interface GridPreferences {
     direction: 'asc' | 'desc';
   };
 }
+
+// Order types
+export interface Order {
+  id: string;
+  orderNumber: string;
+  customerName: string;
+  product: string;
+  quantity: number;
+  price: number;
+  totalAmount: number;
+  status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
+  orderDate: string;
+  shippingAddress: string;
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface OrderCreateInput {
+  orderNumber: string;
+  customerName: string;
+  product: string;
+  quantity: number;
+  price: number;
+  shippingAddress: string;
+  notes?: string;
+}
+
+export interface OrderUpdateInput extends Partial<OrderCreateInput> {
+  status?: Order['status'];
+}
