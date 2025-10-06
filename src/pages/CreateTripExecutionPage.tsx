@@ -9,8 +9,52 @@ import {
   EnhancedSmartGrid, 
   TripFooterActions 
 } from '@/components/TripExecution';
+import { useTripStore } from '@/datastore/tripStore';
+import { toast } from 'sonner';
 
 const CreateTripExecutionPage = () => {
+  const { selectedTrip, loading, error, saveTrip, updateField, reset } = useTripStore();
+  
+  // Initialize with empty trip on mount
+  useEffect(() => {
+    // Initialize a new trip with default values
+    updateField('id', 'TRIP_NEW');
+    updateField('status', 'draft');
+    updateField('customerId', 'CUS0009173');
+    updateField('railInfo', 'Railtrax NV - 46798333');
+    updateField('amount', 45595.00);
+    updateField('mode', 'Rail');
+    updateField('fromLocation', '53-202705, Voila');
+    updateField('toLocation', '53-21925-3, Curtici');
+    updateField('tripType', 'one-way');
+    
+    return () => {
+      reset();
+    };
+  }, [updateField, reset]);
+
+  // Handle save draft
+  const handleSaveDraft = async () => {
+    if (selectedTrip) {
+      await saveTrip(selectedTrip);
+      toast.success('Trip saved as draft');
+    }
+  };
+
+  // Handle confirm trip
+  const handleConfirmTrip = async () => {
+    if (selectedTrip) {
+      await saveTrip({ ...selectedTrip, status: 'approved' });
+      toast.success('Trip created and confirmed successfully');
+    }
+  };
+
+  // Handle errors
+  useEffect(() => {
+    if (error) {
+      toast.error(error);
+    }
+  }, [error]);
   const [layoutConfig, setLayoutConfig] = useState<LayoutConfig>({
     sections: {
       top: {
@@ -27,14 +71,25 @@ const CreateTripExecutionPage = () => {
         collapsible: true,
         collapsed: false,
         minWidth: '0',
-        title: 'TRIP00000001',
+        title: selectedTrip?.id || 'New Trip',
         content: (
           <div className="h-full flex flex-col overflow-hidden">
-            <div className="flex-1 overflow-auto p-4 space-y-0">
-              <TripStatusBadge />
-              <TripDetailsForm />
-            </div>
-            <ActionIconBar />
+            {loading ? (
+              <div className="flex-1 flex items-center justify-center">
+                <div className="text-muted-foreground">Loading...</div>
+              </div>
+            ) : (
+              <>
+                <div className="flex-1 overflow-auto p-4 space-y-0">
+                  <TripStatusBadge status={selectedTrip?.status} />
+                  <TripDetailsForm 
+                    tripData={selectedTrip} 
+                    onFieldChange={updateField}
+                  />
+                </div>
+                <ActionIconBar />
+              </>
+            )}
           </div>
         )
       },
@@ -70,7 +125,13 @@ const CreateTripExecutionPage = () => {
         height: 'auto',
         collapsible: false,
         title: '',
-        content: <TripFooterActions />
+        content: (
+          <TripFooterActions 
+            onSaveDraft={handleSaveDraft}
+            onConfirmTrip={handleConfirmTrip}
+            loading={loading}
+          />
+        )
       }
     }
   });

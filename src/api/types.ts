@@ -38,6 +38,20 @@ export interface Trip {
   createdAt: string;
   updatedAt: string;
   userId: string;
+  
+  // Additional trip execution fields
+  customerId?: string;
+  railInfo?: string;
+  amount?: number;
+  mode?: string;
+  fromLocation?: string;
+  toLocation?: string;
+  tripType?: 'one-way' | 'round-trip';
+  trainNo?: string;
+  cluster?: string;
+  supplierRefNo?: string;
+  qcUserdefined1?: string;
+  remarks1?: string;
 }
 
 export interface TripCreateInput {
