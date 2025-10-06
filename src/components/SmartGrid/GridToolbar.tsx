@@ -67,6 +67,9 @@ interface GridToolbarProps {
   onToggleServersideFilter?: () => void;
   hideCheckboxToggle?: boolean;
   gridId?: string;
+  // Selection props
+  selectedRowsCount?: number;
+  onClearSelection?: () => void;
 }
 
 export function GridToolbar({
@@ -104,7 +107,9 @@ export function GridToolbar({
   showServersideFilter = false,
   onToggleServersideFilter,
   hideCheckboxToggle = false,
-  gridId
+  gridId,
+  selectedRowsCount = 0,
+  onClearSelection
 }: GridToolbarProps) {
   // Default configurable button configuration
   const defaultConfigurableButton: ConfigurableButtonConfig = {
@@ -161,6 +166,25 @@ export function GridToolbar({
         {filters.length > 0 && (
           <div className="text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded ml-3">
             {filters.length} filter{filters.length > 1 ? 's' : ''} active
+          </div>
+        )}
+
+        {/* Show selected rows count and clear button */}
+        {selectedRowsCount > 0 && (
+          <div className="flex items-center gap-2 ml-3">
+            <div className="text-xs text-green-600 bg-green-50 px-2 py-1 rounded">
+              {selectedRowsCount} row{selectedRowsCount > 1 ? 's' : ''} selected
+            </div>
+            {onClearSelection && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={onClearSelection}
+                className="h-6 px-2 text-xs text-red-600 hover:text-red-700 hover:bg-red-50"
+              >
+                Clear All
+              </Button>
+            )}
           </div>
         )}
       </div>
