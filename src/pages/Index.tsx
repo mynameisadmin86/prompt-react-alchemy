@@ -42,6 +42,13 @@ const Index = () => {
       color: "text-amber-600"
     },
     {
+      title: "Dynamic Panel Demo (Zustand)",
+      description: "Dynamic panel demo with Zustand state management and data binding",
+      icon: PanelLeft,
+      path: "/dynamic-panel-demo-zustand",
+      color: "text-fuchsia-600"
+    },
+    {
       title: "FlexGrid Demo",
       description: "Flexible grid layouts with drag-and-drop and responsive design",
       icon: Layout,
