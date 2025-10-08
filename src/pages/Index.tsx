@@ -91,6 +91,13 @@ const Index = () => {
       color: "text-emerald-600"
     },
     {
+      title: "Trip Execution Create (Zustand)", 
+      description: "Data-entry page for trip execution using Zustand and Dynamic Panels",
+      icon: Workflow,
+      path: "/trip-execution-create",
+      color: "text-lime-600"
+    },
+    {
       title: "Side Drawer Demo",
       description: "Configurable side drawer with various width options and content",
       icon: PanelLeft,
