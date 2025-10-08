@@ -51,6 +51,54 @@ const DynamicPanelDemoCloneZustand = () => {
   const handleOperationalDetailsDataChange = setOperationalDetailsData;
   const handleBillingDetailsDataChange = setBillingDetailsData;
 
+  // Memoize options arrays separately
+  const customerOptions = useMemo(() => [
+    { label: 'DB Cargo', value: 'db-cargo' },
+    { label: 'ABC Rail Goods', value: 'abc-rail' },
+    { label: 'Wave Cargo', value: 'wave-cargo' }
+  ], []);
+
+  const contractTypeOptions = useMemo(() => [
+    { label: 'Fixed Price', value: 'fixed' },
+    { label: 'Variable', value: 'variable' },
+    { label: 'Cost Plus', value: 'cost-plus' }
+  ], []);
+
+  const currencyOptions = useMemo(() => [
+    { label: '€', value: '€' },
+    { label: '$', value: '$' },
+    { label: '£', value: '£' },
+    { label: '¥', value: '¥' }
+  ], []);
+
+  const priorityOptions = useMemo(() => [
+    { label: 'High', value: 'high' },
+    { label: 'Medium', value: 'medium' },
+    { label: 'Low', value: 'low' }
+  ], []);
+
+  const trainTypeOptions = useMemo(() => [
+    { label: 'Freight', value: 'freight' },
+    { label: 'Passenger', value: 'passenger' },
+    { label: 'Mixed', value: 'mixed' }
+  ], []);
+
+  const billingStatusOptions = useMemo(() => [
+    { label: 'Draft', value: 'draft' },
+    { label: 'Pending', value: 'pending' },
+    { label: 'Approved', value: 'approved' },
+    { label: 'Rejected', value: 'rejected' }
+  ], []);
+
+  const paymentTermsOptions = useMemo(() => [
+    { label: 'Net 30', value: 'net-30' },
+    { label: 'Net 60', value: 'net-60' },
+    { label: 'Due on Receipt', value: 'due-on-receipt' }
+  ], []);
+
+  // Memoize default values to prevent object recreation
+  const unitPriceDefaultValue = useMemo(() => ({ dropdown: '€', input: '' }), []);
+
   // Memoize panel configurations to prevent recreation on every render
   const basicDetailsConfig: PanelConfig = useMemo(() => ({
     tripPlanNo: {
@@ -72,11 +120,7 @@ const DynamicPanelDemoCloneZustand = () => {
       visible: true,
       editable: true,
       order: 2,
-      options: [
-        { label: 'DB Cargo', value: 'db-cargo' },
-        { label: 'ABC Rail Goods', value: 'abc-rail' },
-        { label: 'Wave Cargo', value: 'wave-cargo' }
-      ]
+      options: customerOptions
     },
     contractType: {
       id: 'contractType',
@@ -87,38 +131,19 @@ const DynamicPanelDemoCloneZustand = () => {
       visible: true,
       editable: true,
       order: 3,
-      options: [
-        { label: 'Fixed Price', value: 'fixed' },
-        { label: 'Variable', value: 'variable' },
-        { label: 'Cost Plus', value: 'cost-plus' }
-      ],
-      events: {
-        onChange: (value, event) => {
-          console.log('contractType changed:', value);
-        }
-      }
+      options: contractTypeOptions
     },
     unitPrice: {
       id: 'unitPrice',
       label: 'Unit Price',
       fieldType: 'inputdropdown',
-      value: { dropdown: '€', input: '' },
+      value: unitPriceDefaultValue,
       mandatory: false,
       visible: true,
       editable: true,
       order: 4,
       placeholder: 'Enter Value',
-      options: [
-        { label: '€', value: '€' },
-        { label: '$', value: '$' },
-        { label: '£', value: '£' },
-        { label: '¥', value: '¥' }
-      ],
-      events: {
-        onChange: (value, event) => {
-          console.log('unitPrice changed:', value);
-        }
-      }
+      options: currencyOptions
     },
     description: {
       id: 'description',
@@ -129,12 +154,7 @@ const DynamicPanelDemoCloneZustand = () => {
       visible: true,
       editable: true,
       order: 5,
-      placeholder: 'Enter trip description...',
-      events: {
-        onBlur: (event) => {
-          console.log('Description blur event:', event);
-        }
-      }
+      placeholder: 'Enter trip description...'
     },
     priority: {
       id: 'priority',
@@ -145,13 +165,9 @@ const DynamicPanelDemoCloneZustand = () => {
       visible: true,
       editable: true,
       order: 6,
-      options: [
-        { label: 'High', value: 'high' },
-        { label: 'Medium', value: 'medium' },
-        { label: 'Low', value: 'low' }
-      ]
+      options: priorityOptions
     }
-  }), []);
+  }), [customerOptions, contractTypeOptions, currencyOptions, priorityOptions, unitPriceDefaultValue]);
 
   // Operational Details Panel Configuration
   const operationalDetailsConfig: PanelConfig = useMemo(() => ({
@@ -236,13 +252,9 @@ const DynamicPanelDemoCloneZustand = () => {
       visible: true,
       editable: true,
       order: 8,
-      options: [
-        { label: 'Freight', value: 'freight' },
-        { label: 'Passenger', value: 'passenger' },
-        { label: 'Mixed', value: 'mixed' }
-      ]
+      options: trainTypeOptions
     }
-  }), []);
+  }), [trainTypeOptions]);
 
   // Billing Details Panel Configuration
   const billingDetailsConfig: PanelConfig = useMemo(() => ({
@@ -285,12 +297,7 @@ const DynamicPanelDemoCloneZustand = () => {
       visible: true,
       editable: true,
       order: 4,
-      options: [
-        { label: 'Draft', value: 'draft' },
-        { label: 'Pending', value: 'pending' },
-        { label: 'Approved', value: 'approved' },
-        { label: 'Rejected', value: 'rejected' }
-      ]
+      options: billingStatusOptions
     },
     paymentTerms: {
       id: 'paymentTerms',
@@ -301,11 +308,7 @@ const DynamicPanelDemoCloneZustand = () => {
       visible: true,
       editable: true,
       order: 5,
-      options: [
-        { label: 'Net 30', value: 'net-30' },
-        { label: 'Net 60', value: 'net-60' },
-        { label: 'Due on Receipt', value: 'due-on-receipt' }
-      ]
+      options: paymentTermsOptions
     },
     invoiceDate: {
       id: 'invoiceDate',
@@ -317,7 +320,7 @@ const DynamicPanelDemoCloneZustand = () => {
       editable: true,
       order: 6
     }
-  }), []);
+  }), [billingStatusOptions, paymentTermsOptions]);
 
   // Mock functions for user config management
   const getUserPanelConfig = (userId: string, panelId: string): PanelSettings | null => {
