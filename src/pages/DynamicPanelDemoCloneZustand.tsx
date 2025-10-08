@@ -1,4 +1,4 @@
-import React, { useCallback, useRef } from 'react';
+import React, { useCallback, useRef, useMemo } from 'react';
 import { DynamicPanel, type DynamicPanelRef } from '@/components/DynamicPanel';
 import { PanelVisibilityManager } from '@/components/DynamicPanel/PanelVisibilityManager';
 import { PanelConfig, PanelSettings } from '@/types/dynamicPanel';
@@ -46,21 +46,13 @@ const DynamicPanelDemoCloneZustand = () => {
   const operationalDetailsRef = useRef<DynamicPanelRef>(null);
   const billingDetailsRef = useRef<DynamicPanelRef>(null);
 
-  // Memoized callbacks to prevent re-rendering and focus loss
-  const handleBasicDetailsDataChange = useCallback((data: any) => {
-    setBasicDetailsData(data);
-  }, [setBasicDetailsData]);
+  // Stable callbacks - Zustand setters are already stable
+  const handleBasicDetailsDataChange = setBasicDetailsData;
+  const handleOperationalDetailsDataChange = setOperationalDetailsData;
+  const handleBillingDetailsDataChange = setBillingDetailsData;
 
-  const handleOperationalDetailsDataChange = useCallback((data: any) => {
-    setOperationalDetailsData(data);
-  }, [setOperationalDetailsData]);
-
-  const handleBillingDetailsDataChange = useCallback((data: any) => {
-    setBillingDetailsData(data);
-  }, [setBillingDetailsData]);
-
-  // Basic Details Panel Configuration
-  const basicDetailsConfig: PanelConfig = {
+  // Memoize panel configurations to prevent recreation on every render
+  const basicDetailsConfig: PanelConfig = useMemo(() => ({
     tripPlanNo: {
       id: 'tripPlanNo',
       label: 'Trip Plan No',
@@ -159,10 +151,10 @@ const DynamicPanelDemoCloneZustand = () => {
         { label: 'Low', value: 'low' }
       ]
     }
-  };
+  }), []);
 
   // Operational Details Panel Configuration
-  const operationalDetailsConfig: PanelConfig = {
+  const operationalDetailsConfig: PanelConfig = useMemo(() => ({
     plannedStartDate: {
       id: 'plannedStartDate',
       label: 'Planned Start Date',
@@ -250,10 +242,10 @@ const DynamicPanelDemoCloneZustand = () => {
         { label: 'Mixed', value: 'mixed' }
       ]
     }
-  };
+  }), []);
 
   // Billing Details Panel Configuration
-  const billingDetailsConfig: PanelConfig = {
+  const billingDetailsConfig: PanelConfig = useMemo(() => ({
     totalAmount: {
       id: 'totalAmount',
       label: 'Total Amount',
@@ -325,7 +317,7 @@ const DynamicPanelDemoCloneZustand = () => {
       editable: true,
       order: 6
     }
-  };
+  }), []);
 
   // Mock functions for user config management
   const getUserPanelConfig = (userId: string, panelId: string): PanelSettings | null => {
