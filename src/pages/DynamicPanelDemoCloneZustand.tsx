@@ -46,10 +46,29 @@ const DynamicPanelDemoCloneZustand = () => {
   const operationalDetailsRef = useRef<DynamicPanelRef>(null);
   const billingDetailsRef = useRef<DynamicPanelRef>(null);
 
-  // Stable callbacks - Zustand setters are already stable
-  const handleBasicDetailsDataChange = setBasicDetailsData;
-  const handleOperationalDetailsDataChange = setOperationalDetailsData;
-  const handleBillingDetailsDataChange = setBillingDetailsData;
+  // Wrap Zustand setters in useCallback to ensure they're stable
+  const handleBasicDetailsDataChange = useCallback((data: any) => {
+    setBasicDetailsData(data);
+  }, [setBasicDetailsData]);
+
+  const handleOperationalDetailsDataChange = useCallback((data: any) => {
+    setOperationalDetailsData(data);
+  }, [setOperationalDetailsData]);
+
+  const handleBillingDetailsDataChange = useCallback((data: any) => {
+    setBillingDetailsData(data);
+  }, [setBillingDetailsData]);
+
+  // Memoize callback functions
+  const getUserPanelConfigCallback = useCallback((userId: string, panelId: string): PanelSettings | null => {
+    const stored = localStorage.getItem(`panel-config-clone-zustand-${userId}-${panelId}`);
+    return stored ? JSON.parse(stored) : null;
+  }, []);
+
+  const saveUserPanelConfigCallback = useCallback((userId: string, panelId: string, settings: PanelSettings): void => {
+    localStorage.setItem(`panel-config-clone-zustand-${userId}-${panelId}`, JSON.stringify(settings));
+    console.log(`Saved config for panel ${panelId}:`, settings);
+  }, []);
 
   // Memoize options arrays separately
   const customerOptions = useMemo(() => [
@@ -323,15 +342,8 @@ const DynamicPanelDemoCloneZustand = () => {
   }), [billingStatusOptions, paymentTermsOptions]);
 
   // Mock functions for user config management
-  const getUserPanelConfig = (userId: string, panelId: string): PanelSettings | null => {
-    const stored = localStorage.getItem(`panel-config-clone-zustand-${userId}-${panelId}`);
-    return stored ? JSON.parse(stored) : null;
-  };
-
-  const saveUserPanelConfig = (userId: string, panelId: string, settings: PanelSettings): void => {
-    localStorage.setItem(`panel-config-clone-zustand-${userId}-${panelId}`, JSON.stringify(settings));
-    console.log(`Saved config for panel ${panelId}:`, settings);
-  };
+  const getUserPanelConfig = getUserPanelConfigCallback;
+  const saveUserPanelConfig = saveUserPanelConfigCallback;
 
   // Panel visibility management
   const panels = [
