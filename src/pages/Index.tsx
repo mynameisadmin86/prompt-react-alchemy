@@ -42,6 +42,13 @@ const Index = () => {
       color: "text-amber-600"
     },
     {
+      title: "Dynamic Panel Demo Clone (Zustand)",
+      description: "Clone version with Zustand state management and data binding",
+      icon: PanelLeft,
+      path: "/dynamic-panel-demo-clone-zustand",
+      color: "text-yellow-600"
+    },
+    {
       title: "Dynamic Panel Demo (Zustand)",
       description: "Dynamic panel demo with Zustand state management and data binding",
       icon: PanelLeft,
