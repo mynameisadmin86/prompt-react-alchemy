@@ -7,7 +7,8 @@ import { ChevronDown, User, Euro, MapPin } from 'lucide-react';
 import { LayoutConfig } from '@/components/FlexGridLayout/types';
 import { PanelConfig } from '@/types/dynamicPanel';
 import { GridColumnConfig } from '@/types/smartgrid';
-import { useTripExecutionStore } from '@/stores/tripExecutionStore';
+import { TripFooterActions } from '@/components/TripExecution/TripFooterActions';
+import { useTripExecutionPageStore } from '@/stores/tripExecutionPageStore';
 import { TripStatusBadge } from '@/components/TripExecution/TripStatusBadge';
 import { SummaryCardsGrid } from '@/components/TripExecution/SummaryCardsGrid';
 
@@ -231,30 +232,17 @@ const TripInfoSection = () => (
   </div>
 );
 
-const TripExecutionFooterActions = ({ onSaveDraft, onConfirmTrip }: { onSaveDraft: () => void; onConfirmTrip: () => void }) => (
-  <div className="flex items-center justify-between p-4 bg-background border-t">
-    <div className="flex items-center space-x-2">
-      <Button variant="outline" size="sm" className="text-destructive border-destructive/20 hover:bg-destructive/10">
-        Cancel
-      </Button>
-    </div>
-    
-    <div className="flex items-center space-x-2">
-      <div className="relative">
-        <Button variant="outline" size="sm" className="pr-8" onClick={onSaveDraft}>
-          Save Draft
-          <ChevronDown className="h-4 w-4 ml-2" />
-        </Button>
-      </div>
-      <Button size="sm" className="bg-primary hover:bg-primary/90" onClick={onConfirmTrip}>
-        Confirm Trip
-      </Button>
-    </div>
-  </div>
-);
-
 const TripExecutionZustand = () => {
-  const { tripData, setSectionData, getSectionData } = useTripExecutionStore();
+  const { 
+    tripInfo,
+    tripDetails, 
+    activities,
+    updateTripDetailField, 
+    saveDraft, 
+    confirmTrip,
+    isSaving,
+    isLoading
+  } = useTripExecutionPageStore();
   
   // Trip execution panel configuration
   const tripExecutionPanelConfig: PanelConfig = useMemo(() => ({
@@ -340,20 +328,18 @@ const TripExecutionZustand = () => {
   // Callback for handling data changes
   const handleOperationalDataChange = useCallback((data: Record<string, any>) => {
     Object.entries(data).forEach(([field, value]) => {
-      setSectionData('operationalDetails', field, value);
+      updateTripDetailField(field as any, value);
     });
-  }, [setSectionData]);
+  }, [updateTripDetailField]);
 
   // Action handlers
-  const handleSaveDraft = useCallback(() => {
-    console.log('Saving draft:', tripData);
-    // Add your save logic here
-  }, [tripData]);
+  const handleSaveDraft = useCallback(async () => {
+    await saveDraft();
+  }, [saveDraft]);
 
-  const handleConfirmTrip = useCallback(() => {
-    console.log('Confirming trip:', tripData);
-    // Add your confirmation logic here
-  }, [tripData]);
+  const handleConfirmTrip = useCallback(async () => {
+    await confirmTrip();
+  }, [confirmTrip]);
 
   const [layoutConfig, setLayoutConfig] = useState<LayoutConfig>({
     sections: {
@@ -380,9 +366,12 @@ const TripExecutionZustand = () => {
               panelTitle="Trip Details"
               panelConfig={tripExecutionPanelConfig}
               initialData={{
-                'trip-type': 'One Way',
-                'cluster': '10000406',
-                'oc-userdefined-1': 'GC'
+                'trip-type': tripDetails.tripType,
+                'train-no': tripDetails.trainNo,
+                'cluster': tripDetails.cluster,
+                'supplier-ref-no': tripDetails.supplierRefNo,
+                'oc-userdefined-1': tripDetails.ocUserdefined1,
+                'remarks-1': tripDetails.remarks1
               }}
               onDataChange={handleOperationalDataChange}
             />
@@ -427,7 +416,7 @@ const TripExecutionZustand = () => {
         visible: true,
         height: 'auto',
         collapsible: false,
-        content: <TripExecutionFooterActions onSaveDraft={handleSaveDraft} onConfirmTrip={handleConfirmTrip} />
+        content: <TripFooterActions onSaveDraft={handleSaveDraft} onConfirmTrip={handleConfirmTrip} loading={isSaving} />
       }
     }
   });
