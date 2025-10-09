@@ -98,11 +98,18 @@ const Index = () => {
       color: "text-lime-600"
     },
     {
+      title: "Trip Execution (Zustand)", 
+      description: "Trip execution page with Zustand state management",
+      icon: Workflow,
+      path: "/trip-execution-zustand",
+      color: "text-teal-600"
+    },
+    {
       title: "Side Drawer Demo",
       description: "Configurable side drawer with various width options and content",
       icon: PanelLeft,
       path: "/side-drawer-demo",
-      color: "text-teal-600"
+      color: "text-orange-600"
     },
     {
       title: "SmartGridPlus Demo",

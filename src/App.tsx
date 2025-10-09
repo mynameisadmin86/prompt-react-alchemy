@@ -19,6 +19,7 @@ import TripExecution from "./pages/TripExecution";
 import TripExecutionPage from "./pages/TripExecutionPage";
 import CreateTripExecutionPage from "./pages/CreateTripExecutionPage";
 import TripExecutionCreate from "./pages/TripExecutionCreate";
+import TripExecutionZustand from "./pages/TripExecutionZustand";
 import SideDrawerDemo from "./pages/SideDrawerDemo";
 import SmartGridPlusDemo from "./pages/SmartGridPlusDemo";
 import BillingDemo from "./pages/BillingDemo";
@@ -57,6 +58,7 @@ const App = () => (
           <Route path="/trip-execution-page" element={<TripExecutionPage />} />
           <Route path="/create-trip-execution" element={<CreateTripExecutionPage />} />
           <Route path="/trip-execution-create" element={<TripExecutionCreate />} />
+          <Route path="/trip-execution-zustand" element={<TripExecutionZustand />} />
           <Route path="/side-drawer-demo" element={<SideDrawerDemo />} />
           <Route path="/smart-grid-plus-demo" element={<SmartGridPlusDemo />} />
           <Route path="/billing-demo" element={<BillingDemo />} />
