@@ -166,10 +166,11 @@ export const IncidentsDrawerScreen: React.FC<IncidentsDrawerScreenProps> = ({ on
     setSelectedIncident(null);
   };
 
-  const handleDeleteIncident = (id: string, e: React.MouseEvent) => {
+  const handleDeleteIncident = (index: number, e: React.MouseEvent) => {
     e.stopPropagation();
-    setIncidents(prev => prev.filter(inc => inc.id !== id));
-    if (selectedIncident?.id === id) {
+    const incidentToDelete = incidents[index];
+    setIncidents(prev => prev.filter((_, i) => i !== index));
+    if (selectedIncident === incidentToDelete) {
       setSelectedIncident(null);
       setFormData(initialFormData);
     }
@@ -226,7 +227,7 @@ export const IncidentsDrawerScreen: React.FC<IncidentsDrawerScreenProps> = ({ on
                         variant="ghost" 
                         size="icon" 
                         className="h-7 w-7 text-destructive hover:text-destructive hover:bg-destructive/10"
-                        onClick={(e) => handleDeleteIncident(incident.id, e)}
+                        onClick={(e) => handleDeleteIncident(index, e)}
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
