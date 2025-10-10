@@ -202,7 +202,7 @@ export const IncidentsDrawerScreen: React.FC<IncidentsDrawerScreenProps> = ({ on
         </div>
 
         {/* Accordion Sections */}
-        <Accordion type="multiple" defaultValue={['incident-details']} className="w-full">
+        <Accordion type="single" collapsible defaultValue="incident-details" className="w-full">
           {/* Incident Details Section */}
           <AccordionItem value="incident-details">
             <AccordionTrigger className="text-sm font-medium hover:no-underline">
