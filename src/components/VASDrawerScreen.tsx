@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -6,54 +6,208 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Edit2, Trash2, Calendar, Clock } from 'lucide-react';
+import { Plus, Trash2, Calendar, Clock } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
+import { cn } from '@/lib/utils';
+
+interface FormData {
+  customerOrderNo: string;
+  applicableToCustomer: boolean;
+  applicableToSupplier: boolean;
+  vasId: string;
+  customer: string;
+  supplierContract: string;
+  supplier: string;
+  thuServed: string;
+  startDate: string;
+  startTime: string;
+  endDate: string;
+  endTime: string;
+  remarks: string;
+}
 
 interface VASItem {
   id: string;
   name: string;
   quantity: number;
+  formData: FormData;
 }
 
-const mockVASItems: VASItem[] = [
-  { id: '1', name: 'Bubble Wrap', quantity: 2 },
-  { id: '2', name: 'Packing', quantity: 2 },
-  { id: '3', name: 'Unpacking', quantity: 2 },
-  { id: '4', name: 'Gasoline', quantity: 2 },
-  { id: '5', name: 'Unloading', quantity: 2 },
+const initialFormData: FormData = {
+  customerOrderNo: '',
+  applicableToCustomer: true,
+  applicableToSupplier: true,
+  vasId: '',
+  customer: '',
+  supplierContract: '',
+  supplier: '',
+  thuServed: '',
+  startDate: '',
+  startTime: '',
+  endDate: '',
+  endTime: '',
+  remarks: '',
+};
+
+const initialVASItems: VASItem[] = [
+  { 
+    id: '1', 
+    name: 'Bubble Wrap', 
+    quantity: 2,
+    formData: {
+      customerOrderNo: 'CO000000001',
+      applicableToCustomer: true,
+      applicableToSupplier: true,
+      vasId: 'vas1',
+      customer: 'customer1',
+      supplierContract: 'contract1',
+      supplier: 'Supplier A',
+      thuServed: '2',
+      startDate: '2025-01-15',
+      startTime: '08:00',
+      endDate: '2025-01-15',
+      endTime: '17:00',
+      remarks: 'Handle with care',
+    }
+  },
+  { 
+    id: '2', 
+    name: 'Packing', 
+    quantity: 2,
+    formData: {
+      customerOrderNo: 'CO000000001',
+      applicableToCustomer: true,
+      applicableToSupplier: false,
+      vasId: 'vas2',
+      customer: 'customer2',
+      supplierContract: 'contract2',
+      supplier: 'Supplier B',
+      thuServed: '2',
+      startDate: '2025-01-16',
+      startTime: '09:00',
+      endDate: '2025-01-16',
+      endTime: '18:00',
+      remarks: 'Standard packing',
+    }
+  },
+  { 
+    id: '3', 
+    name: 'Unpacking', 
+    quantity: 2,
+    formData: {
+      customerOrderNo: 'CO000000001',
+      applicableToCustomer: false,
+      applicableToSupplier: true,
+      vasId: 'vas1',
+      customer: 'customer1',
+      supplierContract: 'contract1',
+      supplier: 'Supplier C',
+      thuServed: '2',
+      startDate: '2025-01-17',
+      startTime: '10:00',
+      endDate: '2025-01-17',
+      endTime: '16:00',
+      remarks: '',
+    }
+  },
+  { 
+    id: '4', 
+    name: 'Gasoline', 
+    quantity: 2,
+    formData: {
+      customerOrderNo: 'CO000000001',
+      applicableToCustomer: true,
+      applicableToSupplier: true,
+      vasId: 'vas2',
+      customer: 'customer2',
+      supplierContract: 'contract2',
+      supplier: 'Supplier D',
+      thuServed: '2',
+      startDate: '2025-01-18',
+      startTime: '07:00',
+      endDate: '2025-01-18',
+      endTime: '15:00',
+      remarks: 'Full tank',
+    }
+  },
+  { 
+    id: '5', 
+    name: 'Unloading', 
+    quantity: 2,
+    formData: {
+      customerOrderNo: 'CO000000001',
+      applicableToCustomer: true,
+      applicableToSupplier: true,
+      vasId: 'vas1',
+      customer: 'customer1',
+      supplierContract: 'contract1',
+      supplier: 'Supplier E',
+      thuServed: '2',
+      startDate: '2025-01-19',
+      startTime: '11:00',
+      endDate: '2025-01-19',
+      endTime: '19:00',
+      remarks: 'Careful unloading',
+    }
+  },
 ];
 
 export const VASDrawerScreen = () => {
-  const [vasItems, setVasItems] = useState<VASItem[]>(mockVASItems);
-  const [formData, setFormData] = useState({
-    customerOrderNo: 'CO000000001',
-    applicableToCustomer: true,
-    applicableToSupplier: true,
-    vasId: '',
-    customer: '',
-    supplierContract: '',
-    supplier: '',
-    thuServed: '2',
-    startDate: '',
-    startTime: '',
-    endDate: '',
-    endTime: '',
-    remarks: '',
-  });
+  const [vasItems, setVasItems] = useState<VASItem[]>(initialVASItems);
+  const [selectedVAS, setSelectedVAS] = useState<string | null>(null);
+  const [formData, setFormData] = useState<FormData>(initialFormData);
 
-  const handleQuantityChange = (id: string, newQuantity: number) => {
-    setVasItems(vasItems.map(item => 
-      item.id === id ? { ...item, quantity: Math.max(0, newQuantity) } : item
-    ));
+  // Auto-select first VAS on mount
+  useEffect(() => {
+    if (vasItems.length > 0 && !selectedVAS) {
+      const firstVAS = vasItems[0];
+      setSelectedVAS(firstVAS.id);
+      setFormData(firstVAS.formData);
+    }
+  }, []);
+
+  const handleVASClick = (vas: VASItem) => {
+    setSelectedVAS(vas.id);
+    setFormData(vas.formData);
+  };
+
+  const handleAddNew = () => {
+    setSelectedVAS(null);
+    setFormData(initialFormData);
   };
 
   const handleDeleteItem = (id: string) => {
     setVasItems(vasItems.filter(item => item.id !== id));
+    if (selectedVAS === id) {
+      setSelectedVAS(null);
+      setFormData(initialFormData);
+    }
   };
 
   const handleSave = () => {
-    console.log('Saving VAS:', { formData, vasItems });
-    // Add save logic here
+    if (selectedVAS) {
+      // Update existing VAS
+      setVasItems(vasItems.map(item => 
+        item.id === selectedVAS 
+          ? { ...item, formData }
+          : item
+      ));
+    } else {
+      // Create new VAS
+      const newVAS: VASItem = {
+        id: Date.now().toString(),
+        name: formData.vasId || 'New VAS',
+        quantity: parseInt(formData.thuServed) || 1,
+        formData,
+      };
+      setVasItems([...vasItems, newVAS]);
+      setSelectedVAS(newVAS.id);
+    }
+  };
+
+  const handleClear = () => {
+    setFormData(initialFormData);
+    setSelectedVAS(null);
   };
 
   return (
@@ -62,19 +216,26 @@ export const VASDrawerScreen = () => {
       <div className="w-64 border-r border-border bg-muted/30 p-4 flex flex-col">
         <div className="flex items-center justify-between mb-4">
           <h3 className="font-semibold text-sm">All VAS</h3>
-          <div className="flex gap-1">
-            <Button size="icon" variant="ghost" className="h-8 w-8">
-              <Edit2 className="h-4 w-4" />
-            </Button>
-            <Button size="icon" variant="ghost" className="h-8 w-8">
-              <Plus className="h-4 w-4" />
-            </Button>
-          </div>
+          <Button 
+            size="icon" 
+            variant="ghost" 
+            className="h-8 w-8"
+            onClick={handleAddNew}
+          >
+            <Plus className="h-4 w-4" />
+          </Button>
         </div>
 
         <div className="space-y-2 flex-1 overflow-y-auto">
           {vasItems.map((item) => (
-            <Card key={item.id} className="border-l-4 border-l-primary">
+            <Card 
+              key={item.id} 
+              className={cn(
+                "border-l-4 cursor-pointer transition-colors hover:bg-accent",
+                selectedVAS === item.id ? "border-l-primary bg-accent" : "border-l-transparent"
+              )}
+              onClick={() => handleVASClick(item)}
+            >
               <CardContent className="p-3">
                 <div className="flex items-center justify-between">
                   <div className="flex-1">
@@ -89,7 +250,10 @@ export const VASDrawerScreen = () => {
                     size="icon"
                     variant="ghost"
                     className="h-8 w-8 text-destructive hover:text-destructive"
-                    onClick={() => handleDeleteItem(item.id)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDeleteItem(item.id);
+                    }}
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>
@@ -274,8 +438,8 @@ export const VASDrawerScreen = () => {
 
           {/* Action Buttons */}
           <div className="flex justify-end gap-2 pt-4 border-t">
-            <Button variant="outline">
-              Cancel
+            <Button variant="outline" onClick={handleClear}>
+              Clear
             </Button>
             <Button onClick={handleSave}>
               Save VAS
