@@ -199,17 +199,29 @@ export const IncidentsDrawerScreen: React.FC<IncidentsDrawerScreenProps> = ({ on
 
   const handleSave = () => {
     if (selectedIncident) {
+      const newStatus: 'Open' | 'In Progress' | 'Closed' = 
+        formData.incidentStatus === 'open' ? 'Open' : 
+        formData.incidentStatus === 'in-progress' ? 'In Progress' : 'Closed';
+      
+      const updatedIncident: Incident = { 
+        ...selectedIncident, 
+        formData, 
+        status: newStatus 
+      };
       setIncidents(prev => 
         prev.map(inc => 
-          inc.id === selectedIncident.id 
-            ? { ...inc, formData, status: formData.incidentStatus === 'open' ? 'Open' : formData.incidentStatus === 'in-progress' ? 'In Progress' : 'Closed' } 
-            : inc
+          inc.id === selectedIncident.id ? updatedIncident : inc
         )
       );
+      setSelectedIncident(updatedIncident);
     } else {
+      const newStatus: 'Open' | 'In Progress' | 'Closed' = 
+        formData.incidentStatus === 'open' ? 'Open' : 
+        formData.incidentStatus === 'in-progress' ? 'In Progress' : 'Closed';
+      
       const newIncident: Incident = {
         id: `INC${String(incidents.length + 1).padStart(6, '0')}`,
-        status: formData.incidentStatus === 'open' ? 'Open' : formData.incidentStatus === 'in-progress' ? 'In Progress' : 'Closed',
+        status: newStatus,
         formData,
       };
       setIncidents(prev => [...prev, newIncident]);
