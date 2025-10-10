@@ -242,22 +242,9 @@ export const IncidentsDrawerScreen: React.FC<IncidentsDrawerScreenProps> = ({ on
         {/* Main Content Area */}
         <div className="flex-1 overflow-y-auto">
           <div className="p-6 space-y-6">
-            {/* Top action icons */}
-            <div className="flex justify-end gap-2">
-              <Button variant="outline" size="icon" className="h-8 w-8">
-                <Copy className="h-4 w-4" />
-              </Button>
-              <Button variant="outline" size="icon" className="h-8 w-8">
-                <Download className="h-4 w-4" />
-              </Button>
-              <Button variant="outline" size="icon" className="h-8 w-8">
-                <Maximize2 className="h-4 w-4" />
-              </Button>
-            </div>
-
-            {/* Top Fields */}
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
+            {/* Top row with fields and action icons */}
+            <div className="flex items-end gap-4">
+              <div className="flex-1 space-y-2">
                 <Label htmlFor="incidentId">Incident ID <span className="text-destructive">*</span></Label>
                 <Input
                   id="incidentId"
@@ -266,7 +253,7 @@ export const IncidentsDrawerScreen: React.FC<IncidentsDrawerScreenProps> = ({ on
                   placeholder="Enter incident ID"
                 />
               </div>
-              <div className="space-y-2">
+              <div className="flex-1 space-y-2">
                 <Label htmlFor="incidentStatus">Incident Status <span className="text-destructive">*</span></Label>
                 <Select value={formData.incidentStatus} onValueChange={(value) => handleInputChange('incidentStatus', value)}>
                   <SelectTrigger id="incidentStatus">
@@ -278,6 +265,17 @@ export const IncidentsDrawerScreen: React.FC<IncidentsDrawerScreenProps> = ({ on
                     <SelectItem value="closed">Closed</SelectItem>
                   </SelectContent>
                 </Select>
+              </div>
+              <div className="flex gap-2">
+                <Button variant="outline" size="icon" className="h-10 w-10">
+                  <Copy className="h-4 w-4" />
+                </Button>
+                <Button variant="outline" size="icon" className="h-10 w-10">
+                  <Download className="h-4 w-4" />
+                </Button>
+                <Button variant="outline" size="icon" className="h-10 w-10">
+                  <Maximize2 className="h-4 w-4" />
+                </Button>
               </div>
             </div>
 
