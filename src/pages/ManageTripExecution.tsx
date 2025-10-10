@@ -6,6 +6,10 @@ import { useFooterStore } from '@/stores/footerStore';
 import { useToast } from '@/hooks/use-toast';
 import { manageTripStore } from '@/stores/mangeTripStore';
 import { useSearchParams } from "react-router-dom";
+import { SideDrawer } from '@/components/SideDrawer';
+import { useDrawerStore } from '@/stores/drawerStore';
+import { ResourcesDrawerScreen } from '@/components/ResourcesDrawerScreen';
+import { VASDrawerScreen } from '@/components/VASDrawerScreen';
 
 const ManageTripExecution = () => {
   const { loading, tripData, fetchTrip, saveTrip } = manageTripStore();
@@ -16,6 +20,7 @@ const ManageTripExecution = () => {
   const [isConfirmButtonDisabled, setIsConfirmButtonDisabled] = useState(true);
   const { toast } = useToast();
   const [error, setError] = useState<string | null>(null);
+  const { isOpen, drawerType, closeDrawer } = useDrawerStore();
 
   // Fetch trip data on first render if editing
   useEffect(() => {
@@ -151,6 +156,20 @@ const ManageTripExecution = () => {
           </div>
         </div>
       </div>
+
+      {/* Side Drawer */}
+      <SideDrawer
+        isOpen={isOpen}
+        onClose={closeDrawer}
+        title={drawerType === 'resources' ? 'Resources' : drawerType === 'vas' ? 'VAS' : ''}
+        slideDirection="right"
+        width="500px"
+        smoothness="smooth"
+        showCloseButton={true}
+      >
+        {drawerType === 'resources' && <ResourcesDrawerScreen />}
+        {drawerType === 'vas' && <VASDrawerScreen />}
+      </SideDrawer>
     </div>
   );
 };

@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Package, Users, Wrench, 
   AlertTriangle, Briefcase, CreditCard, 
   PackageCheck, UserRoundCheck, Settings, CarFront,HandCoins, TicketPercent } from 'lucide-react';
+import { useDrawerStore } from '@/stores/drawerStore';
 
 const summaryCardsData = [
   {
@@ -61,12 +62,30 @@ const summaryCardsData = [
   }
 ];
 
-export const SummaryCardsGrid = () => (
-  <div className="grid grid-cols-2 gap-6">
-    {summaryCardsData.map((card, index) => {
-      const Icon = card.icon;
-      return (
-        <Card key={index} className="h-fit border-[#EAECF0] rounded-sm shadow-none">
+export const SummaryCardsGrid = () => {
+  const { openDrawer } = useDrawerStore();
+
+  const handleCardClick = (cardTitle: string) => {
+    if (cardTitle === 'Resources') {
+      openDrawer('resources');
+    } else if (cardTitle === 'VAS') {
+      openDrawer('vas');
+    }
+  };
+
+  return (
+    <div className="grid grid-cols-2 gap-6">
+      {summaryCardsData.map((card, index) => {
+        const Icon = card.icon;
+        const isClickable = card.title === 'Resources' || card.title === 'VAS';
+        return (
+          <Card 
+            key={index} 
+            className={`h-fit border-[#EAECF0] rounded-sm shadow-none ${
+              isClickable ? 'cursor-pointer hover:shadow-md transition-shadow' : ''
+            }`}
+            onClick={() => isClickable && handleCardClick(card.title)}
+          >
           <CardHeader className="p-4">
             <CardTitle className="text-md font-medium flex items-center gap-2">
               {/* <Icon className={`h-4 w-4 ${card.iconColor}`} /> */}
@@ -101,7 +120,8 @@ export const SummaryCardsGrid = () => (
             ))}
           </CardContent>
         </Card>
-      );
-    })}
-  </div>
-);
+        );
+      })}
+    </div>
+  );
+};
