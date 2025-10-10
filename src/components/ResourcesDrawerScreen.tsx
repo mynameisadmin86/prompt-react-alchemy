@@ -97,6 +97,13 @@ export const ResourcesDrawerScreen = ({ onClose }: { onClose?: () => void }) => 
       <div className="flex flex-1 overflow-hidden">
         {/* Left Sidebar - Resource List */}
         <div className="w-64 border-r border-border bg-muted/30 p-4 flex flex-col">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-semibold text-sm">All Resources</h3>
+            <Button size="icon" variant="ghost" className="h-8 w-8">
+              <Plus className="h-4 w-4" />
+            </Button>
+          </div>
+
           <div className="space-y-2 flex-1 overflow-y-auto">
             {mockResources.map((resource) => (
               <Card
