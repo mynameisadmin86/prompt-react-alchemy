@@ -243,17 +243,16 @@ export const VASDrawerScreen = () => {
           {vasItems.map((item) => (
             <Card 
               key={item.id} 
-              className={cn(
-                "border-l-4 cursor-pointer transition-colors hover:bg-accent",
-                selectedVAS === item.id ? "border-l-primary bg-accent" : "border-l-transparent"
-              )}
+              className={`cursor-pointer transition-colors hover:bg-accent ${
+                selectedVAS === item.id ? 'bg-accent border-primary' : ''
+              }`}
               onClick={() => handleVASClick(item)}
             >
               <CardContent className="p-3">
                 <div className="flex items-center justify-between">
                   <div className="flex-1">
                     <div className="font-medium text-sm">{item.name}</div>
-                    <div className="flex items-center gap-2 mt-2">
+                    <div className="flex items-center gap-2 mt-1">
                       <Badge variant="secondary" className="text-xs">
                         Qty {item.quantity}
                       </Badge>
