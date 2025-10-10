@@ -250,6 +250,30 @@ class QuickOrderService {
       throw error;
     }
   }
+
+  async getMasterCommonData(params: { messageType: string; searchTerm?: string; offset?: number; limit?: number }): Promise<any> {
+    try {
+      console.log('Fetching master common data:', params);
+      
+      const response = await fetch(`${this.baseUrl}/master-data`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(params)
+      });
+
+      if (!response.ok) {
+        throw new Error(`API call failed with status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('QuickOrderService.getMasterCommonData error:', error);
+      throw error;
+    }
+  }
 }
 
 export const quickOrderService = new QuickOrderService();
