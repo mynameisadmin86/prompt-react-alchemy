@@ -107,11 +107,66 @@ const initialFormData: FormData = {
 };
 
 const initialIncidents: Incident[] = [
-  { id: 'INC000001', status: 'Open', formData: { ...initialFormData, incidentId: 'INC000001', incidentStatus: 'open' } },
-  { id: 'INC000001', status: 'In Progress', formData: { ...initialFormData, incidentId: 'INC000001', incidentStatus: 'in-progress' } },
-  { id: 'INC000001', status: 'Open', formData: { ...initialFormData, incidentId: 'INC000001', incidentStatus: 'open' } },
-  { id: 'INC000001', status: 'Closed', formData: { ...initialFormData, incidentId: 'INC000001', incidentStatus: 'closed' } },
-  { id: 'INC000001', status: 'Open', formData: { ...initialFormData, incidentId: 'INC000001', incidentStatus: 'open' } },
+  { 
+    id: 'INC000001', 
+    status: 'Open', 
+    formData: { 
+      ...initialFormData, 
+      incidentId: 'INC000001', 
+      incidentStatus: 'open',
+      incidentType: 'accident',
+      placeOfIncident: 'warehouse',
+      detailedDescription: 'First incident - Open status'
+    } 
+  },
+  { 
+    id: 'INC000002', 
+    status: 'In Progress', 
+    formData: { 
+      ...initialFormData, 
+      incidentId: 'INC000002', 
+      incidentStatus: 'in-progress',
+      incidentType: 'breakdown',
+      placeOfIncident: 'highway',
+      detailedDescription: 'Second incident - In Progress status'
+    } 
+  },
+  { 
+    id: 'INC000003', 
+    status: 'Open', 
+    formData: { 
+      ...initialFormData, 
+      incidentId: 'INC000003', 
+      incidentStatus: 'open',
+      incidentType: 'delay',
+      placeOfIncident: 'city',
+      detailedDescription: 'Third incident - Open status'
+    } 
+  },
+  { 
+    id: 'INC000004', 
+    status: 'Closed', 
+    formData: { 
+      ...initialFormData, 
+      incidentId: 'INC000004', 
+      incidentStatus: 'closed',
+      incidentType: 'theft',
+      placeOfIncident: 'warehouse',
+      detailedDescription: 'Fourth incident - Closed status'
+    } 
+  },
+  { 
+    id: 'INC000005', 
+    status: 'Open', 
+    formData: { 
+      ...initialFormData, 
+      incidentId: 'INC000005', 
+      incidentStatus: 'open',
+      incidentType: 'accident',
+      placeOfIncident: 'highway',
+      detailedDescription: 'Fifth incident - Open status'
+    } 
+  },
 ];
 
 export const IncidentsDrawerScreen: React.FC<IncidentsDrawerScreenProps> = ({ onClose }) => {
@@ -128,6 +183,7 @@ export const IncidentsDrawerScreen: React.FC<IncidentsDrawerScreenProps> = ({ on
   }, []);
 
   const handleIncidentClick = (incident: Incident) => {
+    console.log('Incident clicked:', incident);
     setSelectedIncident(incident);
     setFormData(incident.formData);
   };
