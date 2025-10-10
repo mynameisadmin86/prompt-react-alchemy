@@ -168,7 +168,7 @@ const ManageTripExecution = () => {
         smoothness="smooth"
         showCloseButton={true}
       >
-        {drawerType === 'resources' && <ResourcesDrawerScreen />}
+        {drawerType === 'resources' && <ResourcesDrawerScreen onClose={closeDrawer} />}
         {drawerType === 'vas' && <VASDrawerScreen />}
         {drawerType === 'incidents' && <IncidentsDrawerScreen onClose={closeDrawer} />}
       </SideDrawer>

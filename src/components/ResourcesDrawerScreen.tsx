@@ -5,7 +5,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Search, Trash2 } from 'lucide-react';
+import { Plus, Search, Trash2, ArrowLeft, X } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
 
 interface Resource {
@@ -20,7 +20,7 @@ const mockResources: Resource[] = [
   { id: '14388 (RAM)', type: 'Handler', name: '14388 (RAM)' },
 ];
 
-export const ResourcesDrawerScreen = () => {
+export const ResourcesDrawerScreen = ({ onClose }: { onClose?: () => void }) => {
   const [selectedResource, setSelectedResource] = useState<Resource | null>(null);
   const [formData, setFormData] = useState({
     carrier: 'ABC Executive Agent',
@@ -66,9 +66,37 @@ export const ResourcesDrawerScreen = () => {
   };
 
   return (
-    <div className="flex h-full">
-      {/* Left Sidebar - Resource List */}
-      <div className="w-64 border-r border-border bg-muted/30 p-4 flex flex-col">
+    <div className="flex flex-col h-full">
+      {/* Header */}
+      <div className="sticky top-0 z-20 flex items-center justify-between px-6 py-4 border-b bg-card">
+        <div className="flex items-center gap-3">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onClose}
+            className="h-8 w-8"
+          >
+            <ArrowLeft className="h-4 w-4" />
+          </Button>
+          <h2 className="text-lg font-semibold">Resources</h2>
+          <Badge variant="secondary" className="ml-2">
+            TRIP000000001
+          </Badge>
+        </div>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={onClose}
+          className="h-8 w-8"
+        >
+          <X className="h-4 w-4" />
+        </Button>
+      </div>
+
+      {/* Body */}
+      <div className="flex flex-1 overflow-hidden">
+        {/* Left Sidebar - Resource List */}
+        <div className="w-64 border-r border-border bg-muted/30 p-4 flex flex-col">
         <div className="flex items-center justify-between mb-4">
           <h3 className="font-semibold text-sm">All Resources</h3>
           <Button size="icon" variant="ghost" className="h-8 w-8">
@@ -293,6 +321,7 @@ export const ResourcesDrawerScreen = () => {
             </Button>
           </div>
         </div>
+      </div>
       </div>
     </div>
   );
