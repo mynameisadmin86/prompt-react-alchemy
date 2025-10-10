@@ -11,6 +11,7 @@ interface DrawerLayoutProps {
   footer?: React.ReactNode;
   onClose: () => void;
   className?: string;
+  gridColumns?: string;
 }
 
 export const DrawerLayout: React.FC<DrawerLayoutProps> = ({
@@ -20,6 +21,7 @@ export const DrawerLayout: React.FC<DrawerLayoutProps> = ({
   footer,
   onClose,
   className,
+  gridColumns = 'md:grid-cols-2',
 }) => {
   return (
     <motion.div
@@ -43,7 +45,7 @@ export const DrawerLayout: React.FC<DrawerLayoutProps> = ({
       </div>
 
       {/* Body - Two Panel Layout */}
-      <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-6 p-6 overflow-y-auto">
+      <div className={cn("flex-1 grid grid-cols-1 gap-6 p-6 overflow-y-auto", gridColumns)}>
         {/* Left Panel */}
         <div className="space-y-4">
           {leftPanel}

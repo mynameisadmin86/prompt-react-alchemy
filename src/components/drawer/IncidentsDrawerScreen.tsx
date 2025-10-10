@@ -425,6 +425,7 @@ export const IncidentsDrawerScreen: React.FC<IncidentsDrawerScreenProps> = ({ on
       rightPanel={rightPanel}
       footer={footer}
       onClose={onClose}
+      gridColumns="md:grid-cols-[25%_75%]"
     />
   );
 };

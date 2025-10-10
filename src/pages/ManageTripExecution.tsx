@@ -164,7 +164,7 @@ const ManageTripExecution = () => {
         onClose={closeDrawer}
         title={drawerType === 'resources' ? 'Resources' : drawerType === 'vas' ? 'VAS' : drawerType === 'incidents' ? 'Incidents' : ''}
         slideDirection="right"
-        width="75%"
+        width={drawerType === 'incidents' ? '100%' : '75%'}
         smoothness="smooth"
         showCloseButton={true}
       >
