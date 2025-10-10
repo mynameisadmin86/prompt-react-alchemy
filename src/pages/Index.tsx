@@ -70,6 +70,13 @@ const Index = () => {
       color: "text-pink-600"
     },
     {
+      title: "Transport Execution-Trip Log",
+      description: "Trip execution workflow with status tracking and approval processes",
+      icon: Workflow,
+      path: "/trip-log",
+      color: "text-cyan-600"
+    },
+    {
       title: "Trip Execution",
       description: "Trip execution workflow with status tracking and approval processes",
       icon: Workflow,

@@ -32,6 +32,7 @@ import QuickOrderManagement from "./pages/QuickOrderManagement";
 import QuickOrderServerSideManagement from "./pages/QuickOrderServerSideManagement";
 import OrderListPage from "./pages/OrderListPage";
 import CreateOrderPage from "./pages/CreateOrderPage";
+import ManageTripExecution from "./pages/ManageTripExecution";
 
 const queryClient = new QueryClient();
 
@@ -69,6 +70,7 @@ const App = () => (
           <Route path="/quick-order-server-side-management" element={<QuickOrderServerSideManagement />} />
           <Route path="/order-list" element={<OrderListPage />} />
           <Route path="/create-order" element={<CreateOrderPage />} />
+          <Route path="/trip-log" element={<ManageTripExecution />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

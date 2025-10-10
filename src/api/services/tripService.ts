@@ -39,4 +39,33 @@ export const tripService = {
     const response = await apiClient.post(API_ENDPOINTS.TRIPS.APPROVE(id));
     return response.data;
   },
+
+  // Get single trip
+  getTripById: async (params?: any): Promise<ApiResponse<Trip>> => {
+    const requestPayload = JSON.stringify({
+      context: {
+        UserID: "ramcouser",
+        Role: "ramcorole",
+        OUID: 4,
+        MessageID: "12345",
+        MessageType: "TripLog GetTripID",
+      },
+      SearchCriteria: {
+        TripID: params?.id,
+      },
+      Pagination: {
+        PageNumber: 1,
+        PageSize: 10,
+        TotalRecords: 200,
+      },
+    });
+    const requestBody = {
+      RequestData: requestPayload,
+    };
+    const response = await apiClient.post(
+      `${API_ENDPOINTS.TRIPS}`,
+      requestBody
+    );
+    return response.data;
+  },
 };
