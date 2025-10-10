@@ -14,7 +14,6 @@ interface TripDetailsFormProps {
 export const TripDetailsForm = ({ tripData, onFieldChange }: TripDetailsFormProps) => {
   return (
     <div className="space-y-6">
-      2=
       {/* Trip Information Grid */}
       <div className="grid grid-cols-1 gap-4">
         <div className="grid grid-cols-2 gap-4 text-sm">
@@ -50,6 +49,7 @@ export const TripDetailsForm = ({ tripData, onFieldChange }: TripDetailsFormProp
           </div>
         </div>
       </div>
+
       {/* Trip Type Radio */}
       <div className="space-y-3">
         <Label className="text-sm font-medium">Trip Type</Label>
@@ -72,6 +72,7 @@ export const TripDetailsForm = ({ tripData, onFieldChange }: TripDetailsFormProp
           </div>
         </RadioGroup>
       </div>
+
       {/* Form Fields */}
       <div className="space-y-4">
         <div className="grid grid-cols-2 gap-4">
