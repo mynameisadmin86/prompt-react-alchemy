@@ -8,7 +8,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
-import { Plus, Edit, Trash2, Calendar, Clock, Maximize2, Copy, Download } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
+import { Plus, Edit, Trash2, Calendar, Clock, Maximize2, Copy, Download, Car, Wrench, FileText, Users, DollarSign } from 'lucide-react';
 
 interface IncidentsDrawerScreenProps {
   onClose: () => void;
@@ -41,6 +42,39 @@ export const IncidentsDrawerScreen: React.FC<IncidentsDrawerScreenProps> = ({ on
     driverFault: '',
     vehicleFault: '',
     detailedDescription: '',
+    // Maintenance Details
+    maintenanceRequired: false,
+    accidentType: '',
+    causeCode: '',
+    incidentResolution: '',
+    maintenanceType: '',
+    wagon: '',
+    container: '',
+    workType: '',
+    workCategory: '',
+    workGroup: '',
+    maintenanceDescription: '',
+    // More Details
+    incidentCausedBy: '',
+    incidentCauserName: '',
+    incidentReportedBy: '',
+    incidentCloseDate: '',
+    riskInvolved: '',
+    dangerousGoods: '',
+    loadTime: '',
+    refDocNo: '',
+    mobileRefIncidentId: '',
+    remarks: '',
+    // Work Order Details
+    workOrderNumber: 'WON00000001',
+    workOrderStatus: 'In Progress',
+    workRequestNumber: 'WRN00000001',
+    workRequestStatus: 'Draft',
+    errorMessage: 'Not Applicable',
+    // Claim Details
+    claimRequired: false,
+    claimNo: 'CL00000001',
+    claimStatus: 'Initiated',
   });
 
   const handleInputChange = (field: string, value: string) => {
@@ -173,14 +207,12 @@ export const IncidentsDrawerScreen: React.FC<IncidentsDrawerScreenProps> = ({ on
           <AccordionItem value="incident-details">
             <AccordionTrigger className="text-sm font-medium hover:no-underline">
               <div className="flex items-center gap-2">
-                <div className="h-5 w-5 rounded bg-orange-100 flex items-center justify-center">
-                  🚗
-                </div>
+                <Car className="h-5 w-5 text-orange-500" />
                 Incident Details
               </div>
             </AccordionTrigger>
             <AccordionContent>
-              <div className="grid grid-cols-2 gap-4 pt-2">
+              <div className="grid grid-cols-5 gap-4 pt-2">
                 <div className="space-y-1.5">
                   <Label htmlFor="incidentType" className="text-xs">
                     Incident Type <span className="text-destructive">*</span>
@@ -311,7 +343,7 @@ export const IncidentsDrawerScreen: React.FC<IncidentsDrawerScreenProps> = ({ on
                   </Select>
                 </div>
 
-                <div className="col-span-2 space-y-1.5">
+                <div className="col-span-5 space-y-1.5">
                   <Label htmlFor="detailedDescription" className="text-xs">
                     Detailed Description
                   </Label>
@@ -331,16 +363,171 @@ export const IncidentsDrawerScreen: React.FC<IncidentsDrawerScreenProps> = ({ on
           <AccordionItem value="maintenance-details">
             <AccordionTrigger className="text-sm font-medium hover:no-underline">
               <div className="flex items-center gap-2">
-                <div className="h-5 w-5 rounded bg-purple-100 flex items-center justify-center">
-                  🔧
-                </div>
+                <Wrench className="h-5 w-5 text-purple-500" />
                 Maintenance Details
               </div>
             </AccordionTrigger>
             <AccordionContent>
-              <div className="grid grid-cols-2 gap-4 pt-2">
-                <div className="col-span-2 text-sm text-muted-foreground">
-                  Maintenance details will be displayed here...
+              <div className="space-y-4 pt-2">
+                <div className="flex items-center gap-2">
+                  <Switch
+                    id="maintenanceRequired"
+                    checked={formData.maintenanceRequired}
+                    onCheckedChange={(checked) => handleInputChange('maintenanceRequired', checked.toString())}
+                  />
+                  <Label htmlFor="maintenanceRequired" className="text-sm cursor-pointer">
+                    Maintenance Required
+                  </Label>
+                </div>
+
+                <div className="grid grid-cols-5 gap-4">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="accidentType" className="text-xs">
+                      Accident Type <span className="text-destructive">*</span>
+                    </Label>
+                    <Select value={formData.accidentType} onValueChange={(value) => handleInputChange('accidentType', value)}>
+                      <SelectTrigger id="accidentType" className="h-9">
+                        <SelectValue placeholder="Select Accident Type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="collision">Collision</SelectItem>
+                        <SelectItem value="rollover">Rollover</SelectItem>
+                        <SelectItem value="other">Other</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <Label htmlFor="causeCode" className="text-xs">
+                      Cause Code <span className="text-destructive">*</span>
+                    </Label>
+                    <Select value={formData.causeCode} onValueChange={(value) => handleInputChange('causeCode', value)}>
+                      <SelectTrigger id="causeCode" className="h-9">
+                        <SelectValue placeholder="Select Cause Code" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="mechanical">Mechanical Failure</SelectItem>
+                        <SelectItem value="driver-error">Driver Error</SelectItem>
+                        <SelectItem value="weather">Weather Related</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <Label htmlFor="incidentResolution" className="text-xs">
+                      Incident Resolution <span className="text-destructive">*</span>
+                    </Label>
+                    <Input
+                      id="incidentResolution"
+                      value={formData.incidentResolution}
+                      onChange={(e) => handleInputChange('incidentResolution', e.target.value)}
+                      placeholder="Enter Incident Resolution"
+                      className="h-9"
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <Label htmlFor="maintenanceType" className="text-xs">
+                      Maintenance Type
+                    </Label>
+                    <Select value={formData.maintenanceType} onValueChange={(value) => handleInputChange('maintenanceType', value)}>
+                      <SelectTrigger id="maintenanceType" className="h-9">
+                        <SelectValue placeholder="Select Maint. Type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="preventive">Preventive</SelectItem>
+                        <SelectItem value="corrective">Corrective</SelectItem>
+                        <SelectItem value="emergency">Emergency</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <Label htmlFor="wagon" className="text-xs">
+                      Wagon <span className="text-destructive">*</span>
+                    </Label>
+                    <Input
+                      id="wagon"
+                      value={formData.wagon}
+                      onChange={(e) => handleInputChange('wagon', e.target.value)}
+                      placeholder="Enter Wagon"
+                      className="h-9"
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <Label htmlFor="container" className="text-xs">
+                      Container <span className="text-destructive">*</span>
+                    </Label>
+                    <Input
+                      id="container"
+                      value={formData.container}
+                      onChange={(e) => handleInputChange('container', e.target.value)}
+                      placeholder="Enter Container"
+                      className="h-9"
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <Label htmlFor="workType" className="text-xs">
+                      Work Type <span className="text-destructive">*</span>
+                    </Label>
+                    <Select value={formData.workType} onValueChange={(value) => handleInputChange('workType', value)}>
+                      <SelectTrigger id="workType" className="h-9">
+                        <SelectValue placeholder="Select Work Type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="repair">Repair</SelectItem>
+                        <SelectItem value="inspection">Inspection</SelectItem>
+                        <SelectItem value="replacement">Replacement</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <Label htmlFor="workCategory" className="text-xs">
+                      Work Category <span className="text-destructive">*</span>
+                    </Label>
+                    <Select value={formData.workCategory} onValueChange={(value) => handleInputChange('workCategory', value)}>
+                      <SelectTrigger id="workCategory" className="h-9">
+                        <SelectValue placeholder="Select Work Categ." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="mechanical">Mechanical</SelectItem>
+                        <SelectItem value="electrical">Electrical</SelectItem>
+                        <SelectItem value="structural">Structural</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <Label htmlFor="workGroup" className="text-xs">
+                      Work Group <span className="text-destructive">*</span>
+                    </Label>
+                    <Select value={formData.workGroup} onValueChange={(value) => handleInputChange('workGroup', value)}>
+                      <SelectTrigger id="workGroup" className="h-9">
+                        <SelectValue placeholder="Select Work Group" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="maintenance">Maintenance</SelectItem>
+                        <SelectItem value="operations">Operations</SelectItem>
+                        <SelectItem value="technical">Technical</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="col-span-5 space-y-1.5">
+                    <Label htmlFor="maintenanceDescription" className="text-xs">
+                      Maintenance Description <span className="text-destructive">*</span>
+                    </Label>
+                    <Textarea
+                      id="maintenanceDescription"
+                      value={formData.maintenanceDescription}
+                      onChange={(e) => handleInputChange('maintenanceDescription', e.target.value)}
+                      placeholder="Enter Maintenance Desc."
+                      className="min-h-[80px] resize-none"
+                    />
+                  </div>
                 </div>
               </div>
             </AccordionContent>
@@ -350,16 +537,157 @@ export const IncidentsDrawerScreen: React.FC<IncidentsDrawerScreenProps> = ({ on
           <AccordionItem value="more-details">
             <AccordionTrigger className="text-sm font-medium hover:no-underline">
               <div className="flex items-center gap-2">
-                <div className="h-5 w-5 rounded bg-pink-100 flex items-center justify-center">
-                  📄
-                </div>
+                <FileText className="h-5 w-5 text-pink-500" />
                 More Details
               </div>
             </AccordionTrigger>
             <AccordionContent>
-              <div className="grid grid-cols-2 gap-4 pt-2">
-                <div className="col-span-2 text-sm text-muted-foreground">
-                  Additional details will be displayed here...
+              <div className="grid grid-cols-5 gap-4 pt-2">
+                <div className="space-y-1.5">
+                  <Label htmlFor="incidentCausedBy" className="text-xs">
+                    Incident Caused By
+                  </Label>
+                  <Select value={formData.incidentCausedBy} onValueChange={(value) => handleInputChange('incidentCausedBy', value)}>
+                    <SelectTrigger id="incidentCausedBy" className="h-9">
+                      <SelectValue placeholder="Select Inc. Caused" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="driver">Driver</SelectItem>
+                      <SelectItem value="vehicle">Vehicle</SelectItem>
+                      <SelectItem value="external">External Factors</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label htmlFor="incidentCauserName" className="text-xs">
+                    Incident Causer Name
+                  </Label>
+                  <Select value={formData.incidentCauserName} onValueChange={(value) => handleInputChange('incidentCauserName', value)}>
+                    <SelectTrigger id="incidentCauserName" className="h-9">
+                      <SelectValue placeholder="Select Inc. Causer Name" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="john-doe">John Doe</SelectItem>
+                      <SelectItem value="jane-smith">Jane Smith</SelectItem>
+                      <SelectItem value="other">Other</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label htmlFor="incidentReportedBy" className="text-xs">
+                    Incident Reported By
+                  </Label>
+                  <Input
+                    id="incidentReportedBy"
+                    value={formData.incidentReportedBy}
+                    onChange={(e) => handleInputChange('incidentReportedBy', e.target.value)}
+                    placeholder="Enter Inc. Reported By"
+                    className="h-9"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label htmlFor="incidentCloseDate" className="text-xs">
+                    Incident Close Date
+                  </Label>
+                  <div className="relative">
+                    <Input
+                      id="incidentCloseDate"
+                      type="date"
+                      value={formData.incidentCloseDate}
+                      onChange={(e) => handleInputChange('incidentCloseDate', e.target.value)}
+                      className="h-9"
+                    />
+                    <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label htmlFor="riskInvolved" className="text-xs">
+                    Risk Involved
+                  </Label>
+                  <Select value={formData.riskInvolved} onValueChange={(value) => handleInputChange('riskInvolved', value)}>
+                    <SelectTrigger id="riskInvolved" className="h-9">
+                      <SelectValue placeholder="Select Risk Involved" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="low">Low</SelectItem>
+                      <SelectItem value="medium">Medium</SelectItem>
+                      <SelectItem value="high">High</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label htmlFor="dangerousGoods" className="text-xs">
+                    Dangerous Goods
+                  </Label>
+                  <Select value={formData.dangerousGoods} onValueChange={(value) => handleInputChange('dangerousGoods', value)}>
+                    <SelectTrigger id="dangerousGoods" className="h-9">
+                      <SelectValue placeholder="Select Danger Goods" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="yes">Yes</SelectItem>
+                      <SelectItem value="no">No</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label htmlFor="loadTime" className="text-xs">
+                    Load Time
+                  </Label>
+                  <Select value={formData.loadTime} onValueChange={(value) => handleInputChange('loadTime', value)}>
+                    <SelectTrigger id="loadTime" className="h-9">
+                      <SelectValue placeholder="Select Load Time" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="morning">Morning</SelectItem>
+                      <SelectItem value="afternoon">Afternoon</SelectItem>
+                      <SelectItem value="evening">Evening</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label htmlFor="refDocNo" className="text-xs">
+                    Ref. Doc. No.
+                  </Label>
+                  <Input
+                    id="refDocNo"
+                    value={formData.refDocNo}
+                    onChange={(e) => handleInputChange('refDocNo', e.target.value)}
+                    placeholder="Enter Ref. Doc. No."
+                    className="h-9"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label htmlFor="mobileRefIncidentId" className="text-xs">
+                    Mobile Ref. Incident ID
+                  </Label>
+                  <Input
+                    id="mobileRefIncidentId"
+                    value={formData.mobileRefIncidentId}
+                    onChange={(e) => handleInputChange('mobileRefIncidentId', e.target.value)}
+                    placeholder="Enter Mobile Ref. Inc. ID"
+                    className="h-9"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label htmlFor="remarks" className="text-xs">
+                    Remarks
+                  </Label>
+                  <Input
+                    id="remarks"
+                    value={formData.remarks}
+                    onChange={(e) => handleInputChange('remarks', e.target.value)}
+                    placeholder="Enter Remarks"
+                    className="h-9"
+                  />
                 </div>
               </div>
             </AccordionContent>
@@ -369,16 +697,35 @@ export const IncidentsDrawerScreen: React.FC<IncidentsDrawerScreenProps> = ({ on
           <AccordionItem value="work-order-details">
             <AccordionTrigger className="text-sm font-medium hover:no-underline">
               <div className="flex items-center gap-2">
-                <div className="h-5 w-5 rounded bg-green-100 flex items-center justify-center">
-                  📋
-                </div>
+                <Users className="h-5 w-5 text-green-500" />
                 Work Order Details
               </div>
             </AccordionTrigger>
             <AccordionContent>
-              <div className="grid grid-cols-2 gap-4 pt-2">
-                <div className="col-span-2 text-sm text-muted-foreground">
-                  Work order details will be displayed here...
+              <div className="grid grid-cols-5 gap-4 pt-2">
+                <div className="space-y-1.5">
+                  <Label className="text-xs">Work Order Number</Label>
+                  <div className="text-sm text-primary font-medium">{formData.workOrderNumber}</div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label className="text-xs">Work Order Status</Label>
+                  <div className="text-sm">{formData.workOrderStatus}</div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label className="text-xs">Work Request Number</Label>
+                  <div className="text-sm">{formData.workRequestNumber}</div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label className="text-xs">Work Request Status</Label>
+                  <div className="text-sm">{formData.workRequestStatus}</div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label className="text-xs">Error Message</Label>
+                  <div className="text-sm">{formData.errorMessage}</div>
                 </div>
               </div>
             </AccordionContent>
@@ -388,16 +735,33 @@ export const IncidentsDrawerScreen: React.FC<IncidentsDrawerScreenProps> = ({ on
           <AccordionItem value="claim-details">
             <AccordionTrigger className="text-sm font-medium hover:no-underline">
               <div className="flex items-center gap-2">
-                <div className="h-5 w-5 rounded bg-teal-100 flex items-center justify-center">
-                  💰
-                </div>
+                <DollarSign className="h-5 w-5 text-teal-500" />
                 Claim Details
               </div>
             </AccordionTrigger>
             <AccordionContent>
-              <div className="grid grid-cols-2 gap-4 pt-2">
-                <div className="col-span-2 text-sm text-muted-foreground">
-                  Claim details will be displayed here...
+              <div className="space-y-4 pt-2">
+                <div className="flex items-center gap-2">
+                  <Switch
+                    id="claimRequired"
+                    checked={formData.claimRequired}
+                    onCheckedChange={(checked) => handleInputChange('claimRequired', checked.toString())}
+                  />
+                  <Label htmlFor="claimRequired" className="text-sm cursor-pointer">
+                    Claim Required
+                  </Label>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">Claim No.</Label>
+                    <div className="text-sm text-primary font-medium">{formData.claimNo}</div>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">Claim Status</Label>
+                    <div className="text-sm">{formData.claimStatus}</div>
+                  </div>
                 </div>
               </div>
             </AccordionContent>
