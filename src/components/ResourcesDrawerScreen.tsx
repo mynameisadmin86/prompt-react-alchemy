@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -8,61 +8,168 @@ import { Badge } from '@/components/ui/badge';
 import { Plus, Search, Trash2, ArrowLeft, X } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
 
+interface FormData {
+  carrier: string;
+  supplier: string;
+  supplierRef: string;
+  carrierStatus: string;
+  scheduleNo: string;
+  trainNo: string;
+  pathNo: string;
+  legDetails: string;
+  departurePoint: string;
+  arrivalPoint: string;
+  service: string;
+  subService: string;
+  infrastructureManager: string;
+  reason: string;
+  remarks: string;
+}
+
 interface Resource {
   id: string;
   type: 'Schedule' | 'Agent' | 'Handler';
   name: string;
+  formData: FormData;
 }
 
-const mockResources: Resource[] = [
-  { id: 'SCH32030023', type: 'Schedule', name: 'SCH32030023' },
-  { id: 'DB Cargo', type: 'Agent', name: 'DB Cargo' },
-  { id: '14388 (RAM)', type: 'Handler', name: '14388 (RAM)' },
-];
+const initialFormData: FormData = {
+  carrier: '',
+  supplier: '',
+  supplierRef: '',
+  carrierStatus: '',
+  scheduleNo: '',
+  trainNo: '',
+  pathNo: '',
+  legDetails: '',
+  departurePoint: '',
+  arrivalPoint: '',
+  service: '',
+  subService: '',
+  infrastructureManager: '',
+  reason: '',
+  remarks: '',
+};
 
-export const ResourcesDrawerScreen = ({ onClose }: { onClose?: () => void }) => {
-  const [selectedResource, setSelectedResource] = useState<Resource | null>(null);
-  const [formData, setFormData] = useState({
-    carrier: 'ABC Executive Agent',
-    supplier: 'ABC Supplier',
-    supplierRef: '',
-    carrierStatus: 'Inprogress',
-    scheduleNo: '',
-    trainNo: '',
-    pathNo: '',
-    legDetails: '01 - Voila to Curtici',
-    departurePoint: 'S3-202705, Voila',
-    arrivalPoint: 'S3-21925-3, Curtici',
-    service: '',
-    subService: '',
-    infrastructureManager: '',
-    reason: '',
-    remarks: '',
-  });
-
-  const handleSave = () => {
-    console.log('Saving resource:', formData);
-    // Add save logic here
-  };
-
-  const handleClear = () => {
-    setFormData({
+const initialResources: Resource[] = [
+  { 
+    id: 'SCH32030023', 
+    type: 'Schedule', 
+    name: 'SCH32030023',
+    formData: {
       carrier: 'ABC Executive Agent',
       supplier: 'ABC Supplier',
-      supplierRef: '',
+      supplierRef: 'REF001',
       carrierStatus: 'Inprogress',
-      scheduleNo: '',
-      trainNo: '',
-      pathNo: '',
+      scheduleNo: 'SCH32030023',
+      trainNo: 'TR001',
+      pathNo: 'P001',
       legDetails: '01 - Voila to Curtici',
       departurePoint: 'S3-202705, Voila',
       arrivalPoint: 'S3-21925-3, Curtici',
-      service: '',
-      subService: '',
-      infrastructureManager: '',
-      reason: '',
-      remarks: '',
-    });
+      service: 'service1',
+      subService: 'sub1',
+      infrastructureManager: 'IM001',
+      reason: 'reason1',
+      remarks: 'Schedule resource details',
+    }
+  },
+  { 
+    id: 'DB Cargo', 
+    type: 'Agent', 
+    name: 'DB Cargo',
+    formData: {
+      carrier: 'DB Cargo Agent',
+      supplier: 'DB Supplier',
+      supplierRef: 'REF002',
+      carrierStatus: 'Completed',
+      scheduleNo: 'SCH002',
+      trainNo: 'TR002',
+      pathNo: 'P002',
+      legDetails: '01 - Voila to Curtici',
+      departurePoint: 'S3-202705, Voila',
+      arrivalPoint: 'S3-21925-3, Curtici',
+      service: 'service2',
+      subService: 'sub2',
+      infrastructureManager: 'IM002',
+      reason: 'reason2',
+      remarks: 'Agent resource details',
+    }
+  },
+  { 
+    id: '14388 (RAM)', 
+    type: 'Handler', 
+    name: '14388 (RAM)',
+    formData: {
+      carrier: 'RAM Executive Agent',
+      supplier: 'RAM Supplier',
+      supplierRef: 'REF003',
+      carrierStatus: 'Pending',
+      scheduleNo: 'SCH003',
+      trainNo: 'TR003',
+      pathNo: 'P003',
+      legDetails: '01 - Voila to Curtici',
+      departurePoint: 'S3-202705, Voila',
+      arrivalPoint: 'S3-21925-3, Curtici',
+      service: 'service1',
+      subService: 'sub1',
+      infrastructureManager: 'IM003',
+      reason: 'reason1',
+      remarks: 'Handler resource details',
+    }
+  },
+];
+
+export const ResourcesDrawerScreen = ({ onClose }: { onClose?: () => void }) => {
+  const [resources, setResources] = useState<Resource[]>(initialResources);
+  const [selectedResource, setSelectedResource] = useState<Resource | null>(null);
+  const [formData, setFormData] = useState<FormData>(initialFormData);
+
+  // Auto-select first resource on mount
+  useEffect(() => {
+    if (resources.length > 0) {
+      const firstResource = resources[0];
+      setSelectedResource(firstResource);
+      setFormData(firstResource.formData);
+    }
+  }, []);
+
+  const handleResourceClick = (resource: Resource) => {
+    setSelectedResource(resource);
+    setFormData(resource.formData);
+  };
+
+  const handleAddNew = () => {
+    setSelectedResource(null);
+    setFormData(initialFormData);
+  };
+
+  const handleSave = () => {
+    if (selectedResource) {
+      // Update existing resource
+      setResources(prev => 
+        prev.map(r => 
+          r.id === selectedResource.id 
+            ? { ...r, formData } 
+            : r
+        )
+      );
+    } else {
+      // Create new resource
+      const newResource: Resource = {
+        id: `RES${Date.now()}`,
+        type: 'Schedule',
+        name: formData.scheduleNo || `Resource ${resources.length + 1}`,
+        formData,
+      };
+      setResources(prev => [...prev, newResource]);
+      setSelectedResource(newResource);
+    }
+  };
+
+  const handleClear = () => {
+    setFormData(initialFormData);
+    setSelectedResource(null);
   };
 
   return (
@@ -73,19 +180,19 @@ export const ResourcesDrawerScreen = ({ onClose }: { onClose?: () => void }) => 
         <div className="w-64 border-r border-border bg-muted/30 p-4 flex flex-col">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-semibold text-sm">All Resources</h3>
-            <Button size="icon" variant="ghost" className="h-8 w-8">
+            <Button size="icon" variant="ghost" className="h-8 w-8" onClick={handleAddNew}>
               <Plus className="h-4 w-4" />
             </Button>
           </div>
 
           <div className="space-y-2 flex-1 overflow-y-auto">
-            {mockResources.map((resource) => (
+            {resources.map((resource) => (
               <Card
                 key={resource.id}
                 className={`cursor-pointer transition-colors hover:bg-accent ${
                   selectedResource?.id === resource.id ? 'bg-accent border-primary' : ''
                 }`}
-                onClick={() => setSelectedResource(resource)}
+                onClick={() => handleResourceClick(resource)}
               >
                 <CardContent className="p-3">
                   <div className="font-medium text-sm">{resource.name}</div>
