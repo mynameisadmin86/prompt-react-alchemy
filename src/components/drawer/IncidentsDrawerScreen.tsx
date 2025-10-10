@@ -102,13 +102,13 @@ export const IncidentsDrawerScreen: React.FC<IncidentsDrawerScreenProps> = ({ on
   const leftPanel = (
     <div className="h-full flex flex-col">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-sm font-semibold">All Incidents</h3>
+        <h3 className="text-sm font-semibold text-gray-700">All Incidents</h3>
         <div className="flex gap-2">
-          <Button variant="outline" size="icon" className="h-8 w-8">
-            <Edit className="h-4 w-4" />
+          <Button variant="outline" size="icon" className="h-8 w-8 hover:bg-gray-50">
+            <Edit className="h-4 w-4 text-gray-600" />
           </Button>
-          <Button variant="outline" size="icon" className="h-8 w-8">
-            <Plus className="h-4 w-4" />
+          <Button variant="outline" size="icon" className="h-8 w-8 hover:bg-gray-50">
+            <Plus className="h-4 w-4 text-gray-600" />
           </Button>
         </div>
       </div>
@@ -116,15 +116,15 @@ export const IncidentsDrawerScreen: React.FC<IncidentsDrawerScreenProps> = ({ on
         {incidents.map((incident, index) => (
           <Card 
             key={`${incident.id}-${index}`}
-            className={`cursor-pointer transition-all hover:shadow-md ${
-              selectedIncident === incident.id ? 'border-primary' : ''
+            className={`cursor-pointer transition-all border border-gray-200 shadow-sm hover:shadow-md ${
+              selectedIncident === incident.id ? 'border-primary bg-blue-50/50' : 'hover:bg-gray-50'
             }`}
             onClick={() => setSelectedIncident(incident.id)}
           >
             <CardContent className="p-3 flex items-center justify-between">
-              <span className="text-sm font-medium">{incident.id}</span>
+              <span className="text-sm font-medium text-gray-900">{incident.id}</span>
               <div className="flex items-center gap-2">
-                <Badge className={`${getStatusColor(incident.status)} text-xs`}>
+                <Badge className={`${getStatusColor(incident.status)} text-xs font-medium`}>
                   {incident.status}
                 </Badge>
                 <Button 
@@ -150,22 +150,22 @@ export const IncidentsDrawerScreen: React.FC<IncidentsDrawerScreenProps> = ({ on
     <div className="h-full overflow-y-auto">
       <div className="space-y-4">
         {/* Header with Incident ID and Actions */}
-        <div className="flex items-center justify-between pb-4 border-b">
+        <div className="flex items-center justify-between pb-4 border-b border-gray-200">
           <div className="flex items-center gap-2">
-            <span className="text-sm font-medium">Incident</span>
-            <Badge variant="outline" className="text-xs bg-blue-50">
+            <span className="text-sm font-medium text-gray-700">Incident</span>
+            <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700 border-blue-200">
               {formData.incidentId}
             </Badge>
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" size="icon" className="h-8 w-8">
-              <Copy className="h-4 w-4" />
+            <Button variant="outline" size="icon" className="h-8 w-8 hover:bg-gray-50">
+              <Copy className="h-4 w-4 text-gray-600" />
             </Button>
-            <Button variant="outline" size="icon" className="h-8 w-8">
-              <Download className="h-4 w-4" />
+            <Button variant="outline" size="icon" className="h-8 w-8 hover:bg-gray-50">
+              <Download className="h-4 w-4 text-gray-600" />
             </Button>
-            <Button variant="outline" size="icon" className="h-8 w-8">
-              <Maximize2 className="h-4 w-4" />
+            <Button variant="outline" size="icon" className="h-8 w-8 hover:bg-gray-50">
+              <Maximize2 className="h-4 w-4 text-gray-600" />
             </Button>
           </div>
         </div>
@@ -173,7 +173,7 @@ export const IncidentsDrawerScreen: React.FC<IncidentsDrawerScreenProps> = ({ on
         {/* Top Fields */}
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-1.5">
-            <Label htmlFor="incidentId" className="text-xs">
+            <Label htmlFor="incidentId" className="text-xs font-medium text-gray-600">
               Incident ID <span className="text-destructive">*</span>
             </Label>
             <Input
@@ -181,15 +181,15 @@ export const IncidentsDrawerScreen: React.FC<IncidentsDrawerScreenProps> = ({ on
               value={formData.incidentId}
               onChange={(e) => handleInputChange('incidentId', e.target.value)}
               placeholder="Enter incident ID"
-              className="h-9"
+              className="h-9 border-gray-200"
             />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="incidentStatus" className="text-xs">
+            <Label htmlFor="incidentStatus" className="text-xs font-medium text-gray-600">
               Incident Status <span className="text-destructive">*</span>
             </Label>
             <Select value={formData.incidentStatus} onValueChange={(value) => handleInputChange('incidentStatus', value)}>
-              <SelectTrigger id="incidentStatus" className="h-9">
+              <SelectTrigger id="incidentStatus" className="h-9 border-gray-200">
                 <SelectValue placeholder="Select Incident Status" />
               </SelectTrigger>
               <SelectContent>
@@ -204,21 +204,21 @@ export const IncidentsDrawerScreen: React.FC<IncidentsDrawerScreenProps> = ({ on
         {/* Accordion Sections */}
         <Accordion type="single" collapsible defaultValue="incident-details" className="w-full">
           {/* Incident Details Section */}
-          <AccordionItem value="incident-details">
-            <AccordionTrigger className="text-sm font-medium hover:no-underline">
+          <AccordionItem value="incident-details" className="border-b border-gray-200">
+            <AccordionTrigger className="text-sm font-medium text-gray-700 hover:no-underline hover:bg-gray-50 px-4 py-3 rounded-md">
               <div className="flex items-center gap-2">
                 <Car className="h-5 w-5 text-orange-500" />
                 Incident Details
               </div>
             </AccordionTrigger>
-            <AccordionContent>
-              <div className="grid grid-cols-5 gap-4 pt-2">
+            <AccordionContent className="px-4 pt-4">
+              <div className="grid grid-cols-5 gap-4">
                 <div className="space-y-1.5">
-                  <Label htmlFor="incidentType" className="text-xs">
+                  <Label htmlFor="incidentType" className="text-xs font-medium text-gray-600">
                     Incident Type <span className="text-destructive">*</span>
                   </Label>
                   <Select value={formData.incidentType} onValueChange={(value) => handleInputChange('incidentType', value)}>
-                    <SelectTrigger id="incidentType" className="h-9">
+                    <SelectTrigger id="incidentType" className="h-9 border-gray-200">
                       <SelectValue placeholder="Select Incident Type" />
                     </SelectTrigger>
                     <SelectContent>
@@ -231,7 +231,7 @@ export const IncidentsDrawerScreen: React.FC<IncidentsDrawerScreenProps> = ({ on
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label htmlFor="incidentDate" className="text-xs">
+                  <Label htmlFor="incidentDate" className="text-xs font-medium text-gray-600">
                     Incident Date <span className="text-destructive">*</span>
                   </Label>
                   <div className="relative">
@@ -240,14 +240,14 @@ export const IncidentsDrawerScreen: React.FC<IncidentsDrawerScreenProps> = ({ on
                       type="date"
                       value={formData.incidentDate}
                       onChange={(e) => handleInputChange('incidentDate', e.target.value)}
-                      className="h-9"
+                      className="h-9 border-gray-200"
                     />
                     <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
                   </div>
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label htmlFor="incidentTime" className="text-xs">
+                  <Label htmlFor="incidentTime" className="text-xs font-medium text-gray-600">
                     Incident Time <span className="text-destructive">*</span>
                   </Label>
                   <div className="relative">
@@ -256,18 +256,18 @@ export const IncidentsDrawerScreen: React.FC<IncidentsDrawerScreenProps> = ({ on
                       type="time"
                       value={formData.incidentTime}
                       onChange={(e) => handleInputChange('incidentTime', e.target.value)}
-                      className="h-9"
+                      className="h-9 border-gray-200"
                     />
                     <Clock className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
                   </div>
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label htmlFor="placeOfIncident" className="text-xs">
+                  <Label htmlFor="placeOfIncident" className="text-xs font-medium text-gray-600">
                     Place of Incident
                   </Label>
                   <Select value={formData.placeOfIncident} onValueChange={(value) => handleInputChange('placeOfIncident', value)}>
-                    <SelectTrigger id="placeOfIncident" className="h-9">
+                    <SelectTrigger id="placeOfIncident" className="h-9 border-gray-200">
                       <SelectValue placeholder="Select Place of Inc." />
                     </SelectTrigger>
                     <SelectContent>
@@ -279,7 +279,7 @@ export const IncidentsDrawerScreen: React.FC<IncidentsDrawerScreenProps> = ({ on
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label htmlFor="createdDate" className="text-xs">
+                  <Label htmlFor="createdDate" className="text-xs font-medium text-gray-600">
                     Created Date
                   </Label>
                   <div className="relative">
@@ -288,18 +288,18 @@ export const IncidentsDrawerScreen: React.FC<IncidentsDrawerScreenProps> = ({ on
                       type="date"
                       value={formData.createdDate}
                       onChange={(e) => handleInputChange('createdDate', e.target.value)}
-                      className="h-9"
+                      className="h-9 border-gray-200"
                     />
                     <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
                   </div>
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label htmlFor="weatherCondition" className="text-xs">
+                  <Label htmlFor="weatherCondition" className="text-xs font-medium text-gray-600">
                     Weather Condition
                   </Label>
                   <Select value={formData.weatherCondition} onValueChange={(value) => handleInputChange('weatherCondition', value)}>
-                    <SelectTrigger id="weatherCondition" className="h-9">
+                    <SelectTrigger id="weatherCondition" className="h-9 border-gray-200">
                       <SelectValue placeholder="Select Weather Con." />
                     </SelectTrigger>
                     <SelectContent>
@@ -312,11 +312,11 @@ export const IncidentsDrawerScreen: React.FC<IncidentsDrawerScreenProps> = ({ on
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label htmlFor="driverFault" className="text-xs">
+                  <Label htmlFor="driverFault" className="text-xs font-medium text-gray-600">
                     Driver Fault
                   </Label>
                   <Select value={formData.driverFault} onValueChange={(value) => handleInputChange('driverFault', value)}>
-                    <SelectTrigger id="driverFault" className="h-9">
+                    <SelectTrigger id="driverFault" className="h-9 border-gray-200">
                       <SelectValue placeholder="Select Driver Fault" />
                     </SelectTrigger>
                     <SelectContent>
@@ -328,11 +328,11 @@ export const IncidentsDrawerScreen: React.FC<IncidentsDrawerScreenProps> = ({ on
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label htmlFor="vehicleFault" className="text-xs">
+                  <Label htmlFor="vehicleFault" className="text-xs font-medium text-gray-600">
                     Vehicle Fault
                   </Label>
                   <Select value={formData.vehicleFault} onValueChange={(value) => handleInputChange('vehicleFault', value)}>
-                    <SelectTrigger id="vehicleFault" className="h-9">
+                    <SelectTrigger id="vehicleFault" className="h-9 border-gray-200">
                       <SelectValue placeholder="Select Vehicle Fault" />
                     </SelectTrigger>
                     <SelectContent>
@@ -344,7 +344,7 @@ export const IncidentsDrawerScreen: React.FC<IncidentsDrawerScreenProps> = ({ on
                 </div>
 
                 <div className="col-span-5 space-y-1.5">
-                  <Label htmlFor="detailedDescription" className="text-xs">
+                  <Label htmlFor="detailedDescription" className="text-xs font-medium text-gray-600">
                     Detailed Description
                   </Label>
                   <Textarea
@@ -352,7 +352,7 @@ export const IncidentsDrawerScreen: React.FC<IncidentsDrawerScreenProps> = ({ on
                     value={formData.detailedDescription}
                     onChange={(e) => handleInputChange('detailedDescription', e.target.value)}
                     placeholder="Enter Description"
-                    className="min-h-[80px] resize-none"
+                    className="min-h-[80px] resize-none border-gray-200"
                   />
                 </div>
               </div>
@@ -360,33 +360,33 @@ export const IncidentsDrawerScreen: React.FC<IncidentsDrawerScreenProps> = ({ on
           </AccordionItem>
 
           {/* Maintenance Details Section */}
-          <AccordionItem value="maintenance-details">
-            <AccordionTrigger className="text-sm font-medium hover:no-underline">
+          <AccordionItem value="maintenance-details" className="border-b border-gray-200">
+            <AccordionTrigger className="text-sm font-medium text-gray-700 hover:no-underline hover:bg-gray-50 px-4 py-3 rounded-md">
               <div className="flex items-center gap-2">
                 <Wrench className="h-5 w-5 text-purple-500" />
                 Maintenance Details
               </div>
             </AccordionTrigger>
-            <AccordionContent>
-              <div className="space-y-4 pt-2">
+            <AccordionContent className="px-4 pt-4">
+              <div className="space-y-4">
                 <div className="flex items-center gap-2">
                   <Switch
                     id="maintenanceRequired"
                     checked={formData.maintenanceRequired}
                     onCheckedChange={(checked) => handleInputChange('maintenanceRequired', checked.toString())}
                   />
-                  <Label htmlFor="maintenanceRequired" className="text-sm cursor-pointer">
+                  <Label htmlFor="maintenanceRequired" className="text-sm font-medium text-gray-700 cursor-pointer">
                     Maintenance Required
                   </Label>
                 </div>
 
                 <div className="grid grid-cols-5 gap-4">
                   <div className="space-y-1.5">
-                    <Label htmlFor="accidentType" className="text-xs">
+                    <Label htmlFor="accidentType" className="text-xs font-medium text-gray-600">
                       Accident Type <span className="text-destructive">*</span>
                     </Label>
                     <Select value={formData.accidentType} onValueChange={(value) => handleInputChange('accidentType', value)}>
-                      <SelectTrigger id="accidentType" className="h-9">
+                      <SelectTrigger id="accidentType" className="h-9 border-gray-200">
                         <SelectValue placeholder="Select Accident Type" />
                       </SelectTrigger>
                       <SelectContent>
@@ -398,11 +398,11 @@ export const IncidentsDrawerScreen: React.FC<IncidentsDrawerScreenProps> = ({ on
                   </div>
 
                   <div className="space-y-1.5">
-                    <Label htmlFor="causeCode" className="text-xs">
+                    <Label htmlFor="causeCode" className="text-xs font-medium text-gray-600">
                       Cause Code <span className="text-destructive">*</span>
                     </Label>
                     <Select value={formData.causeCode} onValueChange={(value) => handleInputChange('causeCode', value)}>
-                      <SelectTrigger id="causeCode" className="h-9">
+                      <SelectTrigger id="causeCode" className="h-9 border-gray-200">
                         <SelectValue placeholder="Select Cause Code" />
                       </SelectTrigger>
                       <SelectContent>
@@ -414,7 +414,7 @@ export const IncidentsDrawerScreen: React.FC<IncidentsDrawerScreenProps> = ({ on
                   </div>
 
                   <div className="space-y-1.5">
-                    <Label htmlFor="incidentResolution" className="text-xs">
+                    <Label htmlFor="incidentResolution" className="text-xs font-medium text-gray-600">
                       Incident Resolution <span className="text-destructive">*</span>
                     </Label>
                     <Input
@@ -422,16 +422,16 @@ export const IncidentsDrawerScreen: React.FC<IncidentsDrawerScreenProps> = ({ on
                       value={formData.incidentResolution}
                       onChange={(e) => handleInputChange('incidentResolution', e.target.value)}
                       placeholder="Enter Incident Resolution"
-                      className="h-9"
+                      className="h-9 border-gray-200"
                     />
                   </div>
 
                   <div className="space-y-1.5">
-                    <Label htmlFor="maintenanceType" className="text-xs">
+                    <Label htmlFor="maintenanceType" className="text-xs font-medium text-gray-600">
                       Maintenance Type
                     </Label>
                     <Select value={formData.maintenanceType} onValueChange={(value) => handleInputChange('maintenanceType', value)}>
-                      <SelectTrigger id="maintenanceType" className="h-9">
+                      <SelectTrigger id="maintenanceType" className="h-9 border-gray-200">
                         <SelectValue placeholder="Select Maint. Type" />
                       </SelectTrigger>
                       <SelectContent>
@@ -443,7 +443,7 @@ export const IncidentsDrawerScreen: React.FC<IncidentsDrawerScreenProps> = ({ on
                   </div>
 
                   <div className="space-y-1.5">
-                    <Label htmlFor="wagon" className="text-xs">
+                    <Label htmlFor="wagon" className="text-xs font-medium text-gray-600">
                       Wagon <span className="text-destructive">*</span>
                     </Label>
                     <Input
@@ -451,12 +451,12 @@ export const IncidentsDrawerScreen: React.FC<IncidentsDrawerScreenProps> = ({ on
                       value={formData.wagon}
                       onChange={(e) => handleInputChange('wagon', e.target.value)}
                       placeholder="Enter Wagon"
-                      className="h-9"
+                      className="h-9 border-gray-200"
                     />
                   </div>
 
                   <div className="space-y-1.5">
-                    <Label htmlFor="container" className="text-xs">
+                    <Label htmlFor="container" className="text-xs font-medium text-gray-600">
                       Container <span className="text-destructive">*</span>
                     </Label>
                     <Input
@@ -464,16 +464,16 @@ export const IncidentsDrawerScreen: React.FC<IncidentsDrawerScreenProps> = ({ on
                       value={formData.container}
                       onChange={(e) => handleInputChange('container', e.target.value)}
                       placeholder="Enter Container"
-                      className="h-9"
+                      className="h-9 border-gray-200"
                     />
                   </div>
 
                   <div className="space-y-1.5">
-                    <Label htmlFor="workType" className="text-xs">
+                    <Label htmlFor="workType" className="text-xs font-medium text-gray-600">
                       Work Type <span className="text-destructive">*</span>
                     </Label>
                     <Select value={formData.workType} onValueChange={(value) => handleInputChange('workType', value)}>
-                      <SelectTrigger id="workType" className="h-9">
+                      <SelectTrigger id="workType" className="h-9 border-gray-200">
                         <SelectValue placeholder="Select Work Type" />
                       </SelectTrigger>
                       <SelectContent>
@@ -485,11 +485,11 @@ export const IncidentsDrawerScreen: React.FC<IncidentsDrawerScreenProps> = ({ on
                   </div>
 
                   <div className="space-y-1.5">
-                    <Label htmlFor="workCategory" className="text-xs">
+                    <Label htmlFor="workCategory" className="text-xs font-medium text-gray-600">
                       Work Category <span className="text-destructive">*</span>
                     </Label>
                     <Select value={formData.workCategory} onValueChange={(value) => handleInputChange('workCategory', value)}>
-                      <SelectTrigger id="workCategory" className="h-9">
+                      <SelectTrigger id="workCategory" className="h-9 border-gray-200">
                         <SelectValue placeholder="Select Work Categ." />
                       </SelectTrigger>
                       <SelectContent>
@@ -501,11 +501,11 @@ export const IncidentsDrawerScreen: React.FC<IncidentsDrawerScreenProps> = ({ on
                   </div>
 
                   <div className="space-y-1.5">
-                    <Label htmlFor="workGroup" className="text-xs">
+                    <Label htmlFor="workGroup" className="text-xs font-medium text-gray-600">
                       Work Group <span className="text-destructive">*</span>
                     </Label>
                     <Select value={formData.workGroup} onValueChange={(value) => handleInputChange('workGroup', value)}>
-                      <SelectTrigger id="workGroup" className="h-9">
+                      <SelectTrigger id="workGroup" className="h-9 border-gray-200">
                         <SelectValue placeholder="Select Work Group" />
                       </SelectTrigger>
                       <SelectContent>
@@ -517,7 +517,7 @@ export const IncidentsDrawerScreen: React.FC<IncidentsDrawerScreenProps> = ({ on
                   </div>
 
                   <div className="col-span-5 space-y-1.5">
-                    <Label htmlFor="maintenanceDescription" className="text-xs">
+                    <Label htmlFor="maintenanceDescription" className="text-xs font-medium text-gray-600">
                       Maintenance Description <span className="text-destructive">*</span>
                     </Label>
                     <Textarea
@@ -525,7 +525,7 @@ export const IncidentsDrawerScreen: React.FC<IncidentsDrawerScreenProps> = ({ on
                       value={formData.maintenanceDescription}
                       onChange={(e) => handleInputChange('maintenanceDescription', e.target.value)}
                       placeholder="Enter Maintenance Desc."
-                      className="min-h-[80px] resize-none"
+                      className="min-h-[80px] resize-none border-gray-200"
                     />
                   </div>
                 </div>
@@ -534,21 +534,21 @@ export const IncidentsDrawerScreen: React.FC<IncidentsDrawerScreenProps> = ({ on
           </AccordionItem>
 
           {/* More Details Section */}
-          <AccordionItem value="more-details">
-            <AccordionTrigger className="text-sm font-medium hover:no-underline">
+          <AccordionItem value="more-details" className="border-b border-gray-200">
+            <AccordionTrigger className="text-sm font-medium text-gray-700 hover:no-underline hover:bg-gray-50 px-4 py-3 rounded-md">
               <div className="flex items-center gap-2">
                 <FileText className="h-5 w-5 text-pink-500" />
                 More Details
               </div>
             </AccordionTrigger>
-            <AccordionContent>
-              <div className="grid grid-cols-5 gap-4 pt-2">
+            <AccordionContent className="px-4 pt-4">
+              <div className="grid grid-cols-5 gap-4">
                 <div className="space-y-1.5">
-                  <Label htmlFor="incidentCausedBy" className="text-xs">
+                  <Label htmlFor="incidentCausedBy" className="text-xs font-medium text-gray-600">
                     Incident Caused By
                   </Label>
                   <Select value={formData.incidentCausedBy} onValueChange={(value) => handleInputChange('incidentCausedBy', value)}>
-                    <SelectTrigger id="incidentCausedBy" className="h-9">
+                    <SelectTrigger id="incidentCausedBy" className="h-9 border-gray-200">
                       <SelectValue placeholder="Select Inc. Caused" />
                     </SelectTrigger>
                     <SelectContent>
@@ -560,11 +560,11 @@ export const IncidentsDrawerScreen: React.FC<IncidentsDrawerScreenProps> = ({ on
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label htmlFor="incidentCauserName" className="text-xs">
+                  <Label htmlFor="incidentCauserName" className="text-xs font-medium text-gray-600">
                     Incident Causer Name
                   </Label>
                   <Select value={formData.incidentCauserName} onValueChange={(value) => handleInputChange('incidentCauserName', value)}>
-                    <SelectTrigger id="incidentCauserName" className="h-9">
+                    <SelectTrigger id="incidentCauserName" className="h-9 border-gray-200">
                       <SelectValue placeholder="Select Inc. Causer Name" />
                     </SelectTrigger>
                     <SelectContent>
@@ -576,7 +576,7 @@ export const IncidentsDrawerScreen: React.FC<IncidentsDrawerScreenProps> = ({ on
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label htmlFor="incidentReportedBy" className="text-xs">
+                  <Label htmlFor="incidentReportedBy" className="text-xs font-medium text-gray-600">
                     Incident Reported By
                   </Label>
                   <Input
@@ -584,12 +584,12 @@ export const IncidentsDrawerScreen: React.FC<IncidentsDrawerScreenProps> = ({ on
                     value={formData.incidentReportedBy}
                     onChange={(e) => handleInputChange('incidentReportedBy', e.target.value)}
                     placeholder="Enter Inc. Reported By"
-                    className="h-9"
+                    className="h-9 border-gray-200"
                   />
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label htmlFor="incidentCloseDate" className="text-xs">
+                  <Label htmlFor="incidentCloseDate" className="text-xs font-medium text-gray-600">
                     Incident Close Date
                   </Label>
                   <div className="relative">
@@ -598,18 +598,18 @@ export const IncidentsDrawerScreen: React.FC<IncidentsDrawerScreenProps> = ({ on
                       type="date"
                       value={formData.incidentCloseDate}
                       onChange={(e) => handleInputChange('incidentCloseDate', e.target.value)}
-                      className="h-9"
+                      className="h-9 border-gray-200"
                     />
                     <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
                   </div>
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label htmlFor="riskInvolved" className="text-xs">
+                  <Label htmlFor="riskInvolved" className="text-xs font-medium text-gray-600">
                     Risk Involved
                   </Label>
                   <Select value={formData.riskInvolved} onValueChange={(value) => handleInputChange('riskInvolved', value)}>
-                    <SelectTrigger id="riskInvolved" className="h-9">
+                    <SelectTrigger id="riskInvolved" className="h-9 border-gray-200">
                       <SelectValue placeholder="Select Risk Involved" />
                     </SelectTrigger>
                     <SelectContent>
@@ -621,11 +621,11 @@ export const IncidentsDrawerScreen: React.FC<IncidentsDrawerScreenProps> = ({ on
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label htmlFor="dangerousGoods" className="text-xs">
+                  <Label htmlFor="dangerousGoods" className="text-xs font-medium text-gray-600">
                     Dangerous Goods
                   </Label>
                   <Select value={formData.dangerousGoods} onValueChange={(value) => handleInputChange('dangerousGoods', value)}>
-                    <SelectTrigger id="dangerousGoods" className="h-9">
+                    <SelectTrigger id="dangerousGoods" className="h-9 border-gray-200">
                       <SelectValue placeholder="Select Danger Goods" />
                     </SelectTrigger>
                     <SelectContent>
@@ -636,11 +636,11 @@ export const IncidentsDrawerScreen: React.FC<IncidentsDrawerScreenProps> = ({ on
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label htmlFor="loadTime" className="text-xs">
+                  <Label htmlFor="loadTime" className="text-xs font-medium text-gray-600">
                     Load Time
                   </Label>
                   <Select value={formData.loadTime} onValueChange={(value) => handleInputChange('loadTime', value)}>
-                    <SelectTrigger id="loadTime" className="h-9">
+                    <SelectTrigger id="loadTime" className="h-9 border-gray-200">
                       <SelectValue placeholder="Select Load Time" />
                     </SelectTrigger>
                     <SelectContent>
@@ -652,7 +652,7 @@ export const IncidentsDrawerScreen: React.FC<IncidentsDrawerScreenProps> = ({ on
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label htmlFor="refDocNo" className="text-xs">
+                  <Label htmlFor="refDocNo" className="text-xs font-medium text-gray-600">
                     Ref. Doc. No.
                   </Label>
                   <Input
@@ -660,12 +660,12 @@ export const IncidentsDrawerScreen: React.FC<IncidentsDrawerScreenProps> = ({ on
                     value={formData.refDocNo}
                     onChange={(e) => handleInputChange('refDocNo', e.target.value)}
                     placeholder="Enter Ref. Doc. No."
-                    className="h-9"
+                    className="h-9 border-gray-200"
                   />
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label htmlFor="mobileRefIncidentId" className="text-xs">
+                  <Label htmlFor="mobileRefIncidentId" className="text-xs font-medium text-gray-600">
                     Mobile Ref. Incident ID
                   </Label>
                   <Input
@@ -673,12 +673,12 @@ export const IncidentsDrawerScreen: React.FC<IncidentsDrawerScreenProps> = ({ on
                     value={formData.mobileRefIncidentId}
                     onChange={(e) => handleInputChange('mobileRefIncidentId', e.target.value)}
                     placeholder="Enter Mobile Ref. Inc. ID"
-                    className="h-9"
+                    className="h-9 border-gray-200"
                   />
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label htmlFor="remarks" className="text-xs">
+                  <Label htmlFor="remarks" className="text-xs font-medium text-gray-600">
                     Remarks
                   </Label>
                   <Input
@@ -686,7 +686,7 @@ export const IncidentsDrawerScreen: React.FC<IncidentsDrawerScreenProps> = ({ on
                     value={formData.remarks}
                     onChange={(e) => handleInputChange('remarks', e.target.value)}
                     placeholder="Enter Remarks"
-                    className="h-9"
+                    className="h-9 border-gray-200"
                   />
                 </div>
               </div>
@@ -694,73 +694,73 @@ export const IncidentsDrawerScreen: React.FC<IncidentsDrawerScreenProps> = ({ on
           </AccordionItem>
 
           {/* Work Order Details Section */}
-          <AccordionItem value="work-order-details">
-            <AccordionTrigger className="text-sm font-medium hover:no-underline">
+          <AccordionItem value="work-order-details" className="border-b border-gray-200">
+            <AccordionTrigger className="text-sm font-medium text-gray-700 hover:no-underline hover:bg-gray-50 px-4 py-3 rounded-md">
               <div className="flex items-center gap-2">
                 <Users className="h-5 w-5 text-green-500" />
                 Work Order Details
               </div>
             </AccordionTrigger>
-            <AccordionContent>
-              <div className="grid grid-cols-5 gap-4 pt-2">
+            <AccordionContent className="px-4 pt-4">
+              <div className="grid grid-cols-5 gap-4">
                 <div className="space-y-1.5">
-                  <Label className="text-xs">Work Order Number</Label>
+                  <Label className="text-xs font-medium text-gray-600">Work Order Number</Label>
                   <div className="text-sm text-primary font-medium">{formData.workOrderNumber}</div>
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label className="text-xs">Work Order Status</Label>
-                  <div className="text-sm">{formData.workOrderStatus}</div>
+                  <Label className="text-xs font-medium text-gray-600">Work Order Status</Label>
+                  <div className="text-sm text-gray-900">{formData.workOrderStatus}</div>
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label className="text-xs">Work Request Number</Label>
-                  <div className="text-sm">{formData.workRequestNumber}</div>
+                  <Label className="text-xs font-medium text-gray-600">Work Request Number</Label>
+                  <div className="text-sm text-gray-900">{formData.workRequestNumber}</div>
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label className="text-xs">Work Request Status</Label>
-                  <div className="text-sm">{formData.workRequestStatus}</div>
+                  <Label className="text-xs font-medium text-gray-600">Work Request Status</Label>
+                  <div className="text-sm text-gray-900">{formData.workRequestStatus}</div>
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label className="text-xs">Error Message</Label>
-                  <div className="text-sm">{formData.errorMessage}</div>
+                  <Label className="text-xs font-medium text-gray-600">Error Message</Label>
+                  <div className="text-sm text-gray-900">{formData.errorMessage}</div>
                 </div>
               </div>
             </AccordionContent>
           </AccordionItem>
 
           {/* Claim Details Section */}
-          <AccordionItem value="claim-details">
-            <AccordionTrigger className="text-sm font-medium hover:no-underline">
+          <AccordionItem value="claim-details" className="border-b border-gray-200">
+            <AccordionTrigger className="text-sm font-medium text-gray-700 hover:no-underline hover:bg-gray-50 px-4 py-3 rounded-md">
               <div className="flex items-center gap-2">
                 <DollarSign className="h-5 w-5 text-teal-500" />
                 Claim Details
               </div>
             </AccordionTrigger>
-            <AccordionContent>
-              <div className="space-y-4 pt-2">
+            <AccordionContent className="px-4 pt-4">
+              <div className="space-y-4">
                 <div className="flex items-center gap-2">
                   <Switch
                     id="claimRequired"
                     checked={formData.claimRequired}
                     onCheckedChange={(checked) => handleInputChange('claimRequired', checked.toString())}
                   />
-                  <Label htmlFor="claimRequired" className="text-sm cursor-pointer">
+                  <Label htmlFor="claimRequired" className="text-sm font-medium text-gray-700 cursor-pointer">
                     Claim Required
                   </Label>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1.5">
-                    <Label className="text-xs">Claim No.</Label>
+                    <Label className="text-xs font-medium text-gray-600">Claim No.</Label>
                     <div className="text-sm text-primary font-medium">{formData.claimNo}</div>
                   </div>
 
                   <div className="space-y-1.5">
-                    <Label className="text-xs">Claim Status</Label>
-                    <div className="text-sm">{formData.claimStatus}</div>
+                    <Label className="text-xs font-medium text-gray-600">Claim Status</Label>
+                    <div className="text-sm text-gray-900">{formData.claimStatus}</div>
                   </div>
                 </div>
               </div>
@@ -773,10 +773,10 @@ export const IncidentsDrawerScreen: React.FC<IncidentsDrawerScreenProps> = ({ on
 
   const footer = (
     <div className="flex justify-end gap-3">
-      <Button variant="outline" onClick={onClose}>
+      <Button variant="outline" onClick={onClose} className="hover:bg-gray-50">
         Cancel
       </Button>
-      <Button onClick={handleSaveIncident}>
+      <Button onClick={handleSaveIncident} className="bg-primary hover:bg-primary/90">
         Save Incident
       </Button>
     </div>
