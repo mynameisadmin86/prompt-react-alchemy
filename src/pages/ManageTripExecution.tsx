@@ -163,6 +163,7 @@ const ManageTripExecution = () => {
         isOpen={isOpen}
         onClose={closeDrawer}
         title={drawerType === 'resources' ? 'Resources' : drawerType === 'vas' ? 'VAS' : drawerType === 'incidents' ? 'Incidents' : ''}
+        titleBadge={drawerType === 'vas' ? tripUniqueID || 'TRIP0000000001' : undefined}
         slideDirection="right"
         width={drawerType === 'incidents' ? '100%' : '75%'}
         smoothness="smooth"

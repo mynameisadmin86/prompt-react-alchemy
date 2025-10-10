@@ -214,6 +214,19 @@ export const VASDrawerScreen = () => {
     <div className="flex h-full">
       {/* Left Sidebar - VAS Items List */}
       <div className="w-64 border-r border-border bg-muted/30 p-4 flex flex-col">
+        {/* Customer Order No */}
+        <div className="space-y-2 mb-4">
+          <Label>Customer Order No.</Label>
+          <Select value={formData.customerOrderNo} onValueChange={(value) => setFormData({ ...formData, customerOrderNo: value })}>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="CO000000001">CO000000001</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
         <div className="flex items-center justify-between mb-4">
           <h3 className="font-semibold text-sm">All VAS</h3>
           <Button 
@@ -267,19 +280,6 @@ export const VASDrawerScreen = () => {
       {/* Main Content Area */}
       <div className="flex-1 overflow-y-auto">
         <div className="p-6 space-y-6">
-          {/* Customer Order No */}
-          <div className="space-y-2">
-            <Label>Customer Order No.</Label>
-            <Select value={formData.customerOrderNo} onValueChange={(value) => setFormData({ ...formData, customerOrderNo: value })}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="CO000000001">CO000000001</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
           {/* Applicable To Checkboxes */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
