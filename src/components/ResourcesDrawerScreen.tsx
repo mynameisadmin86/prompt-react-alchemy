@@ -67,32 +67,6 @@ export const ResourcesDrawerScreen = ({ onClose }: { onClose?: () => void }) => 
 
   return (
     <div className="flex flex-col h-full">
-      {/* Header */}
-      <div className="sticky top-0 z-20 flex items-center justify-between px-6 py-4 border-b bg-card">
-        <div className="flex items-center gap-3">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={onClose}
-            className="h-8 w-8"
-          >
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
-          <h2 className="text-lg font-semibold">Resources</h2>
-          <Badge variant="secondary" className="ml-2">
-            TRIP000000001
-          </Badge>
-        </div>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={onClose}
-          className="h-8 w-8"
-        >
-          <X className="h-4 w-4" />
-        </Button>
-      </div>
-
       {/* Body */}
       <div className="flex flex-1 overflow-hidden">
         {/* Left Sidebar - Resource List */}
