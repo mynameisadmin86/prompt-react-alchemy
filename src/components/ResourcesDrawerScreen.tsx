@@ -12,57 +12,80 @@ interface Resource {
   id: string;
   type: 'Schedule' | 'Agent' | 'Handler';
   name: string;
+  formData: ResourceFormData;
 }
 
-const mockResources: Resource[] = [
-  { id: 'SCH32030023', type: 'Schedule', name: 'SCH32030023' },
-  { id: 'DB Cargo', type: 'Agent', name: 'DB Cargo' },
-  { id: '14388 (RAM)', type: 'Handler', name: '14388 (RAM)' },
-];
+interface ResourceFormData {
+  carrier: string;
+  supplier: string;
+  supplierRef: string;
+  carrierStatus: string;
+  scheduleNo: string;
+  trainNo: string;
+  pathNo: string;
+  legDetails: string;
+  departurePoint: string;
+  arrivalPoint: string;
+  service: string;
+  subService: string;
+  infrastructureManager: string;
+  reason: string;
+  remarks: string;
+}
+
+const initialFormData: ResourceFormData = {
+  carrier: '',
+  supplier: '',
+  supplierRef: '',
+  carrierStatus: '',
+  scheduleNo: '',
+  trainNo: '',
+  pathNo: '',
+  legDetails: '',
+  departurePoint: '',
+  arrivalPoint: '',
+  service: '',
+  subService: '',
+  infrastructureManager: '',
+  reason: '',
+  remarks: '',
+};
 
 export const ResourcesDrawerScreen = ({ onClose }: { onClose?: () => void }) => {
+  const [resources, setResources] = useState<Resource[]>([]);
   const [selectedResource, setSelectedResource] = useState<Resource | null>(null);
-  const [formData, setFormData] = useState({
-    carrier: 'ABC Executive Agent',
-    supplier: 'ABC Supplier',
-    supplierRef: '',
-    carrierStatus: 'Inprogress',
-    scheduleNo: '',
-    trainNo: '',
-    pathNo: '',
-    legDetails: '01 - Voila to Curtici',
-    departurePoint: 'S3-202705, Voila',
-    arrivalPoint: 'S3-21925-3, Curtici',
-    service: '',
-    subService: '',
-    infrastructureManager: '',
-    reason: '',
-    remarks: '',
-  });
+  const [formData, setFormData] = useState<ResourceFormData>(initialFormData);
+
+  const handleResourceClick = (resource: Resource) => {
+    setSelectedResource(resource);
+    setFormData(resource.formData);
+  };
 
   const handleSave = () => {
-    console.log('Saving resource:', formData);
-    // Add save logic here
+    if (selectedResource) {
+      // Update existing resource
+      setResources(resources.map(r => 
+        r.id === selectedResource.id 
+          ? { ...r, formData: { ...formData } }
+          : r
+      ));
+      setSelectedResource({ ...selectedResource, formData: { ...formData } });
+    } else {
+      // Create new resource
+      const newResource: Resource = {
+        id: `RES${Date.now()}`,
+        type: 'Schedule',
+        name: formData.scheduleNo || formData.carrier || `Resource ${resources.length + 1}`,
+        formData: { ...formData }
+      };
+      setResources([...resources, newResource]);
+      setSelectedResource(newResource);
+    }
   };
 
   const handleClear = () => {
-    setFormData({
-      carrier: 'ABC Executive Agent',
-      supplier: 'ABC Supplier',
-      supplierRef: '',
-      carrierStatus: 'Inprogress',
-      scheduleNo: '',
-      trainNo: '',
-      pathNo: '',
-      legDetails: '01 - Voila to Curtici',
-      departurePoint: 'S3-202705, Voila',
-      arrivalPoint: 'S3-21925-3, Curtici',
-      service: '',
-      subService: '',
-      infrastructureManager: '',
-      reason: '',
-      remarks: '',
-    });
+    setFormData(initialFormData);
+    setSelectedResource(null);
   };
 
   return (
@@ -79,13 +102,13 @@ export const ResourcesDrawerScreen = ({ onClose }: { onClose?: () => void }) => 
           </div>
 
           <div className="space-y-2 flex-1 overflow-y-auto">
-            {mockResources.map((resource) => (
+            {resources.map((resource) => (
               <Card
                 key={resource.id}
                 className={`cursor-pointer transition-colors hover:bg-accent ${
                   selectedResource?.id === resource.id ? 'bg-accent border-primary' : ''
                 }`}
-                onClick={() => setSelectedResource(resource)}
+                onClick={() => handleResourceClick(resource)}
               >
                 <CardContent className="p-3">
                   <div className="font-medium text-sm">{resource.name}</div>
