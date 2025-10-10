@@ -162,11 +162,13 @@ const ManageTripExecution = () => {
       <SideDrawer
         isOpen={isOpen}
         onClose={closeDrawer}
-        title={drawerType === 'resources' ? 'Resources' : drawerType === 'vas' ? 'VAS' : drawerType === 'incidents' ? 'Incidents' : ''}
+        onBack={drawerType === 'incidents' ? closeDrawer : undefined}
+        title={drawerType === 'resources' ? 'Resources' : drawerType === 'vas' ? 'VAS' : drawerType === 'incidents' ? 'Incident' : ''}
         titleBadge={drawerType === 'vas' || drawerType === 'incidents' ? tripUniqueID || 'TRIP0000000001' : undefined}
         slideDirection="right"
         width={drawerType === 'incidents' ? '100%' : '75%'}
         smoothness="smooth"
+        showBackButton={drawerType === 'incidents'}
         showCloseButton={true}
       >
         {drawerType === 'resources' && <ResourcesDrawerScreen onClose={closeDrawer} />}

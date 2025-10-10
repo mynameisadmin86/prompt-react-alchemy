@@ -189,7 +189,7 @@ export const IncidentsDrawerScreen: React.FC<IncidentsDrawerScreenProps> = ({ on
       {/* Body */}
       <div className="flex flex-1 overflow-hidden">
         {/* Left Sidebar - Incident List */}
-        <div className="w-64 border-r border-border bg-muted/30 p-4 flex flex-col">
+        <div className="w-[30%] border-r border-border bg-muted/30 p-4 flex flex-col">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-semibold text-sm">All Incidents</h3>
             <div className="flex gap-1">
@@ -203,32 +203,38 @@ export const IncidentsDrawerScreen: React.FC<IncidentsDrawerScreenProps> = ({ on
           </div>
 
           <div className="space-y-2 flex-1 overflow-y-auto">
-            {incidents.map((incident, index) => (
-              <Card
-                key={`${incident.id}-${index}`}
-                className={`cursor-pointer transition-colors hover:bg-accent ${
-                  selectedIncident?.id === incident.id ? 'bg-accent border-primary' : ''
-                }`}
-                onClick={() => handleIncidentClick(incident)}
-              >
-                <CardContent className="p-3 flex items-center justify-between">
-                  <span className="text-sm font-medium">{incident.id}</span>
-                  <div className="flex items-center gap-2">
-                    <Badge className={`${getStatusColor(incident.status)} text-xs font-medium`}>
-                      {incident.status}
-                    </Badge>
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      className="h-7 w-7 text-destructive hover:text-destructive hover:bg-destructive/10"
-                      onClick={(e) => handleDeleteIncident(incident.id, e)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+            {incidents.map((incident, index) => {
+              const isSelected = selectedIncident ? 
+                incidents.findIndex(inc => inc === selectedIncident) === index : 
+                false;
+              
+              return (
+                <Card
+                  key={`${incident.id}-${index}`}
+                  className={`cursor-pointer transition-colors hover:bg-accent ${
+                    isSelected ? 'bg-accent border-primary' : ''
+                  }`}
+                  onClick={() => handleIncidentClick(incident)}
+                >
+                  <CardContent className="p-3 flex items-center justify-between">
+                    <span className="text-sm font-medium">{incident.id}</span>
+                    <div className="flex items-center gap-2">
+                      <Badge className={`${getStatusColor(incident.status)} text-xs font-medium`}>
+                        {incident.status}
+                      </Badge>
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="h-7 w-7 text-destructive hover:text-destructive hover:bg-destructive/10"
+                        onClick={(e) => handleDeleteIncident(incident.id, e)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
         </div>
 
@@ -275,9 +281,9 @@ export const IncidentsDrawerScreen: React.FC<IncidentsDrawerScreenProps> = ({ on
             </div>
 
             {/* Accordion Sections */}
-            <Accordion type="single" collapsible className="w-full">
+            <Accordion type="single" collapsible className="w-full space-y-4">
               {/* Incident Details Section */}
-              <AccordionItem value="incident-details">
+              <AccordionItem value="incident-details" className="border rounded-lg px-4">
                 <AccordionTrigger className="hover:no-underline">
                   <div className="flex items-center gap-2">
                     <Car className="h-5 w-5 text-orange-500" />
@@ -391,7 +397,7 @@ export const IncidentsDrawerScreen: React.FC<IncidentsDrawerScreenProps> = ({ on
               </AccordionItem>
 
               {/* Maintenance Details Section */}
-              <AccordionItem value="maintenance-details">
+              <AccordionItem value="maintenance-details" className="border rounded-lg px-4">
                 <AccordionTrigger className="hover:no-underline">
                   <div className="flex items-center gap-2">
                     <Wrench className="h-5 w-5 text-purple-500" />
@@ -515,7 +521,7 @@ export const IncidentsDrawerScreen: React.FC<IncidentsDrawerScreenProps> = ({ on
               </AccordionItem>
 
               {/* More Details Section */}
-              <AccordionItem value="more-details">
+              <AccordionItem value="more-details" className="border rounded-lg px-4">
                 <AccordionTrigger className="hover:no-underline">
                   <div className="flex items-center gap-2">
                     <FileText className="h-5 w-5 text-pink-500" />
@@ -625,7 +631,7 @@ export const IncidentsDrawerScreen: React.FC<IncidentsDrawerScreenProps> = ({ on
               </AccordionItem>
 
               {/* Work Order Details Section */}
-              <AccordionItem value="work-order-details">
+              <AccordionItem value="work-order-details" className="border rounded-lg px-4">
                 <AccordionTrigger className="hover:no-underline">
                   <div className="flex items-center gap-2">
                     <Users className="h-5 w-5 text-green-500" />
@@ -663,7 +669,7 @@ export const IncidentsDrawerScreen: React.FC<IncidentsDrawerScreenProps> = ({ on
               </AccordionItem>
 
               {/* Claim Details Section */}
-              <AccordionItem value="claim-details">
+              <AccordionItem value="claim-details" className="border rounded-lg px-4">
                 <AccordionTrigger className="hover:no-underline">
                   <div className="flex items-center gap-2">
                     <DollarSign className="h-5 w-5 text-teal-500" />
