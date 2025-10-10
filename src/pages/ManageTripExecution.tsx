@@ -8,8 +8,8 @@ import { manageTripStore } from '@/stores/mangeTripStore';
 import { useSearchParams } from "react-router-dom";
 import { SideDrawer } from '@/components/SideDrawer';
 import { useDrawerStore } from '@/stores/drawerStore';
-import { ResourcesDrawerScreen } from '@/components/ResourcesDrawerScreen';
-import { VASDrawerScreen } from '@/components/VASDrawerScreen';
+import { ResourcesDrawerScreen } from '@/components/drawer/ResourcesDrawerScreen';
+import { VASDrawerScreen } from '@/components/drawer/VASDrawerScreen';
 
 const ManageTripExecution = () => {
   const { loading, tripData, fetchTrip, saveTrip } = manageTripStore();
@@ -167,8 +167,8 @@ const ManageTripExecution = () => {
         smoothness="smooth"
         showCloseButton={true}
       >
-        {drawerType === 'resources' && <ResourcesDrawerScreen />}
-        {drawerType === 'vas' && <VASDrawerScreen />}
+        {drawerType === 'resources' && <ResourcesDrawerScreen onClose={closeDrawer} />}
+        {drawerType === 'vas' && <VASDrawerScreen onClose={closeDrawer} />}
       </SideDrawer>
     </div>
   );
