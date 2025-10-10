@@ -70,6 +70,8 @@ export const SummaryCardsGrid = () => {
       openDrawer('resources');
     } else if (cardTitle === 'VAS') {
       openDrawer('vas');
+    } else if (cardTitle === 'Incidents') {
+      openDrawer('incidents');
     }
   };
 
@@ -77,7 +79,7 @@ export const SummaryCardsGrid = () => {
     <div className="grid grid-cols-2 gap-6">
       {summaryCardsData.map((card, index) => {
         const Icon = card.icon;
-        const isClickable = card.title === 'Resources' || card.title === 'VAS';
+        const isClickable = card.title === 'Resources' || card.title === 'VAS' || card.title === 'Incidents';
         return (
           <Card 
             key={index} 
