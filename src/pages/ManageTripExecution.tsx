@@ -10,6 +10,7 @@ import { SideDrawer } from '@/components/SideDrawer';
 import { useDrawerStore } from '@/stores/drawerStore';
 import { ResourcesDrawerScreen } from '@/components/ResourcesDrawerScreen';
 import { VASDrawerScreen } from '@/components/VASDrawerScreen';
+import { IncidentsDrawerScreen } from '@/components/drawer/IncidentsDrawerScreen';
 
 const ManageTripExecution = () => {
   const { loading, tripData, fetchTrip, saveTrip } = manageTripStore();
@@ -161,7 +162,7 @@ const ManageTripExecution = () => {
       <SideDrawer
         isOpen={isOpen}
         onClose={closeDrawer}
-        title={drawerType === 'resources' ? 'Resources' : drawerType === 'vas' ? 'VAS' : ''}
+        title={drawerType === 'resources' ? 'Resources' : drawerType === 'vas' ? 'VAS' : drawerType === 'incidents' ? 'Incidents' : ''}
         slideDirection="right"
         width="75%"
         smoothness="smooth"
@@ -169,6 +170,7 @@ const ManageTripExecution = () => {
       >
         {drawerType === 'resources' && <ResourcesDrawerScreen />}
         {drawerType === 'vas' && <VASDrawerScreen />}
+        {drawerType === 'incidents' && <IncidentsDrawerScreen onClose={closeDrawer} />}
       </SideDrawer>
     </div>
   );
