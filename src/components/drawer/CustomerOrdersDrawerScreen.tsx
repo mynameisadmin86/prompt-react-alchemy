@@ -141,8 +141,8 @@ export const CustomerOrdersDrawerScreen: React.FC<CustomerOrdersDrawerScreenProp
         </Button>
       </div>
 
-      {/* Total Bookings Section */}
-      <div className="px-6 py-3 border-b bg-background">
+      {/* Total Bookings & Toolbar Section */}
+      <div className="px-6 py-3 border-b bg-background space-y-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span className="text-sm font-medium">Total Bookings</span>
@@ -155,10 +155,7 @@ export const CustomerOrdersDrawerScreen: React.FC<CustomerOrdersDrawerScreenProp
             Add CO to Running Trip
           </Button>
         </div>
-      </div>
 
-      {/* Toolbar */}
-      <div className="px-6 py-3 bg-background">
         <div className="flex items-center justify-between">
           <h3 className="text-sm font-semibold">Customer Orders</h3>
           <div className="flex items-center gap-2">
