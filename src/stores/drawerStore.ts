@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-type DrawerType = 'resources' | 'vas' | 'incidents' | 'customer-orders' | null;
+type DrawerType = 'resources' | 'vas' | 'incidents' | null;
 
 interface DrawerStore {
   drawerType: DrawerType;
