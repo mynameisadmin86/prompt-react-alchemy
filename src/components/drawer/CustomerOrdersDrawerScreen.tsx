@@ -141,16 +141,16 @@ export const CustomerOrdersDrawerScreen: React.FC<CustomerOrdersDrawerScreenProp
         </Button>
       </div>
 
-      {/* Sub Header with Total Bookings */}
-      <div className="px-6 py-4 border-b bg-card">
+      {/* Total Bookings Section */}
+      <div className="px-6 py-3 border-b bg-background">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span className="text-sm font-medium">Total Bookings</span>
-            <Badge variant="secondary" className="rounded-full">
+            <Badge variant="secondary" className="rounded-full px-2.5 py-0.5">
               {orders.length}
             </Badge>
           </div>
-          <Button size="sm" className="gap-2">
+          <Button size="sm" variant="outline" className="gap-2">
             <Plus className="h-4 w-4" />
             Add CO to Running Trip
           </Button>
@@ -158,7 +158,7 @@ export const CustomerOrdersDrawerScreen: React.FC<CustomerOrdersDrawerScreenProp
       </div>
 
       {/* Toolbar */}
-      <div className="px-6 py-4 border-b bg-card">
+      <div className="px-6 py-3 bg-background">
         <div className="flex items-center justify-between">
           <h3 className="text-sm font-semibold">Customer Orders</h3>
           <div className="flex items-center gap-2">
@@ -168,19 +168,19 @@ export const CustomerOrdersDrawerScreen: React.FC<CustomerOrdersDrawerScreenProp
                 placeholder="Search"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-9 w-64"
+                className="pl-9 w-64 h-9"
               />
             </div>
-            <Button variant="outline" size="icon">
+            <Button variant="outline" size="icon" className="h-9 w-9">
               <Download className="h-4 w-4" />
             </Button>
-            <Button variant="outline" size="icon">
+            <Button variant="outline" size="icon" className="h-9 w-9">
               <Filter className="h-4 w-4" />
             </Button>
-            <Button variant="outline" size="icon">
+            <Button variant="outline" size="icon" className="h-9 w-9">
               <Copy className="h-4 w-4" />
             </Button>
-            <Button variant="outline" size="icon">
+            <Button variant="outline" size="icon" className="h-9 w-9">
               <MoreVertical className="h-4 w-4" />
             </Button>
           </div>
