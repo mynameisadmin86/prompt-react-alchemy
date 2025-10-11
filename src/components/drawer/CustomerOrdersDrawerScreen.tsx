@@ -117,32 +117,7 @@ export const CustomerOrdersDrawerScreen: React.FC<CustomerOrdersDrawerScreenProp
     <div className="flex flex-col h-full bg-background">
       {/* Header */}
       <div className="sticky top-0 z-20 border-b bg-card">
-        <div className="flex items-center justify-between px-6 py-4">
-          <div className="flex items-center gap-3">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={onClose}
-              className="h-8 w-8"
-            >
-              <ArrowLeft className="h-4 w-4" />
-            </Button>
-            <h2 className="text-lg font-semibold">Customer Order</h2>
-            <Badge variant="secondary" className="bg-blue-50 text-blue-700 hover:bg-blue-50">
-              {tripId}
-            </Badge>
-          </div>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={onClose}
-            className="h-8 w-8"
-          >
-            <X className="h-4 w-4" />
-          </Button>
-        </div>
-
-        <div className="flex items-center justify-between px-6 py-3 border-t">
+        <div className="flex items-center justify-between px-6 py-3">
           <div className="flex items-center gap-2">
             <span className="text-sm font-medium">Total Bookings</span>
             <Badge variant="secondary" className="rounded-full px-2.5 py-0.5">
