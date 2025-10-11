@@ -12,6 +12,7 @@ import { ResourcesDrawerScreen } from '@/components/ResourcesDrawerScreen';
 import { VASDrawerScreen } from '@/components/VASDrawerScreen';
 import { IncidentsDrawerScreen } from '@/components/drawer/IncidentsDrawerScreen';
 import { CustomerOrdersDrawerScreen } from '@/components/drawer/CustomerOrdersDrawerScreen';
+import { SupplierBillingDrawerScreen } from '@/components/drawer/SupplierBillingDrawerScreen';
 
 const ManageTripExecution = () => {
   const { loading, tripData, fetchTrip, saveTrip } = manageTripStore();
@@ -163,19 +164,20 @@ const ManageTripExecution = () => {
       <SideDrawer
         isOpen={isOpen}
         onClose={closeDrawer}
-        onBack={drawerType === 'incidents' || drawerType === 'customer-orders' ? closeDrawer : undefined}
-        title={drawerType === 'resources' ? 'Resources' : drawerType === 'vas' ? 'VAS' : drawerType === 'incidents' ? 'Incident' : drawerType === 'customer-orders' ? 'Customer Order' : ''}
-        titleBadge={drawerType === 'vas' || drawerType === 'incidents' || drawerType === 'customer-orders' ? tripUniqueID || 'TRIP0000000001' : undefined}
+        onBack={drawerType === 'incidents' || drawerType === 'customer-orders' || drawerType === 'supplier-billing' ? closeDrawer : undefined}
+        title={drawerType === 'resources' ? 'Resources' : drawerType === 'vas' ? 'VAS' : drawerType === 'incidents' ? 'Incident' : drawerType === 'customer-orders' ? 'Customer Order' : drawerType === 'supplier-billing' ? 'Supplier Billing' : ''}
+        titleBadge={drawerType === 'vas' || drawerType === 'incidents' || drawerType === 'customer-orders' || drawerType === 'supplier-billing' ? tripUniqueID || 'TRIP0000000001' : undefined}
         slideDirection="right"
-        width={drawerType === 'incidents' || drawerType === 'customer-orders' ? '100%' : '75%'}
+        width={drawerType === 'incidents' || drawerType === 'customer-orders' || drawerType === 'supplier-billing' ? '100%' : '75%'}
         smoothness="smooth"
-        showBackButton={drawerType === 'incidents' || drawerType === 'customer-orders'}
+        showBackButton={drawerType === 'incidents' || drawerType === 'customer-orders' || drawerType === 'supplier-billing'}
         showCloseButton={true}
       >
         {drawerType === 'resources' && <ResourcesDrawerScreen onClose={closeDrawer} />}
         {drawerType === 'vas' && <VASDrawerScreen />}
         {drawerType === 'incidents' && <IncidentsDrawerScreen onClose={closeDrawer} />}
         {drawerType === 'customer-orders' && <CustomerOrdersDrawerScreen onClose={closeDrawer} tripId={tripUniqueID || undefined} />}
+        {drawerType === 'supplier-billing' && <SupplierBillingDrawerScreen onClose={closeDrawer} tripId={tripUniqueID || undefined} />}
       </SideDrawer>
     </div>
   );
