@@ -66,7 +66,9 @@ export const SummaryCardsGrid = () => {
   const { openDrawer } = useDrawerStore();
 
   const handleCardClick = (cardTitle: string) => {
-    if (cardTitle === 'Resources') {
+    if (cardTitle === 'Customer Orders') {
+      openDrawer('customer-orders');
+    } else if (cardTitle === 'Resources') {
       openDrawer('resources');
     } else if (cardTitle === 'VAS') {
       openDrawer('vas');
@@ -79,7 +81,7 @@ export const SummaryCardsGrid = () => {
     <div className="grid grid-cols-2 gap-6">
       {summaryCardsData.map((card, index) => {
         const Icon = card.icon;
-        const isClickable = card.title === 'Resources' || card.title === 'VAS' || card.title === 'Incidents';
+        const isClickable = card.title === 'Customer Orders' || card.title === 'Resources' || card.title === 'VAS' || card.title === 'Incidents';
         return (
           <Card 
             key={index} 
