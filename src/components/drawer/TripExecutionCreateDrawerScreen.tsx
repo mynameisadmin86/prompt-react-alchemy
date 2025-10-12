@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, ChevronDown, ChevronUp, Plus, User, FileText, MapPin, Truck, Package, Calendar, Info, Trash2, RefreshCw, Send, AlertCircle, Download, Filter, CheckSquare, MoreVertical, Container, Box, Boxes, Search, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -76,6 +76,7 @@ export const TripExecutionCreateDrawerScreen: React.FC<TripExecutionCreateDrawer
   const [expandedActuals, setExpandedActuals] = useState(true);
   const [pickupComplete, setPickupComplete] = useState(false);
   const [showAddViaPointsDialog, setShowAddViaPointsDialog] = useState(false);
+  const [selectedLeg, setSelectedLeg] = useState<Leg | null>(null);
 
   const legs: Leg[] = [
     {
@@ -119,6 +120,13 @@ export const TripExecutionCreateDrawerScreen: React.FC<TripExecutionCreateDrawer
       hasInfo: true
     }
   ];
+
+  // Auto-select first leg on mount
+  useEffect(() => {
+    if (legs.length > 0) {
+      setSelectedLeg(legs[0]);
+    }
+  }, []);
 
   const activities: Activity[] = [
     {
@@ -237,7 +245,11 @@ export const TripExecutionCreateDrawerScreen: React.FC<TripExecutionCreateDrawer
             {legs.map((leg) => (
               <div
                 key={leg.id}
-                className="p-3 rounded-md border bg-card hover:bg-accent/50 transition-colors cursor-pointer space-y-2"
+                onClick={() => setSelectedLeg(leg)}
+                className={cn(
+                  "p-3 rounded-md border bg-card hover:bg-accent/50 transition-colors cursor-pointer space-y-2",
+                  selectedLeg?.id === leg.id && "border-primary bg-accent"
+                )}
               >
                 {/* Leg Header */}
                 <div className="flex items-start justify-between">
@@ -285,6 +297,15 @@ export const TripExecutionCreateDrawerScreen: React.FC<TripExecutionCreateDrawer
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col">
+        {!selectedLeg ? (
+          <div className="flex-1 flex items-center justify-center text-muted-foreground">
+            <div className="text-center">
+              <MapPin className="h-12 w-12 mx-auto mb-3 opacity-50" />
+              <p className="text-sm">Select a leg to view details</p>
+            </div>
+          </div>
+        ) : (
+          <>
         {/* Tabs */}
         <Tabs defaultValue="activities" className="flex-1 flex flex-col">
           <div className="border-b px-6 pt-4">
@@ -1351,6 +1372,8 @@ export const TripExecutionCreateDrawerScreen: React.FC<TripExecutionCreateDrawer
             </Button>
           </div>
         </div>
+        </>
+        )}
       </div>
     </motion.div>
 
