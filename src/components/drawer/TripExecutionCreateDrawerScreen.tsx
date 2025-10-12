@@ -1109,9 +1109,224 @@ export const TripExecutionCreateDrawerScreen: React.FC<TripExecutionCreateDrawer
             </div>
           </TabsContent>
 
-          <TabsContent value="transshipment" className="flex-1 p-6">
-            <div className="text-center text-muted-foreground py-12">
-              Transshipment content coming soon
+          <TabsContent value="transshipment" className="flex-1 flex flex-col m-0">
+            {/* Transshipment Details Header */}
+            <div className="px-6 py-4 border-b">
+              <div className="flex items-center justify-between">
+                <h2 className="text-lg font-semibold flex items-center gap-2">
+                  Transshipment Details
+                  <Badge variant="secondary" className="rounded-full h-5 px-2 text-xs">
+                    5
+                  </Badge>
+                </h2>
+                <div className="flex items-center gap-2">
+                  <Button variant="outline" size="sm" className="gap-2">
+                    <Plus className="h-4 w-4" />
+                    Add New
+                    <ChevronDown className="h-4 w-4" />
+                  </Button>
+                  <Button variant="ghost" size="icon" className="h-8 w-8">
+                    <User className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+            {/* Transshipment Content */}
+            <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
+              {/* Consignment Selection */}
+              <div className="flex items-center gap-4">
+                <div className="flex-1">
+                  <Select defaultValue="CN000000001">
+                    <SelectTrigger className="h-10">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="CN000000001">CN000000001</SelectItem>
+                      <SelectItem value="CN000000002">CN000000002</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox id="transship-pickup-complete" />
+                  <Label htmlFor="transship-pickup-complete" className="text-sm cursor-pointer">
+                    Pickup Complete for this CO
+                  </Label>
+                </div>
+              </div>
+
+              {/* Stat Cards */}
+              <div className="grid grid-cols-4 gap-3">
+                <div className="bg-blue-50 p-4 rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded bg-blue-100">
+                      <Truck className="h-5 w-5 text-blue-600" />
+                    </div>
+                    <div>
+                      <div className="text-lg font-semibold">12 Nos</div>
+                      <div className="text-xs text-muted-foreground">Wagon Quantity</div>
+                    </div>
+                  </div>
+                </div>
+                <div className="bg-purple-50 p-4 rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded bg-purple-100">
+                      <Container className="h-5 w-5 text-purple-600" />
+                    </div>
+                    <div>
+                      <div className="text-lg font-semibold">12 Nos</div>
+                      <div className="text-xs text-muted-foreground">Container Quantity</div>
+                    </div>
+                  </div>
+                </div>
+                <div className="bg-red-50 p-4 rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded bg-red-100">
+                      <Box className="h-5 w-5 text-red-600" />
+                    </div>
+                    <div>
+                      <div className="text-lg font-semibold">23 Ton</div>
+                      <div className="text-xs text-muted-foreground">Product Weight</div>
+                    </div>
+                  </div>
+                </div>
+                <div className="bg-cyan-50 p-4 rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded bg-cyan-100">
+                      <Boxes className="h-5 w-5 text-cyan-600" />
+                    </div>
+                    <div>
+                      <div className="text-lg font-semibold">10 Nos</div>
+                      <div className="text-xs text-muted-foreground">THU Quantity</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Transshipment List */}
+              <div className="space-y-3">
+                <h4 className="text-sm font-semibold">Transshipment List</h4>
+                
+                {/* Table Toolbar */}
+                <div className="flex items-center justify-between">
+                  <div className="relative flex-1 max-w-xs">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input 
+                      placeholder="Search" 
+                      className="pl-9 h-9"
+                    />
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button variant="outline" size="icon" className="h-9 w-9">
+                      <Download className="h-4 w-4" />
+                    </Button>
+                    <Button variant="outline" size="icon" className="h-9 w-9">
+                      <Filter className="h-4 w-4" />
+                    </Button>
+                    <Button variant="outline" size="icon" className="h-9 w-9">
+                      <CheckSquare className="h-4 w-4" />
+                    </Button>
+                    <Button variant="outline" size="icon" className="h-9 w-9">
+                      <MoreVertical className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Table */}
+                <div className="border rounded-lg">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Wagon ID Type</TableHead>
+                        <TableHead>Container ID Type</TableHead>
+                        <TableHead>Hazardous Goods</TableHead>
+                        <TableHead>Departure and Arrival</TableHead>
+                        <TableHead>Plan From & To Date</TableHead>
+                        <TableHead>Price</TableHead>
+                        <TableHead>Draft Bill</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      <TableRow>
+                        <TableCell>
+                          <div className="font-medium text-blue-600">WAG00000001</div>
+                          <div className="text-xs text-muted-foreground">Habbins</div>
+                        </TableCell>
+                        <TableCell>
+                          <div>CONT100001</div>
+                          <div className="text-xs text-muted-foreground">Container A</div>
+                        </TableCell>
+                        <TableCell>-</TableCell>
+                        <TableCell>Frankfurt Station A - Frankfurt Station B</TableCell>
+                        <TableCell>12-Mar-2025 to 12-Mar-2025</TableCell>
+                        <TableCell>€ 1395.00</TableCell>
+                        <TableCell>
+                          <span className="text-blue-600 font-medium">DB/000234</span>
+                        </TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell>
+                          <div className="font-medium text-blue-600">WAG00000001</div>
+                          <div className="text-xs text-muted-foreground">Habbins</div>
+                        </TableCell>
+                        <TableCell>
+                          <div>CONT100001</div>
+                          <div className="text-xs text-muted-foreground">Container A</div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="h-5 w-5 rounded-full bg-orange-500 flex items-center justify-center">
+                            <AlertCircle className="h-3 w-3 text-white" />
+                          </div>
+                        </TableCell>
+                        <TableCell>Frankfurt Station A - Frankfurt Station B</TableCell>
+                        <TableCell>12-Mar-2025 to 12-Mar-2025</TableCell>
+                        <TableCell>€ 1395.00</TableCell>
+                        <TableCell>
+                          <span className="text-blue-600 font-medium">DB/000234</span>
+                        </TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell>
+                          <div className="font-medium text-blue-600">WAG00000001</div>
+                          <div className="text-xs text-muted-foreground">Habbins</div>
+                        </TableCell>
+                        <TableCell>
+                          <div>CONT100001</div>
+                          <div className="text-xs text-muted-foreground">Container A</div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="h-5 w-5 rounded-full bg-orange-500 flex items-center justify-center">
+                            <AlertCircle className="h-3 w-3 text-white" />
+                          </div>
+                        </TableCell>
+                        <TableCell>Frankfurt Station A - Frankfurt Station B</TableCell>
+                        <TableCell>12-Mar-2025 to 12-Mar-2025</TableCell>
+                        <TableCell>€ 1395.00</TableCell>
+                        <TableCell>
+                          <span className="text-blue-600 font-medium">DB/000234</span>
+                        </TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell>
+                          <div className="font-medium text-blue-600">WAG00000001</div>
+                          <div className="text-xs text-muted-foreground">Habbins</div>
+                        </TableCell>
+                        <TableCell>
+                          <div>CONT100001</div>
+                          <div className="text-xs text-muted-foreground">Container A</div>
+                        </TableCell>
+                        <TableCell>-</TableCell>
+                        <TableCell>Frankfurt Station A - Frankfurt Station B</TableCell>
+                        <TableCell>12-Mar-2025 to 12-Mar-2025</TableCell>
+                        <TableCell>€ 1395.00</TableCell>
+                        <TableCell>
+                          <span className="text-blue-600 font-medium">DB/000234</span>
+                        </TableCell>
+                      </TableRow>
+                    </TableBody>
+                  </Table>
+                </div>
+              </div>
             </div>
           </TabsContent>
         </Tabs>
