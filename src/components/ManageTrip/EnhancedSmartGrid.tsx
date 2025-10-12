@@ -389,6 +389,11 @@ export const EnhancedSmartGrid = () => {
         gridTitle="Trip Execution Create"
         recordCount={gridState.gridData.length}
         showCreateButton={true}
+        onRowClick={(row) => {
+          console.log('Row clicked:', row);
+          const { openDrawer } = require('@/stores/drawerStore').useDrawerStore.getState();
+          openDrawer('trip-execution-create');
+        }}
         searchPlaceholder="Search"
         clientSideSearch={true}
         showSubHeaders={false}
