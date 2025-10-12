@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, ChevronDown, ChevronUp, Plus, User, FileText, MapPin, Truck, Package, Calendar, Info, Trash2, RefreshCw, Send } from 'lucide-react';
+import { X, ChevronDown, ChevronUp, Plus, User, FileText, MapPin, Truck, Package, Calendar, Info, Trash2, RefreshCw, Send, AlertCircle, Download, Filter, CheckSquare, MoreVertical, Container, Box, Boxes, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -8,6 +8,9 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
 interface TripExecutionCreateDrawerScreenProps {
   onClose: () => void;
@@ -68,6 +71,9 @@ export const TripExecutionCreateDrawerScreen: React.FC<TripExecutionCreateDrawer
 }) => {
   const [expandedActivities, setExpandedActivities] = useState(true);
   const [expandedAdditional, setExpandedAdditional] = useState(false);
+  const [expandedPlanned, setExpandedPlanned] = useState(true);
+  const [expandedActuals, setExpandedActuals] = useState(true);
+  const [pickupComplete, setPickupComplete] = useState(false);
 
   const legs: Leg[] = [
     {
@@ -595,9 +601,511 @@ export const TripExecutionCreateDrawerScreen: React.FC<TripExecutionCreateDrawer
             </div>
           </TabsContent>
 
-          <TabsContent value="consignment" className="flex-1 p-6">
-            <div className="text-center text-muted-foreground py-12">
-              Consignment content coming soon
+          <TabsContent value="consignment" className="flex-1 flex flex-col m-0">
+            {/* Alert */}
+            <div className="px-6 pt-4">
+              <Alert className="border-orange-200 bg-orange-50">
+                <AlertCircle className="h-4 w-4 text-orange-600" />
+                <AlertDescription className="text-orange-800 text-sm ml-2">
+                  Kindly take note that the Actual {'<<'} weight/length/wagon quantity {'>>'}  is higher than the allowed limit. Please check path constraints for more details.
+                </AlertDescription>
+              </Alert>
+            </div>
+
+            {/* Consignment Details Header */}
+            <div className="px-6 py-4 border-b">
+              <div className="flex items-center justify-between">
+                <h2 className="text-lg font-semibold">Consignment Details</h2>
+                <div className="flex items-center gap-2">
+                  <Button variant="outline" size="sm" className="gap-2">
+                    <Plus className="h-4 w-4" />
+                    Add Actuals
+                    <ChevronDown className="h-4 w-4" />
+                  </Button>
+                  <Button variant="ghost" size="icon" className="h-8 w-8">
+                    <MoreVertical className="h-4 w-4" />
+                  </Button>
+                  <Button variant="ghost" size="icon" className="h-8 w-8">
+                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+                    </svg>
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+            {/* Consignment Content */}
+            <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
+              {/* Consignment Selection */}
+              <div className="flex items-center gap-4">
+                <div className="flex-1">
+                  <Select defaultValue="CO000000001">
+                    <SelectTrigger className="h-10">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="CO000000001">CO000000001</SelectItem>
+                      <SelectItem value="CO000000002">CO000000002</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox 
+                    id="pickup-complete" 
+                    checked={pickupComplete}
+                    onCheckedChange={(checked) => setPickupComplete(checked as boolean)}
+                  />
+                  <Label htmlFor="pickup-complete" className="text-sm cursor-pointer">
+                    Pickup Complete for this CO
+                  </Label>
+                </div>
+              </div>
+
+              {/* Planned Section */}
+              <div className="space-y-3">
+                <div 
+                  className="flex items-center justify-between cursor-pointer p-2 -mx-2 rounded hover:bg-muted/50"
+                  onClick={() => setExpandedPlanned(!expandedPlanned)}
+                >
+                  <h3 className="text-sm font-semibold flex items-center gap-2">
+                    Planned
+                    <Badge variant="secondary" className="rounded-full h-5 px-2 text-xs">
+                      5
+                    </Badge>
+                  </h3>
+                  {expandedPlanned ? (
+                    <ChevronUp className="h-4 w-4 text-muted-foreground" />
+                  ) : (
+                    <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                  )}
+                </div>
+
+                <AnimatePresence>
+                  {expandedPlanned && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.2 }}
+                      className="space-y-4 overflow-hidden"
+                    >
+                      {/* Stat Cards */}
+                      <div className="grid grid-cols-4 gap-3">
+                        <div className="bg-blue-50 p-4 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 rounded bg-blue-100">
+                              <Truck className="h-5 w-5 text-blue-600" />
+                            </div>
+                            <div>
+                              <div className="text-lg font-semibold">12 Nos</div>
+                              <div className="text-xs text-muted-foreground">Wagon Quantity</div>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="bg-purple-50 p-4 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 rounded bg-purple-100">
+                              <Container className="h-5 w-5 text-purple-600" />
+                            </div>
+                            <div>
+                              <div className="text-lg font-semibold">12 Nos</div>
+                              <div className="text-xs text-muted-foreground">Container Quantity</div>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="bg-red-50 p-4 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 rounded bg-red-100">
+                              <Box className="h-5 w-5 text-red-600" />
+                            </div>
+                            <div>
+                              <div className="text-lg font-semibold">23 Ton</div>
+                              <div className="text-xs text-muted-foreground">Product Weight</div>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="bg-cyan-50 p-4 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 rounded bg-cyan-100">
+                              <Boxes className="h-5 w-5 text-cyan-600" />
+                            </div>
+                            <div>
+                              <div className="text-lg font-semibold">10 Nos</div>
+                              <div className="text-xs text-muted-foreground">THU Quantity</div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Plan List Table */}
+                      <div className="space-y-3">
+                        <h4 className="text-sm font-semibold">Plan List</h4>
+                        
+                        {/* Table Toolbar */}
+                        <div className="flex items-center justify-between">
+                          <div className="relative flex-1 max-w-xs">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                            <Input 
+                              placeholder="Search" 
+                              className="pl-9 h-9"
+                            />
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Button variant="outline" size="icon" className="h-9 w-9">
+                              <Download className="h-4 w-4" />
+                            </Button>
+                            <Button variant="outline" size="icon" className="h-9 w-9">
+                              <Filter className="h-4 w-4" />
+                            </Button>
+                            <Button variant="outline" size="icon" className="h-9 w-9">
+                              <CheckSquare className="h-4 w-4" />
+                            </Button>
+                            <Button variant="outline" size="icon" className="h-9 w-9">
+                              <MoreVertical className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
+
+                        {/* Table */}
+                        <div className="border rounded-lg">
+                          <Table>
+                            <TableHeader>
+                              <TableRow>
+                                <TableHead>Wagon ID Type</TableHead>
+                                <TableHead>Container ID Type</TableHead>
+                                <TableHead>Hazardous Goods</TableHead>
+                                <TableHead>Departure and Arrival</TableHead>
+                                <TableHead>Plan From & To Date</TableHead>
+                                <TableHead>Price</TableHead>
+                                <TableHead className="w-12"></TableHead>
+                              </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                              <TableRow>
+                                <TableCell>
+                                  <div className="font-medium text-blue-600">WAG00000001</div>
+                                  <div className="text-xs text-muted-foreground">Habbins</div>
+                                </TableCell>
+                                <TableCell>
+                                  <div>CONT100001</div>
+                                  <div className="text-xs text-muted-foreground">Container A</div>
+                                </TableCell>
+                                <TableCell>-</TableCell>
+                                <TableCell>Frankfurt Station A - Frankfurt Station B</TableCell>
+                                <TableCell>12-Mar-2025 to 12-Mar-2025</TableCell>
+                                <TableCell>€ 1395.00</TableCell>
+                                <TableCell>
+                                  <Button variant="ghost" size="icon" className="h-8 w-8">
+                                    <MoreVertical className="h-4 w-4" />
+                                  </Button>
+                                </TableCell>
+                              </TableRow>
+                              <TableRow>
+                                <TableCell>
+                                  <div className="font-medium text-blue-600">WAG00000001</div>
+                                  <div className="text-xs text-muted-foreground">Habbins</div>
+                                </TableCell>
+                                <TableCell>
+                                  <div>CONT100001</div>
+                                  <div className="text-xs text-muted-foreground">Container A</div>
+                                </TableCell>
+                                <TableCell>
+                                  <div className="h-5 w-5 rounded-full bg-orange-500 flex items-center justify-center">
+                                    <AlertCircle className="h-3 w-3 text-white" />
+                                  </div>
+                                </TableCell>
+                                <TableCell>Frankfurt Station A - Frankfurt Station B</TableCell>
+                                <TableCell>12-Mar-2025 to 12-Mar-2025</TableCell>
+                                <TableCell>€ 1395.00</TableCell>
+                                <TableCell>
+                                  <Button variant="ghost" size="icon" className="h-8 w-8">
+                                    <MoreVertical className="h-4 w-4" />
+                                  </Button>
+                                </TableCell>
+                              </TableRow>
+                              <TableRow>
+                                <TableCell>
+                                  <div className="font-medium text-blue-600">WAG00000001</div>
+                                  <div className="text-xs text-muted-foreground">Habbins</div>
+                                </TableCell>
+                                <TableCell>
+                                  <div>CONT100001</div>
+                                  <div className="text-xs text-muted-foreground">Container A</div>
+                                </TableCell>
+                                <TableCell>
+                                  <div className="h-5 w-5 rounded-full bg-orange-500 flex items-center justify-center">
+                                    <AlertCircle className="h-3 w-3 text-white" />
+                                  </div>
+                                </TableCell>
+                                <TableCell>Frankfurt Station A - Frankfurt Station B</TableCell>
+                                <TableCell>12-Mar-2025 to 12-Mar-2025</TableCell>
+                                <TableCell>€ 1395.00</TableCell>
+                                <TableCell>
+                                  <Button variant="ghost" size="icon" className="h-8 w-8">
+                                    <MoreVertical className="h-4 w-4" />
+                                  </Button>
+                                </TableCell>
+                              </TableRow>
+                            </TableBody>
+                          </Table>
+                        </div>
+
+                        {/* Pagination */}
+                        <div className="flex items-center justify-between text-sm">
+                          <div className="flex items-center gap-2">
+                            <Button variant="outline" size="icon" className="h-8 w-8">
+                              <ChevronDown className="h-4 w-4 rotate-90" />
+                            </Button>
+                            <Button variant="outline" size="icon" className="h-8 w-8">
+                              <ChevronDown className="h-4 w-4 -rotate-90" />
+                            </Button>
+                            <Button variant="default" size="sm" className="h-8 w-8 p-0">1</Button>
+                            <Button variant="outline" size="sm" className="h-8 w-8 p-0">2</Button>
+                            <Button variant="outline" size="sm" className="h-8 w-8 p-0">3</Button>
+                            <Button variant="outline" size="sm" className="h-8 w-8 p-0">4</Button>
+                            <Button variant="outline" size="sm" className="h-8 w-8 p-0">5</Button>
+                            <span className="text-muted-foreground">...</span>
+                            <Button variant="outline" size="sm" className="h-8 w-8 p-0">10</Button>
+                            <Button variant="outline" size="icon" className="h-8 w-8">
+                              <ChevronDown className="h-4 w-4 -rotate-90" />
+                            </Button>
+                            <Button variant="outline" size="icon" className="h-8 w-8">
+                              <ChevronDown className="h-4 w-4 rotate-90" />
+                            </Button>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-muted-foreground">Go to</span>
+                            <Input className="h-8 w-16 text-center" defaultValue="12" />
+                          </div>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+
+              {/* Actuals Section */}
+              <div className="space-y-3">
+                <div 
+                  className="flex items-center justify-between cursor-pointer p-2 -mx-2 rounded hover:bg-muted/50"
+                  onClick={() => setExpandedActuals(!expandedActuals)}
+                >
+                  <h3 className="text-sm font-semibold flex items-center gap-2">
+                    Actuals
+                    <Badge variant="secondary" className="rounded-full h-5 px-2 text-xs">
+                      5
+                    </Badge>
+                  </h3>
+                  {expandedActuals ? (
+                    <ChevronUp className="h-4 w-4 text-muted-foreground" />
+                  ) : (
+                    <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                  )}
+                </div>
+
+                <AnimatePresence>
+                  {expandedActuals && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.2 }}
+                      className="space-y-4 overflow-hidden"
+                    >
+                      {/* Stat Cards */}
+                      <div className="grid grid-cols-4 gap-3">
+                        <div className="bg-blue-50 p-4 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 rounded bg-blue-100">
+                              <Truck className="h-5 w-5 text-blue-600" />
+                            </div>
+                            <div>
+                              <div className="text-lg font-semibold">12 Nos</div>
+                              <div className="text-xs text-muted-foreground">Wagon Quantity</div>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="bg-purple-50 p-4 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 rounded bg-purple-100">
+                              <Container className="h-5 w-5 text-purple-600" />
+                            </div>
+                            <div>
+                              <div className="text-lg font-semibold">12 Nos</div>
+                              <div className="text-xs text-muted-foreground">Container Quantity</div>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="bg-red-50 p-4 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 rounded bg-red-100">
+                              <Box className="h-5 w-5 text-red-600" />
+                            </div>
+                            <div>
+                              <div className="text-lg font-semibold">23 Ton</div>
+                              <div className="text-xs text-muted-foreground">Product Weight</div>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="bg-cyan-50 p-4 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 rounded bg-cyan-100">
+                              <Boxes className="h-5 w-5 text-cyan-600" />
+                            </div>
+                            <div>
+                              <div className="text-lg font-semibold">10 Nos</div>
+                              <div className="text-xs text-muted-foreground">THU Quantity</div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Actual List Table */}
+                      <div className="space-y-3">
+                        <h4 className="text-sm font-semibold">Actual List</h4>
+                        
+                        {/* Table Toolbar */}
+                        <div className="flex items-center justify-between">
+                          <div className="relative flex-1 max-w-xs">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                            <Input 
+                              placeholder="Search" 
+                              className="pl-9 h-9"
+                            />
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Button variant="outline" size="icon" className="h-9 w-9">
+                              <Download className="h-4 w-4" />
+                            </Button>
+                            <Button variant="outline" size="icon" className="h-9 w-9">
+                              <Filter className="h-4 w-4" />
+                            </Button>
+                            <Button variant="outline" size="icon" className="h-9 w-9">
+                              <CheckSquare className="h-4 w-4" />
+                            </Button>
+                            <Button variant="outline" size="icon" className="h-9 w-9">
+                              <MoreVertical className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
+
+                        {/* Table */}
+                        <div className="border rounded-lg">
+                          <Table>
+                            <TableHeader>
+                              <TableRow>
+                                <TableHead>Wagon ID Type</TableHead>
+                                <TableHead>Container ID Type</TableHead>
+                                <TableHead>Hazardous Goods</TableHead>
+                                <TableHead>Departure and Arrival</TableHead>
+                                <TableHead>Plan From & To Date</TableHead>
+                                <TableHead>Price</TableHead>
+                                <TableHead className="w-12"></TableHead>
+                              </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                              <TableRow>
+                                <TableCell>
+                                  <div className="font-medium text-blue-600">WAG00000001</div>
+                                  <div className="text-xs text-muted-foreground">Habbins</div>
+                                </TableCell>
+                                <TableCell>
+                                  <div>CONT100001</div>
+                                  <div className="text-xs text-muted-foreground">Container A</div>
+                                </TableCell>
+                                <TableCell>-</TableCell>
+                                <TableCell>Frankfurt Station A - Frankfurt Station B</TableCell>
+                                <TableCell>12-Mar-2025 to 12-Mar-2025</TableCell>
+                                <TableCell>€ 1395.00</TableCell>
+                                <TableCell>
+                                  <Button variant="ghost" size="icon" className="h-8 w-8">
+                                    <MoreVertical className="h-4 w-4" />
+                                  </Button>
+                                </TableCell>
+                              </TableRow>
+                              <TableRow>
+                                <TableCell>
+                                  <div className="font-medium text-blue-600">WAG00000001</div>
+                                  <div className="text-xs text-muted-foreground">Habbins</div>
+                                </TableCell>
+                                <TableCell>
+                                  <div>CONT100001</div>
+                                  <div className="text-xs text-muted-foreground">Container A</div>
+                                </TableCell>
+                                <TableCell>
+                                  <div className="h-5 w-5 rounded-full bg-orange-500 flex items-center justify-center">
+                                    <AlertCircle className="h-3 w-3 text-white" />
+                                  </div>
+                                </TableCell>
+                                <TableCell>Frankfurt Station A - Frankfurt Station B</TableCell>
+                                <TableCell>12-Mar-2025 to 12-Mar-2025</TableCell>
+                                <TableCell>€ 1395.00</TableCell>
+                                <TableCell>
+                                  <Button variant="ghost" size="icon" className="h-8 w-8">
+                                    <MoreVertical className="h-4 w-4" />
+                                  </Button>
+                                </TableCell>
+                              </TableRow>
+                              <TableRow>
+                                <TableCell>
+                                  <div className="font-medium text-blue-600">WAG00000001</div>
+                                  <div className="text-xs text-muted-foreground">Habbins</div>
+                                </TableCell>
+                                <TableCell>
+                                  <div>CONT100001</div>
+                                  <div className="text-xs text-muted-foreground">Container A</div>
+                                </TableCell>
+                                <TableCell>
+                                  <div className="h-5 w-5 rounded-full bg-orange-500 flex items-center justify-center">
+                                    <AlertCircle className="h-3 w-3 text-white" />
+                                  </div>
+                                </TableCell>
+                                <TableCell>Frankfurt Station A - Frankfurt Station B</TableCell>
+                                <TableCell>12-Mar-2025 to 12-Mar-2025</TableCell>
+                                <TableCell>€ 1395.00</TableCell>
+                                <TableCell>
+                                  <Button variant="ghost" size="icon" className="h-8 w-8">
+                                    <MoreVertical className="h-4 w-4" />
+                                  </Button>
+                                </TableCell>
+                              </TableRow>
+                            </TableBody>
+                          </Table>
+                        </div>
+
+                        {/* Pagination */}
+                        <div className="flex items-center justify-between text-sm">
+                          <div className="flex items-center gap-2">
+                            <Button variant="outline" size="icon" className="h-8 w-8">
+                              <ChevronDown className="h-4 w-4 rotate-90" />
+                            </Button>
+                            <Button variant="outline" size="icon" className="h-8 w-8">
+                              <ChevronDown className="h-4 w-4 -rotate-90" />
+                            </Button>
+                            <Button variant="default" size="sm" className="h-8 w-8 p-0">1</Button>
+                            <Button variant="outline" size="sm" className="h-8 w-8 p-0">2</Button>
+                            <Button variant="outline" size="sm" className="h-8 w-8 p-0">3</Button>
+                            <Button variant="outline" size="sm" className="h-8 w-8 p-0">4</Button>
+                            <Button variant="outline" size="sm" className="h-8 w-8 p-0">5</Button>
+                            <span className="text-muted-foreground">...</span>
+                            <Button variant="outline" size="sm" className="h-8 w-8 p-0">10</Button>
+                            <Button variant="outline" size="icon" className="h-8 w-8">
+                              <ChevronDown className="h-4 w-4 -rotate-90" />
+                            </Button>
+                            <Button variant="outline" size="icon" className="h-8 w-8">
+                              <ChevronDown className="h-4 w-4 rotate-90" />
+                            </Button>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-muted-foreground">Go to</span>
+                            <Input className="h-8 w-16 text-center" defaultValue="12" />
+                          </div>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
             </div>
           </TabsContent>
 
