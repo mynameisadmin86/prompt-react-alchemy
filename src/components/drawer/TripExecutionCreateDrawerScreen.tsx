@@ -66,6 +66,7 @@ export const TripExecutionCreateDrawerScreen: React.FC<TripExecutionCreateDrawer
   onClose,
   tripId = 'TRIP00000001'
 }) => {
+  const [expandedActivities, setExpandedActivities] = useState(true);
   const [expandedAdditional, setExpandedAdditional] = useState(false);
 
   const legs: Leg[] = [
@@ -309,44 +310,60 @@ export const TripExecutionCreateDrawerScreen: React.FC<TripExecutionCreateDrawer
             <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
               {/* Activities Section */}
               <div className="space-y-3">
-                <div className="flex items-center justify-between p-2 -mx-2">
+                <div 
+                  className="flex items-center justify-between cursor-pointer p-2 -mx-2 rounded hover:bg-muted/50"
+                  onClick={() => setExpandedActivities(!expandedActivities)}
+                >
                   <h3 className="text-sm font-semibold flex items-center gap-2">
                     Activities
                     <Badge variant="secondary" className="rounded-full h-5 px-2 text-xs">
                       {activities.length}
                     </Badge>
                   </h3>
+                  {expandedActivities ? (
+                    <ChevronUp className="h-4 w-4 text-muted-foreground" />
+                  ) : (
+                    <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                  )}
                 </div>
 
                 {/* Activities List */}
-                <div className="space-y-3">
-                  {activities.map((activity) => (
-                    <div key={activity.id} className="border rounded-lg bg-card">
-                      {/* Activity Header */}
-                      <div className="flex items-center justify-between p-4 bg-muted/30">
-                        <div className="flex items-center gap-3">
-                          <div className="p-2 rounded bg-blue-500/10 text-blue-600">
-                            {activity.icon}
+                <AnimatePresence>
+                  {expandedActivities && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.2 }}
+                      className="space-y-3 overflow-hidden"
+                    >
+                      {activities.map((activity) => (
+                        <div key={activity.id} className="border rounded-lg bg-card">
+                          {/* Activity Header */}
+                          <div className="flex items-center justify-between p-4 bg-muted/30">
+                            <div className="flex items-center gap-3">
+                              <div className="p-2 rounded bg-blue-500/10 text-blue-600">
+                                {activity.icon}
+                              </div>
+                              <div>
+                                <div className="font-medium text-sm">{activity.name}</div>
+                                <div className="text-xs text-muted-foreground">{activity.timestamp}</div>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              {activity.delayInfo && (
+                                <Badge variant="destructive" className="text-xs">
+                                  {activity.delayInfo}
+                                </Badge>
+                              )}
+                              <Button variant="ghost" size="icon" className="h-8 w-8">
+                                <RefreshCw className="h-4 w-4" />
+                              </Button>
+                            </div>
                           </div>
-                          <div>
-                            <div className="font-medium text-sm">{activity.name}</div>
-                            <div className="text-xs text-muted-foreground">{activity.timestamp}</div>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          {activity.delayInfo && (
-                            <Badge variant="destructive" className="text-xs">
-                              {activity.delayInfo}
-                            </Badge>
-                          )}
-                          <Button variant="ghost" size="icon" className="h-8 w-8">
-                            <RefreshCw className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </div>
 
-                      {/* Activity Details - Always Visible */}
-                      <div className="px-4 pb-4 pt-4 border-t space-y-4">
+                          {/* Activity Details - Always Visible */}
+                          <div className="px-4 pb-4 pt-4 border-t space-y-4">
                         <div className="grid grid-cols-4 gap-4">
                           {activity.fields.revisedDateTime && (
                             <div className="space-y-2">
@@ -437,11 +454,13 @@ export const TripExecutionCreateDrawerScreen: React.FC<TripExecutionCreateDrawer
                       </div>
                     </div>
                   ))}
-                </div>
-              </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
 
-              {/* Additional Activities Section */}
-              <div className="space-y-3">
+          {/* Additional Activities Section */}
+          <div className="space-y-3">
                 <div
                   className="flex items-center justify-between cursor-pointer p-2 -mx-2 rounded hover:bg-muted/50"
                   onClick={() => setExpandedAdditional(!expandedAdditional)}
