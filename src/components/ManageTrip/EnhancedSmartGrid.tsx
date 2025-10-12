@@ -16,6 +16,7 @@ import { DraggableSubRow, SmartGridWithGrouping } from "@/components/SmartGrid";
 import { GridColumnConfig } from '@/types/smartgrid';
 import { useSmartGridState } from '@/hooks/useSmartGridState';
 import { toast } from '../ui/sonner';
+import { useDrawerStore } from '@/stores/drawerStore';
 
 
 interface ActivityData {
@@ -195,10 +196,6 @@ const activitiesColumns: GridColumnConfig[] = [
       'GTOUT': 'bg-orange-100 text-orange-800',
       'LHTA': 'bg-purple-100 text-purple-800'
     },
-    onClick: () => {
-      const { openDrawer } = require('@/stores/drawerStore').useDrawerStore.getState();
-      openDrawer('trip-execution-create');
-    },
     subRow: false,
   },
   {
@@ -314,6 +311,7 @@ export const EnhancedSmartGrid = () => {
   const gridState = useSmartGridState();
   const [showServersideFilter, setShowServersideFilter] = useState<boolean>(false);
   const [apiStatus, setApiStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const { openDrawer } = useDrawerStore();
   
 
   const handleLinkClick = (value: any, row: any) => {
@@ -350,10 +348,18 @@ export const EnhancedSmartGrid = () => {
   useEffect(() => {
     console.log('Activities Grid Data:', activitiesGridData);
     setApiStatus('loading');
-    gridState.setColumns(activitiesColumns);
+    
+    // Add onClick handler to behaviour column
+    const columnsWithHandlers = activitiesColumns.map(col => 
+      col.key === 'behaviour' 
+        ? { ...col, onClick: () => openDrawer('trip-execution-create') }
+        : col
+    );
+    
+    gridState.setColumns(columnsWithHandlers);
     gridState.setGridData(activitiesGridData);
     gridState.setLoading(false);
-  }, []);
+  }, [openDrawer]);
 
 
   return (
