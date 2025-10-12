@@ -69,11 +69,25 @@ export const CellRenderer: React.FC<CellRendererProps> = ({
       statusColor = column.statusMap?.[displayValue] || getDefaultStatusColor(displayValue, column.key);
     }
 
-    return (
-      <Badge className={cn("whitespace-nowrap", statusColor)}>
+    const badgeContent = (
+      <Badge className={cn("whitespace-nowrap", statusColor, column.onClick && "cursor-pointer hover:opacity-80 transition-opacity")}>
         {displayValue}
       </Badge>
     );
+
+    if (column.onClick) {
+      return (
+        <button
+          onClick={() => column.onClick?.(row)}
+          className="focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded"
+          disabled={loading}
+        >
+          {badgeContent}
+        </button>
+      );
+    }
+
+    return badgeContent;
   };
 
   // Default status color mapping based on common patterns

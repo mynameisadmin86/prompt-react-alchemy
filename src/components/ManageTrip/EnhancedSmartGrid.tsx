@@ -195,6 +195,10 @@ const activitiesColumns: GridColumnConfig[] = [
       'GTOUT': 'bg-orange-100 text-orange-800',
       'LHTA': 'bg-purple-100 text-purple-800'
     },
+    onClick: () => {
+      const { openDrawer } = require('@/stores/drawerStore').useDrawerStore.getState();
+      openDrawer('trip-execution-create');
+    },
     subRow: false,
   },
   {
@@ -389,11 +393,6 @@ export const EnhancedSmartGrid = () => {
         gridTitle="Trip Execution Create"
         recordCount={gridState.gridData.length}
         showCreateButton={true}
-        onRowClick={(row) => {
-          console.log('Row clicked:', row);
-          const { openDrawer } = require('@/stores/drawerStore').useDrawerStore.getState();
-          openDrawer('trip-execution-create');
-        }}
         searchPlaceholder="Search"
         clientSideSearch={true}
         showSubHeaders={false}
