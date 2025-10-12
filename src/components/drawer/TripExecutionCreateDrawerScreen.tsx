@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, ChevronDown, ChevronUp, Plus, User, FileText, MapPin, Truck, Package, Calendar, Info, Trash2, RefreshCw, Send, AlertCircle, Download, Filter, CheckSquare, MoreVertical, Container, Box, Boxes, Search } from 'lucide-react';
+import { X, ChevronDown, ChevronUp, Plus, User, FileText, MapPin, Truck, Package, Calendar, Info, Trash2, RefreshCw, Send, AlertCircle, Download, Filter, CheckSquare, MoreVertical, Container, Box, Boxes, Search, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -11,6 +11,7 @@ import { cn } from '@/lib/utils';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 interface TripExecutionCreateDrawerScreenProps {
   onClose: () => void;
@@ -74,6 +75,7 @@ export const TripExecutionCreateDrawerScreen: React.FC<TripExecutionCreateDrawer
   const [expandedPlanned, setExpandedPlanned] = useState(true);
   const [expandedActuals, setExpandedActuals] = useState(true);
   const [pickupComplete, setPickupComplete] = useState(false);
+  const [showAddViaPointsDialog, setShowAddViaPointsDialog] = useState(false);
 
   const legs: Leg[] = [
     {
@@ -184,12 +186,13 @@ export const TripExecutionCreateDrawerScreen: React.FC<TripExecutionCreateDrawer
   ];
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="flex h-full bg-background"
-    >
+    <>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="flex h-full bg-background"
+      >
       {/* Left Sidebar */}
       <div className="w-64 border-r bg-muted/30 flex flex-col">
         {/* Version Selection */}
@@ -217,7 +220,12 @@ export const TripExecutionCreateDrawerScreen: React.FC<TripExecutionCreateDrawer
                 {legs.length}
               </Badge>
             </h3>
-            <Button variant="ghost" size="icon" className="h-7 w-7">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="h-7 w-7"
+              onClick={() => setShowAddViaPointsDialog(true)}
+            >
               <Plus className="h-4 w-4" />
             </Button>
           </div>
@@ -1345,5 +1353,85 @@ export const TripExecutionCreateDrawerScreen: React.FC<TripExecutionCreateDrawer
         </div>
       </div>
     </motion.div>
+
+    {/* Add Via Points Dialog */}
+    <Dialog open={showAddViaPointsDialog} onOpenChange={setShowAddViaPointsDialog}>
+      <DialogContent className="sm:max-w-[500px]">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <MapPin className="h-5 w-5" />
+            Add Via Points
+          </DialogTitle>
+        </DialogHeader>
+        
+        <div className="space-y-4 py-4">
+          {/* Leg From and To */}
+          <div className="space-y-2">
+            <Label className="text-sm">Leg From and To</Label>
+            <Select defaultValue="ber-frn">
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="ber-frn">BER,Berlin to FRN,France</SelectItem>
+                <SelectItem value="frn-par">FRN,France to PAR,Paris</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Via Location */}
+          <div className="space-y-2">
+            <Label className="text-sm">Via Location</Label>
+            <Select defaultValue="frk">
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="frk">FRK, Frankfurt</SelectItem>
+                <SelectItem value="mun">MUN, Munich</SelectItem>
+                <SelectItem value="ham">HAM, Hamburg</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Planned Date */}
+          <div className="space-y-2">
+            <Label className="text-sm">Planned Date</Label>
+            <div className="relative">
+              <Input 
+                type="date"
+                defaultValue="2025-03-25"
+                className="pr-10"
+              />
+              <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+            </div>
+          </div>
+
+          {/* Planned Time */}
+          <div className="space-y-2">
+            <Label className="text-sm">Planned Time</Label>
+            <div className="relative">
+              <Input 
+                type="time"
+                defaultValue="10:00"
+                className="pr-10"
+              />
+              <Clock className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+            </div>
+          </div>
+        </div>
+
+        {/* Save Button */}
+        <div className="flex justify-end">
+          <Button 
+            onClick={() => setShowAddViaPointsDialog(false)}
+            className="w-full"
+          >
+            Save
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+    </>
   );
 };
