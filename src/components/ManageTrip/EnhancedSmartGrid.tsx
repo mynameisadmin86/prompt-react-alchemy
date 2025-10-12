@@ -239,11 +239,6 @@ const activitiesColumns: GridColumnConfig[] = [
       'completed': 'bg-green-100 text-green-800',
       'pending': 'bg-gray-100 text-gray-800'
     },
-    onClick: (row: any) => {
-      console.log('Status cell clicked:', row);
-      const { openDrawer } = require('@/stores/drawerStore').useDrawerStore.getState();
-      openDrawer('trip-execution-create');
-    },
     subRow: false,
   },
   {
@@ -394,6 +389,11 @@ export const EnhancedSmartGrid = () => {
         gridTitle="Trip Execution Create"
         recordCount={gridState.gridData.length}
         showCreateButton={true}
+        onRowClick={(row) => {
+          console.log('Row clicked:', row);
+          const { openDrawer } = require('@/stores/drawerStore').useDrawerStore.getState();
+          openDrawer('trip-execution-create');
+        }}
         searchPlaceholder="Search"
         clientSideSearch={true}
         showSubHeaders={false}
