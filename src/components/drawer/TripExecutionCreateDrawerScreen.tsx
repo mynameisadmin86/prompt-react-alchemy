@@ -66,7 +66,6 @@ export const TripExecutionCreateDrawerScreen: React.FC<TripExecutionCreateDrawer
   onClose,
   tripId = 'TRIP00000001'
 }) => {
-  const [expandedActivities, setExpandedActivities] = useState<Set<string>>(new Set());
   const [expandedAdditional, setExpandedAdditional] = useState(false);
 
   const legs: Leg[] = [
@@ -176,16 +175,6 @@ export const TripExecutionCreateDrawerScreen: React.FC<TripExecutionCreateDrawer
       }
     }
   ];
-
-  const toggleActivity = (id: string) => {
-    const newExpanded = new Set(expandedActivities);
-    if (newExpanded.has(id)) {
-      newExpanded.delete(id);
-    } else {
-      newExpanded.add(id);
-    }
-    setExpandedActivities(newExpanded);
-  };
 
   return (
     <motion.div
@@ -320,21 +309,13 @@ export const TripExecutionCreateDrawerScreen: React.FC<TripExecutionCreateDrawer
             <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
               {/* Activities Section */}
               <div className="space-y-3">
-                <div
-                  className="flex items-center justify-between cursor-pointer p-2 -mx-2 rounded hover:bg-muted/50"
-                  onClick={() => setExpandedActivities(prev => {
-                    const newSet = new Set(prev);
-                    activities.forEach(a => newSet.add(a.id));
-                    return newSet;
-                  })}
-                >
+                <div className="flex items-center justify-between p-2 -mx-2">
                   <h3 className="text-sm font-semibold flex items-center gap-2">
                     Activities
                     <Badge variant="secondary" className="rounded-full h-5 px-2 text-xs">
                       {activities.length}
                     </Badge>
                   </h3>
-                  <ChevronUp className="h-4 w-4 text-muted-foreground" />
                 </div>
 
                 {/* Activities List */}
@@ -342,10 +323,7 @@ export const TripExecutionCreateDrawerScreen: React.FC<TripExecutionCreateDrawer
                   {activities.map((activity) => (
                     <div key={activity.id} className="border rounded-lg bg-card">
                       {/* Activity Header */}
-                      <div
-                        className="flex items-center justify-between p-4 cursor-pointer hover:bg-muted/50"
-                        onClick={() => toggleActivity(activity.id)}
-                      >
+                      <div className="flex items-center justify-between p-4 bg-muted/30">
                         <div className="flex items-center gap-3">
                           <div className="p-2 rounded bg-blue-500/10 text-blue-600">
                             {activity.icon}
@@ -364,116 +342,99 @@ export const TripExecutionCreateDrawerScreen: React.FC<TripExecutionCreateDrawer
                           <Button variant="ghost" size="icon" className="h-8 w-8">
                             <RefreshCw className="h-4 w-4" />
                           </Button>
-                          {expandedActivities.has(activity.id) ? (
-                            <ChevronUp className="h-4 w-4 text-muted-foreground" />
-                          ) : (
-                            <ChevronDown className="h-4 w-4 text-muted-foreground" />
-                          )}
                         </div>
                       </div>
 
-                      {/* Activity Details */}
-                      <AnimatePresence>
-                        {expandedActivities.has(activity.id) && (
-                          <motion.div
-                            initial={{ height: 0, opacity: 0 }}
-                            animate={{ height: 'auto', opacity: 1 }}
-                            exit={{ height: 0, opacity: 0 }}
-                            transition={{ duration: 0.2 }}
-                            className="overflow-hidden"
-                          >
-                            <div className="px-4 pb-4 pt-2 border-t space-y-4">
-                              <div className="grid grid-cols-4 gap-4">
-                                {activity.fields.revisedDateTime && (
-                                  <div className="space-y-2">
-                                    <Label className="text-xs text-muted-foreground">
-                                      Revised Date and Time
-                                    </Label>
-                                    <div className="relative">
-                                      <Input
-                                        defaultValue={activity.fields.revisedDateTime}
-                                        className="pr-8 text-sm h-9"
-                                      />
-                                      <Calendar className="absolute right-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
-                                    </div>
-                                  </div>
-                                )}
-                                <div className="space-y-2">
-                                  <Label className="text-xs text-muted-foreground">
-                                    Actual Date and Time <span className="text-red-500">*</span>
-                                  </Label>
-                                  <div className="relative">
-                                    <Input
-                                      defaultValue={activity.fields.actualDateTime}
-                                      className="pr-8 text-sm h-9"
-                                    />
-                                    <Calendar className="absolute right-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
-                                  </div>
-                                </div>
-                                {activity.fields.lastLocation && (
-                                  <div className="space-y-2">
-                                    <Label className="text-xs text-muted-foreground">
-                                      Last Identified Location
-                                    </Label>
-                                    <div className="relative">
-                                      <Input
-                                        defaultValue={activity.fields.lastLocation}
-                                        className="pr-8 text-sm h-9"
-                                      />
-                                      <MapPin className="absolute right-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
-                                    </div>
-                                  </div>
-                                )}
-                                {activity.fields.lastDateTime && (
-                                  <div className="space-y-2">
-                                    <Label className="text-xs text-muted-foreground">
-                                      Last Identified Date and Time
-                                    </Label>
-                                    <div className="relative">
-                                      <Input
-                                        defaultValue={activity.fields.lastDateTime}
-                                        className="pr-8 text-sm h-9"
-                                      />
-                                      <Calendar className="absolute right-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
-                                    </div>
-                                  </div>
-                                )}
-                              </div>
-
-                              <div className="grid grid-cols-2 gap-4">
-                                <div className="space-y-2">
-                                  <Label className="text-xs text-muted-foreground">
-                                    Reason for Changes
-                                  </Label>
-                                  <Select defaultValue={activity.fields.reasonForChanges}>
-                                    <SelectTrigger className="h-9">
-                                      <SelectValue />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                      <SelectItem value="SevenLRC">SevenLRC</SelectItem>
-                                    </SelectContent>
-                                  </Select>
-                                </div>
-                                {activity.fields.delayedReason && (
-                                  <div className="space-y-2">
-                                    <Label className="text-xs text-muted-foreground">
-                                      Delayed Reason
-                                    </Label>
-                                    <Select defaultValue={activity.fields.delayedReason}>
-                                      <SelectTrigger className="h-9">
-                                        <SelectValue />
-                                      </SelectTrigger>
-                                      <SelectContent>
-                                        <SelectItem value="SevenLRC">SevenLRC</SelectItem>
-                                      </SelectContent>
-                                    </Select>
-                                  </div>
-                                )}
+                      {/* Activity Details - Always Visible */}
+                      <div className="px-4 pb-4 pt-4 border-t space-y-4">
+                        <div className="grid grid-cols-4 gap-4">
+                          {activity.fields.revisedDateTime && (
+                            <div className="space-y-2">
+                              <Label className="text-xs text-muted-foreground">
+                                Revised Date and Time
+                              </Label>
+                              <div className="relative">
+                                <Input
+                                  defaultValue={activity.fields.revisedDateTime}
+                                  className="pr-8 text-sm h-9"
+                                />
+                                <Calendar className="absolute right-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
                               </div>
                             </div>
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
+                          )}
+                          <div className="space-y-2">
+                            <Label className="text-xs text-muted-foreground">
+                              Actual Date and Time <span className="text-red-500">*</span>
+                            </Label>
+                            <div className="relative">
+                              <Input
+                                defaultValue={activity.fields.actualDateTime}
+                                className="pr-8 text-sm h-9"
+                              />
+                              <Calendar className="absolute right-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+                            </div>
+                          </div>
+                          {activity.fields.lastLocation && (
+                            <div className="space-y-2">
+                              <Label className="text-xs text-muted-foreground">
+                                Last Identified Location
+                              </Label>
+                              <div className="relative">
+                                <Input
+                                  defaultValue={activity.fields.lastLocation}
+                                  className="pr-8 text-sm h-9"
+                                />
+                                <MapPin className="absolute right-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+                              </div>
+                            </div>
+                          )}
+                          {activity.fields.lastDateTime && (
+                            <div className="space-y-2">
+                              <Label className="text-xs text-muted-foreground">
+                                Last Identified Date and Time
+                              </Label>
+                              <div className="relative">
+                                <Input
+                                  defaultValue={activity.fields.lastDateTime}
+                                  className="pr-8 text-sm h-9"
+                                />
+                                <Calendar className="absolute right-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+                              </div>
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label className="text-xs text-muted-foreground">
+                              Reason for Changes
+                            </Label>
+                            <Select defaultValue={activity.fields.reasonForChanges}>
+                              <SelectTrigger className="h-9">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="SevenLRC">SevenLRC</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          {activity.fields.delayedReason && (
+                            <div className="space-y-2">
+                              <Label className="text-xs text-muted-foreground">
+                                Delayed Reason
+                              </Label>
+                              <Select defaultValue={activity.fields.delayedReason}>
+                                <SelectTrigger className="h-9">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="SevenLRC">SevenLRC</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          )}
+                        </div>
+                      </div>
                     </div>
                   ))}
                 </div>
