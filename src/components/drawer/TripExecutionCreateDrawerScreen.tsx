@@ -12,41 +12,12 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { useTripExecutionDrawerStore } from '@/stores/tripExecutionDrawerStore';
+import { toast } from 'sonner';
 
 interface TripExecutionCreateDrawerScreenProps {
   onClose: () => void;
   tripId?: string;
-}
-
-interface Leg {
-  id: string;
-  legNumber: number;
-  from: string;
-  to: string;
-  type: 'Pickup' | 'Bhub' | 'Via';
-  typeColor: string;
-  planned: number;
-  actual: number;
-  customer: string;
-  consignment: string;
-  hasInfo?: boolean;
-  statusIcon?: 'success' | 'warning';
-}
-
-interface Activity {
-  id: string;
-  name: string;
-  icon: React.ReactNode;
-  timestamp: string;
-  delayInfo?: string;
-  fields: {
-    revisedDateTime?: string;
-    actualDateTime: string;
-    lastLocation?: string;
-    lastDateTime?: string;
-    reasonForChanges: string;
-    delayedReason?: string;
-  };
 }
 
 interface AdditionalActivity {
@@ -76,103 +47,45 @@ export const TripExecutionCreateDrawerScreen: React.FC<TripExecutionCreateDrawer
   const [expandedActuals, setExpandedActuals] = useState(true);
   const [pickupComplete, setPickupComplete] = useState(false);
   const [showAddViaPointsDialog, setShowAddViaPointsDialog] = useState(false);
-  const [selectedLeg, setSelectedLeg] = useState<Leg | null>(null);
+  
+  // Add Via Points dialog state
+  const [viaPointForm, setViaPointForm] = useState({
+    legFromTo: '',
+    viaLocation: '',
+    plannedDate: '',
+    plannedTime: '',
+  });
 
-  const legs: Leg[] = [
-    {
-      id: '1',
-      legNumber: 1,
-      from: 'Berlin',
-      to: 'Berlin',
-      type: 'Pickup',
-      typeColor: 'bg-blue-500',
-      planned: 20,
-      actual: 20,
-      customer: 'ABC Customer',
-      consignment: 'CO00000001',
-      hasInfo: true,
-      statusIcon: 'success'
-    },
-    {
-      id: '2',
-      legNumber: 2,
-      from: 'Berlin',
-      to: 'Paris',
-      type: 'Bhub',
-      typeColor: 'bg-cyan-500',
-      planned: 20,
-      actual: 20,
-      customer: 'Multiple',
-      consignment: 'Multiple',
-      hasInfo: true
-    },
-    {
-      id: '3',
-      legNumber: 3,
-      from: 'Frankfurt',
-      to: 'Paris',
-      type: 'Bhub',
-      typeColor: 'bg-cyan-500',
-      planned: 20,
-      actual: 20,
-      customer: 'Multiple',
-      consignment: 'Multiple',
-      hasInfo: true
-    }
-  ];
+  // Zustand store
+  const { legs, selectedLegId, selectLeg, getSelectedLeg, addLeg, removeLeg } = useTripExecutionDrawerStore();
+  const selectedLeg = getSelectedLeg();
 
-  // Auto-select first leg on mount
-  useEffect(() => {
-    if (legs.length > 0) {
-      setSelectedLeg(legs[0]);
+  const handleAddViaPoint = () => {
+    if (!viaPointForm.viaLocation) {
+      toast.error('Please enter via location');
+      return;
     }
-  }, []);
 
-  const activities: Activity[] = [
-    {
-      id: 'arrived',
-      name: 'Arrived at Destination',
-      icon: <MapPin className="h-4 w-4" />,
-      timestamp: '25-Mar-2025 10:10 AM',
-      delayInfo: '1d 2h 45m Delayed',
-      fields: {
-        revisedDateTime: '25-Mar-2025 10:20 AM',
-        actualDateTime: '25-Mar-2025 10:20 AM',
-        lastLocation: '25-Mar-2025 10:20 AM',
-        lastDateTime: '25-Mar-2025 10:20 AM',
-        reasonForChanges: 'SevenLRC',
-        delayedReason: 'SevenLRC'
-      }
-    },
-    {
-      id: 'loaded',
-      name: 'Loaded',
-      icon: <Package className="h-4 w-4" />,
-      timestamp: '25-Mar-2025 11:20 AM',
-      fields: {
-        revisedDateTime: '25-Mar-2025 10:20 AM',
-        actualDateTime: '25-Mar-2025 10:20 AM',
-        lastLocation: '25-Mar-2025 10:20 AM',
-        lastDateTime: '25-Mar-2025 10:20 AM',
-        reasonForChanges: 'SevenLRC',
-        delayedReason: 'SevenLRC'
-      }
-    },
-    {
-      id: 'departed',
-      name: 'Departed at Source',
-      icon: <Truck className="h-4 w-4" />,
-      timestamp: '25-Mar-2025 09:11 AM',
-      fields: {
-        revisedDateTime: '25-Mar-2025 10:20 AM',
-        actualDateTime: '25-Mar-2025 10:20 AM',
-        lastLocation: '25-Mar-2025 10:20 AM',
-        lastDateTime: '25-Mar-2025 10:20 AM',
-        reasonForChanges: 'SevenLRC',
-        delayedReason: 'SevenLRC'
-      }
-    }
-  ];
+    const [from, to] = viaPointForm.legFromTo ? viaPointForm.legFromTo.split(' - ') : ['', ''];
+    
+    addLeg(
+      from || viaPointForm.viaLocation,
+      to || viaPointForm.viaLocation,
+      viaPointForm.viaLocation,
+      viaPointForm.plannedDate,
+      viaPointForm.plannedTime
+    );
+
+    // Reset form
+    setViaPointForm({
+      legFromTo: '',
+      viaLocation: '',
+      plannedDate: '',
+      plannedTime: '',
+    });
+    setShowAddViaPointsDialog(false);
+    toast.success('Via point added successfully');
+  };
 
   const additionalActivities: AdditionalActivity[] = [
     {
@@ -202,7 +115,7 @@ export const TripExecutionCreateDrawerScreen: React.FC<TripExecutionCreateDrawer
         className="flex h-full bg-background"
       >
       {/* Left Sidebar */}
-      <div className="w-64 border-r bg-muted/30 flex flex-col">
+      <div className="w-80 border-r bg-muted/30 flex flex-col">
         {/* Version Selection */}
         <div className="p-4 border-b space-y-3">
           <div className="space-y-2">
@@ -245,49 +158,58 @@ export const TripExecutionCreateDrawerScreen: React.FC<TripExecutionCreateDrawer
             {legs.map((leg) => (
               <div
                 key={leg.id}
-                onClick={() => setSelectedLeg(leg)}
+                onClick={() => selectLeg(leg.id)}
                 className={cn(
                   "p-3 rounded-md border bg-card hover:bg-accent/50 transition-colors cursor-pointer space-y-2",
-                  selectedLeg?.id === leg.id && "border-primary bg-accent"
+                  selectedLegId === leg.id && "border-primary bg-accent"
                 )}
               >
                 {/* Leg Header */}
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="text-sm font-medium">
-                        {leg.legNumber}: {leg.from} → {leg.to}
-                      </span>
-                      {leg.hasInfo && (
-                        <Info className="h-3 w-3 text-muted-foreground" />
-                      )}
-                    </div>
-                    <div className="text-xs text-muted-foreground">
-                      {leg.planned} Planned/{leg.actual} Actuals
-                    </div>
-                  </div>
-                  <div className="flex flex-col items-end gap-1">
-                    <Badge className={cn("text-xs", leg.typeColor, "text-white")}>
-                      {leg.type}
-                    </Badge>
-                    {leg.statusIcon === 'success' && (
-                      <div className="h-4 w-4 rounded-full bg-green-500 flex items-center justify-center">
-                        <div className="h-2 w-2 rounded-full bg-white" />
+                    <div className="flex items-center gap-2">
+                      <MapPin className="h-4 w-4 text-muted-foreground" />
+                      <div className="flex-1 min-w-0">
+                        <div className="font-medium text-sm truncate">{leg.from}</div>
+                        <div className="text-xs text-muted-foreground">Origin</div>
                       </div>
-                    )}
+                      <div className="flex items-center gap-1">
+                        {leg.hasInfo && (
+                          <Badge variant="secondary" className="h-5 px-1.5 text-[10px]">
+                            <Info className="h-3 w-3" />
+                          </Badge>
+                        )}
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="h-5 w-5"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            removeLeg(leg.id);
+                            toast.success('Leg removed successfully');
+                          }}
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
-                {/* Customer & Consignment */}
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2 text-xs">
-                    <User className="h-3 w-3 text-muted-foreground" />
-                    <span className="text-muted-foreground">{leg.customer}</span>
+                {/* Destination */}
+                <div className="flex items-center gap-2">
+                  <MapPin className="h-4 w-4 text-muted-foreground" />
+                  <div className="flex-1 min-w-0">
+                    <div className="font-medium text-sm truncate">{leg.to}</div>
+                    <div className="text-xs text-muted-foreground">Destination</div>
                   </div>
-                  <div className="flex items-center gap-2 text-xs">
-                    <FileText className="h-3 w-3 text-muted-foreground" />
-                    <span className="text-muted-foreground">{leg.consignment}</span>
-                  </div>
+                </div>
+
+                {/* Distance & Duration */}
+                <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                  <span>{leg.distance}</span>
+                  <span>•</span>
+                  <span>{leg.duration}</span>
                 </div>
               </div>
             ))}
@@ -310,9 +232,9 @@ export const TripExecutionCreateDrawerScreen: React.FC<TripExecutionCreateDrawer
         <Tabs defaultValue="activities" className="flex-1 flex flex-col">
           <div className="border-b px-6 pt-4">
             <TabsList className="h-10">
-              <TabsTrigger value="activities">Activities</TabsTrigger>
-              <TabsTrigger value="consignment">Consignment</TabsTrigger>
-              <TabsTrigger value="transshipment">Transshipment</TabsTrigger>
+              <TabsTrigger value="activities">Activities ({selectedLeg.activities.length})</TabsTrigger>
+              <TabsTrigger value="consignment">Consignment ({selectedLeg.consignments.length})</TabsTrigger>
+              <TabsTrigger value="transshipment">Transshipment ({selectedLeg.transshipments.length})</TabsTrigger>
             </TabsList>
           </div>
 
@@ -320,22 +242,11 @@ export const TripExecutionCreateDrawerScreen: React.FC<TripExecutionCreateDrawer
             {/* Activities Header */}
             <div className="px-6 py-4 border-b">
               <div className="flex items-center justify-between">
-                <h2 className="text-lg font-semibold">Activities Details</h2>
+                <h2 className="text-lg font-semibold">Activities Details - {selectedLeg.from} to {selectedLeg.to}</h2>
                 <div className="flex items-center gap-2">
                   <Button variant="outline" size="sm" className="gap-2">
                     <Plus className="h-4 w-4" />
                     Add Activities
-                  </Button>
-                  <Button variant="ghost" size="icon" className="h-8 w-8">
-                    <ChevronDown className="h-4 w-4" />
-                  </Button>
-                  <Button variant="ghost" size="icon" className="h-8 w-8">
-                    <User className="h-4 w-4" />
-                  </Button>
-                  <Button variant="ghost" size="icon" className="h-8 w-8">
-                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
-                    </svg>
                   </Button>
                 </div>
               </div>
@@ -352,7 +263,7 @@ export const TripExecutionCreateDrawerScreen: React.FC<TripExecutionCreateDrawer
                   <h3 className="text-sm font-semibold flex items-center gap-2">
                     Activities
                     <Badge variant="secondary" className="rounded-full h-5 px-2 text-xs">
-                      {activities.length}
+                      {selectedLeg.activities.length}
                     </Badge>
                   </h3>
                   {expandedActivities ? (
@@ -372,130 +283,84 @@ export const TripExecutionCreateDrawerScreen: React.FC<TripExecutionCreateDrawer
                       transition={{ duration: 0.2 }}
                       className="space-y-3 overflow-hidden"
                     >
-                      {activities.map((activity) => (
+                      {selectedLeg.activities.map((activity) => (
                         <div key={activity.id} className="border rounded-lg bg-card">
                           {/* Activity Header */}
                           <div className="flex items-center justify-between p-4 bg-muted/30">
                             <div className="flex items-center gap-3">
                               <div className="p-2 rounded bg-blue-500/10 text-blue-600">
-                                {activity.icon}
+                                <Package className="h-4 w-4" />
                               </div>
                               <div>
-                                <div className="font-medium text-sm">{activity.name}</div>
-                                <div className="text-xs text-muted-foreground">{activity.timestamp}</div>
+                                <div className="font-medium text-sm">{activity.category} - {activity.subCategory}</div>
+                                <div className="text-xs text-muted-foreground">{activity.plannedDate} {activity.plannedTime}</div>
                               </div>
                             </div>
                             <div className="flex items-center gap-2">
-                              {activity.delayInfo && (
-                                <Badge variant="destructive" className="text-xs">
-                                  {activity.delayInfo}
-                                </Badge>
-                              )}
-                              <Button variant="ghost" size="icon" className="h-8 w-8">
-                                <RefreshCw className="h-4 w-4" />
-                              </Button>
+                              <Badge 
+                                variant={activity.status === 'completed' ? 'default' : activity.status === 'in-progress' ? 'secondary' : 'outline'} 
+                                className="text-xs"
+                              >
+                                {activity.status}
+                              </Badge>
                             </div>
                           </div>
 
-                          {/* Activity Details - Always Visible */}
+                          {/* Activity Details */}
                           <div className="px-4 pb-4 pt-4 border-t space-y-4">
-                        <div className="grid grid-cols-4 gap-4">
-                          {activity.fields.revisedDateTime && (
-                            <div className="space-y-2">
-                              <Label className="text-xs text-muted-foreground">
-                                Revised Date and Time
-                              </Label>
-                              <div className="relative">
+                            <div className="grid grid-cols-3 gap-4">
+                              <div className="space-y-2">
+                                <Label className="text-xs text-muted-foreground">
+                                  Planned Date
+                                </Label>
                                 <Input
-                                  defaultValue={activity.fields.revisedDateTime}
-                                  className="pr-8 text-sm h-9"
+                                  value={activity.plannedDate}
+                                  className="text-sm h-9"
+                                  readOnly
                                 />
-                                <Calendar className="absolute right-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+                              </div>
+                              <div className="space-y-2">
+                                <Label className="text-xs text-muted-foreground">
+                                  Planned Time
+                                </Label>
+                                <Input
+                                  value={activity.plannedTime}
+                                  className="text-sm h-9"
+                                  readOnly
+                                />
+                              </div>
+                              <div className="space-y-2">
+                                <Label className="text-xs text-muted-foreground">
+                                  Location
+                                </Label>
+                                <Input
+                                  value={activity.location}
+                                  className="text-sm h-9"
+                                  readOnly
+                                />
                               </div>
                             </div>
-                          )}
-                          <div className="space-y-2">
-                            <Label className="text-xs text-muted-foreground">
-                              Actual Date and Time <span className="text-red-500">*</span>
-                            </Label>
-                            <div className="relative">
-                              <Input
-                                defaultValue={activity.fields.actualDateTime}
-                                className="pr-8 text-sm h-9"
-                              />
-                              <Calendar className="absolute right-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
-                            </div>
-                          </div>
-                          {activity.fields.lastLocation && (
-                            <div className="space-y-2">
-                              <Label className="text-xs text-muted-foreground">
-                                Last Identified Location
-                              </Label>
-                              <div className="relative">
-                                <Input
-                                  defaultValue={activity.fields.lastLocation}
-                                  className="pr-8 text-sm h-9"
-                                />
-                                <MapPin className="absolute right-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
-                              </div>
-                            </div>
-                          )}
-                          {activity.fields.lastDateTime && (
-                            <div className="space-y-2">
-                              <Label className="text-xs text-muted-foreground">
-                                Last Identified Date and Time
-                              </Label>
-                              <div className="relative">
-                                <Input
-                                  defaultValue={activity.fields.lastDateTime}
-                                  className="pr-8 text-sm h-9"
-                                />
-                                <Calendar className="absolute right-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
-                              </div>
-                            </div>
-                          )}
-                        </div>
 
-                        <div className="grid grid-cols-2 gap-4">
-                          <div className="space-y-2">
-                            <Label className="text-xs text-muted-foreground">
-                              Reason for Changes
-                            </Label>
-                            <Select defaultValue={activity.fields.reasonForChanges}>
-                              <SelectTrigger className="h-9">
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="SevenLRC">SevenLRC</SelectItem>
-                              </SelectContent>
-                            </Select>
+                            {activity.remarks && (
+                              <div className="space-y-2">
+                                <Label className="text-xs text-muted-foreground">Remarks</Label>
+                                <Input
+                                  value={activity.remarks}
+                                  className="text-sm h-9"
+                                  readOnly
+                                />
+                              </div>
+                            )}
                           </div>
-                          {activity.fields.delayedReason && (
-                            <div className="space-y-2">
-                              <Label className="text-xs text-muted-foreground">
-                                Delayed Reason
-                              </Label>
-                              <Select defaultValue={activity.fields.delayedReason}>
-                                <SelectTrigger className="h-9">
-                                  <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="SevenLRC">SevenLRC</SelectItem>
-                                </SelectContent>
-                              </Select>
-                            </div>
-                          )}
                         </div>
-                      </div>
-                    </div>
-                  ))}
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
+                      ))
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
 
-          {/* Additional Activities Section */}
-          <div className="space-y-3">
+              {/* Additional Activities Section */}
+              <div className="space-y-3">
                 <div
                   className="flex items-center justify-between cursor-pointer p-2 -mx-2 rounded hover:bg-muted/50"
                   onClick={() => setExpandedAdditional(!expandedAdditional)}
@@ -631,830 +496,187 @@ export const TripExecutionCreateDrawerScreen: React.FC<TripExecutionCreateDrawer
           </TabsContent>
 
           <TabsContent value="consignment" className="flex-1 flex flex-col m-0">
-            {/* Alert */}
-            <div className="px-6 pt-4">
-              <Alert className="border-orange-200 bg-orange-50">
-                <AlertCircle className="h-4 w-4 text-orange-600" />
-                <AlertDescription className="text-orange-800 text-sm ml-2">
-                  Kindly take note that the Actual {'<<'} weight/length/wagon quantity {'>>'}  is higher than the allowed limit. Please check path constraints for more details.
-                </AlertDescription>
-              </Alert>
-            </div>
-
-            {/* Consignment Details Header */}
+            {/* Consignment Header */}
             <div className="px-6 py-4 border-b">
               <div className="flex items-center justify-between">
-                <h2 className="text-lg font-semibold">Consignment Details</h2>
-                <div className="flex items-center gap-2">
-                  <Button variant="outline" size="sm" className="gap-2">
-                    <Plus className="h-4 w-4" />
-                    Add Actuals
-                    <ChevronDown className="h-4 w-4" />
-                  </Button>
-                  <Button variant="ghost" size="icon" className="h-8 w-8">
-                    <MoreVertical className="h-4 w-4" />
-                  </Button>
-                  <Button variant="ghost" size="icon" className="h-8 w-8">
-                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
-                    </svg>
-                  </Button>
-                </div>
+                <h2 className="text-lg font-semibold">Consignment Details - {selectedLeg.from} to {selectedLeg.to}</h2>
               </div>
             </div>
 
             {/* Consignment Content */}
             <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
-              {/* Consignment Selection */}
-              <div className="flex items-center gap-4">
-                <div className="flex-1">
-                  <Select defaultValue="CO000000001">
-                    <SelectTrigger className="h-10">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="CO000000001">CO000000001</SelectItem>
-                      <SelectItem value="CO000000002">CO000000002</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Checkbox 
-                    id="pickup-complete" 
-                    checked={pickupComplete}
-                    onCheckedChange={(checked) => setPickupComplete(checked as boolean)}
-                  />
-                  <Label htmlFor="pickup-complete" className="text-sm cursor-pointer">
-                    Pickup Complete for this CO
-                  </Label>
-                </div>
-              </div>
-
-              {/* Planned Section */}
-              <div className="space-y-3">
-                <div 
-                  className="flex items-center justify-between cursor-pointer p-2 -mx-2 rounded hover:bg-muted/50"
-                  onClick={() => setExpandedPlanned(!expandedPlanned)}
-                >
-                  <h3 className="text-sm font-semibold flex items-center gap-2">
-                    Planned
-                    <Badge variant="secondary" className="rounded-full h-5 px-2 text-xs">
-                      5
-                    </Badge>
-                  </h3>
-                  {expandedPlanned ? (
-                    <ChevronUp className="h-4 w-4 text-muted-foreground" />
-                  ) : (
-                    <ChevronDown className="h-4 w-4 text-muted-foreground" />
-                  )}
-                </div>
-
-                <AnimatePresence>
-                  {expandedPlanned && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: 'auto', opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.2 }}
-                      className="space-y-4 overflow-hidden"
-                    >
-                      {/* Stat Cards */}
-                      <div className="grid grid-cols-4 gap-3">
-                        <div className="bg-blue-50 p-4 rounded-lg">
-                          <div className="flex items-center gap-3">
-                            <div className="p-2 rounded bg-blue-100">
-                              <Truck className="h-5 w-5 text-blue-600" />
-                            </div>
-                            <div>
-                              <div className="text-lg font-semibold">12 Nos</div>
-                              <div className="text-xs text-muted-foreground">Wagon Quantity</div>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="bg-purple-50 p-4 rounded-lg">
-                          <div className="flex items-center gap-3">
-                            <div className="p-2 rounded bg-purple-100">
-                              <Container className="h-5 w-5 text-purple-600" />
-                            </div>
-                            <div>
-                              <div className="text-lg font-semibold">12 Nos</div>
-                              <div className="text-xs text-muted-foreground">Container Quantity</div>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="bg-red-50 p-4 rounded-lg">
-                          <div className="flex items-center gap-3">
-                            <div className="p-2 rounded bg-red-100">
-                              <Box className="h-5 w-5 text-red-600" />
-                            </div>
-                            <div>
-                              <div className="text-lg font-semibold">23 Ton</div>
-                              <div className="text-xs text-muted-foreground">Product Weight</div>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="bg-cyan-50 p-4 rounded-lg">
-                          <div className="flex items-center gap-3">
-                            <div className="p-2 rounded bg-cyan-100">
-                              <Boxes className="h-5 w-5 text-cyan-600" />
-                            </div>
-                            <div>
-                              <div className="text-lg font-semibold">10 Nos</div>
-                              <div className="text-xs text-muted-foreground">THU Quantity</div>
-                            </div>
-                          </div>
-                        </div>
+              {/* Consignments Grid */}
+              <div className="grid gap-4">
+                {selectedLeg.consignments.map((consignment) => (
+                  <div key={consignment.id} className="border rounded-lg bg-card p-4 space-y-3">
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <div className="font-semibold">{consignment.consignmentNo}</div>
+                        <div className="text-xs text-muted-foreground mt-1">{consignment.commodity}</div>
                       </div>
+                      <Badge variant="secondary">{consignment.status}</Badge>
+                    </div>
 
-                      {/* Plan List Table */}
-                      <div className="space-y-3">
-                        <h4 className="text-sm font-semibold">Plan List</h4>
-                        
-                        {/* Table Toolbar */}
-                        <div className="flex items-center justify-between">
-                          <div className="relative flex-1 max-w-xs">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                            <Input 
-                              placeholder="Search" 
-                              className="pl-9 h-9"
-                            />
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Button variant="outline" size="icon" className="h-9 w-9">
-                              <Download className="h-4 w-4" />
-                            </Button>
-                            <Button variant="outline" size="icon" className="h-9 w-9">
-                              <Filter className="h-4 w-4" />
-                            </Button>
-                            <Button variant="outline" size="icon" className="h-9 w-9">
-                              <CheckSquare className="h-4 w-4" />
-                            </Button>
-                            <Button variant="outline" size="icon" className="h-9 w-9">
-                              <MoreVertical className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </div>
-
-                        {/* Table */}
-                        <div className="border rounded-lg">
-                          <Table>
-                            <TableHeader>
-                              <TableRow>
-                                <TableHead>Wagon ID Type</TableHead>
-                                <TableHead>Container ID Type</TableHead>
-                                <TableHead>Hazardous Goods</TableHead>
-                                <TableHead>Departure and Arrival</TableHead>
-                                <TableHead>Plan From & To Date</TableHead>
-                                <TableHead>Price</TableHead>
-                                <TableHead className="w-12"></TableHead>
-                              </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                              <TableRow>
-                                <TableCell>
-                                  <div className="font-medium text-blue-600">WAG00000001</div>
-                                  <div className="text-xs text-muted-foreground">Habbins</div>
-                                </TableCell>
-                                <TableCell>
-                                  <div>CONT100001</div>
-                                  <div className="text-xs text-muted-foreground">Container A</div>
-                                </TableCell>
-                                <TableCell>-</TableCell>
-                                <TableCell>Frankfurt Station A - Frankfurt Station B</TableCell>
-                                <TableCell>12-Mar-2025 to 12-Mar-2025</TableCell>
-                                <TableCell>€ 1395.00</TableCell>
-                                <TableCell>
-                                  <Button variant="ghost" size="icon" className="h-8 w-8">
-                                    <MoreVertical className="h-4 w-4" />
-                                  </Button>
-                                </TableCell>
-                              </TableRow>
-                              <TableRow>
-                                <TableCell>
-                                  <div className="font-medium text-blue-600">WAG00000001</div>
-                                  <div className="text-xs text-muted-foreground">Habbins</div>
-                                </TableCell>
-                                <TableCell>
-                                  <div>CONT100001</div>
-                                  <div className="text-xs text-muted-foreground">Container A</div>
-                                </TableCell>
-                                <TableCell>
-                                  <div className="h-5 w-5 rounded-full bg-orange-500 flex items-center justify-center">
-                                    <AlertCircle className="h-3 w-3 text-white" />
-                                  </div>
-                                </TableCell>
-                                <TableCell>Frankfurt Station A - Frankfurt Station B</TableCell>
-                                <TableCell>12-Mar-2025 to 12-Mar-2025</TableCell>
-                                <TableCell>€ 1395.00</TableCell>
-                                <TableCell>
-                                  <Button variant="ghost" size="icon" className="h-8 w-8">
-                                    <MoreVertical className="h-4 w-4" />
-                                  </Button>
-                                </TableCell>
-                              </TableRow>
-                              <TableRow>
-                                <TableCell>
-                                  <div className="font-medium text-blue-600">WAG00000001</div>
-                                  <div className="text-xs text-muted-foreground">Habbins</div>
-                                </TableCell>
-                                <TableCell>
-                                  <div>CONT100001</div>
-                                  <div className="text-xs text-muted-foreground">Container A</div>
-                                </TableCell>
-                                <TableCell>
-                                  <div className="h-5 w-5 rounded-full bg-orange-500 flex items-center justify-center">
-                                    <AlertCircle className="h-3 w-3 text-white" />
-                                  </div>
-                                </TableCell>
-                                <TableCell>Frankfurt Station A - Frankfurt Station B</TableCell>
-                                <TableCell>12-Mar-2025 to 12-Mar-2025</TableCell>
-                                <TableCell>€ 1395.00</TableCell>
-                                <TableCell>
-                                  <Button variant="ghost" size="icon" className="h-8 w-8">
-                                    <MoreVertical className="h-4 w-4" />
-                                  </Button>
-                                </TableCell>
-                              </TableRow>
-                            </TableBody>
-                          </Table>
-                        </div>
-
-                        {/* Pagination */}
-                        <div className="flex items-center justify-between text-sm">
-                          <div className="flex items-center gap-2">
-                            <Button variant="outline" size="icon" className="h-8 w-8">
-                              <ChevronDown className="h-4 w-4 rotate-90" />
-                            </Button>
-                            <Button variant="outline" size="icon" className="h-8 w-8">
-                              <ChevronDown className="h-4 w-4 -rotate-90" />
-                            </Button>
-                            <Button variant="default" size="sm" className="h-8 w-8 p-0">1</Button>
-                            <Button variant="outline" size="sm" className="h-8 w-8 p-0">2</Button>
-                            <Button variant="outline" size="sm" className="h-8 w-8 p-0">3</Button>
-                            <Button variant="outline" size="sm" className="h-8 w-8 p-0">4</Button>
-                            <Button variant="outline" size="sm" className="h-8 w-8 p-0">5</Button>
-                            <span className="text-muted-foreground">...</span>
-                            <Button variant="outline" size="sm" className="h-8 w-8 p-0">10</Button>
-                            <Button variant="outline" size="icon" className="h-8 w-8">
-                              <ChevronDown className="h-4 w-4 -rotate-90" />
-                            </Button>
-                            <Button variant="outline" size="icon" className="h-8 w-8">
-                              <ChevronDown className="h-4 w-4 rotate-90" />
-                            </Button>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <span className="text-muted-foreground">Go to</span>
-                            <Input className="h-8 w-16 text-center" defaultValue="12" />
-                          </div>
-                        </div>
+                    <div className="grid grid-cols-3 gap-4 pt-3 border-t">
+                      <div>
+                        <div className="text-xs text-muted-foreground">Packages</div>
+                        <div className="text-sm font-medium">{consignment.packages} Nos</div>
                       </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-
-              {/* Actuals Section */}
-              <div className="space-y-3">
-                <div 
-                  className="flex items-center justify-between cursor-pointer p-2 -mx-2 rounded hover:bg-muted/50"
-                  onClick={() => setExpandedActuals(!expandedActuals)}
-                >
-                  <h3 className="text-sm font-semibold flex items-center gap-2">
-                    Actuals
-                    <Badge variant="secondary" className="rounded-full h-5 px-2 text-xs">
-                      5
-                    </Badge>
-                  </h3>
-                  {expandedActuals ? (
-                    <ChevronUp className="h-4 w-4 text-muted-foreground" />
-                  ) : (
-                    <ChevronDown className="h-4 w-4 text-muted-foreground" />
-                  )}
-                </div>
-
-                <AnimatePresence>
-                  {expandedActuals && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: 'auto', opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.2 }}
-                      className="space-y-4 overflow-hidden"
-                    >
-                      {/* Stat Cards */}
-                      <div className="grid grid-cols-4 gap-3">
-                        <div className="bg-blue-50 p-4 rounded-lg">
-                          <div className="flex items-center gap-3">
-                            <div className="p-2 rounded bg-blue-100">
-                              <Truck className="h-5 w-5 text-blue-600" />
-                            </div>
-                            <div>
-                              <div className="text-lg font-semibold">12 Nos</div>
-                              <div className="text-xs text-muted-foreground">Wagon Quantity</div>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="bg-purple-50 p-4 rounded-lg">
-                          <div className="flex items-center gap-3">
-                            <div className="p-2 rounded bg-purple-100">
-                              <Container className="h-5 w-5 text-purple-600" />
-                            </div>
-                            <div>
-                              <div className="text-lg font-semibold">12 Nos</div>
-                              <div className="text-xs text-muted-foreground">Container Quantity</div>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="bg-red-50 p-4 rounded-lg">
-                          <div className="flex items-center gap-3">
-                            <div className="p-2 rounded bg-red-100">
-                              <Box className="h-5 w-5 text-red-600" />
-                            </div>
-                            <div>
-                              <div className="text-lg font-semibold">23 Ton</div>
-                              <div className="text-xs text-muted-foreground">Product Weight</div>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="bg-cyan-50 p-4 rounded-lg">
-                          <div className="flex items-center gap-3">
-                            <div className="p-2 rounded bg-cyan-100">
-                              <Boxes className="h-5 w-5 text-cyan-600" />
-                            </div>
-                            <div>
-                              <div className="text-lg font-semibold">10 Nos</div>
-                              <div className="text-xs text-muted-foreground">THU Quantity</div>
-                            </div>
-                          </div>
-                        </div>
+                      <div>
+                        <div className="text-xs text-muted-foreground">Weight</div>
+                        <div className="text-sm font-medium">{consignment.weight} kg</div>
                       </div>
-
-                      {/* Actual List Table */}
-                      <div className="space-y-3">
-                        <h4 className="text-sm font-semibold">Actual List</h4>
-                        
-                        {/* Table Toolbar */}
-                        <div className="flex items-center justify-between">
-                          <div className="relative flex-1 max-w-xs">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                            <Input 
-                              placeholder="Search" 
-                              className="pl-9 h-9"
-                            />
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Button variant="outline" size="icon" className="h-9 w-9">
-                              <Download className="h-4 w-4" />
-                            </Button>
-                            <Button variant="outline" size="icon" className="h-9 w-9">
-                              <Filter className="h-4 w-4" />
-                            </Button>
-                            <Button variant="outline" size="icon" className="h-9 w-9">
-                              <CheckSquare className="h-4 w-4" />
-                            </Button>
-                            <Button variant="outline" size="icon" className="h-9 w-9">
-                              <MoreVertical className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </div>
-
-                        {/* Table */}
-                        <div className="border rounded-lg">
-                          <Table>
-                            <TableHeader>
-                              <TableRow>
-                                <TableHead>Wagon ID Type</TableHead>
-                                <TableHead>Container ID Type</TableHead>
-                                <TableHead>Hazardous Goods</TableHead>
-                                <TableHead>Departure and Arrival</TableHead>
-                                <TableHead>Plan From & To Date</TableHead>
-                                <TableHead>Price</TableHead>
-                                <TableHead className="w-12"></TableHead>
-                              </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                              <TableRow>
-                                <TableCell>
-                                  <div className="font-medium text-blue-600">WAG00000001</div>
-                                  <div className="text-xs text-muted-foreground">Habbins</div>
-                                </TableCell>
-                                <TableCell>
-                                  <div>CONT100001</div>
-                                  <div className="text-xs text-muted-foreground">Container A</div>
-                                </TableCell>
-                                <TableCell>-</TableCell>
-                                <TableCell>Frankfurt Station A - Frankfurt Station B</TableCell>
-                                <TableCell>12-Mar-2025 to 12-Mar-2025</TableCell>
-                                <TableCell>€ 1395.00</TableCell>
-                                <TableCell>
-                                  <Button variant="ghost" size="icon" className="h-8 w-8">
-                                    <MoreVertical className="h-4 w-4" />
-                                  </Button>
-                                </TableCell>
-                              </TableRow>
-                              <TableRow>
-                                <TableCell>
-                                  <div className="font-medium text-blue-600">WAG00000001</div>
-                                  <div className="text-xs text-muted-foreground">Habbins</div>
-                                </TableCell>
-                                <TableCell>
-                                  <div>CONT100001</div>
-                                  <div className="text-xs text-muted-foreground">Container A</div>
-                                </TableCell>
-                                <TableCell>
-                                  <div className="h-5 w-5 rounded-full bg-orange-500 flex items-center justify-center">
-                                    <AlertCircle className="h-3 w-3 text-white" />
-                                  </div>
-                                </TableCell>
-                                <TableCell>Frankfurt Station A - Frankfurt Station B</TableCell>
-                                <TableCell>12-Mar-2025 to 12-Mar-2025</TableCell>
-                                <TableCell>€ 1395.00</TableCell>
-                                <TableCell>
-                                  <Button variant="ghost" size="icon" className="h-8 w-8">
-                                    <MoreVertical className="h-4 w-4" />
-                                  </Button>
-                                </TableCell>
-                              </TableRow>
-                              <TableRow>
-                                <TableCell>
-                                  <div className="font-medium text-blue-600">WAG00000001</div>
-                                  <div className="text-xs text-muted-foreground">Habbins</div>
-                                </TableCell>
-                                <TableCell>
-                                  <div>CONT100001</div>
-                                  <div className="text-xs text-muted-foreground">Container A</div>
-                                </TableCell>
-                                <TableCell>
-                                  <div className="h-5 w-5 rounded-full bg-orange-500 flex items-center justify-center">
-                                    <AlertCircle className="h-3 w-3 text-white" />
-                                  </div>
-                                </TableCell>
-                                <TableCell>Frankfurt Station A - Frankfurt Station B</TableCell>
-                                <TableCell>12-Mar-2025 to 12-Mar-2025</TableCell>
-                                <TableCell>€ 1395.00</TableCell>
-                                <TableCell>
-                                  <Button variant="ghost" size="icon" className="h-8 w-8">
-                                    <MoreVertical className="h-4 w-4" />
-                                  </Button>
-                                </TableCell>
-                              </TableRow>
-                            </TableBody>
-                          </Table>
-                        </div>
-
-                        {/* Pagination */}
-                        <div className="flex items-center justify-between text-sm">
-                          <div className="flex items-center gap-2">
-                            <Button variant="outline" size="icon" className="h-8 w-8">
-                              <ChevronDown className="h-4 w-4 rotate-90" />
-                            </Button>
-                            <Button variant="outline" size="icon" className="h-8 w-8">
-                              <ChevronDown className="h-4 w-4 -rotate-90" />
-                            </Button>
-                            <Button variant="default" size="sm" className="h-8 w-8 p-0">1</Button>
-                            <Button variant="outline" size="sm" className="h-8 w-8 p-0">2</Button>
-                            <Button variant="outline" size="sm" className="h-8 w-8 p-0">3</Button>
-                            <Button variant="outline" size="sm" className="h-8 w-8 p-0">4</Button>
-                            <Button variant="outline" size="sm" className="h-8 w-8 p-0">5</Button>
-                            <span className="text-muted-foreground">...</span>
-                            <Button variant="outline" size="sm" className="h-8 w-8 p-0">10</Button>
-                            <Button variant="outline" size="icon" className="h-8 w-8">
-                              <ChevronDown className="h-4 w-4 -rotate-90" />
-                            </Button>
-                            <Button variant="outline" size="icon" className="h-8 w-8">
-                              <ChevronDown className="h-4 w-4 rotate-90" />
-                            </Button>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <span className="text-muted-foreground">Go to</span>
-                            <Input className="h-8 w-16 text-center" defaultValue="12" />
-                          </div>
-                        </div>
+                      <div>
+                        <div className="text-xs text-muted-foreground">Volume</div>
+                        <div className="text-sm font-medium">{consignment.volume} m³</div>
                       </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+                    </div>
+                  </div>
+                ))
               </div>
             </div>
           </TabsContent>
 
           <TabsContent value="transshipment" className="flex-1 flex flex-col m-0">
-            {/* Transshipment Details Header */}
+            {/* Transshipment Header */}
             <div className="px-6 py-4 border-b">
               <div className="flex items-center justify-between">
-                <h2 className="text-lg font-semibold flex items-center gap-2">
-                  Transshipment Details
-                  <Badge variant="secondary" className="rounded-full h-5 px-2 text-xs">
-                    5
-                  </Badge>
-                </h2>
-                <div className="flex items-center gap-2">
-                  <Button variant="outline" size="sm" className="gap-2">
-                    <Plus className="h-4 w-4" />
-                    Add New
-                    <ChevronDown className="h-4 w-4" />
-                  </Button>
-                  <Button variant="ghost" size="icon" className="h-8 w-8">
-                    <User className="h-4 w-4" />
-                  </Button>
-                </div>
+                <h2 className="text-lg font-semibold">Transshipment Details - {selectedLeg.from} to {selectedLeg.to}</h2>
               </div>
             </div>
 
             {/* Transshipment Content */}
             <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
-              {/* Consignment Selection */}
-              <div className="flex items-center gap-4">
-                <div className="flex-1">
-                  <Select defaultValue="CN000000001">
-                    <SelectTrigger className="h-10">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="CN000000001">CN000000001</SelectItem>
-                      <SelectItem value="CN000000002">CN000000002</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Checkbox id="transship-pickup-complete" />
-                  <Label htmlFor="transship-pickup-complete" className="text-sm cursor-pointer">
-                    Pickup Complete for this CO
-                  </Label>
-                </div>
-              </div>
+              {/* Transshipments Grid */}
+              <div className="grid gap-4">
+                {selectedLeg.transshipments.map((transshipment) => (
+                  <div key={transshipment.id} className="rounded-lg border bg-card p-4 space-y-3">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label className="text-xs">From Vehicle</Label>
+                        <Input placeholder="TRK-001" value={transshipment.fromVehicle} className="h-8 text-sm" readOnly />
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-xs">To Vehicle</Label>
+                        <Input placeholder="TRK-002" value={transshipment.toVehicle} className="h-8 text-sm" readOnly />
+                      </div>
+                    </div>
 
-              {/* Stat Cards */}
-              <div className="grid grid-cols-4 gap-3">
-                <div className="bg-blue-50 p-4 rounded-lg">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 rounded bg-blue-100">
-                      <Truck className="h-5 w-5 text-blue-600" />
+                    <div className="space-y-2">
+                      <Label className="text-xs">Location</Label>
+                      <Input placeholder="Select location" value={transshipment.location} className="h-8 text-sm" readOnly />
                     </div>
-                    <div>
-                      <div className="text-lg font-semibold">12 Nos</div>
-                      <div className="text-xs text-muted-foreground">Wagon Quantity</div>
-                    </div>
-                  </div>
-                </div>
-                <div className="bg-purple-50 p-4 rounded-lg">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 rounded bg-purple-100">
-                      <Container className="h-5 w-5 text-purple-600" />
-                    </div>
-                    <div>
-                      <div className="text-lg font-semibold">12 Nos</div>
-                      <div className="text-xs text-muted-foreground">Container Quantity</div>
-                    </div>
-                  </div>
-                </div>
-                <div className="bg-red-50 p-4 rounded-lg">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 rounded bg-red-100">
-                      <Box className="h-5 w-5 text-red-600" />
-                    </div>
-                    <div>
-                      <div className="text-lg font-semibold">23 Ton</div>
-                      <div className="text-xs text-muted-foreground">Product Weight</div>
-                    </div>
-                  </div>
-                </div>
-                <div className="bg-cyan-50 p-4 rounded-lg">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 rounded bg-cyan-100">
-                      <Boxes className="h-5 w-5 text-cyan-600" />
-                    </div>
-                    <div>
-                      <div className="text-lg font-semibold">10 Nos</div>
-                      <div className="text-xs text-muted-foreground">THU Quantity</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
 
-              {/* Transshipment List */}
-              <div className="space-y-3">
-                <h4 className="text-sm font-semibold">Transshipment List</h4>
-                
-                {/* Table Toolbar */}
-                <div className="flex items-center justify-between">
-                  <div className="relative flex-1 max-w-xs">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input 
-                      placeholder="Search" 
-                      className="pl-9 h-9"
-                    />
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Button variant="outline" size="icon" className="h-9 w-9">
-                      <Download className="h-4 w-4" />
-                    </Button>
-                    <Button variant="outline" size="icon" className="h-9 w-9">
-                      <Filter className="h-4 w-4" />
-                    </Button>
-                    <Button variant="outline" size="icon" className="h-9 w-9">
-                      <CheckSquare className="h-4 w-4" />
-                    </Button>
-                    <Button variant="outline" size="icon" className="h-9 w-9">
-                      <MoreVertical className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label className="text-xs">Planned Date</Label>
+                        <Input type="date" value={transshipment.plannedDate} className="h-8 text-sm" readOnly />
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-xs">Planned Time</Label>
+                        <Input type="time" value={transshipment.plannedTime} className="h-8 text-sm" readOnly />
+                      </div>
+                    </div>
 
-                {/* Table */}
-                <div className="border rounded-lg">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Wagon ID Type</TableHead>
-                        <TableHead>Container ID Type</TableHead>
-                        <TableHead>Hazardous Goods</TableHead>
-                        <TableHead>Departure and Arrival</TableHead>
-                        <TableHead>Plan From & To Date</TableHead>
-                        <TableHead>Price</TableHead>
-                        <TableHead>Draft Bill</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      <TableRow>
-                        <TableCell>
-                          <div className="font-medium text-blue-600">WAG00000001</div>
-                          <div className="text-xs text-muted-foreground">Habbins</div>
-                        </TableCell>
-                        <TableCell>
-                          <div>CONT100001</div>
-                          <div className="text-xs text-muted-foreground">Container A</div>
-                        </TableCell>
-                        <TableCell>-</TableCell>
-                        <TableCell>Frankfurt Station A - Frankfurt Station B</TableCell>
-                        <TableCell>12-Mar-2025 to 12-Mar-2025</TableCell>
-                        <TableCell>€ 1395.00</TableCell>
-                        <TableCell>
-                          <span className="text-blue-600 font-medium">DB/000234</span>
-                        </TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell>
-                          <div className="font-medium text-blue-600">WAG00000001</div>
-                          <div className="text-xs text-muted-foreground">Habbins</div>
-                        </TableCell>
-                        <TableCell>
-                          <div>CONT100001</div>
-                          <div className="text-xs text-muted-foreground">Container A</div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="h-5 w-5 rounded-full bg-orange-500 flex items-center justify-center">
-                            <AlertCircle className="h-3 w-3 text-white" />
-                          </div>
-                        </TableCell>
-                        <TableCell>Frankfurt Station A - Frankfurt Station B</TableCell>
-                        <TableCell>12-Mar-2025 to 12-Mar-2025</TableCell>
-                        <TableCell>€ 1395.00</TableCell>
-                        <TableCell>
-                          <span className="text-blue-600 font-medium">DB/000234</span>
-                        </TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell>
-                          <div className="font-medium text-blue-600">WAG00000001</div>
-                          <div className="text-xs text-muted-foreground">Habbins</div>
-                        </TableCell>
-                        <TableCell>
-                          <div>CONT100001</div>
-                          <div className="text-xs text-muted-foreground">Container A</div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="h-5 w-5 rounded-full bg-orange-500 flex items-center justify-center">
-                            <AlertCircle className="h-3 w-3 text-white" />
-                          </div>
-                        </TableCell>
-                        <TableCell>Frankfurt Station A - Frankfurt Station B</TableCell>
-                        <TableCell>12-Mar-2025 to 12-Mar-2025</TableCell>
-                        <TableCell>€ 1395.00</TableCell>
-                        <TableCell>
-                          <span className="text-blue-600 font-medium">DB/000234</span>
-                        </TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell>
-                          <div className="font-medium text-blue-600">WAG00000001</div>
-                          <div className="text-xs text-muted-foreground">Habbins</div>
-                        </TableCell>
-                        <TableCell>
-                          <div>CONT100001</div>
-                          <div className="text-xs text-muted-foreground">Container A</div>
-                        </TableCell>
-                        <TableCell>-</TableCell>
-                        <TableCell>Frankfurt Station A - Frankfurt Station B</TableCell>
-                        <TableCell>12-Mar-2025 to 12-Mar-2025</TableCell>
-                        <TableCell>€ 1395.00</TableCell>
-                        <TableCell>
-                          <span className="text-blue-600 font-medium">DB/000234</span>
-                        </TableCell>
-                      </TableRow>
-                    </TableBody>
-                  </Table>
-                </div>
+                    <div className="flex items-center justify-between pt-2 border-t">
+                      <Badge variant="secondary" className="text-xs">
+                        {transshipment.status}
+                      </Badge>
+                      <Button size="sm" variant="ghost" className="h-7 text-xs">
+                        Edit
+                      </Button>
+                    </div>
+                  </div>
+                ))
               </div>
             </div>
           </TabsContent>
         </Tabs>
 
-        {/* Footer */}
-        <div className="border-t px-6 py-4 bg-card">
-          <div className="flex items-center justify-end gap-3">
-            <Button variant="outline" className="gap-2">
-              <Send className="h-4 w-4" />
-              Send Mail
-            </Button>
-            <Button className="gap-2">
-              Save
-            </Button>
-          </div>
+        {/* Footer Actions */}
+        <div className="sticky bottom-0 z-20 flex items-center justify-end gap-3 px-6 py-4 border-t bg-card">
+          <Button variant="outline" onClick={onClose}>
+            Close
+          </Button>
+          <Button>
+            Save Changes
+          </Button>
         </div>
         </>
         )}
       </div>
     </motion.div>
 
-    {/* Add Via Points Dialog */}
-    <Dialog open={showAddViaPointsDialog} onOpenChange={setShowAddViaPointsDialog}>
-      <DialogContent className="sm:max-w-[500px]">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <MapPin className="h-5 w-5" />
-            Add Via Points
-          </DialogTitle>
-        </DialogHeader>
-        
-        <div className="space-y-4 py-4">
-          {/* Leg From and To */}
-          <div className="space-y-2">
-            <Label className="text-sm">Leg From and To</Label>
-            <Select defaultValue="ber-frn">
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="ber-frn">BER,Berlin to FRN,France</SelectItem>
-                <SelectItem value="frn-par">FRN,France to PAR,Paris</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+      {/* Add Via Points Dialog */}
+      <Dialog open={showAddViaPointsDialog} onOpenChange={setShowAddViaPointsDialog}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Add Via Points</DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Leg From and To (Optional)</Label>
+              <Select value={viaPointForm.legFromTo} onValueChange={(value) => setViaPointForm({ ...viaPointForm, legFromTo: value })}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select leg or leave empty" />
+                </SelectTrigger>
+                <SelectContent>
+                  {legs.map((leg) => (
+                    <SelectItem key={leg.id} value={`${leg.from} - ${leg.to}`}>
+                      {leg.from} - {leg.to}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
 
-          {/* Via Location */}
-          <div className="space-y-2">
-            <Label className="text-sm">Via Location</Label>
-            <Select defaultValue="frk">
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="frk">FRK, Frankfurt</SelectItem>
-                <SelectItem value="mun">MUN, Munich</SelectItem>
-                <SelectItem value="ham">HAM, Hamburg</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Planned Date */}
-          <div className="space-y-2">
-            <Label className="text-sm">Planned Date</Label>
-            <div className="relative">
-              <Input 
-                type="date"
-                defaultValue="2025-03-25"
-                className="pr-10"
+            <div className="space-y-2">
+              <Label>Via Location *</Label>
+              <Input
+                placeholder="Enter via location"
+                value={viaPointForm.viaLocation}
+                onChange={(e) => setViaPointForm({ ...viaPointForm, viaLocation: e.target.value })}
               />
-              <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label className="flex items-center gap-1">
+                  <Clock className="h-3 w-3" />
+                  Planned Date
+                </Label>
+                <Input
+                  type="date"
+                  value={viaPointForm.plannedDate}
+                  onChange={(e) => setViaPointForm({ ...viaPointForm, plannedDate: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label className="flex items-center gap-1">
+                  <Clock className="h-3 w-3" />
+                  Planned Time
+                </Label>
+                <Input
+                  type="time"
+                  value={viaPointForm.plannedTime}
+                  onChange={(e) => setViaPointForm({ ...viaPointForm, plannedTime: e.target.value })}
+                />
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-2 pt-4">
+              <Button variant="outline" onClick={() => setShowAddViaPointsDialog(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleAddViaPoint}>
+                Save
+              </Button>
             </div>
           </div>
-
-          {/* Planned Time */}
-          <div className="space-y-2">
-            <Label className="text-sm">Planned Time</Label>
-            <div className="relative">
-              <Input 
-                type="time"
-                defaultValue="10:00"
-                className="pr-10"
-              />
-              <Clock className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
-            </div>
-          </div>
-        </div>
-
-        {/* Save Button */}
-        <div className="flex justify-end">
-          <Button 
-            onClick={() => setShowAddViaPointsDialog(false)}
-            className="w-full"
-          >
-            Save
-          </Button>
-        </div>
-      </DialogContent>
-    </Dialog>
+        </DialogContent>
+      </Dialog>
     </>
   );
 };
+
