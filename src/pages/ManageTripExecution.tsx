@@ -14,6 +14,7 @@ import { IncidentsDrawerScreen } from '@/components/drawer/IncidentsDrawerScreen
 import { CustomerOrdersDrawerScreen } from '@/components/drawer/CustomerOrdersDrawerScreen';
 import { SupplierBillingDrawerScreen } from '@/components/drawer/SupplierBillingDrawerScreen';
 import { TripExecutionCreateDrawerScreen } from '@/components/drawer/TripExecutionCreateDrawerScreen';
+import { GlobalFooter } from '@/components/GlobalFooter';
 
 const ManageTripExecution = () => {
   const { loading, tripData, fetchTrip, saveTrip } = manageTripStore();
@@ -181,6 +182,9 @@ const ManageTripExecution = () => {
         {drawerType === 'supplier-billing' && <SupplierBillingDrawerScreen onClose={closeDrawer} tripId={tripUniqueID || undefined} />}
         {drawerType === 'trip-execution-create' && <TripExecutionCreateDrawerScreen onClose={closeDrawer} tripId={tripUniqueID || undefined} />}
       </SideDrawer>
+
+      {/* Global Footer */}
+      <GlobalFooter />
     </div>
   );
 };
