@@ -36,7 +36,7 @@ export const SimpleDynamicPanel: React.FC<SimpleDynamicPanelProps> = ({
   const formData = watch();
   useEffect(() => {
     onDataChange?.(formData);
-  }, [formData, onDataChange]);
+  }, [formData]); // Remove onDataChange from dependencies to prevent infinite loop
 
   const renderField = (fieldConfig: PanelFieldConfig) => {
     const { key, label, fieldType } = fieldConfig;
