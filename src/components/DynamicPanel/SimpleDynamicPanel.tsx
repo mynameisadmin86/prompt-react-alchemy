@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -25,18 +25,12 @@ export const SimpleDynamicPanel: React.FC<SimpleDynamicPanelProps> = ({
   onDataChange,
   className = '',
 }) => {
-  const { control, watch } = useForm({
+  const { control } = useForm({
     defaultValues: config.reduce((acc, field) => {
       acc[field.key] = initialData[field.key] || '';
       return acc;
     }, {} as Record<string, any>),
   });
-
-  // Watch for changes and call onDataChange
-  const formData = watch();
-  useEffect(() => {
-    onDataChange?.(formData);
-  }, [formData]); // Remove onDataChange from dependencies to prevent infinite loop
 
   const renderField = (fieldConfig: PanelFieldConfig) => {
     const { key, label, fieldType } = fieldConfig;
