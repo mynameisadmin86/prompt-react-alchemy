@@ -1,17 +1,16 @@
 import React, { useState } from 'react';
 import { X, ChevronDown, ChevronUp, Truck, Container as ContainerIcon, Package, Box, Calendar, Info } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Switch } from '@/components/ui/switch';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Separator } from '@/components/ui/separator';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
+import { SimpleDynamicPanel } from '@/components/DynamicPanel/SimpleDynamicPanel';
+import { PanelFieldConfig } from '@/types/dynamicPanel';
+import { usePlanActualStore } from '@/stores/planActualStore';
 
 interface PlanActualDetailsDrawerProps {
   isOpen: boolean;
@@ -30,6 +29,8 @@ export const PlanActualDetailsDrawer: React.FC<PlanActualDetailsDrawerProps> = (
   isOpen,
   onClose,
 }) => {
+  const { actualsData, updateActualsData } = usePlanActualStore();
+  
   const [expandedSections, setExpandedSections] = useState({
     wagon: true,
     container: true,
@@ -47,11 +48,6 @@ export const PlanActualDetailsDrawer: React.FC<PlanActualDetailsDrawerProps> = (
   ]);
 
   const [selectAll, setSelectAll] = useState(false);
-  const [wagonCount, setWagonCount] = useState('1');
-  const [containerCount, setContainerCount] = useState('1');
-  const [thuCount, setTHUCount] = useState('5');
-  const [hazardousGoods, setHazardousGoods] = useState(false);
-  const [loadType, setLoadType] = useState('loaded');
 
   const toggleSection = (section: keyof typeof expandedSections) => {
     setExpandedSections(prev => ({ ...prev, [section]: !prev[section] }));
@@ -570,672 +566,505 @@ export const PlanActualDetailsDrawer: React.FC<PlanActualDetailsDrawerProps> = (
 
             <TabsContent value="actuals" className="flex-1 m-0 overflow-y-auto p-6 space-y-4">
               {/* Wagon Details */}
-              <div className="border rounded-lg bg-card">
-                <div
-                  className="flex items-center justify-between p-4 cursor-pointer hover:bg-muted/50"
-                  onClick={() => toggleSection('wagon')}
-                >
-                  <div className="flex items-center gap-2">
-                    <Truck className="h-5 w-5 text-blue-600" />
-                    <h3 className="font-semibold">Wagon Details</h3>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Badge variant="outline" className="bg-blue-50 text-blue-600 border-blue-200">
-                      Wagon {wagonCount}
-                    </Badge>
-                    {expandedSections.wagon ? (
-                      <ChevronUp className="h-4 w-4" />
-                    ) : (
-                      <ChevronDown className="h-4 w-4" />
-                    )}
-                  </div>
-                </div>
-
-                <AnimatePresence>
-                  {expandedSections.wagon && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: 'auto', opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      className="overflow-hidden"
-                    >
-                      <Separator />
-                      <div className="p-4 space-y-4">
-                        <div className="grid grid-cols-3 gap-4">
-                          <div className="space-y-2">
-                            <Label className="text-xs">Wagon Type</Label>
-                            <Select>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select Type" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="habbins">Habbins</SelectItem>
-                                <SelectItem value="zaccs">Zaccs</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
-                          <div className="space-y-2">
-                            <Label className="text-xs">Wagon ID</Label>
-                            <Input placeholder="Enter ID" />
-                          </div>
-                          <div className="space-y-2">
-                            <Label className="text-xs">Wagon Quantity</Label>
-                            <div className="flex items-center gap-2">
-                              <Select defaultValue="EA">
-                                <SelectTrigger className="w-20">
-                                  <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="EA">EA</SelectItem>
-                                  <SelectItem value="KG">KG</SelectItem>
-                                </SelectContent>
-                              </Select>
-                              <Input type="number" value={wagonCount} onChange={(e) => setWagonCount(e.target.value)} />
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="grid grid-cols-3 gap-4">
-                          <div className="space-y-2">
-                            <Label className="text-xs">Wagon Tare Weight</Label>
-                            <div className="flex items-center gap-2">
-                              <Select defaultValue="TON">
-                                <SelectTrigger className="w-20">
-                                  <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="TON">TON</SelectItem>
-                                  <SelectItem value="KG">KG</SelectItem>
-                                </SelectContent>
-                              </Select>
-                              <Input placeholder="Enter Value" />
-                            </div>
-                          </div>
-                          <div className="space-y-2">
-                            <Label className="text-xs">Wagon Gross Weight</Label>
-                            <div className="flex items-center gap-2">
-                              <Select defaultValue="TON">
-                                <SelectTrigger className="w-20">
-                                  <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="TON">TON</SelectItem>
-                                  <SelectItem value="KG">KG</SelectItem>
-                                </SelectContent>
-                              </Select>
-                              <Input placeholder="Enter Value" />
-                            </div>
-                          </div>
-                          <div className="space-y-2">
-                            <Label className="text-xs">Wagon Length</Label>
-                            <div className="flex items-center gap-2">
-                              <Select defaultValue="M">
-                                <SelectTrigger className="w-20">
-                                  <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="M">M</SelectItem>
-                                  <SelectItem value="FT">FT</SelectItem>
-                                </SelectContent>
-                              </Select>
-                              <Input placeholder="Enter Value" />
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="space-y-2">
-                          <Label className="text-xs">Wagon Sequence</Label>
-                          <Input placeholder="Enter Wagon Sequence" />
-                        </div>
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
+              <SimpleDynamicPanel
+                title="Wagon Details"
+                config={[
+                  {
+                    fieldType: 'select',
+                    key: 'wagonType',
+                    label: 'Wagon Type',
+                    options: [
+                      { label: 'Habbins', value: 'habbins' },
+                      { label: 'Zaccs', value: 'zaccs' },
+                      { label: 'A Type Wagon', value: 'a-type' },
+                      { label: 'Closed Wagon', value: 'closed' },
+                    ],
+                    onChange: (value) => updateActualsData({ wagonType: value }),
+                  },
+                  {
+                    fieldType: 'search',
+                    key: 'wagonId',
+                    label: 'Wagon ID',
+                    placeholder: 'Search Wagon ID',
+                    onChange: (value) => updateActualsData({ wagonId: value }),
+                  },
+                  {
+                    fieldType: 'text',
+                    key: 'wagonQuantity',
+                    label: 'Wagon Quantity',
+                    placeholder: 'Enter quantity',
+                    onChange: (value) => updateActualsData({ wagonQuantity: value }),
+                  },
+                  {
+                    fieldType: 'select',
+                    key: 'wagonQuantityUnit',
+                    label: 'Unit',
+                    options: [
+                      { label: 'EA', value: 'EA' },
+                      { label: 'KG', value: 'KG' },
+                    ],
+                    onChange: (value) => updateActualsData({ wagonQuantityUnit: value }),
+                  },
+                  {
+                    fieldType: 'currency',
+                    key: 'wagonTareWeight',
+                    label: 'Wagon Tare Weight',
+                    placeholder: 'Enter weight',
+                    onChange: (value) => updateActualsData({ wagonTareWeight: value }),
+                  },
+                  {
+                    fieldType: 'select',
+                    key: 'wagonTareWeightUnit',
+                    label: 'Unit',
+                    options: [
+                      { label: 'TON', value: 'TON' },
+                      { label: 'KG', value: 'KG' },
+                    ],
+                    onChange: (value) => updateActualsData({ wagonTareWeightUnit: value }),
+                  },
+                  {
+                    fieldType: 'currency',
+                    key: 'wagonGrossWeight',
+                    label: 'Wagon Gross Weight',
+                    placeholder: 'Enter weight',
+                    onChange: (value) => updateActualsData({ wagonGrossWeight: value }),
+                  },
+                  {
+                    fieldType: 'select',
+                    key: 'wagonGrossWeightUnit',
+                    label: 'Unit',
+                    options: [
+                      { label: 'TON', value: 'TON' },
+                      { label: 'KG', value: 'KG' },
+                    ],
+                    onChange: (value) => updateActualsData({ wagonGrossWeightUnit: value }),
+                  },
+                  {
+                    fieldType: 'currency',
+                    key: 'wagonLength',
+                    label: 'Wagon Length',
+                    placeholder: 'Enter length',
+                    onChange: (value) => updateActualsData({ wagonLength: value }),
+                  },
+                  {
+                    fieldType: 'select',
+                    key: 'wagonLengthUnit',
+                    label: 'Unit',
+                    options: [
+                      { label: 'M', value: 'M' },
+                      { label: 'FT', value: 'FT' },
+                    ],
+                    onChange: (value) => updateActualsData({ wagonLengthUnit: value }),
+                  },
+                  {
+                    fieldType: 'text',
+                    key: 'wagonSequence',
+                    label: 'Wagon Sequence',
+                    placeholder: 'Enter sequence',
+                    onChange: (value) => updateActualsData({ wagonSequence: value }),
+                  },
+                ] as PanelFieldConfig[]}
+                initialData={actualsData}
+                onDataChange={(data) => updateActualsData(data)}
+                className="border-0 shadow-none"
+              />
 
               {/* Container Details */}
-              <div className="border rounded-lg bg-card">
-                <div
-                  className="flex items-center justify-between p-4 cursor-pointer hover:bg-muted/50"
-                  onClick={() => toggleSection('container')}
-                >
-                  <div className="flex items-center gap-2">
-                    <ContainerIcon className="h-5 w-5 text-purple-600" />
-                    <h3 className="font-semibold">Container Details</h3>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Badge variant="outline" className="bg-teal-50 text-teal-600 border-teal-200">
-                      Container {containerCount}
-                    </Badge>
-                    {expandedSections.container ? (
-                      <ChevronUp className="h-4 w-4" />
-                    ) : (
-                      <ChevronDown className="h-4 w-4" />
-                    )}
-                  </div>
-                </div>
-
-                <AnimatePresence>
-                  {expandedSections.container && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: 'auto', opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      className="overflow-hidden"
-                    >
-                      <Separator />
-                      <div className="p-4 space-y-4">
-                        <div className="grid grid-cols-3 gap-4">
-                          <div className="space-y-2">
-                            <Label className="text-xs">Container Type</Label>
-                            <Select>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select Type" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="20ft">20ft Standard</SelectItem>
-                                <SelectItem value="40ft">40ft Standard</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
-                          <div className="space-y-2">
-                            <Label className="text-xs">Container ID</Label>
-                            <Input placeholder="Enter ID" />
-                          </div>
-                          <div className="space-y-2">
-                            <Label className="text-xs">Container Quantity</Label>
-                            <div className="flex items-center gap-2">
-                              <Select defaultValue="EA">
-                                <SelectTrigger className="w-20">
-                                  <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="EA">EA</SelectItem>
-                                </SelectContent>
-                              </Select>
-                              <Input type="number" value={containerCount} onChange={(e) => setContainerCount(e.target.value)} />
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-4">
-                          <div className="space-y-2">
-                            <Label className="text-xs">Container Tare Weight</Label>
-                            <div className="flex items-center gap-2">
-                              <Select defaultValue="TON">
-                                <SelectTrigger className="w-20">
-                                  <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="TON">TON</SelectItem>
-                                  <SelectItem value="KG">KG</SelectItem>
-                                </SelectContent>
-                              </Select>
-                              <Input placeholder="Enter Value" />
-                            </div>
-                          </div>
-                          <div className="space-y-2">
-                            <Label className="text-xs">Container Load Weight</Label>
-                            <div className="flex items-center gap-2">
-                              <Select defaultValue="TON">
-                                <SelectTrigger className="w-20">
-                                  <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="TON">TON</SelectItem>
-                                  <SelectItem value="KG">KG</SelectItem>
-                                </SelectContent>
-                              </Select>
-                              <Input placeholder="Enter Value" />
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
+              <SimpleDynamicPanel
+                title="Container Details"
+                config={[
+                  {
+                    fieldType: 'select',
+                    key: 'containerType',
+                    label: 'Container Type',
+                    options: [
+                      { label: '20ft Standard', value: '20ft' },
+                      { label: '40ft Standard', value: '40ft' },
+                      { label: 'Container A', value: 'container-a' },
+                    ],
+                    onChange: (value) => updateActualsData({ containerType: value }),
+                  },
+                  {
+                    fieldType: 'search',
+                    key: 'containerId',
+                    label: 'Container ID',
+                    placeholder: 'Search Container ID',
+                    onChange: (value) => updateActualsData({ containerId: value }),
+                  },
+                  {
+                    fieldType: 'text',
+                    key: 'containerQuantity',
+                    label: 'Container Quantity',
+                    placeholder: 'Enter quantity',
+                    onChange: (value) => updateActualsData({ containerQuantity: value }),
+                  },
+                  {
+                    fieldType: 'select',
+                    key: 'containerQuantityUnit',
+                    label: 'Unit',
+                    options: [{ label: 'EA', value: 'EA' }],
+                    onChange: (value) => updateActualsData({ containerQuantityUnit: value }),
+                  },
+                  {
+                    fieldType: 'currency',
+                    key: 'containerTareWeight',
+                    label: 'Container Tare Weight',
+                    placeholder: 'Enter weight',
+                    onChange: (value) => updateActualsData({ containerTareWeight: value }),
+                  },
+                  {
+                    fieldType: 'select',
+                    key: 'containerTareWeightUnit',
+                    label: 'Unit',
+                    options: [
+                      { label: 'TON', value: 'TON' },
+                      { label: 'KG', value: 'KG' },
+                    ],
+                    onChange: (value) => updateActualsData({ containerTareWeightUnit: value }),
+                  },
+                  {
+                    fieldType: 'currency',
+                    key: 'containerLoadWeight',
+                    label: 'Container Load Weight',
+                    placeholder: 'Enter weight',
+                    onChange: (value) => updateActualsData({ containerLoadWeight: value }),
+                  },
+                  {
+                    fieldType: 'select',
+                    key: 'containerLoadWeightUnit',
+                    label: 'Unit',
+                    options: [
+                      { label: 'TON', value: 'TON' },
+                      { label: 'KG', value: 'KG' },
+                    ],
+                    onChange: (value) => updateActualsData({ containerLoadWeightUnit: value }),
+                  },
+                ] as PanelFieldConfig[]}
+                initialData={actualsData}
+                onDataChange={(data) => updateActualsData(data)}
+                className="border-0 shadow-none"
+              />
 
               {/* Product Details */}
-              <div className="border rounded-lg bg-card">
-                <div
-                  className="flex items-center justify-between p-4 cursor-pointer hover:bg-muted/50"
-                  onClick={() => toggleSection('product')}
-                >
-                  <div className="flex items-center gap-2">
-                    <Package className="h-5 w-5 text-pink-600" />
-                    <h3 className="font-semibold">Product Details</h3>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Badge variant="outline" className="bg-purple-50 text-purple-600 border-purple-200">
-                      Wheat Muslin
-                    </Badge>
-                    {expandedSections.product ? (
-                      <ChevronUp className="h-4 w-4" />
-                    ) : (
-                      <ChevronDown className="h-4 w-4" />
-                    )}
-                  </div>
-                </div>
-
-                <AnimatePresence>
-                  {expandedSections.product && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: 'auto', opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      className="overflow-hidden"
-                    >
-                      <Separator />
-                      <div className="p-4 space-y-4">
-                        <div className="flex items-center space-x-2">
-                          <Switch
-                            id="hazardous"
-                            checked={hazardousGoods}
-                            onCheckedChange={setHazardousGoods}
-                          />
-                          <Label htmlFor="hazardous" className="text-sm cursor-pointer">
-                            Contain Hazardous Goods
-                          </Label>
-                        </div>
-
-                        <div className="grid grid-cols-3 gap-4">
-                          <div className="space-y-2">
-                            <Label className="text-xs">NHM</Label>
-                            <Select>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select NHM" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="nhm1">NHM 1</SelectItem>
-                                <SelectItem value="nhm2">NHM 2</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
-                          <div className="space-y-2">
-                            <Label className="text-xs">Product ID</Label>
-                            <Input value="Wheat Muslin" readOnly />
-                          </div>
-                          <div className="space-y-2">
-                            <Label className="text-xs">Product Quantity</Label>
-                            <div className="flex items-center gap-2">
-                              <Select defaultValue="EA">
-                                <SelectTrigger className="w-20">
-                                  <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="EA">EA</SelectItem>
-                                </SelectContent>
-                              </Select>
-                              <Input placeholder="Enter Value" />
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="grid grid-cols-3 gap-4">
-                          <div className="space-y-2">
-                            <Label className="text-xs">Class of Stores</Label>
-                            <Select>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select Class of Stores" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="class1">Class 1</SelectItem>
-                                <SelectItem value="class2">Class 2</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
-                          <div className="space-y-2">
-                            <Label className="text-xs">UN Code</Label>
-                            <Select>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select Code" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="un1">UN 1</SelectItem>
-                                <SelectItem value="un2">UN 2</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
-                          <div className="space-y-2">
-                            <Label className="text-xs">DG Class</Label>
-                            <Select>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select Class" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="dg1">DG 1</SelectItem>
-                                <SelectItem value="dg2">DG 2</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
-                        </div>
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
+              <SimpleDynamicPanel
+                title="Product Details"
+                config={[
+                  {
+                    fieldType: 'radio',
+                    key: 'hazardousGoods',
+                    label: 'Hazardous Goods',
+                    options: [
+                      { label: 'Yes', value: 'yes' },
+                      { label: 'No', value: 'no' },
+                    ],
+                    onChange: (value) => updateActualsData({ hazardousGoods: value === 'yes' }),
+                  },
+                  {
+                    fieldType: 'select',
+                    key: 'nhm',
+                    label: 'NHM',
+                    options: [
+                      { label: '2WQ1E32R43', value: '2WQ1E32R43' },
+                      { label: 'NHM 1', value: 'nhm1' },
+                      { label: 'NHM 2', value: 'nhm2' },
+                    ],
+                    onChange: (value) => updateActualsData({ nhm: value }),
+                  },
+                  {
+                    fieldType: 'text',
+                    key: 'productId',
+                    label: 'Product ID',
+                    placeholder: 'Enter Product ID',
+                    onChange: (value) => updateActualsData({ productId: value }),
+                  },
+                  {
+                    fieldType: 'text',
+                    key: 'productQuantity',
+                    label: 'Product Quantity',
+                    placeholder: 'Enter quantity',
+                    onChange: (value) => updateActualsData({ productQuantity: value }),
+                  },
+                  {
+                    fieldType: 'select',
+                    key: 'productQuantityUnit',
+                    label: 'Unit',
+                    options: [
+                      { label: 'TON', value: 'TON' },
+                      { label: 'EA', value: 'EA' },
+                      { label: 'KG', value: 'KG' },
+                    ],
+                    onChange: (value) => updateActualsData({ productQuantityUnit: value }),
+                  },
+                  {
+                    fieldType: 'select',
+                    key: 'classOfStores',
+                    label: 'Class of Stores',
+                    options: [
+                      { label: 'Class A', value: 'class-a' },
+                      { label: 'Class 1', value: 'class1' },
+                      { label: 'Class 2', value: 'class2' },
+                    ],
+                    onChange: (value) => updateActualsData({ classOfStores: value }),
+                  },
+                  {
+                    fieldType: 'select',
+                    key: 'unCode',
+                    label: 'UN Code',
+                    options: [
+                      { label: '2432', value: '2432' },
+                      { label: 'UN 1', value: 'un1' },
+                      { label: 'UN 2', value: 'un2' },
+                    ],
+                    onChange: (value) => updateActualsData({ unCode: value }),
+                  },
+                  {
+                    fieldType: 'select',
+                    key: 'dgClass',
+                    label: 'DG Class',
+                    options: [
+                      { label: 'AAA', value: 'AAA' },
+                      { label: 'DG 1', value: 'dg1' },
+                      { label: 'DG 2', value: 'dg2' },
+                    ],
+                    onChange: (value) => updateActualsData({ dgClass: value }),
+                  },
+                ] as PanelFieldConfig[]}
+                initialData={actualsData}
+                onDataChange={(data) => updateActualsData(data)}
+                className="border-0 shadow-none"
+              />
 
               {/* THU Details */}
-              <div className="border rounded-lg bg-card">
-                <div
-                  className="flex items-center justify-between p-4 cursor-pointer hover:bg-muted/50"
-                  onClick={() => toggleSection('thu')}
-                >
-                  <div className="flex items-center gap-2">
-                    <Box className="h-5 w-5 text-cyan-600" />
-                    <h3 className="font-semibold">THU Details</h3>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Badge variant="outline" className="bg-cyan-50 text-cyan-600 border-cyan-200">
-                      THU {thuCount}
-                    </Badge>
-                    {expandedSections.thu ? (
-                      <ChevronUp className="h-4 w-4" />
-                    ) : (
-                      <ChevronDown className="h-4 w-4" />
-                    )}
-                  </div>
-                </div>
-
-                <AnimatePresence>
-                  {expandedSections.thu && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: 'auto', opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      className="overflow-hidden"
-                    >
-                      <Separator />
-                      <div className="p-4 space-y-4">
-                        <div className="grid grid-cols-3 gap-4">
-                          <div className="space-y-2">
-                            <Label className="text-xs">THU ID</Label>
-                            <Select>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select Class of Stores" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="thu1">THU 1</SelectItem>
-                                <SelectItem value="thu2">THU 2</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
-                          <div className="space-y-2">
-                            <Label className="text-xs">THU Serial No.</Label>
-                            <Select>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select Code" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="serial1">Serial 1</SelectItem>
-                                <SelectItem value="serial2">Serial 2</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
-                          <div className="space-y-2">
-                            <Label className="text-xs">THU Quantity</Label>
-                            <div className="flex items-center gap-2">
-                              <Select defaultValue="EA">
-                                <SelectTrigger className="w-20">
-                                  <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="EA">EA</SelectItem>
-                                </SelectContent>
-                              </Select>
-                              <Input placeholder="Enter Value" />
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="space-y-2">
-                          <Label className="text-xs">THU Weight</Label>
-                          <div className="flex items-center gap-2">
-                            <Select defaultValue="TON">
-                              <SelectTrigger className="w-32">
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="TON">TON</SelectItem>
-                                <SelectItem value="KG">KG</SelectItem>
-                              </SelectContent>
-                            </Select>
-                            <Input placeholder="Enter Value" className="flex-1" />
-                          </div>
-                        </div>
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
+              <SimpleDynamicPanel
+                title="THU Details"
+                config={[
+                  {
+                    fieldType: 'select',
+                    key: 'thuId',
+                    label: 'THU ID',
+                    options: [
+                      { label: 'THU329847', value: 'THU329847' },
+                      { label: 'THU 1', value: 'thu1' },
+                      { label: 'THU 2', value: 'thu2' },
+                    ],
+                    onChange: (value) => updateActualsData({ thuId: value }),
+                  },
+                  {
+                    fieldType: 'text',
+                    key: 'thuQuantity',
+                    label: 'THU Quantity',
+                    placeholder: 'Enter quantity',
+                    onChange: (value) => updateActualsData({ thuQuantity: value }),
+                  },
+                  {
+                    fieldType: 'select',
+                    key: 'thuQuantityUnit',
+                    label: 'Unit',
+                    options: [{ label: 'EA', value: 'EA' }],
+                    onChange: (value) => updateActualsData({ thuQuantityUnit: value }),
+                  },
+                  {
+                    fieldType: 'currency',
+                    key: 'thuGrossWeight',
+                    label: 'THU Gross Weight',
+                    placeholder: 'Enter weight',
+                    onChange: (value) => updateActualsData({ thuGrossWeight: value }),
+                  },
+                  {
+                    fieldType: 'select',
+                    key: 'thuGrossWeightUnit',
+                    label: 'Unit',
+                    options: [
+                      { label: 'TON', value: 'TON' },
+                      { label: 'KG', value: 'KG' },
+                    ],
+                    onChange: (value) => updateActualsData({ thuGrossWeightUnit: value }),
+                  },
+                  {
+                    fieldType: 'currency',
+                    key: 'thuTareWeight',
+                    label: 'THU Tare Weight',
+                    placeholder: 'Enter weight',
+                    onChange: (value) => updateActualsData({ thuTareWeight: value }),
+                  },
+                  {
+                    fieldType: 'select',
+                    key: 'thuTareWeightUnit',
+                    label: 'Unit',
+                    options: [
+                      { label: 'TON', value: 'TON' },
+                      { label: 'KG', value: 'KG' },
+                    ],
+                    onChange: (value) => updateActualsData({ thuTareWeightUnit: value }),
+                  },
+                  {
+                    fieldType: 'currency',
+                    key: 'thuNetWeight',
+                    label: 'THU Net Weight',
+                    placeholder: 'Enter weight',
+                    onChange: (value) => updateActualsData({ thuNetWeight: value }),
+                  },
+                  {
+                    fieldType: 'select',
+                    key: 'thuNetWeightUnit',
+                    label: 'Unit',
+                    options: [
+                      { label: 'TON', value: 'TON' },
+                      { label: 'KG', value: 'KG' },
+                    ],
+                    onChange: (value) => updateActualsData({ thuNetWeightUnit: value }),
+                  },
+                  {
+                    fieldType: 'currency',
+                    key: 'thuLength',
+                    label: 'THU Length',
+                    placeholder: 'Enter length',
+                    onChange: (value) => updateActualsData({ thuLength: value }),
+                  },
+                  {
+                    fieldType: 'currency',
+                    key: 'thuWidth',
+                    label: 'THU Width',
+                    placeholder: 'Enter width',
+                    onChange: (value) => updateActualsData({ thuWidth: value }),
+                  },
+                  {
+                    fieldType: 'currency',
+                    key: 'thuHeight',
+                    label: 'THU Height',
+                    placeholder: 'Enter height',
+                    onChange: (value) => updateActualsData({ thuHeight: value }),
+                  },
+                  {
+                    fieldType: 'select',
+                    key: 'thuDimensionUnit',
+                    label: 'Dimension Unit',
+                    options: [
+                      { label: 'M', value: 'M' },
+                      { label: 'CM', value: 'CM' },
+                    ],
+                    onChange: (value) => updateActualsData({ thuLengthUnit: value, thuWidthUnit: value, thuHeightUnit: value }),
+                  },
+                ] as PanelFieldConfig[]}
+                initialData={actualsData}
+                onDataChange={(data) => updateActualsData(data)}
+                className="border-0 shadow-none"
+              />
 
               {/* Journey and Scheduling Details */}
-              <div className="border rounded-lg bg-card">
-                <div
-                  className="flex items-center justify-between p-4 cursor-pointer hover:bg-muted/50"
-                  onClick={() => toggleSection('journey')}
-                >
-                  <div className="flex items-center gap-2">
-                    <Calendar className="h-5 w-5 text-blue-600" />
-                    <h3 className="font-semibold">Journey and Scheduling Details</h3>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Badge variant="outline" className="bg-blue-50 text-blue-600 border-blue-200">
-                      10-Mar-2025
-                    </Badge>
-                    {expandedSections.journey ? (
-                      <ChevronUp className="h-4 w-4" />
-                    ) : (
-                      <ChevronDown className="h-4 w-4" />
-                    )}
-                  </div>
-                </div>
-
-                <AnimatePresence>
-                  {expandedSections.journey && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: 'auto', opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      className="overflow-hidden"
-                    >
-                      <Separator />
-                      <div className="p-4 space-y-4">
-                        <div className="grid grid-cols-3 gap-4">
-                          <div className="space-y-2">
-                            <Label className="text-xs">Departure</Label>
-                            <Select defaultValue="frankfurt-a">
-                              <SelectTrigger>
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="frankfurt-a">Frankfurt Station Point A</SelectItem>
-                                <SelectItem value="frankfurt-b">Frankfurt Station Point B</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
-                          <div className="space-y-2">
-                            <Label className="text-xs">Arrival</Label>
-                            <Select defaultValue="frankfurt-b">
-                              <SelectTrigger>
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="frankfurt-a">Frankfurt Station Point A</SelectItem>
-                                <SelectItem value="frankfurt-b">Frankfurt Station Point B</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
-                          <div className="space-y-2">
-                            <Label className="text-xs">Activity Location</Label>
-                            <div className="relative">
-                              <Input placeholder="Search Location" className="pr-8" />
-                              <svg className="absolute right-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                <circle cx="11" cy="11" r="8" />
-                                <path d="M21 21l-4.35-4.35" />
-                              </svg>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="grid grid-cols-3 gap-4">
-                          <div className="space-y-2">
-                            <Label className="text-xs">Activity</Label>
-                            <Select defaultValue="loading">
-                              <SelectTrigger>
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="loading">Loading</SelectItem>
-                                <SelectItem value="unloading">Unloading</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
-                          <div className="space-y-2">
-                            <Label className="text-xs">Planned Date and Time</Label>
-                            <Input type="date" defaultValue="2025-03-10" />
-                          </div>
-                          <div className="space-y-2">
-                            <Label className="text-xs">Rev. Planned Date and Time</Label>
-                            <Input type="date" defaultValue="2025-03-10" />
-                          </div>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-4">
-                          <div className="space-y-2">
-                            <Label className="text-xs">Train No.</Label>
-                            <Input placeholder="Enter Train No." />
-                          </div>
-                          <div className="space-y-2">
-                            <Label className="text-xs">Load Type</Label>
-                            <RadioGroup value={loadType} onValueChange={setLoadType} className="flex items-center gap-4">
-                              <div className="flex items-center space-x-2">
-                                <RadioGroupItem value="loaded" id="loaded" />
-                                <Label htmlFor="loaded" className="cursor-pointer font-normal">
-                                  Loaded
-                                </Label>
-                              </div>
-                              <div className="flex items-center space-x-2">
-                                <RadioGroupItem value="empty" id="empty" />
-                                <Label htmlFor="empty" className="cursor-pointer font-normal">
-                                  Empty
-                                </Label>
-                              </div>
-                            </RadioGroup>
-                          </div>
-                        </div>
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
+              <SimpleDynamicPanel
+                title="Journey and Scheduling Details"
+                config={[
+                  {
+                    fieldType: 'select',
+                    key: 'departure',
+                    label: 'Departure',
+                    options: [
+                      { label: 'Frankfurt Station Point A', value: 'frankfurt-a' },
+                      { label: 'Frankfurt Station Point B', value: 'frankfurt-b' },
+                    ],
+                    onChange: (value) => updateActualsData({ departure: value }),
+                  },
+                  {
+                    fieldType: 'select',
+                    key: 'destination',
+                    label: 'Destination',
+                    options: [
+                      { label: 'Frankfurt Station Point A', value: 'frankfurt-a' },
+                      { label: 'Frankfurt Station Point B', value: 'frankfurt-b' },
+                    ],
+                    onChange: (value) => updateActualsData({ destination: value }),
+                  },
+                  {
+                    fieldType: 'date',
+                    key: 'fromDate',
+                    label: 'From Date',
+                    onChange: (value) => updateActualsData({ fromDate: value }),
+                  },
+                  {
+                    fieldType: 'time',
+                    key: 'fromTime',
+                    label: 'From Time',
+                    onChange: (value) => updateActualsData({ fromTime: value }),
+                  },
+                  {
+                    fieldType: 'date',
+                    key: 'toDate',
+                    label: 'To Date',
+                    onChange: (value) => updateActualsData({ toDate: value }),
+                  },
+                  {
+                    fieldType: 'time',
+                    key: 'toTime',
+                    label: 'To Time',
+                    onChange: (value) => updateActualsData({ toTime: value }),
+                  },
+                ] as PanelFieldConfig[]}
+                initialData={actualsData}
+                onDataChange={(data) => updateActualsData(data)}
+                className="border-0 shadow-none"
+              />
 
               {/* Other Details */}
-              <div className="border rounded-lg bg-card">
-                <div
-                  className="flex items-center justify-between p-4 cursor-pointer hover:bg-muted/50"
-                  onClick={() => toggleSection('other')}
-                >
-                  <div className="flex items-center gap-2">
-                    <Info className="h-5 w-5 text-orange-600" />
-                    <h3 className="font-semibold">Other Details</h3>
-                  </div>
-                  {expandedSections.other ? (
-                    <ChevronUp className="h-4 w-4" />
-                  ) : (
-                    <ChevronDown className="h-4 w-4" />
-                  )}
-                </div>
-
-                <AnimatePresence>
-                  {expandedSections.other && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: 'auto', opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      className="overflow-hidden"
-                    >
-                      <Separator />
-                      <div className="p-4 space-y-4">
-                        <div className="grid grid-cols-3 gap-4">
-                          <div className="space-y-2">
-                            <Label className="text-xs">From Date</Label>
-                            <Input type="date" defaultValue="2025-03-12" />
-                          </div>
-                          <div className="space-y-2">
-                            <Label className="text-xs">From Time</Label>
-                            <Input type="time" defaultValue="08:00:00" />
-                          </div>
-                          <div className="space-y-2">
-                            <Label className="text-xs">To Date</Label>
-                            <Input type="date" defaultValue="2025-03-12" />
-                          </div>
-                        </div>
-
-                        <div className="grid grid-cols-3 gap-4">
-                          <div className="space-y-2">
-                            <Label className="text-xs">To Time</Label>
-                            <Input type="time" defaultValue="08:00:00" />
-                          </div>
-                          <div className="space-y-2">
-                            <Label className="text-xs">QC Userdefined 1</Label>
-                            <Select>
-                              <SelectTrigger>
-                                <SelectValue placeholder="QC" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="qc1">QC 1</SelectItem>
-                                <SelectItem value="qc2">QC 2</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
-                          <div className="space-y-2">
-                            <Label className="text-xs">QC Userdefined 2</Label>
-                            <Select>
-                              <SelectTrigger>
-                                <SelectValue placeholder="QC" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="qc1">QC 1</SelectItem>
-                                <SelectItem value="qc2">QC 2</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
-                        </div>
-
-                        <div className="grid grid-cols-3 gap-4">
-                          <div className="space-y-2">
-                            <Label className="text-xs">QC Userdefined 3</Label>
-                            <Select>
-                              <SelectTrigger>
-                                <SelectValue placeholder="QC" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="qc1">QC 1</SelectItem>
-                                <SelectItem value="qc2">QC 2</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
-                          <div className="space-y-2">
-                            <Label className="text-xs">Remarks 1</Label>
-                            <Input placeholder="Enter Remarks" />
-                          </div>
-                          <div className="space-y-2">
-                            <Label className="text-xs">Remarks 2</Label>
-                            <Input placeholder="Enter Remarks" />
-                          </div>
-                        </div>
-
-                        <div className="space-y-2">
-                          <Label className="text-xs">Remarks 3</Label>
-                          <Input placeholder="Enter Remarks" />
-                        </div>
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
+              <SimpleDynamicPanel
+                title="Other Details"
+                config={[
+                  {
+                    fieldType: 'select',
+                    key: 'qcUserdefined1',
+                    label: 'QC Userdefined 1',
+                    options: [
+                      { label: 'QC 1', value: 'qc1' },
+                      { label: 'QC 2', value: 'qc2' },
+                    ],
+                    onChange: (value) => updateActualsData({ qcUserdefined1: value }),
+                  },
+                  {
+                    fieldType: 'select',
+                    key: 'qcUserdefined2',
+                    label: 'QC Userdefined 2',
+                    options: [
+                      { label: 'QC 1', value: 'qc1' },
+                      { label: 'QC 2', value: 'qc2' },
+                    ],
+                    onChange: (value) => updateActualsData({ qcUserdefined2: value }),
+                  },
+                  {
+                    fieldType: 'select',
+                    key: 'qcUserdefined3',
+                    label: 'QC Userdefined 3',
+                    options: [
+                      { label: 'QC 1', value: 'qc1' },
+                      { label: 'QC 2', value: 'qc2' },
+                    ],
+                    onChange: (value) => updateActualsData({ qcUserdefined3: value }),
+                  },
+                  {
+                    fieldType: 'textarea',
+                    key: 'remarks1',
+                    label: 'Remarks 1',
+                    placeholder: 'Enter remarks',
+                    onChange: (value) => updateActualsData({ remarks1: value }),
+                  },
+                  {
+                    fieldType: 'textarea',
+                    key: 'remarks2',
+                    label: 'Remarks 2',
+                    placeholder: 'Enter remarks',
+                    onChange: (value) => updateActualsData({ remarks2: value }),
+                  },
+                  {
+                    fieldType: 'textarea',
+                    key: 'remarks3',
+                    label: 'Remarks 3',
+                    placeholder: 'Enter remarks',
+                    onChange: (value) => updateActualsData({ remarks3: value }),
+                  },
+                ] as PanelFieldConfig[]}
+                initialData={actualsData}
+                onDataChange={(data) => updateActualsData(data)}
+                className="border-0 shadow-none"
+              />
             </TabsContent>
           </Tabs>
 
