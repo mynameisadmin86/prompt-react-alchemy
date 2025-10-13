@@ -17,12 +17,12 @@ import { TripExecutionCreateDrawerScreen } from '@/components/drawer/TripExecuti
 import { GlobalFooter } from '@/components/GlobalFooter';
 
 const ManageTripExecution = () => {
-  const { loading, tripData, fetchTrip, saveTrip, confirmTrip } = manageTripStore();
+  const { loading, tripData, fetchTrip, saveTrip } = manageTripStore();
   const { config, setFooter, resetFooter } = useFooterStore();
   const [searchParams] = useSearchParams();
   const isEditTrip = !!searchParams.get("id");
   const tripUniqueID = searchParams.get("id");
-  const [isConfirmButtonDisabled, setIsConfirmButtonDisabled] = useState(false);
+  const [isConfirmButtonDisabled, setIsConfirmButtonDisabled] = useState(true);
   const { toast } = useToast();
   const [error, setError] = useState<string | null>(null);
   const { isOpen, drawerType, closeDrawer } = useDrawerStore();
@@ -128,25 +128,21 @@ const ManageTripExecution = () => {
   // Handlers
   const tripSaveDraftHandler = useCallback(async () => {
     try {
-      console.log('Save Draft clicked - Current trip data:', tripData);
       await saveTrip();
-      toast({ title: "Success", description: "Draft saved successfully", variant: "default" });
+      toast({ title: "Draft saved successfully", variant: "default" });
     } catch (err) {
-      console.error('Save draft error:', err);
       toast({ title: "Error saving draft", description: String(err), variant: "destructive" });
     }
-  }, [saveTrip, toast, tripData]);
+  }, [saveTrip, toast]);
 
   const tripConfirmHandler = useCallback(async () => {
     try {
-      console.log('Confirm Trip clicked - Current trip data:', tripData);
-      await confirmTrip();
-      toast({ title: "Success", description: "Trip confirmed successfully", variant: "default" });
+      await saveTrip(); // You can add confirm-specific API logic here
+      toast({ title: "Trip confirmed successfully", variant: "default" });
     } catch (err) {
-      console.error('Confirm trip error:', err);
       toast({ title: "Error confirming trip", description: String(err), variant: "destructive" });
     }
-  }, [confirmTrip, toast, tripData]);
+  }, [saveTrip, toast]);
 
   return (
     <div>
