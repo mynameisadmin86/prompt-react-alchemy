@@ -30,7 +30,8 @@ interface TripState {
 
   // API actions
   fetchTrip: (tripId: string) => Promise<void>;
-  saveTrip?: () => void;
+  saveTrip: () => Promise<void>;
+  confirmTrip: () => Promise<void>;
 }
 
 export const manageTripStore = create<TripState>((set, get) => ({
@@ -68,5 +69,51 @@ export const manageTripStore = create<TripState>((set, get) => ({
     };
     set({ tripData: { ...current, Header: updatedHeader } });
     console.log('------tripData: ', get().tripData);
+  },
+
+  saveTrip: async () => {
+    const current = get().tripData;
+    if (!current) {
+      throw new Error("No trip data to save");
+    }
+    
+    set({ loading: true, error: null });
+    try {
+      console.log("Saving trip draft with data:", current);
+      const response: any = await tripService.saveTripDraft(current);
+      const parsed = response?.data?.ResponseData
+        ? JSON.parse(response.data.ResponseData)
+        : response?.data;
+      
+      set({ tripData: parsed, loading: false, error: null });
+      console.log("Trip saved successfully:", parsed);
+    } catch (err: any) {
+      console.error("saveTrip failed", err);
+      set({ error: err?.message ?? "Save failed", loading: false });
+      throw err;
+    }
+  },
+
+  confirmTrip: async () => {
+    const current = get().tripData;
+    if (!current) {
+      throw new Error("No trip data to confirm");
+    }
+    
+    set({ loading: true, error: null });
+    try {
+      console.log("Confirming trip with data:", current);
+      const response: any = await tripService.confirmTrip(current);
+      const parsed = response?.data?.ResponseData
+        ? JSON.parse(response.data.ResponseData)
+        : response?.data;
+      
+      set({ tripData: parsed, loading: false, error: null });
+      console.log("Trip confirmed successfully:", parsed);
+    } catch (err: any) {
+      console.error("confirmTrip failed", err);
+      set({ error: err?.message ?? "Confirm failed", loading: false });
+      throw err;
+    }
   },
 }));

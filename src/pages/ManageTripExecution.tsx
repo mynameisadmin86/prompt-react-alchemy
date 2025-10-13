@@ -128,21 +128,23 @@ const ManageTripExecution = () => {
   // Handlers
   const tripSaveDraftHandler = useCallback(async () => {
     try {
+      console.log("Save Draft clicked - current tripData:", tripData);
       await saveTrip();
       toast({ title: "Draft saved successfully", variant: "default" });
     } catch (err) {
       toast({ title: "Error saving draft", description: String(err), variant: "destructive" });
     }
-  }, [saveTrip, toast]);
+  }, [saveTrip, tripData, toast]);
 
   const tripConfirmHandler = useCallback(async () => {
     try {
-      await saveTrip(); // You can add confirm-specific API logic here
+      console.log("Confirm Trip clicked - current tripData:", tripData);
+      await manageTripStore.getState().confirmTrip();
       toast({ title: "Trip confirmed successfully", variant: "default" });
     } catch (err) {
       toast({ title: "Error confirming trip", description: String(err), variant: "destructive" });
     }
-  }, [saveTrip, toast]);
+  }, [tripData, toast]);
 
   return (
     <div>

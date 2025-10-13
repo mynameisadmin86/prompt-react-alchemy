@@ -68,4 +68,48 @@ export const tripService = {
     );
     return response.data;
   },
+
+  // Save trip draft
+  saveTripDraft: async (tripData: any): Promise<ApiResponse<Trip>> => {
+    const requestPayload = JSON.stringify({
+      context: {
+        UserID: "ramcouser",
+        Role: "ramcorole",
+        OUID: 4,
+        MessageID: "12345",
+        MessageType: "TripLog SaveDraft",
+      },
+      TripData: tripData,
+    });
+    const requestBody = {
+      RequestData: requestPayload,
+    };
+    const response = await apiClient.post(
+      `${API_ENDPOINTS.TRIPS}`,
+      requestBody
+    );
+    return response.data;
+  },
+
+  // Confirm trip
+  confirmTrip: async (tripData: any): Promise<ApiResponse<Trip>> => {
+    const requestPayload = JSON.stringify({
+      context: {
+        UserID: "ramcouser",
+        Role: "ramcorole",
+        OUID: 4,
+        MessageID: "12345",
+        MessageType: "TripLog Confirm",
+      },
+      TripData: tripData,
+    });
+    const requestBody = {
+      RequestData: requestPayload,
+    };
+    const response = await apiClient.post(
+      `${API_ENDPOINTS.TRIPS}`,
+      requestBody
+    );
+    return response.data;
+  },
 };
