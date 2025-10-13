@@ -68,25 +68,131 @@ export interface ActualsData {
   remarks3?: string;
 }
 
-interface PlanActualStore {
-  actualsData: ActualsData;
-  updateActualsData: (data: Partial<ActualsData>) => void;
-  resetActualsData: () => void;
+export interface PlannedData {
+  // Wagon Details
+  wagonType?: string;
+  wagonId?: string;
+  wagonQuantity?: string;
+  wagonTareWeight?: string;
+  wagonGrossWeight?: string;
+  wagonLength?: string;
+  wagonSequence?: string;
+
+  // Container Details
+  containerType?: string;
+  containerId?: string;
+  containerQuantity?: string;
+  containerTareWeight?: string;
+  containerLoadWeight?: string;
+
+  // Product Details
+  hazardousGoods?: string;
+  nhm?: string;
+  productId?: string;
+  productQuantity?: string;
+  classOfStores?: string;
+  unCode?: string;
+  dgClass?: string;
+
+  // THU Details
+  thuId?: string;
+  thuQuantity?: string;
+  thuGrossWeight?: string;
+  thuTareWeight?: string;
+  thuNetWeight?: string;
+  thuLength?: string;
+  thuWidth?: string;
+  thuHeight?: string;
+
+  // Journey Details
+  departure?: string;
+  destination?: string;
+  fromDate?: string;
+  fromTime?: string;
+  toDate?: string;
+  toTime?: string;
+
+  // Other Details
+  qcUserdefined1?: string;
+  qcUserdefined2?: string;
+  qcUserdefined3?: string;
+  remarks1?: string;
+  remarks2?: string;
+  remarks3?: string;
 }
 
-const initialActualsData: ActualsData = {};
+export interface WagonItemData {
+  id: string;
+  planned: PlannedData;
+  actuals: ActualsData;
+}
 
-export const usePlanActualStore = create<PlanActualStore>((set) => ({
-  actualsData: initialActualsData,
+interface PlanActualStore {
+  wagonItems: Record<string, WagonItemData>;
+  activeWagonId: string | null;
+  setActiveWagon: (id: string) => void;
+  updatePlannedData: (wagonId: string, data: Partial<PlannedData>) => void;
+  updateActualsData: (wagonId: string, data: Partial<ActualsData>) => void;
+  getWagonData: (wagonId: string) => WagonItemData | null;
+  initializeWagon: (wagonId: string) => void;
+}
 
-  updateActualsData: (data) =>
+const createDefaultWagonData = (id: string): WagonItemData => ({
+  id,
+  planned: {},
+  actuals: {},
+});
+
+export const usePlanActualStore = create<PlanActualStore>((set, get) => ({
+  wagonItems: {
+    'WAG00000001': createDefaultWagonData('WAG00000001'),
+    'WAG00000002': createDefaultWagonData('WAG00000002'),
+    'WAG00000003': createDefaultWagonData('WAG00000003'),
+    'WAG00000004': createDefaultWagonData('WAG00000004'),
+  },
+  activeWagonId: 'WAG00000001',
+
+  setActiveWagon: (id) =>
+    set({ activeWagonId: id }),
+
+  initializeWagon: (wagonId) =>
     set((state) => ({
-      actualsData: {
-        ...state.actualsData,
-        ...data,
+      wagonItems: {
+        ...state.wagonItems,
+        [wagonId]: state.wagonItems[wagonId] || createDefaultWagonData(wagonId),
       },
     })),
 
-  resetActualsData: () =>
-    set({ actualsData: initialActualsData }),
+  updatePlannedData: (wagonId, data) =>
+    set((state) => ({
+      wagonItems: {
+        ...state.wagonItems,
+        [wagonId]: {
+          ...state.wagonItems[wagonId],
+          planned: {
+            ...state.wagonItems[wagonId]?.planned,
+            ...data,
+          },
+        },
+      },
+    })),
+
+  updateActualsData: (wagonId, data) =>
+    set((state) => ({
+      wagonItems: {
+        ...state.wagonItems,
+        [wagonId]: {
+          ...state.wagonItems[wagonId],
+          actuals: {
+            ...state.wagonItems[wagonId]?.actuals,
+            ...data,
+          },
+        },
+      },
+    })),
+
+  getWagonData: (wagonId) => {
+    const state = get();
+    return state.wagonItems[wagonId] || null;
+  },
 }));

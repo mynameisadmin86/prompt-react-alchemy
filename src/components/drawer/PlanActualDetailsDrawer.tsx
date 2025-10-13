@@ -10,7 +10,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { SimpleDynamicPanel } from '@/components/DynamicPanel/SimpleDynamicPanel';
 import { PanelFieldConfig } from '@/types/dynamicPanel';
-import { usePlanActualStore } from '@/stores/planActualStore';
+import { usePlanActualStore, ActualsData } from '@/stores/planActualStore';
 
 interface PlanActualDetailsDrawerProps {
   isOpen: boolean;
@@ -29,7 +29,7 @@ export const PlanActualDetailsDrawer: React.FC<PlanActualDetailsDrawerProps> = (
   isOpen,
   onClose,
 }) => {
-  const { actualsData, updateActualsData } = usePlanActualStore();
+  const { wagonItems, activeWagonId, setActiveWagon, updateActualsData, getWagonData } = usePlanActualStore();
   
   const [expandedSections, setExpandedSections] = useState({
     wagon: true,
@@ -48,15 +48,21 @@ export const PlanActualDetailsDrawer: React.FC<PlanActualDetailsDrawerProps> = (
   ]);
 
   const [selectAll, setSelectAll] = useState(false);
-  const [activeItemId, setActiveItemId] = useState<string>('WAG00000001');
 
   const handleItemClick = (item: WagonItem) => {
-    setActiveItemId(item.id);
-    // Load the item's data into the form
-    updateActualsData({
-      wagonType: item.description.toLowerCase().replace(' ', '-'),
-      wagonId: item.id,
-    });
+    setActiveWagon(item.id);
+  };
+
+  // Get current wagon's actuals data
+  const currentWagonData = activeWagonId ? getWagonData(activeWagonId) : null;
+  const actualsData = currentWagonData?.actuals || {};
+  const plannedData = currentWagonData?.planned || {};
+
+  // Helper to update actuals for the current wagon
+  const updateCurrentActuals = (data: Partial<ActualsData>) => {
+    if (activeWagonId) {
+      updateActualsData(activeWagonId, data);
+    }
   };
 
   const toggleSection = (section: keyof typeof expandedSections) => {
@@ -139,7 +145,7 @@ export const PlanActualDetailsDrawer: React.FC<PlanActualDetailsDrawerProps> = (
                 className={cn(
                   "p-3 border rounded-md bg-card hover:bg-accent/50 transition-colors cursor-pointer",
                   item.checked && "border-primary bg-accent",
-                  activeItemId === item.id && "ring-2 ring-primary"
+                  activeWagonId === item.id && "ring-2 ring-primary"
                 )}
               >
                 <div className="flex items-start gap-2">
@@ -603,21 +609,21 @@ export const PlanActualDetailsDrawer: React.FC<PlanActualDetailsDrawerProps> = (
                         : allOptions;
                       return filtered.slice(offset, offset + limit);
                     },
-                    onChange: (selected) => updateActualsData({ wagonType: selected?.value }),
+                    onChange: (selected) => updateCurrentActuals({ wagonType: selected?.value }),
                   },
                   {
                     fieldType: 'search',
                     key: 'wagonId',
                     label: 'Wagon ID',
                     placeholder: 'Search Wagon ID',
-                    onChange: (value) => updateActualsData({ wagonId: value }),
+                    onChange: (value) => updateCurrentActuals({ wagonId: value }),
                   },
                   {
                     fieldType: 'text',
                     key: 'wagonQuantity',
                     label: 'Wagon Quantity',
                     placeholder: 'Enter quantity',
-                    onChange: (value) => updateActualsData({ wagonQuantity: value }),
+                    onChange: (value) => updateCurrentActuals({ wagonQuantity: value }),
                   },
                   {
                     fieldType: 'select',
@@ -627,14 +633,14 @@ export const PlanActualDetailsDrawer: React.FC<PlanActualDetailsDrawerProps> = (
                       { label: 'EA', value: 'EA' },
                       { label: 'KG', value: 'KG' },
                     ],
-                    onChange: (value) => updateActualsData({ wagonQuantityUnit: value }),
+                    onChange: (value) => updateCurrentActuals({ wagonQuantityUnit: value }),
                   },
                   {
                     fieldType: 'currency',
                     key: 'wagonTareWeight',
                     label: 'Wagon Tare Weight',
                     placeholder: 'Enter weight',
-                    onChange: (value) => updateActualsData({ wagonTareWeight: value }),
+                    onChange: (value) => updateCurrentActuals({ wagonTareWeight: value }),
                   },
                   {
                     fieldType: 'select',
@@ -644,14 +650,14 @@ export const PlanActualDetailsDrawer: React.FC<PlanActualDetailsDrawerProps> = (
                       { label: 'TON', value: 'TON' },
                       { label: 'KG', value: 'KG' },
                     ],
-                    onChange: (value) => updateActualsData({ wagonTareWeightUnit: value }),
+                    onChange: (value) => updateCurrentActuals({ wagonTareWeightUnit: value }),
                   },
                   {
                     fieldType: 'currency',
                     key: 'wagonGrossWeight',
                     label: 'Wagon Gross Weight',
                     placeholder: 'Enter weight',
-                    onChange: (value) => updateActualsData({ wagonGrossWeight: value }),
+                    onChange: (value) => updateCurrentActuals({ wagonGrossWeight: value }),
                   },
                   {
                     fieldType: 'select',
@@ -661,14 +667,14 @@ export const PlanActualDetailsDrawer: React.FC<PlanActualDetailsDrawerProps> = (
                       { label: 'TON', value: 'TON' },
                       { label: 'KG', value: 'KG' },
                     ],
-                    onChange: (value) => updateActualsData({ wagonGrossWeightUnit: value }),
+                    onChange: (value) => updateCurrentActuals({ wagonGrossWeightUnit: value }),
                   },
                   {
                     fieldType: 'currency',
                     key: 'wagonLength',
                     label: 'Wagon Length',
                     placeholder: 'Enter length',
-                    onChange: (value) => updateActualsData({ wagonLength: value }),
+                    onChange: (value) => updateCurrentActuals({ wagonLength: value }),
                   },
                   {
                     fieldType: 'select',
@@ -678,18 +684,18 @@ export const PlanActualDetailsDrawer: React.FC<PlanActualDetailsDrawerProps> = (
                       { label: 'M', value: 'M' },
                       { label: 'FT', value: 'FT' },
                     ],
-                    onChange: (value) => updateActualsData({ wagonLengthUnit: value }),
+                    onChange: (value) => updateCurrentActuals({ wagonLengthUnit: value }),
                   },
                   {
                     fieldType: 'text',
                     key: 'wagonSequence',
                     label: 'Wagon Sequence',
                     placeholder: 'Enter sequence',
-                    onChange: (value) => updateActualsData({ wagonSequence: value }),
+                    onChange: (value) => updateCurrentActuals({ wagonSequence: value }),
                   },
-                ] as PanelFieldConfig[]}
+                 ] as PanelFieldConfig[]}
                 initialData={actualsData}
-                onDataChange={(data) => updateActualsData(data)}
+                onDataChange={(data) => updateCurrentActuals(data)}
                 className="border-0 shadow-none"
               />
 
@@ -706,35 +712,35 @@ export const PlanActualDetailsDrawer: React.FC<PlanActualDetailsDrawerProps> = (
                       { label: '40ft Standard', value: '40ft' },
                       { label: 'Container A', value: 'container-a' },
                     ],
-                    onChange: (value) => updateActualsData({ containerType: value }),
+                    onChange: (value) => updateCurrentActuals({ containerType: value }),
                   },
                   {
                     fieldType: 'search',
                     key: 'containerId',
                     label: 'Container ID',
                     placeholder: 'Search Container ID',
-                    onChange: (value) => updateActualsData({ containerId: value }),
+                    onChange: (value) => updateCurrentActuals({ containerId: value }),
                   },
                   {
                     fieldType: 'text',
                     key: 'containerQuantity',
                     label: 'Container Quantity',
                     placeholder: 'Enter quantity',
-                    onChange: (value) => updateActualsData({ containerQuantity: value }),
+                    onChange: (value) => updateCurrentActuals({ containerQuantity: value }),
                   },
                   {
                     fieldType: 'select',
                     key: 'containerQuantityUnit',
                     label: 'Unit',
                     options: [{ label: 'EA', value: 'EA' }],
-                    onChange: (value) => updateActualsData({ containerQuantityUnit: value }),
+                    onChange: (value) => updateCurrentActuals({ containerQuantityUnit: value }),
                   },
                   {
                     fieldType: 'currency',
                     key: 'containerTareWeight',
                     label: 'Container Tare Weight',
                     placeholder: 'Enter weight',
-                    onChange: (value) => updateActualsData({ containerTareWeight: value }),
+                    onChange: (value) => updateCurrentActuals({ containerTareWeight: value }),
                   },
                   {
                     fieldType: 'select',
@@ -744,14 +750,14 @@ export const PlanActualDetailsDrawer: React.FC<PlanActualDetailsDrawerProps> = (
                       { label: 'TON', value: 'TON' },
                       { label: 'KG', value: 'KG' },
                     ],
-                    onChange: (value) => updateActualsData({ containerTareWeightUnit: value }),
+                    onChange: (value) => updateCurrentActuals({ containerTareWeightUnit: value }),
                   },
                   {
                     fieldType: 'currency',
                     key: 'containerLoadWeight',
                     label: 'Container Load Weight',
                     placeholder: 'Enter weight',
-                    onChange: (value) => updateActualsData({ containerLoadWeight: value }),
+                    onChange: (value) => updateCurrentActuals({ containerLoadWeight: value }),
                   },
                   {
                     fieldType: 'select',
@@ -761,11 +767,11 @@ export const PlanActualDetailsDrawer: React.FC<PlanActualDetailsDrawerProps> = (
                       { label: 'TON', value: 'TON' },
                       { label: 'KG', value: 'KG' },
                     ],
-                    onChange: (value) => updateActualsData({ containerLoadWeightUnit: value }),
+                    onChange: (value) => updateCurrentActuals({ containerLoadWeightUnit: value }),
                   },
                 ] as PanelFieldConfig[]}
                 initialData={actualsData}
-                onDataChange={(data) => updateActualsData(data)}
+                onDataChange={(data) => updateCurrentActuals(data)}
                 className="border-0 shadow-none"
               />
 
@@ -781,7 +787,7 @@ export const PlanActualDetailsDrawer: React.FC<PlanActualDetailsDrawerProps> = (
                       { label: 'Yes', value: 'yes' },
                       { label: 'No', value: 'no' },
                     ],
-                    onChange: (value) => updateActualsData({ hazardousGoods: value === 'yes' }),
+                    onChange: (value) => updateCurrentActuals({ hazardousGoods: value === 'yes' }),
                   },
                   {
                     fieldType: 'select',
@@ -792,21 +798,21 @@ export const PlanActualDetailsDrawer: React.FC<PlanActualDetailsDrawerProps> = (
                       { label: 'NHM 1', value: 'nhm1' },
                       { label: 'NHM 2', value: 'nhm2' },
                     ],
-                    onChange: (value) => updateActualsData({ nhm: value }),
+                    onChange: (value) => updateCurrentActuals({ nhm: value }),
                   },
                   {
                     fieldType: 'text',
                     key: 'productId',
                     label: 'Product ID',
                     placeholder: 'Enter Product ID',
-                    onChange: (value) => updateActualsData({ productId: value }),
+                    onChange: (value) => updateCurrentActuals({ productId: value }),
                   },
                   {
                     fieldType: 'text',
                     key: 'productQuantity',
                     label: 'Product Quantity',
                     placeholder: 'Enter quantity',
-                    onChange: (value) => updateActualsData({ productQuantity: value }),
+                    onChange: (value) => updateCurrentActuals({ productQuantity: value }),
                   },
                   {
                     fieldType: 'select',
@@ -817,7 +823,7 @@ export const PlanActualDetailsDrawer: React.FC<PlanActualDetailsDrawerProps> = (
                       { label: 'EA', value: 'EA' },
                       { label: 'KG', value: 'KG' },
                     ],
-                    onChange: (value) => updateActualsData({ productQuantityUnit: value }),
+                    onChange: (value) => updateCurrentActuals({ productQuantityUnit: value }),
                   },
                   {
                     fieldType: 'select',
@@ -828,7 +834,7 @@ export const PlanActualDetailsDrawer: React.FC<PlanActualDetailsDrawerProps> = (
                       { label: 'Class 1', value: 'class1' },
                       { label: 'Class 2', value: 'class2' },
                     ],
-                    onChange: (value) => updateActualsData({ classOfStores: value }),
+                    onChange: (value) => updateCurrentActuals({ classOfStores: value }),
                   },
                   {
                     fieldType: 'select',
@@ -839,7 +845,7 @@ export const PlanActualDetailsDrawer: React.FC<PlanActualDetailsDrawerProps> = (
                       { label: 'UN 1', value: 'un1' },
                       { label: 'UN 2', value: 'un2' },
                     ],
-                    onChange: (value) => updateActualsData({ unCode: value }),
+                    onChange: (value) => updateCurrentActuals({ unCode: value }),
                   },
                   {
                     fieldType: 'select',
@@ -850,11 +856,11 @@ export const PlanActualDetailsDrawer: React.FC<PlanActualDetailsDrawerProps> = (
                       { label: 'DG 1', value: 'dg1' },
                       { label: 'DG 2', value: 'dg2' },
                     ],
-                    onChange: (value) => updateActualsData({ dgClass: value }),
+                    onChange: (value) => updateCurrentActuals({ dgClass: value }),
                   },
-                ] as PanelFieldConfig[]}
+                 ] as PanelFieldConfig[]}
                 initialData={actualsData}
-                onDataChange={(data) => updateActualsData(data)}
+                onDataChange={(data) => updateCurrentActuals(data)}
                 className="border-0 shadow-none"
               />
 
@@ -871,28 +877,28 @@ export const PlanActualDetailsDrawer: React.FC<PlanActualDetailsDrawerProps> = (
                       { label: 'THU 1', value: 'thu1' },
                       { label: 'THU 2', value: 'thu2' },
                     ],
-                    onChange: (value) => updateActualsData({ thuId: value }),
+                    onChange: (value) => updateCurrentActuals({ thuId: value }),
                   },
                   {
                     fieldType: 'text',
                     key: 'thuQuantity',
                     label: 'THU Quantity',
                     placeholder: 'Enter quantity',
-                    onChange: (value) => updateActualsData({ thuQuantity: value }),
+                    onChange: (value) => updateCurrentActuals({ thuQuantity: value }),
                   },
                   {
                     fieldType: 'select',
                     key: 'thuQuantityUnit',
                     label: 'Unit',
                     options: [{ label: 'EA', value: 'EA' }],
-                    onChange: (value) => updateActualsData({ thuQuantityUnit: value }),
+                    onChange: (value) => updateCurrentActuals({ thuQuantityUnit: value }),
                   },
                   {
                     fieldType: 'currency',
                     key: 'thuGrossWeight',
                     label: 'THU Gross Weight',
                     placeholder: 'Enter weight',
-                    onChange: (value) => updateActualsData({ thuGrossWeight: value }),
+                    onChange: (value) => updateCurrentActuals({ thuGrossWeight: value }),
                   },
                   {
                     fieldType: 'select',
@@ -902,14 +908,14 @@ export const PlanActualDetailsDrawer: React.FC<PlanActualDetailsDrawerProps> = (
                       { label: 'TON', value: 'TON' },
                       { label: 'KG', value: 'KG' },
                     ],
-                    onChange: (value) => updateActualsData({ thuGrossWeightUnit: value }),
+                    onChange: (value) => updateCurrentActuals({ thuGrossWeightUnit: value }),
                   },
                   {
                     fieldType: 'currency',
                     key: 'thuTareWeight',
                     label: 'THU Tare Weight',
                     placeholder: 'Enter weight',
-                    onChange: (value) => updateActualsData({ thuTareWeight: value }),
+                    onChange: (value) => updateCurrentActuals({ thuTareWeight: value }),
                   },
                   {
                     fieldType: 'select',
@@ -919,14 +925,14 @@ export const PlanActualDetailsDrawer: React.FC<PlanActualDetailsDrawerProps> = (
                       { label: 'TON', value: 'TON' },
                       { label: 'KG', value: 'KG' },
                     ],
-                    onChange: (value) => updateActualsData({ thuTareWeightUnit: value }),
+                    onChange: (value) => updateCurrentActuals({ thuTareWeightUnit: value }),
                   },
                   {
                     fieldType: 'currency',
                     key: 'thuNetWeight',
                     label: 'THU Net Weight',
                     placeholder: 'Enter weight',
-                    onChange: (value) => updateActualsData({ thuNetWeight: value }),
+                    onChange: (value) => updateCurrentActuals({ thuNetWeight: value }),
                   },
                   {
                     fieldType: 'select',
@@ -936,28 +942,28 @@ export const PlanActualDetailsDrawer: React.FC<PlanActualDetailsDrawerProps> = (
                       { label: 'TON', value: 'TON' },
                       { label: 'KG', value: 'KG' },
                     ],
-                    onChange: (value) => updateActualsData({ thuNetWeightUnit: value }),
+                    onChange: (value) => updateCurrentActuals({ thuNetWeightUnit: value }),
                   },
                   {
                     fieldType: 'currency',
                     key: 'thuLength',
                     label: 'THU Length',
                     placeholder: 'Enter length',
-                    onChange: (value) => updateActualsData({ thuLength: value }),
+                    onChange: (value) => updateCurrentActuals({ thuLength: value }),
                   },
                   {
                     fieldType: 'currency',
                     key: 'thuWidth',
                     label: 'THU Width',
                     placeholder: 'Enter width',
-                    onChange: (value) => updateActualsData({ thuWidth: value }),
+                    onChange: (value) => updateCurrentActuals({ thuWidth: value }),
                   },
                   {
                     fieldType: 'currency',
                     key: 'thuHeight',
                     label: 'THU Height',
                     placeholder: 'Enter height',
-                    onChange: (value) => updateActualsData({ thuHeight: value }),
+                    onChange: (value) => updateCurrentActuals({ thuHeight: value }),
                   },
                   {
                     fieldType: 'select',
@@ -967,11 +973,11 @@ export const PlanActualDetailsDrawer: React.FC<PlanActualDetailsDrawerProps> = (
                       { label: 'M', value: 'M' },
                       { label: 'CM', value: 'CM' },
                     ],
-                    onChange: (value) => updateActualsData({ thuLengthUnit: value, thuWidthUnit: value, thuHeightUnit: value }),
+                    onChange: (value) => updateCurrentActuals({ thuLengthUnit: value, thuWidthUnit: value, thuHeightUnit: value }),
                   },
                 ] as PanelFieldConfig[]}
                 initialData={actualsData}
-                onDataChange={(data) => updateActualsData(data)}
+                onDataChange={(data) => updateCurrentActuals(data)}
                 className="border-0 shadow-none"
               />
 
@@ -987,7 +993,7 @@ export const PlanActualDetailsDrawer: React.FC<PlanActualDetailsDrawerProps> = (
                       { label: 'Frankfurt Station Point A', value: 'frankfurt-a' },
                       { label: 'Frankfurt Station Point B', value: 'frankfurt-b' },
                     ],
-                    onChange: (value) => updateActualsData({ departure: value }),
+                    onChange: (value) => updateCurrentActuals({ departure: value }),
                   },
                   {
                     fieldType: 'select',
@@ -997,35 +1003,35 @@ export const PlanActualDetailsDrawer: React.FC<PlanActualDetailsDrawerProps> = (
                       { label: 'Frankfurt Station Point A', value: 'frankfurt-a' },
                       { label: 'Frankfurt Station Point B', value: 'frankfurt-b' },
                     ],
-                    onChange: (value) => updateActualsData({ destination: value }),
+                    onChange: (value) => updateCurrentActuals({ destination: value }),
                   },
                   {
                     fieldType: 'date',
                     key: 'fromDate',
                     label: 'From Date',
-                    onChange: (value) => updateActualsData({ fromDate: value }),
+                    onChange: (value) => updateCurrentActuals({ fromDate: value }),
                   },
                   {
                     fieldType: 'time',
                     key: 'fromTime',
                     label: 'From Time',
-                    onChange: (value) => updateActualsData({ fromTime: value }),
+                    onChange: (value) => updateCurrentActuals({ fromTime: value }),
                   },
                   {
                     fieldType: 'date',
                     key: 'toDate',
                     label: 'To Date',
-                    onChange: (value) => updateActualsData({ toDate: value }),
+                    onChange: (value) => updateCurrentActuals({ toDate: value }),
                   },
                   {
                     fieldType: 'time',
                     key: 'toTime',
                     label: 'To Time',
-                    onChange: (value) => updateActualsData({ toTime: value }),
+                    onChange: (value) => updateCurrentActuals({ toTime: value }),
                   },
                 ] as PanelFieldConfig[]}
                 initialData={actualsData}
-                onDataChange={(data) => updateActualsData(data)}
+                onDataChange={(data) => updateCurrentActuals(data)}
                 className="border-0 shadow-none"
               />
 
@@ -1041,7 +1047,7 @@ export const PlanActualDetailsDrawer: React.FC<PlanActualDetailsDrawerProps> = (
                       { label: 'QC 1', value: 'qc1' },
                       { label: 'QC 2', value: 'qc2' },
                     ],
-                    onChange: (value) => updateActualsData({ qcUserdefined1: value }),
+                    onChange: (value) => updateCurrentActuals({ qcUserdefined1: value }),
                   },
                   {
                     fieldType: 'select',
@@ -1051,7 +1057,7 @@ export const PlanActualDetailsDrawer: React.FC<PlanActualDetailsDrawerProps> = (
                       { label: 'QC 1', value: 'qc1' },
                       { label: 'QC 2', value: 'qc2' },
                     ],
-                    onChange: (value) => updateActualsData({ qcUserdefined2: value }),
+                    onChange: (value) => updateCurrentActuals({ qcUserdefined2: value }),
                   },
                   {
                     fieldType: 'select',
@@ -1061,32 +1067,32 @@ export const PlanActualDetailsDrawer: React.FC<PlanActualDetailsDrawerProps> = (
                       { label: 'QC 1', value: 'qc1' },
                       { label: 'QC 2', value: 'qc2' },
                     ],
-                    onChange: (value) => updateActualsData({ qcUserdefined3: value }),
+                    onChange: (value) => updateCurrentActuals({ qcUserdefined3: value }),
                   },
                   {
                     fieldType: 'textarea',
                     key: 'remarks1',
                     label: 'Remarks 1',
                     placeholder: 'Enter remarks',
-                    onChange: (value) => updateActualsData({ remarks1: value }),
+                    onChange: (value) => updateCurrentActuals({ remarks1: value }),
                   },
                   {
                     fieldType: 'textarea',
                     key: 'remarks2',
                     label: 'Remarks 2',
                     placeholder: 'Enter remarks',
-                    onChange: (value) => updateActualsData({ remarks2: value }),
+                    onChange: (value) => updateCurrentActuals({ remarks2: value }),
                   },
                   {
                     fieldType: 'textarea',
                     key: 'remarks3',
                     label: 'Remarks 3',
                     placeholder: 'Enter remarks',
-                    onChange: (value) => updateActualsData({ remarks3: value }),
+                    onChange: (value) => updateCurrentActuals({ remarks3: value }),
                   },
                 ] as PanelFieldConfig[]}
                 initialData={actualsData}
-                onDataChange={(data) => updateActualsData(data)}
+                onDataChange={(data) => updateCurrentActuals(data)}
                 className="border-0 shadow-none"
               />
             </TabsContent>
