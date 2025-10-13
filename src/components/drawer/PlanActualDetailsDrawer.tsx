@@ -175,8 +175,397 @@ export const PlanActualDetailsDrawer: React.FC<PlanActualDetailsDrawerProps> = (
               </TabsList>
             </div>
 
-            <TabsContent value="planned" className="flex-1 m-0 overflow-y-auto p-6">
-              <div className="text-muted-foreground">Planned details will be displayed here</div>
+            <TabsContent value="planned" className="flex-1 m-0 overflow-y-auto p-6 space-y-4">
+              {/* Wagon Details - Planned */}
+              <div className="border rounded-lg bg-card">
+                <div
+                  className="flex items-center justify-between p-4 cursor-pointer hover:bg-muted/50"
+                  onClick={() => toggleSection('wagon')}
+                >
+                  <div className="flex items-center gap-2">
+                    <Truck className="h-5 w-5 text-blue-600" />
+                    <h3 className="font-semibold">Wagon Details</h3>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="outline" className="bg-blue-50 text-blue-600 border-blue-200">
+                      Wagon 1
+                    </Badge>
+                    {expandedSections.wagon ? (
+                      <ChevronUp className="h-4 w-4" />
+                    ) : (
+                      <ChevronDown className="h-4 w-4" />
+                    )}
+                  </div>
+                </div>
+
+                <AnimatePresence>
+                  {expandedSections.wagon && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      className="overflow-hidden"
+                    >
+                      <Separator />
+                      <div className="p-4">
+                        <div className="grid grid-cols-4 gap-x-6 gap-y-3">
+                          <div>
+                            <div className="text-xs text-muted-foreground mb-1">Wagon Type</div>
+                            <div className="text-sm font-medium">Habbins</div>
+                          </div>
+                          <div>
+                            <div className="text-xs text-muted-foreground mb-1">Wagon ID</div>
+                            <div className="text-sm font-medium">HAB3243</div>
+                          </div>
+                          <div>
+                            <div className="text-xs text-muted-foreground mb-1">Wagon Quantity</div>
+                            <div className="text-sm font-medium">1 EA</div>
+                          </div>
+                          <div>
+                            <div className="text-xs text-muted-foreground mb-1">Wagon Tare Weight</div>
+                            <div className="text-sm font-medium">100 TON</div>
+                          </div>
+                          <div>
+                            <div className="text-xs text-muted-foreground mb-1">Wagon Gross Weight</div>
+                            <div className="text-sm font-medium">100 TON</div>
+                          </div>
+                          <div>
+                            <div className="text-xs text-muted-foreground mb-1">Wagon Length</div>
+                            <div className="text-sm font-medium">2139 M</div>
+                          </div>
+                          <div>
+                            <div className="text-xs text-muted-foreground mb-1">Wagon Sequence</div>
+                            <div className="text-sm font-medium">1A</div>
+                          </div>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+
+              {/* Container Details - Planned */}
+              <div className="border rounded-lg bg-card">
+                <div
+                  className="flex items-center justify-between p-4 cursor-pointer hover:bg-muted/50"
+                  onClick={() => toggleSection('container')}
+                >
+                  <div className="flex items-center gap-2">
+                    <ContainerIcon className="h-5 w-5 text-purple-600" />
+                    <h3 className="font-semibold">Container Details</h3>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="outline" className="bg-teal-50 text-teal-600 border-teal-200">
+                      Container 1
+                    </Badge>
+                    {expandedSections.container ? (
+                      <ChevronUp className="h-4 w-4" />
+                    ) : (
+                      <ChevronDown className="h-4 w-4" />
+                    )}
+                  </div>
+                </div>
+
+                <AnimatePresence>
+                  {expandedSections.container && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      className="overflow-hidden"
+                    >
+                      <Separator />
+                      <div className="p-4">
+                        <div className="grid grid-cols-4 gap-x-6 gap-y-3">
+                          <div>
+                            <div className="text-xs text-muted-foreground mb-1">Container Type</div>
+                            <div className="text-sm font-medium">Container A</div>
+                          </div>
+                          <div>
+                            <div className="text-xs text-muted-foreground mb-1">Container ID</div>
+                            <div className="text-sm font-medium">CONT3243</div>
+                          </div>
+                          <div>
+                            <div className="text-xs text-muted-foreground mb-1">Container Quantity</div>
+                            <div className="text-sm font-medium">1 EA</div>
+                          </div>
+                          <div>
+                            <div className="text-xs text-muted-foreground mb-1">Container Tare Weight</div>
+                            <div className="text-sm font-medium">100 TON</div>
+                          </div>
+                          <div>
+                            <div className="text-xs text-muted-foreground mb-1">Container Load Weight</div>
+                            <div className="text-sm font-medium">100 TON</div>
+                          </div>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+
+              {/* Product Details - Planned */}
+              <div className="border rounded-lg bg-card">
+                <div
+                  className="flex items-center justify-between p-4 cursor-pointer hover:bg-muted/50"
+                  onClick={() => toggleSection('product')}
+                >
+                  <div className="flex items-center gap-2">
+                    <Package className="h-5 w-5 text-pink-600" />
+                    <h3 className="font-semibold">Product Details</h3>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="outline" className="bg-purple-50 text-purple-600 border-purple-200">
+                      Wheat Muslin
+                    </Badge>
+                    {expandedSections.product ? (
+                      <ChevronUp className="h-4 w-4" />
+                    ) : (
+                      <ChevronDown className="h-4 w-4" />
+                    )}
+                  </div>
+                </div>
+
+                <AnimatePresence>
+                  {expandedSections.product && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      className="overflow-hidden"
+                    >
+                      <Separator />
+                      <div className="p-4">
+                        <div className="grid grid-cols-4 gap-x-6 gap-y-3">
+                          <div>
+                            <div className="text-xs text-muted-foreground mb-1">Hazardous Goods</div>
+                            <div className="text-sm font-medium">Yes</div>
+                          </div>
+                          <div>
+                            <div className="text-xs text-muted-foreground mb-1">NHM</div>
+                            <div className="text-sm font-medium">2WQ1E32R43</div>
+                          </div>
+                          <div>
+                            <div className="text-xs text-muted-foreground mb-1">Product ID</div>
+                            <div className="text-sm font-medium">Wheat Muslin</div>
+                          </div>
+                          <div>
+                            <div className="text-xs text-muted-foreground mb-1">Product Quantity</div>
+                            <div className="text-sm font-medium">100 TON</div>
+                          </div>
+                          <div>
+                            <div className="text-xs text-muted-foreground mb-1">Class of Stores</div>
+                            <div className="text-sm font-medium">Class A</div>
+                          </div>
+                          <div>
+                            <div className="text-xs text-muted-foreground mb-1">UN Code</div>
+                            <div className="text-sm font-medium">2432</div>
+                          </div>
+                          <div>
+                            <div className="text-xs text-muted-foreground mb-1">DG Class</div>
+                            <div className="text-sm font-medium">AAA</div>
+                          </div>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+
+              {/* THU Details - Planned */}
+              <div className="border rounded-lg bg-card">
+                <div
+                  className="flex items-center justify-between p-4 cursor-pointer hover:bg-muted/50"
+                  onClick={() => toggleSection('thu')}
+                >
+                  <div className="flex items-center gap-2">
+                    <Box className="h-5 w-5 text-cyan-600" />
+                    <h3 className="font-semibold">THU Details</h3>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="outline" className="bg-cyan-50 text-cyan-600 border-cyan-200">
+                      THU 5
+                    </Badge>
+                    {expandedSections.thu ? (
+                      <ChevronUp className="h-4 w-4" />
+                    ) : (
+                      <ChevronDown className="h-4 w-4" />
+                    )}
+                  </div>
+                </div>
+
+                <AnimatePresence>
+                  {expandedSections.thu && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      className="overflow-hidden"
+                    >
+                      <Separator />
+                      <div className="p-4">
+                        <div className="grid grid-cols-4 gap-x-6 gap-y-3">
+                          <div>
+                            <div className="text-xs text-muted-foreground mb-1">THU ID</div>
+                            <div className="text-sm font-medium">THU329847</div>
+                          </div>
+                          <div>
+                            <div className="text-xs text-muted-foreground mb-1">THU Serial No.</div>
+                            <div className="text-sm font-medium">TH23300000/2025</div>
+                          </div>
+                          <div>
+                            <div className="text-xs text-muted-foreground mb-1">THU Quantity</div>
+                            <div className="text-sm font-medium">10 EA</div>
+                          </div>
+                          <div>
+                            <div className="text-xs text-muted-foreground mb-1">THU Weight</div>
+                            <div className="text-sm font-medium">10 TON</div>
+                          </div>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+
+              {/* Journey and Scheduling Details - Planned */}
+              <div className="border rounded-lg bg-card">
+                <div
+                  className="flex items-center justify-between p-4 cursor-pointer hover:bg-muted/50"
+                  onClick={() => toggleSection('journey')}
+                >
+                  <div className="flex items-center gap-2">
+                    <Calendar className="h-5 w-5 text-blue-600" />
+                    <h3 className="font-semibold">Journey and Scheduling Details</h3>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="outline" className="bg-blue-50 text-blue-600 border-blue-200">
+                      10-Mar-2025
+                    </Badge>
+                    {expandedSections.journey ? (
+                      <ChevronUp className="h-4 w-4" />
+                    ) : (
+                      <ChevronDown className="h-4 w-4" />
+                    )}
+                  </div>
+                </div>
+
+                <AnimatePresence>
+                  {expandedSections.journey && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      className="overflow-hidden"
+                    >
+                      <Separator />
+                      <div className="p-4">
+                        <div className="grid grid-cols-4 gap-x-6 gap-y-3">
+                          <div>
+                            <div className="text-xs text-muted-foreground mb-1">Departure</div>
+                            <div className="text-sm font-medium">Frankfurt Station Point A</div>
+                          </div>
+                          <div>
+                            <div className="text-xs text-muted-foreground mb-1">Arrival</div>
+                            <div className="text-sm font-medium">Frankfurt Station Point B</div>
+                          </div>
+                          <div>
+                            <div className="text-xs text-muted-foreground mb-1">Activity Location</div>
+                            <div className="text-sm font-medium">Frankfurt Station</div>
+                          </div>
+                          <div>
+                            <div className="text-xs text-muted-foreground mb-1">Activity</div>
+                            <div className="text-sm font-medium">Loading</div>
+                          </div>
+                          <div>
+                            <div className="text-xs text-muted-foreground mb-1">Planned Date and Time</div>
+                            <div className="text-sm font-medium">10-Mar-2025 10:00 AM</div>
+                          </div>
+                          <div>
+                            <div className="text-xs text-muted-foreground mb-1">Rev. Planned Date and Time</div>
+                            <div className="text-sm font-medium">10-Mar-2025 10:00 AM</div>
+                          </div>
+                          <div>
+                            <div className="text-xs text-muted-foreground mb-1">Train No.</div>
+                            <div className="text-sm font-medium">---</div>
+                          </div>
+                          <div>
+                            <div className="text-xs text-muted-foreground mb-1">Load Type</div>
+                            <div className="text-sm font-medium">Loaded</div>
+                          </div>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+
+              {/* Other Details - Planned */}
+              <div className="border rounded-lg bg-card">
+                <div
+                  className="flex items-center justify-between p-4 cursor-pointer hover:bg-muted/50"
+                  onClick={() => toggleSection('other')}
+                >
+                  <div className="flex items-center gap-2">
+                    <Info className="h-5 w-5 text-orange-600" />
+                    <h3 className="font-semibold">Other Details</h3>
+                  </div>
+                  {expandedSections.other ? (
+                    <ChevronUp className="h-4 w-4" />
+                  ) : (
+                    <ChevronDown className="h-4 w-4" />
+                  )}
+                </div>
+
+                <AnimatePresence>
+                  {expandedSections.other && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      className="overflow-hidden"
+                    >
+                      <Separator />
+                      <div className="p-4">
+                        <div className="grid grid-cols-4 gap-x-6 gap-y-3">
+                          <div>
+                            <div className="text-xs text-muted-foreground mb-1">From Date and Time</div>
+                            <div className="text-sm font-medium">12-Mar-2025 08:00 AM</div>
+                          </div>
+                          <div>
+                            <div className="text-xs text-muted-foreground mb-1">To Date and Time</div>
+                            <div className="text-sm font-medium">12-Mar-2025 08:00 AM</div>
+                          </div>
+                          <div>
+                            <div className="text-xs text-muted-foreground mb-1">QC Userdefined 1</div>
+                            <div className="text-sm font-medium">---</div>
+                          </div>
+                          <div>
+                            <div className="text-xs text-muted-foreground mb-1">QC Userdefined 2</div>
+                            <div className="text-sm font-medium">---</div>
+                          </div>
+                          <div>
+                            <div className="text-xs text-muted-foreground mb-1">QC Userdefined 3</div>
+                            <div className="text-sm font-medium">---</div>
+                          </div>
+                          <div>
+                            <div className="text-xs text-muted-foreground mb-1">Remarks 1</div>
+                            <div className="text-sm font-medium">---</div>
+                          </div>
+                          <div>
+                            <div className="text-xs text-muted-foreground mb-1">Remarks 2</div>
+                            <div className="text-sm font-medium">---</div>
+                          </div>
+                          <div>
+                            <div className="text-xs text-muted-foreground mb-1">Remarks 3</div>
+                            <div className="text-sm font-medium">---</div>
+                          </div>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
             </TabsContent>
 
             <TabsContent value="actuals" className="flex-1 m-0 overflow-y-auto p-6 space-y-4">
