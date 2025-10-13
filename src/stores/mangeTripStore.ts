@@ -30,7 +30,8 @@ interface TripState {
 
   // API actions
   fetchTrip: (tripId: string) => Promise<void>;
-  saveTrip?: () => void;
+  saveTrip: () => Promise<void>;
+  confirmTrip: () => Promise<void>;
 }
 
 export const manageTripStore = create<TripState>((set, get) => ({
@@ -58,6 +59,61 @@ export const manageTripStore = create<TripState>((set, get) => ({
       set({ error: err?.message ?? "Fetch failed", loading: false });
     }
   },
+  
+  saveTrip: async () => {
+    const current = get().tripData;
+    if (!current) {
+      throw new Error("No trip data to save");
+    }
+    
+    set({ loading: true, error: null });
+    try {
+      console.log('Saving trip draft with data:', current);
+      const res = await tripService.saveTripDraft(current);
+      
+      // Update the store with the response if needed
+      if (res?.data) {
+        const parsed = typeof res.data === 'string' ? JSON.parse(res.data) : res.data;
+        set({ tripData: parsed, loading: false, error: null });
+      } else {
+        set({ loading: false });
+      }
+      
+      console.log('Trip saved successfully:', res);
+    } catch (err: any) {
+      console.error("saveTrip failed", err);
+      set({ error: err?.message ?? "Save failed", loading: false });
+      throw err;
+    }
+  },
+  
+  confirmTrip: async () => {
+    const current = get().tripData;
+    if (!current) {
+      throw new Error("No trip data to confirm");
+    }
+    
+    set({ loading: true, error: null });
+    try {
+      console.log('Confirming trip with data:', current);
+      const res = await tripService.confirmTrip(current);
+      
+      // Update the store with the response
+      if (res?.data) {
+        const parsed = typeof res.data === 'string' ? JSON.parse(res.data) : res.data;
+        set({ tripData: parsed, loading: false, error: null });
+      } else {
+        set({ loading: false });
+      }
+      
+      console.log('Trip confirmed successfully:', res);
+    } catch (err: any) {
+      console.error("confirmTrip failed", err);
+      set({ error: err?.message ?? "Confirm failed", loading: false });
+      throw err;
+    }
+  },
+  
   updateHeaderField: (key, value, modeFlag = "Update") => {
     const current = get().tripData;
     if (!current) return;
