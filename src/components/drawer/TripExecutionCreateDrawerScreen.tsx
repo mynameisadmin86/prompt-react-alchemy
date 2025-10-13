@@ -353,7 +353,7 @@ export const TripExecutionCreateDrawerScreen: React.FC<TripExecutionCreateDrawer
                             )}
                           </div>
                         </div>
-                      ))
+                      ))}
                     </motion.div>
                   )}
                 </AnimatePresence>
@@ -532,7 +532,7 @@ export const TripExecutionCreateDrawerScreen: React.FC<TripExecutionCreateDrawer
                       </div>
                     </div>
                   </div>
-                ))
+                ))}
               </div>
             </div>
           </TabsContent>
@@ -550,44 +550,35 @@ export const TripExecutionCreateDrawerScreen: React.FC<TripExecutionCreateDrawer
               {/* Transshipments Grid */}
               <div className="grid gap-4">
                 {selectedLeg.transshipments.map((transshipment) => (
-                  <div key={transshipment.id} className="rounded-lg border bg-card p-4 space-y-3">
-                    <div className="grid grid-cols-2 gap-4">
+                  <div key={transshipment.id} className="border rounded-lg bg-card p-4">
+                    <div className="flex items-start justify-between">
                       <div className="space-y-2">
-                        <Label className="text-xs">From Vehicle</Label>
-                        <Input placeholder="TRK-001" value={transshipment.fromVehicle} className="h-8 text-sm" readOnly />
+                        <div>
+                          <div className="text-xs text-muted-foreground">Transshipment Point</div>
+                          <div className="font-semibold">{transshipment.location}</div>
+                        </div>
+                        <div className="flex items-center gap-4">
+                          <div>
+                            <div className="text-xs text-muted-foreground">Planned Date</div>
+                            <div className="text-sm">{transshipment.plannedDate}</div>
+                          </div>
+                          <div>
+                            <div className="text-xs text-muted-foreground">Planned Time</div>
+                            <div className="text-sm">{transshipment.plannedTime}</div>
+                          </div>
+                        </div>
                       </div>
-                      <div className="space-y-2">
-                        <Label className="text-xs">To Vehicle</Label>
-                        <Input placeholder="TRK-002" value={transshipment.toVehicle} className="h-8 text-sm" readOnly />
+                      <div className="flex items-center gap-2">
+                        <Badge variant={transshipment.status === 'completed' ? 'default' : 'secondary'}>
+                          {transshipment.status}
+                        </Badge>
+                        <Button size="sm" variant="ghost" className="h-7 text-xs">
+                          Edit
+                        </Button>
                       </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label className="text-xs">Location</Label>
-                      <Input placeholder="Select location" value={transshipment.location} className="h-8 text-sm" readOnly />
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label className="text-xs">Planned Date</Label>
-                        <Input type="date" value={transshipment.plannedDate} className="h-8 text-sm" readOnly />
-                      </div>
-                      <div className="space-y-2">
-                        <Label className="text-xs">Planned Time</Label>
-                        <Input type="time" value={transshipment.plannedTime} className="h-8 text-sm" readOnly />
-                      </div>
-                    </div>
-
-                    <div className="flex items-center justify-between pt-2 border-t">
-                      <Badge variant="secondary" className="text-xs">
-                        {transshipment.status}
-                      </Badge>
-                      <Button size="sm" variant="ghost" className="h-7 text-xs">
-                        Edit
-                      </Button>
                     </div>
                   </div>
-                ))
+                ))}
               </div>
             </div>
           </TabsContent>
