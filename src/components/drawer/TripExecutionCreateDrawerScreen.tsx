@@ -16,6 +16,7 @@ import { Separator } from '@/components/ui/separator';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useTripExecutionDrawerStore } from '@/stores/tripExecutionDrawerStore';
 import { toast } from 'sonner';
+import { PlanActualDetailsDrawer } from './PlanActualDetailsDrawer';
 
 interface TripExecutionCreateDrawerScreenProps {
   onClose: () => void;
@@ -50,6 +51,7 @@ export const TripExecutionCreateDrawerScreen: React.FC<TripExecutionCreateDrawer
   const [pickupComplete, setPickupComplete] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [showAddViaPointsDialog, setShowAddViaPointsDialog] = useState(false);
+  const [showPlanActualDrawer, setShowPlanActualDrawer] = useState(false);
   
   // Add Via Points dialog state
   const [viaPointForm, setViaPointForm] = useState({
@@ -513,7 +515,11 @@ export const TripExecutionCreateDrawerScreen: React.FC<TripExecutionCreateDrawer
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-semibold">Consignment Details</h3>
                 <div className="flex items-center gap-2">
-                  <Button size="sm" className="h-8">
+                  <Button 
+                    size="sm" 
+                    className="h-8"
+                    onClick={() => setShowPlanActualDrawer(true)}
+                  >
                     <Plus className="h-4 w-4 mr-1" />
                     Add Actuals
                   </Button>
