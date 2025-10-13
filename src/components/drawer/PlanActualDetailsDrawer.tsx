@@ -48,6 +48,16 @@ export const PlanActualDetailsDrawer: React.FC<PlanActualDetailsDrawerProps> = (
   ]);
 
   const [selectAll, setSelectAll] = useState(false);
+  const [activeItemId, setActiveItemId] = useState<string>('WAG00000001');
+
+  const handleItemClick = (item: WagonItem) => {
+    setActiveItemId(item.id);
+    // Load the item's data into the form
+    updateActualsData({
+      wagonType: item.description.toLowerCase().replace(' ', '-'),
+      wagonId: item.id,
+    });
+  };
 
   const toggleSection = (section: keyof typeof expandedSections) => {
     setExpandedSections(prev => ({ ...prev, [section]: !prev[section] }));
@@ -125,20 +135,28 @@ export const PlanActualDetailsDrawer: React.FC<PlanActualDetailsDrawerProps> = (
             {selectedItems.map((item) => (
               <div
                 key={item.id}
+                onClick={() => handleItemClick(item)}
                 className={cn(
                   "p-3 border rounded-md bg-card hover:bg-accent/50 transition-colors cursor-pointer",
-                  item.checked && "border-primary bg-accent"
+                  item.checked && "border-primary bg-accent",
+                  activeItemId === item.id && "ring-2 ring-primary"
                 )}
               >
                 <div className="flex items-start gap-2">
                   <Checkbox
                     checked={item.checked}
                     onCheckedChange={() => toggleItemCheck(item.id)}
+                    onClick={(e) => e.stopPropagation()}
                   />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between mb-1">
                       <div className="font-medium text-sm text-blue-600">{item.name}</div>
-                      <Button size="icon" variant="ghost" className="h-5 w-5 shrink-0">
+                      <Button 
+                        size="icon" 
+                        variant="ghost" 
+                        className="h-5 w-5 shrink-0"
+                        onClick={(e) => e.stopPropagation()}
+                      >
                         <svg className="h-3 w-3" viewBox="0 0 24 24" fill="currentColor">
                           <circle cx="12" cy="5" r="2" />
                           <circle cx="12" cy="12" r="2" />
