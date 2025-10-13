@@ -17,7 +17,7 @@ interface TripState {
   setTrip?: (data: TripData) => void;
   updateHeader?: (updates: Partial<Header>, modeFlag?: ModeFlag) => void;
   updateHeaderField: (
-    key: keyof Header,
+    key: string,
     value: any,
     modeFlag?: ModeFlag
   ) => void;

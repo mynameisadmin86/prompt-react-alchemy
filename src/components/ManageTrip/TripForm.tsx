@@ -147,6 +147,11 @@ export const TripForm: React.FC<TripFormProps> = ({
               : {})
           }));
         },
+        events: {
+          onChange: (val: string) => {
+            updateHeaderField("Cluster", val, "Update");
+          }
+        }
       },
       ForwardTripID: {
         id: 'ForwardTripID',
@@ -159,7 +164,12 @@ export const TripForm: React.FC<TripFormProps> = ({
         editable: true,
         order: 4,
         maxLength: 40,
-        placeholder: 'Enter Forward Trip ID'
+        placeholder: 'Enter Forward Trip ID',
+        events: {
+          onChange: (val: string) => {
+            updateHeaderField("ForwardTripID", val, "Update");
+          }
+        }
       },
       ReturnTripID: {
         id: 'ReturnTripID',
@@ -172,7 +182,12 @@ export const TripForm: React.FC<TripFormProps> = ({
         editable: true,
         order: 4,
         maxLength: 40,
-        placeholder: 'Enter Return Trip ID'
+        placeholder: 'Enter Return Trip ID',
+        events: {
+          onChange: (val: string) => {
+            updateHeaderField("ReturnTripID", val, "Update");
+          }
+        }
       },
       SupplierRefNo: {
         id: 'SupplierRefNo',
@@ -185,7 +200,12 @@ export const TripForm: React.FC<TripFormProps> = ({
         editable: true,
         order: 4,
         maxLength: 40,
-        placeholder: 'Enter Supplier Ref. No.'
+        placeholder: 'Enter Supplier Ref. No.',
+        events: {
+          onChange: (val: string) => {
+            updateHeaderField("SupplierRefNo", val, "Update");
+          }
+        }
       },
       QCUserDefined1: {
         id: 'QCUserDefined1',
@@ -199,6 +219,11 @@ export const TripForm: React.FC<TripFormProps> = ({
         order: 5,
         maxLength: 255,
         options: qcList1?.filter((qc: any) => qc.id).map((qc: any) => ({ label: qc.name, value: qc.id })),
+        events: {
+          onChange: (val: any) => {
+            updateHeaderField("QCUserDefined1", val, "Update");
+          }
+        }
       },
       QCUserDefined2: {
         id: 'QCUserDefined2',
@@ -212,6 +237,11 @@ export const TripForm: React.FC<TripFormProps> = ({
         order: 5,
         maxLength: 255,
         options: qcList2?.filter((qc: any) => qc.id).map((qc: any) => ({ label: qc.name, value: qc.id })),
+        events: {
+          onChange: (val: any) => {
+            updateHeaderField("QCUserDefined2", val, "Update");
+          }
+        }
       },
       QCUserDefined3: {
         id: 'QCUserDefined3',
@@ -225,6 +255,11 @@ export const TripForm: React.FC<TripFormProps> = ({
         order: 5,
         maxLength: 255,
         options: qcList3?.filter((qc: any) => qc.id).map((qc: any) => ({ label: qc.name, value: qc.id })),
+        events: {
+          onChange: (val: any) => {
+            updateHeaderField("QCUserDefined3", val, "Update");
+          }
+        }
       },
       Remarks1: {
         id: 'Remarks1',
@@ -238,6 +273,11 @@ export const TripForm: React.FC<TripFormProps> = ({
         order: 6,
         placeholder: 'Enter Remarks',
         maxLength: 500,
+        events: {
+          onChange: (val: string) => {
+            updateHeaderField("Remarks1", val, "Update");
+          }
+        }
       },
       Remarks2: {
         id: 'Remarks2',
@@ -251,6 +291,11 @@ export const TripForm: React.FC<TripFormProps> = ({
         order: 6,
         placeholder: 'Enter Remarks',
         maxLength: 500,
+        events: {
+          onChange: (val: string) => {
+            updateHeaderField("Remarks2", val, "Update");
+          }
+        }
       },
       Remarks3: {
         id: 'Remarks3',
@@ -264,6 +309,11 @@ export const TripForm: React.FC<TripFormProps> = ({
         order: 6,
         placeholder: 'Enter Remarks',
         maxLength: 500,
+        events: {
+          onChange: (val: string) => {
+            updateHeaderField("Remarks3", val, "Update");
+          }
+        }
       },
     };
   }, [tripType, qcList1, qcList2, qcList3, updateHeaderField]); // Dependencies for useMemo (removed tripData, formData)
@@ -322,15 +372,8 @@ export const TripForm: React.FC<TripFormProps> = ({
         panelTitle="Trip Details"
         panelConfig={tripExecutionPanelConfig} // Use the memoized config
         initialData={formData} // Pass local formData as initialData
-        // onDataChange={handleDataChange} // Re-enabled to allow data flow back
+        onDataChange={handleDataChange} // Re-enabled to allow data flow back
       />
-      {/* Debug JSON View */}
-      {/* <div className="mt-4 p-4 border rounded-md bg-gray-50">
-        <h3 className="font-medium mb-2">TripForm Data (formData)</h3>
-        <pre className="text-xs bg-muted p-3 rounded-md overflow-auto max-h-[300px]">
-          {JSON.stringify(formData, null, 2)} // Display formData
-        </pre>
-      </div> */}
     </>
   );
 };
