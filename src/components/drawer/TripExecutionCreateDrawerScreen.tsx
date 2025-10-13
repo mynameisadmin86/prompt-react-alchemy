@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, ChevronDown, ChevronUp, Plus, User, FileText, MapPin, Truck, Package, Calendar, Info, Trash2, RefreshCw, Send, AlertCircle, Download, Filter, CheckSquare, MoreVertical, Container, Box, Boxes, Search, Clock } from 'lucide-react';
+import { X, ChevronDown, ChevronUp, Plus, User, FileText, MapPin, Truck, Package, Calendar, Info, Trash2, RefreshCw, Send, AlertCircle, Download, Filter, CheckSquare, MoreVertical, Container, Box, Boxes, Search, Clock, PackageCheck, FileEdit } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -11,6 +11,7 @@ import { cn } from '@/lib/utils';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Card } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useTripExecutionDrawerStore } from '@/stores/tripExecutionDrawerStore';
 import { toast } from 'sonner';
@@ -538,47 +539,173 @@ export const TripExecutionCreateDrawerScreen: React.FC<TripExecutionCreateDrawer
           </TabsContent>
 
           <TabsContent value="transshipment" className="flex-1 flex flex-col m-0">
-            {/* Transshipment Header */}
-            <div className="px-6 py-4 border-b">
-              <div className="flex items-center justify-between">
-                <h2 className="text-lg font-semibold">Transshipment Details - {selectedLeg.from} to {selectedLeg.to}</h2>
-              </div>
-            </div>
-
             {/* Transshipment Content */}
-            <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
-              {/* Transshipments Grid */}
-              <div className="grid gap-4">
-                {selectedLeg.transshipments.map((transshipment) => (
-                  <div key={transshipment.id} className="border rounded-lg bg-card p-4">
-                    <div className="flex items-start justify-between">
-                      <div className="space-y-2">
-                        <div>
-                          <div className="text-xs text-muted-foreground">Transshipment Point</div>
-                          <div className="font-semibold">{transshipment.location}</div>
-                        </div>
-                        <div className="flex items-center gap-4">
-                          <div>
-                            <div className="text-xs text-muted-foreground">Planned Date</div>
-                            <div className="text-sm">{transshipment.plannedDate}</div>
-                          </div>
-                          <div>
-                            <div className="text-xs text-muted-foreground">Planned Time</div>
-                            <div className="text-sm">{transshipment.plannedTime}</div>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Badge variant={transshipment.status === 'completed' ? 'default' : 'secondary'}>
-                          {transshipment.status}
-                        </Badge>
-                        <Button size="sm" variant="ghost" className="h-7 text-xs">
-                          Edit
-                        </Button>
-                      </div>
+            <div className="flex-1 overflow-y-auto px-6 py-4 space-y-6">
+              {/* Header */}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <h3 className="text-lg font-semibold">Transshipment Details</h3>
+                  <Badge variant="secondary" className="h-6 px-2">
+                    {selectedLeg.transshipments.length}
+                  </Badge>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button size="sm" className="h-8">
+                    <Plus className="h-4 w-4 mr-1" />
+                    Add New
+                  </Button>
+                  <Button size="sm" variant="ghost" className="h-8 w-8 p-0">
+                    <ChevronDown className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+
+              {/* CO Selection */}
+              <div className="flex items-center gap-4 p-4 bg-muted/30 rounded-lg">
+                <Select defaultValue="CN000000001">
+                  <SelectTrigger className="w-[200px] h-9">
+                    <SelectValue placeholder="Select CO" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="CN000000001">CN000000001</SelectItem>
+                    <SelectItem value="CN000000002">CN000000002</SelectItem>
+                  </SelectContent>
+                </Select>
+                <div className="flex items-center space-x-2">
+                  <Checkbox id="pickup-complete" />
+                  <Label htmlFor="pickup-complete" className="text-sm font-normal cursor-pointer">
+                    Pickup Complete for this CO
+                  </Label>
+                </div>
+              </div>
+
+              {/* Summary Cards */}
+              <div className="grid grid-cols-4 gap-4">
+                <Card className="p-4">
+                  <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-lg bg-blue-500/10 flex items-center justify-center">
+                      <Truck className="h-5 w-5 text-blue-500" />
+                    </div>
+                    <div>
+                      <div className="text-2xl font-bold">12 Nos</div>
+                      <div className="text-xs text-muted-foreground">Wagon Quantity</div>
                     </div>
                   </div>
-                ))}
+                </Card>
+                <Card className="p-4">
+                  <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-lg bg-purple-500/10 flex items-center justify-center">
+                      <Package className="h-5 w-5 text-purple-500" />
+                    </div>
+                    <div>
+                      <div className="text-2xl font-bold">12 Nos</div>
+                      <div className="text-xs text-muted-foreground">Container Quantity</div>
+                    </div>
+                  </div>
+                </Card>
+                <Card className="p-4">
+                  <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-lg bg-pink-500/10 flex items-center justify-center">
+                      <Box className="h-5 w-5 text-pink-500" />
+                    </div>
+                    <div>
+                      <div className="text-2xl font-bold">23 Ton</div>
+                      <div className="text-xs text-muted-foreground">Product Weight</div>
+                    </div>
+                  </div>
+                </Card>
+                <Card className="p-4">
+                  <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-lg bg-cyan-500/10 flex items-center justify-center">
+                      <PackageCheck className="h-5 w-5 text-cyan-500" />
+                    </div>
+                    <div>
+                      <div className="text-2xl font-bold">10 Nos</div>
+                      <div className="text-xs text-muted-foreground">THU Quantity</div>
+                    </div>
+                  </div>
+                </Card>
+              </div>
+
+              {/* Transshipment List */}
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h4 className="font-semibold">Transshipment List</h4>
+                  <div className="flex items-center gap-2">
+                    <div className="relative">
+                      <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                      <Input placeholder="Search" className="pl-8 h-9 w-[200px]" />
+                    </div>
+                    <Button size="sm" variant="outline" className="h-9 w-9 p-0">
+                      <Download className="h-4 w-4" />
+                    </Button>
+                    <Button size="sm" variant="outline" className="h-9 w-9 p-0">
+                      <Filter className="h-4 w-4" />
+                    </Button>
+                    <Button size="sm" variant="outline" className="h-9 w-9 p-0">
+                      <FileEdit className="h-4 w-4" />
+                    </Button>
+                    <Button size="sm" variant="outline" className="h-9 w-9 p-0">
+                      <MoreVertical className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Table */}
+                <div className="border rounded-lg overflow-hidden">
+                  <Table>
+                    <TableHeader>
+                      <TableRow className="bg-muted/50">
+                        <TableHead className="w-[180px]">Wagon ID Type</TableHead>
+                        <TableHead className="w-[180px]">Container ID Type</TableHead>
+                        <TableHead className="w-[120px]">Hazardous Goods</TableHead>
+                        <TableHead className="w-[240px]">Departure and Arrival</TableHead>
+                        <TableHead className="w-[200px]">Plan From & To Date</TableHead>
+                        <TableHead className="w-[120px]">Price</TableHead>
+                        <TableHead className="w-[120px]">Draft Bill</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {selectedLeg.transshipments.map((transshipment) => (
+                        <TableRow key={transshipment.id}>
+                          <TableCell>
+                            <div>
+                              <div className="font-medium text-blue-600">WAG00000001</div>
+                              <div className="text-xs text-muted-foreground">Habbins</div>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div>
+                              <div className="font-medium">CONT100001</div>
+                              <div className="text-xs text-muted-foreground">Container A</div>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center justify-center">
+                              <Badge variant="outline" className="h-6 w-6 p-0 rounded-full flex items-center justify-center border-orange-500 text-orange-500">
+                                <AlertCircle className="h-4 w-4" />
+                              </Badge>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="text-sm">Frankfurt Station A - Frankfurt Station B</div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="text-sm">12-Mar-2025 to 12-Mar-2025</div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="font-medium">€ 1395.00</div>
+                          </TableCell>
+                          <TableCell>
+                            <Button variant="link" className="h-auto p-0 text-blue-600">
+                              DB/000234
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
               </div>
             </div>
           </TabsContent>
