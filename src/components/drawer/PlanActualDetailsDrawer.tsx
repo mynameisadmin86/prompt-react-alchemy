@@ -570,16 +570,22 @@ export const PlanActualDetailsDrawer: React.FC<PlanActualDetailsDrawerProps> = (
                 title="Wagon Details"
                 config={[
                   {
-                    fieldType: 'select',
+                    fieldType: 'lazyselect',
                     key: 'wagonType',
                     label: 'Wagon Type',
-                    options: [
-                      { label: 'Habbins', value: 'habbins' },
-                      { label: 'Zaccs', value: 'zaccs' },
-                      { label: 'A Type Wagon', value: 'a-type' },
-                      { label: 'Closed Wagon', value: 'closed' },
-                    ],
-                    onChange: (value) => updateActualsData({ wagonType: value }),
+                    fetchOptions: async ({ searchTerm, offset, limit }) => {
+                      const allOptions = [
+                        { label: 'Habbins', value: 'habbins' },
+                        { label: 'Zaccs', value: 'zaccs' },
+                        { label: 'A Type Wagon', value: 'a-type' },
+                        { label: 'Closed Wagon', value: 'closed' },
+                      ];
+                      const filtered = searchTerm
+                        ? allOptions.filter(opt => opt.label.toLowerCase().includes(searchTerm.toLowerCase()))
+                        : allOptions;
+                      return filtered.slice(offset, offset + limit);
+                    },
+                    onChange: (selected) => updateActualsData({ wagonType: selected?.value }),
                   },
                   {
                     fieldType: 'search',
