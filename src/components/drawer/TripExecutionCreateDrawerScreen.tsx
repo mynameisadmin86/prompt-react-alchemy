@@ -1183,6 +1183,12 @@ export const TripExecutionCreateDrawerScreen: React.FC<TripExecutionCreateDrawer
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Plan and Actual Details Drawer */}
+      <PlanActualDetailsDrawer 
+        isOpen={showPlanActualDrawer}
+        onClose={() => setShowPlanActualDrawer(false)}
+      />
     </>
   );
 };
