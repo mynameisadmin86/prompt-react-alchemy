@@ -12,6 +12,8 @@ import { Card } from '@/components/ui/card';
 import { Search, Package, Settings, ExternalLink, Home, ChevronRight, CalendarIcon, MapPin, Building2, Users, Truck, Calendar as CalendarIcon2, Box, UserCog, Car, UserCircle, Plus } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
+import { SmartGrid } from '@/components/SmartGrid';
+import type { GridColumnConfig } from '@/types/smartgrid';
 
 const TripPlanning = () => {
   const [tripNo, setTripNo] = useState('');
@@ -28,8 +30,65 @@ const TripPlanning = () => {
   const [departureLocation, setDepartureLocation] = useState('Berlin Central Station');
   const [arrivalCode, setArrivalCode] = useState('52115');
   const [arrivalLocation, setArrivalLocation] = useState('Frankfurt Station');
+  const [selectedOrders, setSelectedOrders] = useState<Set<number>>(new Set());
 
   const isWagonContainer = tripType === 'Wagon/Container Movement';
+
+  // Customer Orders Grid Configuration
+  const customerOrdersColumns: GridColumnConfig[] = [
+    { key: 'orderNo', label: 'Order No.', type: 'Text', width: 150, editable: false },
+    { key: 'customerName', label: 'Customer Name', type: 'Text', width: 200, editable: false },
+    { key: 'orderDate', label: 'Order Date', type: 'Date', width: 150, editable: false },
+    { key: 'deliveryDate', label: 'Delivery Date', type: 'Date', width: 150, editable: false },
+    { key: 'origin', label: 'Origin', type: 'Text', width: 180, editable: false },
+    { key: 'destination', label: 'Destination', type: 'Text', width: 180, editable: false },
+    { key: 'weight', label: 'Weight (kg)', type: 'Text', width: 120, editable: false },
+    { key: 'volume', label: 'Volume (m³)', type: 'Text', width: 120, editable: false },
+    { key: 'status', label: 'Status', type: 'Badge', width: 120, editable: false, statusMap: {
+      'Confirmed': 'bg-green-100 text-green-800',
+      'Pending': 'bg-yellow-100 text-yellow-800',
+      'In Transit': 'bg-blue-100 text-blue-800',
+    }},
+  ];
+
+  const customerOrdersData = [
+    {
+      id: '1',
+      orderNo: 'ORD-2023-001',
+      customerName: 'Acme Corp',
+      orderDate: '2023-10-01',
+      deliveryDate: '2023-10-15',
+      origin: 'Berlin Central Station',
+      destination: 'Frankfurt Station',
+      weight: 1500,
+      volume: 12.5,
+      status: 'Confirmed',
+    },
+    {
+      id: '2',
+      orderNo: 'ORD-2023-002',
+      customerName: 'Global Logistics GmbH',
+      orderDate: '2023-10-02',
+      deliveryDate: '2023-10-16',
+      origin: 'Hamburg Port',
+      destination: 'Munich Hub',
+      weight: 2300,
+      volume: 18.2,
+      status: 'Pending',
+    },
+    {
+      id: '3',
+      orderNo: 'ORD-2023-003',
+      customerName: 'Express Shipping Ltd',
+      orderDate: '2023-10-03',
+      deliveryDate: '2023-10-14',
+      origin: 'Cologne Station',
+      destination: 'Stuttgart Center',
+      weight: 890,
+      volume: 7.8,
+      status: 'In Transit',
+    },
+  ];
 
   return (
     <div className="min-h-screen bg-background">
@@ -160,7 +219,6 @@ const TripPlanning = () => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="Normal Trip">Normal Trip</SelectItem>
-                  <SelectItem value="Express Trip">Express Trip</SelectItem>
                   <SelectItem value="Wagon/Container Movement">Wagon/Container Movement</SelectItem>
                 </SelectContent>
               </Select>
@@ -408,33 +466,21 @@ const TripPlanning = () => {
               </div>
             </div>
 
-            {/* Empty State */}
-            <div className="flex flex-col items-center justify-center py-16 text-center">
-              <div className="relative mb-6">
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-8">
-                  <div className="flex gap-1">
-                    {[...Array(5)].map((_, i) => (
-                      <div 
-                        key={i} 
-                        className="h-1 w-6 bg-primary/20 rounded-full"
-                        style={{ 
-                          transform: `rotate(${(i - 2) * 15}deg) translateY(${Math.abs(i - 2) * 4}px)`,
-                          opacity: 1 - Math.abs(i - 2) * 0.2 
-                        }}
-                      />
-                    ))}
-                  </div>
-                </div>
-                <div className="relative">
-                  <div className="h-32 w-40 bg-gradient-to-br from-purple-400 via-purple-500 to-indigo-500 rounded-lg transform rotate-12 opacity-80" />
-                  <div className="absolute inset-0 h-32 w-40 bg-gradient-to-br from-purple-300 via-purple-400 to-indigo-400 rounded-lg transform -rotate-6" />
-                  <div className="absolute inset-0 h-32 w-40 bg-gradient-to-br from-purple-200 via-purple-300 to-indigo-300 rounded-lg" />
-                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-16 w-24 border-l-4 border-t-4 border-purple-400/50 rounded-tl-lg" />
-                </div>
-              </div>
-              <p className="text-muted-foreground max-w-md">
-                There are no customer orders to display. Please use the "search" to find orders.
-              </p>
+            {/* SmartGrid */}
+            <div className="mt-4">
+              <SmartGrid
+                columns={customerOrdersColumns}
+                data={customerOrdersData}
+                onUpdate={async (row) => {
+                  console.log('Data changed:', row);
+                }}
+                selectedRows={selectedOrders}
+                onSelectionChange={(rows) => {
+                  setSelectedOrders(rows);
+                  console.log('Selection changed:', rows);
+                }}
+                paginationMode="pagination"
+              />
             </div>
           </div>
         )}
