@@ -77,6 +77,13 @@ const Index = () => {
       color: "text-cyan-600"
     },
     {
+      title: "Trip Planning",
+      description: "Trip planning interface with customer orders and planning details management",
+      icon: Search,
+      path: "/trip-planning",
+      color: "text-blue-500"
+    },
+    {
       title: "Trip Execution",
       description: "Trip execution workflow with status tracking and approval processes",
       icon: Workflow,
