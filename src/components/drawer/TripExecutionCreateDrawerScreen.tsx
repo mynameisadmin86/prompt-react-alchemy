@@ -17,6 +17,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { useTripExecutionDrawerStore } from '@/stores/tripExecutionDrawerStore';
 import { toast } from 'sonner';
 import { PlanActualDetailsDrawer } from './PlanActualDetailsDrawer';
+import { SmartGrid } from '@/components/SmartGrid';
+import type { GridColumnConfig } from '@/types/smartgrid';
 
 interface TripExecutionCreateDrawerScreenProps {
   onClose: () => void;
@@ -39,6 +41,107 @@ interface AdditionalActivity {
     reasonForChanges: string;
   };
 }
+
+// Consignment Grid Configurations
+const plannedColumns: GridColumnConfig[] = [
+  { key: 'wagonId', label: 'Wagon ID', type: 'Text', width: 120, editable: false },
+  { key: 'wagonType', label: 'Wagon Type', type: 'Text', width: 120, editable: false },
+  { key: 'containerId', label: 'Container ID', type: 'Text', width: 120, editable: false },
+  { key: 'containerType', label: 'Container Type', type: 'Text', width: 120, editable: false },
+  { key: 'hazardous', label: 'Hazardous Goods', type: 'Badge', width: 120, editable: false, statusMap: {
+    'Yes': 'bg-orange-100 text-orange-600 border-orange-200',
+    'No': 'bg-gray-100 text-gray-600',
+  }},
+  { key: 'route', label: 'Departure and Arrival', type: 'Text', width: 250, editable: false },
+  { key: 'planDates', label: 'Plan From & To Date', type: 'Text', width: 180, editable: false },
+  { key: 'price', label: 'Price', type: 'Text', width: 120, editable: false },
+];
+
+const actualsColumns: GridColumnConfig[] = [
+  { key: 'wagonId', label: 'Wagon ID', type: 'Text', width: 120, editable: false },
+  { key: 'wagonType', label: 'Wagon Type', type: 'Text', width: 120, editable: false },
+  { key: 'containerId', label: 'Container ID', type: 'Text', width: 120, editable: false },
+  { key: 'containerType', label: 'Container Type', type: 'Text', width: 120, editable: false },
+  { key: 'hazardous', label: 'Hazardous Goods', type: 'Badge', width: 120, editable: false, statusMap: {
+    'Yes': 'bg-orange-100 text-orange-600 border-orange-200',
+    'No': 'bg-gray-100 text-gray-600',
+  }},
+  { key: 'route', label: 'Departure and Arrival', type: 'Text', width: 250, editable: false },
+  { key: 'actualDates', label: 'Actual From & To Date', type: 'Text', width: 180, editable: false },
+  { key: 'price', label: 'Price', type: 'Text', width: 120, editable: false },
+];
+
+const plannedData = [
+  {
+    id: '1',
+    wagonId: 'WAG00000001',
+    wagonType: 'Habbins',
+    containerId: 'CONT100001',
+    containerType: 'Container A',
+    hazardous: 'No',
+    route: 'Frankfurt Station A - Frankfurt Station B',
+    planDates: '12-Mar-2025 to 12-Mar-2025',
+    price: '€ 1395.00',
+  },
+  {
+    id: '2',
+    wagonId: 'WAG00000002',
+    wagonType: 'Habbins',
+    containerId: 'CONT100002',
+    containerType: 'Container A',
+    hazardous: 'Yes',
+    route: 'Frankfurt Station A - Frankfurt Station B',
+    planDates: '12-Mar-2025 to 12-Mar-2025',
+    price: '€ 1395.00',
+  },
+  {
+    id: '3',
+    wagonId: 'WAG00000003',
+    wagonType: 'Habbins',
+    containerId: 'CONT100003',
+    containerType: 'Container A',
+    hazardous: 'Yes',
+    route: 'Frankfurt Station A - Frankfurt Station B',
+    planDates: '12-Mar-2025 to 12-Mar-2025',
+    price: '€ 1395.00',
+  },
+];
+
+const actualsData = [
+  {
+    id: '1',
+    wagonId: 'WAG00000001',
+    wagonType: 'Habbins',
+    containerId: 'CONT100001',
+    containerType: 'Container A',
+    hazardous: 'No',
+    route: 'Frankfurt Station A - Frankfurt Station B',
+    actualDates: '12-Mar-2025 to 12-Mar-2025',
+    price: '€ 1395.00',
+  },
+  {
+    id: '2',
+    wagonId: 'WAG00000002',
+    wagonType: 'Habbins',
+    containerId: 'CONT100002',
+    containerType: 'Container A',
+    hazardous: 'Yes',
+    route: 'Frankfurt Station A - Frankfurt Station B',
+    actualDates: '12-Mar-2025 to 12-Mar-2025',
+    price: '€ 1395.00',
+  },
+  {
+    id: '3',
+    wagonId: 'WAG00000003',
+    wagonType: 'Habbins',
+    containerId: 'CONT100003',
+    containerType: 'Container A',
+    hazardous: 'Yes',
+    route: 'Frankfurt Station A - Frankfurt Station B',
+    actualDates: '12-Mar-2025 to 12-Mar-2025',
+    price: '€ 1395.00',
+  },
+];
 
 export const TripExecutionCreateDrawerScreen: React.FC<TripExecutionCreateDrawerScreenProps> = ({
   onClose,
@@ -637,124 +740,16 @@ export const TripExecutionCreateDrawerScreen: React.FC<TripExecutionCreateDrawer
 
                       {/* Plan List */}
                       <div className="space-y-4">
-                        <div className="flex items-center justify-between">
-                          <h5 className="font-semibold">Plan List</h5>
-                          <div className="flex items-center gap-2">
-                            <div className="relative">
-                              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                              <Input placeholder="Search" className="pl-8 h-9 w-[200px]" />
-                            </div>
-                            <Button size="sm" variant="outline" className="h-9 w-9 p-0">
-                              <Download className="h-4 w-4" />
-                            </Button>
-                            <Button size="sm" variant="outline" className="h-9 w-9 p-0">
-                              <Filter className="h-4 w-4" />
-                            </Button>
-                            <Button size="sm" variant="outline" className="h-9 w-9 p-0">
-                              <FileEdit className="h-4 w-4" />
-                            </Button>
-                            <Button size="sm" variant="outline" className="h-9 w-9 p-0">
-                              <MoreVertical className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </div>
-
-                        {/* Table */}
-                        <div className="border rounded-lg overflow-hidden">
-                          <Table>
-                            <TableHeader>
-                              <TableRow className="bg-muted/50">
-                                <TableHead className="w-[150px]">Wagon ID Type</TableHead>
-                                <TableHead className="w-[150px]">Container ID Type</TableHead>
-                                <TableHead className="w-[120px]">Hazardous Goods</TableHead>
-                                <TableHead className="w-[280px]">Departure and Arrival</TableHead>
-                                <TableHead className="w-[200px]">Plan From & To Date</TableHead>
-                                <TableHead className="w-[120px]">Price</TableHead>
-                                <TableHead className="w-[50px]"></TableHead>
-                              </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                              {[1, 2, 3].map((item) => (
-                                <TableRow key={item}>
-                                  <TableCell>
-                                    <div>
-                                      <div className="font-medium text-blue-600">WAG00000001</div>
-                                      <div className="text-xs text-muted-foreground">Habbins</div>
-                                    </div>
-                                  </TableCell>
-                                  <TableCell>
-                                    <div>
-                                      <div className="font-medium">CONT100001</div>
-                                      <div className="text-xs text-muted-foreground">Container A</div>
-                                    </div>
-                                  </TableCell>
-                                  <TableCell>
-                                    <div className="flex items-center justify-center">
-                                      {item > 1 ? (
-                                        <Badge variant="outline" className="h-6 w-6 p-0 rounded-full flex items-center justify-center border-orange-500 text-orange-500">
-                                          <AlertCircle className="h-4 w-4" />
-                                        </Badge>
-                                      ) : (
-                                        <span className="text-muted-foreground">-</span>
-                                      )}
-                                    </div>
-                                  </TableCell>
-                                  <TableCell>
-                                    <div className="text-sm">Frankfurt Station A - Frankfurt Station B</div>
-                                  </TableCell>
-                                  <TableCell>
-                                    <div className="text-sm">12-Mar-2025 to 12-Mar-2025</div>
-                                  </TableCell>
-                                  <TableCell>
-                                    <div className="font-medium">€ 1395.00</div>
-                                  </TableCell>
-                                  <TableCell>
-                                    <Button size="sm" variant="ghost" className="h-8 w-8 p-0">
-                                      <MoreVertical className="h-4 w-4" />
-                                    </Button>
-                                  </TableCell>
-                                </TableRow>
-                              ))}
-                            </TableBody>
-                          </Table>
-                        </div>
-
-                        {/* Pagination */}
-                        <div className="flex items-center justify-center gap-1">
-                          <Button size="sm" variant="outline" className="h-8 w-8 p-0">
-                            <ChevronDown className="h-4 w-4 rotate-90" />
-                            <ChevronDown className="h-4 w-4 rotate-90 -ml-2" />
-                          </Button>
-                          <Button size="sm" variant="outline" className="h-8 w-8 p-0">
-                            <ChevronDown className="h-4 w-4 rotate-90" />
-                          </Button>
-                          {[1, 2, 3, 4, 5].map((page) => (
-                            <Button
-                              key={page}
-                              size="sm"
-                              variant={currentPage === page ? "default" : "outline"}
-                              className="h-8 w-8 p-0"
-                              onClick={() => setCurrentPage(page)}
-                            >
-                              {page}
-                            </Button>
-                          ))}
-                          <span className="text-sm text-muted-foreground px-2">...</span>
-                          <Button size="sm" variant="outline" className="h-8 w-8 p-0">
-                            10
-                          </Button>
-                          <Button size="sm" variant="outline" className="h-8 w-8 p-0">
-                            <ChevronDown className="h-4 w-4 -rotate-90" />
-                          </Button>
-                          <Button size="sm" variant="outline" className="h-8 w-8 p-0">
-                            <ChevronDown className="h-4 w-4 -rotate-90" />
-                            <ChevronDown className="h-4 w-4 -rotate-90 -ml-2" />
-                          </Button>
-                          <div className="flex items-center gap-2 ml-4">
-                            <span className="text-sm text-muted-foreground">Go to</span>
-                            <Input type="number" className="h-8 w-16 text-center" defaultValue="12" />
-                          </div>
-                        </div>
+                        <h5 className="font-semibold">Plan List</h5>
+                        
+                        <SmartGrid
+                          columns={plannedColumns}
+                          data={plannedData}
+                          onUpdate={async (row) => {
+                            console.log('Planned data updated:', row);
+                          }}
+                          paginationMode="pagination"
+                        />
                       </div>
                     </motion.div>
                   )}
@@ -838,87 +833,16 @@ export const TripExecutionCreateDrawerScreen: React.FC<TripExecutionCreateDrawer
 
                       {/* Actual List */}
                       <div className="space-y-4">
-                        <div className="flex items-center justify-between">
-                          <h5 className="font-semibold">Actual List</h5>
-                          <div className="flex items-center gap-2">
-                            <div className="relative">
-                              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                              <Input placeholder="Search" className="pl-8 h-9 w-[200px]" />
-                            </div>
-                            <Button size="sm" variant="outline" className="h-9 w-9 p-0">
-                              <Download className="h-4 w-4" />
-                            </Button>
-                            <Button size="sm" variant="outline" className="h-9 w-9 p-0">
-                              <Filter className="h-4 w-4" />
-                            </Button>
-                            <Button size="sm" variant="outline" className="h-9 w-9 p-0">
-                              <FileEdit className="h-4 w-4" />
-                            </Button>
-                            <Button size="sm" variant="outline" className="h-9 w-9 p-0">
-                              <MoreVertical className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </div>
-
-                        {/* Table */}
-                        <div className="border rounded-lg overflow-hidden">
-                          <Table>
-                            <TableHeader>
-                              <TableRow className="bg-muted/50">
-                                <TableHead className="w-[150px]">Wagon ID Type</TableHead>
-                                <TableHead className="w-[150px]">Container ID Type</TableHead>
-                                <TableHead className="w-[120px]">Hazardous Goods</TableHead>
-                                <TableHead className="w-[280px]">Departure and Arrival</TableHead>
-                                <TableHead className="w-[200px]">Plan From & To Date</TableHead>
-                                <TableHead className="w-[120px]">Price</TableHead>
-                                <TableHead className="w-[50px]"></TableHead>
-                              </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                              {[1, 2, 3].map((item) => (
-                                <TableRow key={item}>
-                                  <TableCell>
-                                    <div>
-                                      <div className="font-medium text-blue-600">WAG00000001</div>
-                                      <div className="text-xs text-muted-foreground">Habbins</div>
-                                    </div>
-                                  </TableCell>
-                                  <TableCell>
-                                    <div>
-                                      <div className="font-medium">CONT100001</div>
-                                      <div className="text-xs text-muted-foreground">Container A</div>
-                                    </div>
-                                  </TableCell>
-                                  <TableCell>
-                                    <div className="flex items-center justify-center">
-                                      {item > 1 ? (
-                                        <Badge variant="outline" className="h-6 w-6 p-0 rounded-full flex items-center justify-center border-orange-500 text-orange-500">
-                                          <AlertCircle className="h-4 w-4" />
-                                        </Badge>
-                                      ) : (
-                                        <span className="text-muted-foreground">-</span>
-                                      )}
-                                    </div>
-                                  </TableCell>
-                                  <TableCell>
-                                    <div className="text-sm">Frankfurt Station A - Frankfurt Station B</div>
-                                  </TableCell>
-                                  <TableCell>
-                                    <div className="text-sm">12-Mar-2025 to 12-Mar-2025</div>
-                                  </TableCell>
-                                  <TableCell>
-                                    <div className="font-medium">€ 1395.00</div>
-                                  </TableCell>
-                                  <TableCell>
-                                    <Button size="sm" variant="ghost" className="h-8 w-8 p-0">
-                                      <MoreVertical className="h-4 w-4" />
-                                    </Button>
-                                  </TableCell>
-                                </TableRow>
-                              ))}
-                            </TableBody>
-                          </Table>
-                        </div>
+                        <h5 className="font-semibold">Actual List</h5>
+                        
+                        <SmartGrid
+                          columns={actualsColumns}
+                          data={actualsData}
+                          onUpdate={async (row) => {
+                            console.log('Actuals data updated:', row);
+                          }}
+                          paginationMode="pagination"
+                        />
                       </div>
                     </motion.div>
                   )}
