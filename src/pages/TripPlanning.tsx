@@ -6,7 +6,10 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Search, Package, Settings, ExternalLink, Home, ChevronRight, CalendarIcon } from 'lucide-react';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Label } from '@/components/ui/label';
+import { Card } from '@/components/ui/card';
+import { Search, Package, Settings, ExternalLink, Home, ChevronRight, CalendarIcon, MapPin, Building2, Users, Truck, Calendar as CalendarIcon2, Box, UserCog, Car, UserCircle, Plus } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 
@@ -18,6 +21,15 @@ const TripPlanning = () => {
   const [planDate, setPlanDate] = useState<Date>(new Date(2023, 9, 12));
   const [requestSupplier, setRequestSupplier] = useState(false);
   const [customerOrderSearch, setCustomerOrderSearch] = useState('');
+  const [referenceDocType, setReferenceDocType] = useState('');
+  const [referenceDocNo, setReferenceDocNo] = useState('');
+  const [transportMode, setTransportMode] = useState('rail');
+  const [departureCode, setDepartureCode] = useState('234315');
+  const [departureLocation, setDepartureLocation] = useState('Berlin Central Station');
+  const [arrivalCode, setArrivalCode] = useState('52115');
+  const [arrivalLocation, setArrivalLocation] = useState('Frankfurt Station');
+
+  const isWagonContainer = tripType === 'Wagon/Container Movement';
 
   return (
     <div className="min-h-screen bg-background">
@@ -149,6 +161,7 @@ const TripPlanning = () => {
                 <SelectContent>
                   <SelectItem value="Normal Trip">Normal Trip</SelectItem>
                   <SelectItem value="Express Trip">Express Trip</SelectItem>
+                  <SelectItem value="Wagon/Container Movement">Wagon/Container Movement</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -180,6 +193,51 @@ const TripPlanning = () => {
             </div>
           </div>
 
+          {isWagonContainer && (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Reference Doc. Type</label>
+                <Select value={referenceDocType} onValueChange={setReferenceDocType}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select Reference Doc. Type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="PO">Purchase Order</SelectItem>
+                    <SelectItem value="SO">Sales Order</SelectItem>
+                    <SelectItem value="DO">Delivery Order</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Reference Doc. No.</label>
+                <div className="relative">
+                  <Input 
+                    placeholder="Enter Reference Doc. No."
+                    value={referenceDocNo}
+                    onChange={(e) => setReferenceDocNo(e.target.value)}
+                    className="pr-10"
+                  />
+                  <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Transport Mode</label>
+                <RadioGroup value={transportMode} onValueChange={setTransportMode} className="flex items-center gap-6 h-10">
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="rail" id="rail" />
+                    <Label htmlFor="rail" className="cursor-pointer">Rail</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="road" id="road" />
+                    <Label htmlFor="road" className="cursor-pointer">Road</Label>
+                  </div>
+                </RadioGroup>
+              </div>
+            </div>
+          )}
+
           <div className="flex items-center gap-2 mt-4">
             <Checkbox 
               id="request-supplier"
@@ -195,72 +253,191 @@ const TripPlanning = () => {
           </div>
         </div>
 
-        {/* Customer Orders Card */}
-        <div className="bg-card border border-border rounded-lg p-6">
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                <Package className="h-5 w-5 text-primary" />
+        {/* Conditional Content Based on Trip Type */}
+        {isWagonContainer ? (
+          <div className="flex gap-6">
+            {/* Address Details Section - Left */}
+            <div className="flex-1 bg-card border border-border rounded-lg p-6">
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-lg bg-purple-100 flex items-center justify-center">
+                    <Building2 className="h-5 w-5 text-purple-600" />
+                  </div>
+                  <h2 className="text-lg font-medium">Address Details</h2>
+                </div>
+                <Button variant="ghost" size="icon">
+                  <ExternalLink className="h-4 w-4" />
+                </Button>
               </div>
-              <div className="flex items-center gap-2">
-                <h2 className="text-lg font-medium">Customer Orders</h2>
-                <Badge variant="secondary" className="rounded-full">0</Badge>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input 
-                  placeholder="Search"
-                  value={customerOrderSearch}
-                  onChange={(e) => setCustomerOrderSearch(e.target.value)}
-                  className="pl-9 w-64"
-                />
-              </div>
-              <Button variant="ghost" size="icon">
-                <Settings className="h-5 w-5" />
-              </Button>
-              <Button variant="ghost" size="icon">
-                <Search className="h-5 w-5" />
-              </Button>
-              <Button variant="ghost" size="icon">
-                <ExternalLink className="h-5 w-5" />
-              </Button>
-              <Button variant="ghost" size="icon">
-                <Settings className="h-5 w-5" />
-              </Button>
-            </div>
-          </div>
 
-          {/* Empty State */}
-          <div className="flex flex-col items-center justify-center py-16 text-center">
-            <div className="relative mb-6">
-              <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-8">
-                <div className="flex gap-1">
-                  {[...Array(5)].map((_, i) => (
-                    <div 
-                      key={i} 
-                      className="h-1 w-6 bg-primary/20 rounded-full"
-                      style={{ 
-                        transform: `rotate(${(i - 2) * 15}deg) translateY(${Math.abs(i - 2) * 4}px)`,
-                        opacity: 1 - Math.abs(i - 2) * 0.2 
-                      }}
-                    />
-                  ))}
+              <div className="grid grid-cols-2 gap-6">
+                {/* Departure */}
+                <div className="space-y-4 bg-blue-50/50 p-4 rounded-lg">
+                  <h3 className="font-medium text-sm">Departure</h3>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Departure *</label>
+                    <div className="relative">
+                      <Input 
+                        value={`${departureCode} | ${departureLocation}`}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          const parts = value.split('|');
+                          setDepartureCode(parts[0]?.trim() || '');
+                          setDepartureLocation(parts[1]?.trim() || '');
+                        }}
+                        className="pr-10"
+                      />
+                      <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-2 bg-white p-3 rounded border border-border">
+                    <MapPin className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+                    <div className="text-sm">
+                      <p className="font-medium">Berlin Central Station - Europaplatz 1, 10557</p>
+                      <p className="text-muted-foreground">Berlin, Germany</p>
+                    </div>
+                    <Button variant="ghost" size="icon" className="ml-auto flex-shrink-0">
+                      <ExternalLink className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Arrival */}
+                <div className="space-y-4 bg-orange-50/50 p-4 rounded-lg">
+                  <h3 className="font-medium text-sm">Arrival</h3>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Arrival *</label>
+                    <div className="relative">
+                      <Input 
+                        value={`${arrivalCode} | ${arrivalLocation}`}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          const parts = value.split('|');
+                          setArrivalCode(parts[0]?.trim() || '');
+                          setArrivalLocation(parts[1]?.trim() || '');
+                        }}
+                        className="pr-10"
+                      />
+                      <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-2 bg-white p-3 rounded border border-border">
+                    <Building2 className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+                    <div className="text-sm">
+                      <p className="font-medium">Hauptbahnhof, 60329 Frankfurt am Main,</p>
+                      <p className="text-muted-foreground">Germany</p>
+                    </div>
+                    <Button variant="ghost" size="icon" className="ml-auto flex-shrink-0">
+                      <ExternalLink className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
               </div>
-              <div className="relative">
-                <div className="h-32 w-40 bg-gradient-to-br from-purple-400 via-purple-500 to-indigo-500 rounded-lg transform rotate-12 opacity-80" />
-                <div className="absolute inset-0 h-32 w-40 bg-gradient-to-br from-purple-300 via-purple-400 to-indigo-400 rounded-lg transform -rotate-6" />
-                <div className="absolute inset-0 h-32 w-40 bg-gradient-to-br from-purple-200 via-purple-300 to-indigo-300 rounded-lg" />
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-16 w-24 border-l-4 border-t-4 border-purple-400/50 rounded-tl-lg" />
+            </div>
+
+            {/* Resources Cards - Right */}
+            <div className="w-80 space-y-3">
+              {[
+                { title: 'Resources', subtitle: 'Selected Resources', icon: Users, color: 'bg-pink-100', iconColor: 'text-pink-600' },
+                { title: 'Supplier', icon: Truck, color: 'bg-cyan-100', iconColor: 'text-cyan-600' },
+                { title: 'Schedule', icon: CalendarIcon2, color: 'bg-lime-100', iconColor: 'text-lime-600' },
+                { title: 'Equipment', icon: Box, color: 'bg-red-100', iconColor: 'text-red-600' },
+                { title: 'Handler', icon: UserCog, color: 'bg-orange-100', iconColor: 'text-orange-600' },
+                { title: 'Vehicle', icon: Car, color: 'bg-amber-100', iconColor: 'text-amber-600' },
+                { title: 'Driver', icon: UserCircle, color: 'bg-indigo-100', iconColor: 'text-indigo-600' },
+              ].map((resource) => {
+                const Icon = resource.icon;
+                return (
+                  <Card key={resource.title} className="p-4 hover:shadow-md transition-shadow cursor-pointer">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className={cn("h-10 w-10 rounded-lg flex items-center justify-center", resource.color)}>
+                          <Icon className={cn("h-5 w-5", resource.iconColor)} />
+                        </div>
+                        <div>
+                          <h3 className="font-medium text-sm">{resource.title}</h3>
+                          {resource.subtitle && (
+                            <p className="text-xs text-muted-foreground">{resource.subtitle}</p>
+                          )}
+                        </div>
+                      </div>
+                      <Button variant="ghost" size="icon">
+                        <Plus className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </Card>
+                );
+              })}
+            </div>
+          </div>
+        ) : (
+          /* Customer Orders Card - Default */
+          <div className="bg-card border border-border rounded-lg p-6">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <Package className="h-5 w-5 text-primary" />
+                </div>
+                <div className="flex items-center gap-2">
+                  <h2 className="text-lg font-medium">Customer Orders</h2>
+                  <Badge variant="secondary" className="rounded-full">0</Badge>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input 
+                    placeholder="Search"
+                    value={customerOrderSearch}
+                    onChange={(e) => setCustomerOrderSearch(e.target.value)}
+                    className="pl-9 w-64"
+                  />
+                </div>
+                <Button variant="ghost" size="icon">
+                  <Settings className="h-5 w-5" />
+                </Button>
+                <Button variant="ghost" size="icon">
+                  <Search className="h-5 w-5" />
+                </Button>
+                <Button variant="ghost" size="icon">
+                  <ExternalLink className="h-5 w-5" />
+                </Button>
+                <Button variant="ghost" size="icon">
+                  <Settings className="h-5 w-5" />
+                </Button>
               </div>
             </div>
-            <p className="text-muted-foreground max-w-md">
-              There are no customer orders to display. Please use the "search" to find orders.
-            </p>
+
+            {/* Empty State */}
+            <div className="flex flex-col items-center justify-center py-16 text-center">
+              <div className="relative mb-6">
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-8">
+                  <div className="flex gap-1">
+                    {[...Array(5)].map((_, i) => (
+                      <div 
+                        key={i} 
+                        className="h-1 w-6 bg-primary/20 rounded-full"
+                        style={{ 
+                          transform: `rotate(${(i - 2) * 15}deg) translateY(${Math.abs(i - 2) * 4}px)`,
+                          opacity: 1 - Math.abs(i - 2) * 0.2 
+                        }}
+                      />
+                    ))}
+                  </div>
+                </div>
+                <div className="relative">
+                  <div className="h-32 w-40 bg-gradient-to-br from-purple-400 via-purple-500 to-indigo-500 rounded-lg transform rotate-12 opacity-80" />
+                  <div className="absolute inset-0 h-32 w-40 bg-gradient-to-br from-purple-300 via-purple-400 to-indigo-400 rounded-lg transform -rotate-6" />
+                  <div className="absolute inset-0 h-32 w-40 bg-gradient-to-br from-purple-200 via-purple-300 to-indigo-300 rounded-lg" />
+                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-16 w-24 border-l-4 border-t-4 border-purple-400/50 rounded-tl-lg" />
+                </div>
+              </div>
+              <p className="text-muted-foreground max-w-md">
+                There are no customer orders to display. Please use the "search" to find orders.
+              </p>
+            </div>
           </div>
-        </div>
+        )}
       </main>
     </div>
   );
