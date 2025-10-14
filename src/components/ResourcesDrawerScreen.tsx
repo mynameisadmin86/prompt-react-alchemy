@@ -2,11 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Plus, Search, Trash2, ArrowLeft, X } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
+import { DynamicLazySelect } from '@/components/DynamicPanel/DynamicLazySelect';
 
 interface FormData {
   carrier: string;
@@ -172,6 +172,79 @@ export const ResourcesDrawerScreen = ({ onClose }: { onClose?: () => void }) => 
     setSelectedResource(null);
   };
 
+  // Fetch functions for lazy select
+  const fetchCarrierOptions = async ({ searchTerm, offset, limit }: { searchTerm: string; offset: number; limit: number }) => {
+    const allOptions = [
+      { label: 'ABC Executive Agent', value: 'ABC Executive Agent' },
+      { label: 'DB Cargo Agent', value: 'DB Cargo Agent' },
+      { label: 'RAM Executive Agent', value: 'RAM Executive Agent' },
+    ];
+    const filtered = allOptions.filter(opt => 
+      opt.label.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    return filtered.slice(offset, offset + limit);
+  };
+
+  const fetchCarrierStatusOptions = async ({ searchTerm, offset, limit }: { searchTerm: string; offset: number; limit: number }) => {
+    const allOptions = [
+      { label: 'Inprogress', value: 'Inprogress' },
+      { label: 'Completed', value: 'Completed' },
+      { label: 'Pending', value: 'Pending' },
+    ];
+    const filtered = allOptions.filter(opt => 
+      opt.label.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    return filtered.slice(offset, offset + limit);
+  };
+
+  const fetchLegDetailsOptions = async ({ searchTerm, offset, limit }: { searchTerm: string; offset: number; limit: number }) => {
+    const allOptions = [
+      { label: '01 - Voila to Curtici', value: '01 - Voila to Curtici' },
+      { label: '02 - Curtici to Budapest', value: '02 - Curtici to Budapest' },
+      { label: '03 - Budapest to Vienna', value: '03 - Budapest to Vienna' },
+    ];
+    const filtered = allOptions.filter(opt => 
+      opt.label.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    return filtered.slice(offset, offset + limit);
+  };
+
+  const fetchServiceOptions = async ({ searchTerm, offset, limit }: { searchTerm: string; offset: number; limit: number }) => {
+    const allOptions = [
+      { label: 'Service 1', value: 'service1' },
+      { label: 'Service 2', value: 'service2' },
+      { label: 'Service 3', value: 'service3' },
+    ];
+    const filtered = allOptions.filter(opt => 
+      opt.label.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    return filtered.slice(offset, offset + limit);
+  };
+
+  const fetchSubServiceOptions = async ({ searchTerm, offset, limit }: { searchTerm: string; offset: number; limit: number }) => {
+    const allOptions = [
+      { label: 'Sub Service 1', value: 'sub1' },
+      { label: 'Sub Service 2', value: 'sub2' },
+      { label: 'Sub Service 3', value: 'sub3' },
+    ];
+    const filtered = allOptions.filter(opt => 
+      opt.label.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    return filtered.slice(offset, offset + limit);
+  };
+
+  const fetchReasonOptions = async ({ searchTerm, offset, limit }: { searchTerm: string; offset: number; limit: number }) => {
+    const allOptions = [
+      { label: 'Reason 1', value: 'reason1' },
+      { label: 'Reason 2', value: 'reason2' },
+      { label: 'Reason 3', value: 'reason3' },
+    ];
+    const filtered = allOptions.filter(opt => 
+      opt.label.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    return filtered.slice(offset, offset + limit);
+  };
+
   return (
     <div className="flex flex-col h-full">
       {/* Body */}
@@ -210,14 +283,12 @@ export const ResourcesDrawerScreen = ({ onClose }: { onClose?: () => void }) => 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Carrier (Executive Agent)</Label>
-                <Select value={formData.carrier} onValueChange={(value) => setFormData({ ...formData, carrier: value })}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="ABC Executive Agent">ABC Executive Agent</SelectItem>
-                  </SelectContent>
-                </Select>
+                <DynamicLazySelect
+                  fetchOptions={fetchCarrierOptions}
+                  value={formData.carrier}
+                  onChange={(value) => setFormData({ ...formData, carrier: (value as string) || '' })}
+                  placeholder="Select Carrier"
+                />
               </div>
               <div className="space-y-2">
                 <Label>Supplier</Label>
@@ -243,16 +314,12 @@ export const ResourcesDrawerScreen = ({ onClose }: { onClose?: () => void }) => 
               </div>
               <div className="space-y-2">
                 <Label>Carrier Status</Label>
-                <Select value={formData.carrierStatus} onValueChange={(value) => setFormData({ ...formData, carrierStatus: value })}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Inprogress">Inprogress</SelectItem>
-                    <SelectItem value="Completed">Completed</SelectItem>
-                    <SelectItem value="Pending">Pending</SelectItem>
-                  </SelectContent>
-                </Select>
+                <DynamicLazySelect
+                  fetchOptions={fetchCarrierStatusOptions}
+                  value={formData.carrierStatus}
+                  onChange={(value) => setFormData({ ...formData, carrierStatus: (value as string) || '' })}
+                  placeholder="Select Status"
+                />
               </div>
             </div>
 
@@ -291,14 +358,12 @@ export const ResourcesDrawerScreen = ({ onClose }: { onClose?: () => void }) => 
               </div>
               <div className="space-y-2">
                 <Label>Leg Details</Label>
-                <Select value={formData.legDetails} onValueChange={(value) => setFormData({ ...formData, legDetails: value })}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="01 - Voila to Curtici">01 - Voila to Curtici</SelectItem>
-                  </SelectContent>
-                </Select>
+                <DynamicLazySelect
+                  fetchOptions={fetchLegDetailsOptions}
+                  value={formData.legDetails}
+                  onChange={(value) => setFormData({ ...formData, legDetails: (value as string) || '' })}
+                  placeholder="Select Leg Details"
+                />
               </div>
             </div>
 
@@ -330,27 +395,21 @@ export const ResourcesDrawerScreen = ({ onClose }: { onClose?: () => void }) => 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Service</Label>
-                <Select value={formData.service} onValueChange={(value) => setFormData({ ...formData, service: value })}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select Service" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="service1">Service 1</SelectItem>
-                    <SelectItem value="service2">Service 2</SelectItem>
-                  </SelectContent>
-                </Select>
+                <DynamicLazySelect
+                  fetchOptions={fetchServiceOptions}
+                  value={formData.service}
+                  onChange={(value) => setFormData({ ...formData, service: (value as string) || '' })}
+                  placeholder="Select Service"
+                />
               </div>
               <div className="space-y-2">
                 <Label>Sub Service</Label>
-                <Select value={formData.subService} onValueChange={(value) => setFormData({ ...formData, subService: value })}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select Sub Service" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="sub1">Sub Service 1</SelectItem>
-                    <SelectItem value="sub2">Sub Service 2</SelectItem>
-                  </SelectContent>
-                </Select>
+                <DynamicLazySelect
+                  fetchOptions={fetchSubServiceOptions}
+                  value={formData.subService}
+                  onChange={(value) => setFormData({ ...formData, subService: (value as string) || '' })}
+                  placeholder="Select Sub Service"
+                />
               </div>
             </div>
 
@@ -366,18 +425,12 @@ export const ResourcesDrawerScreen = ({ onClose }: { onClose?: () => void }) => 
               </div>
               <div className="space-y-2">
                 <Label>Reason</Label>
-                <div className="relative">
-                  <Select value={formData.reason} onValueChange={(value) => setFormData({ ...formData, reason: value })}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select Reason" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="reason1">Reason 1</SelectItem>
-                      <SelectItem value="reason2">Reason 2</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <Search className="absolute right-9 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
-                </div>
+                <DynamicLazySelect
+                  fetchOptions={fetchReasonOptions}
+                  value={formData.reason}
+                  onChange={(value) => setFormData({ ...formData, reason: (value as string) || '' })}
+                  placeholder="Select Reason"
+                />
               </div>
             </div>
 
