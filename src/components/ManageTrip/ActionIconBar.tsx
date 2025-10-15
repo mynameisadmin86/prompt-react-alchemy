@@ -47,7 +47,7 @@ export const ActionIconBar = () => {
         <Link size={16} strokeWidth={1.2} />
         {/* <span className="text-xs">Print</span> */}
       </Button>
-      <Button variant="ghost" size="sm" className="flex-col h-auto rounded-lg p-2.5 border border-[#D0D5DD]">
+      <Button onClick={() => openDrawer('train-parameters')} variant="ghost" size="sm" className="flex-col h-auto rounded-lg p-2.5 border border-[#D0D5DD]">
         <TramFront size={16} strokeWidth={1.2} />
         {/* <span className="text-xs">Print</span> */}
       </Button>
