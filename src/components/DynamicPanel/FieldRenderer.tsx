@@ -8,7 +8,6 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { DynamicLazySelect } from './DynamicLazySelect';
 import { SearchableSelect } from './SearchableSelect';
 import { Search, Calendar as CalendarIcon, Clock } from 'lucide-react';
@@ -249,40 +248,38 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
         <Controller
           name={fieldId}
           control={control}
-          render={({ field }) => (
-            <div>
-              <div className="text-xs text-blue-600 mb-1">TabIndex: {tabIndex}</div>
-              <Select
-                value={field.value || ''}
-                onValueChange={(value) => {
-                  field.onChange(value);
-                  events?.onChange?.(value, { target: { value } } as any);
-                }}
-              >
-                <SelectTrigger 
-                  className={cn(
-                    "h-8 text-xs focus:ring-1 focus:z-50 focus:relative",
-                    hasError 
-                      ? 'border-red-500 focus:border-red-500 focus:ring-red-500' 
-                      : 'border-gray-300 focus:border-blue-500 focus:ring-blue-500'
-                  )}
-                  tabIndex={tabIndex}
-                  onClick={events?.onClick ? (e) => events.onClick!(e, field.value) : undefined}
-                  onFocus={events?.onFocus}
-                  onBlur={events?.onBlur}
-                >
-                  <SelectValue placeholder={placeholder || "Select..."} />
-                </SelectTrigger>
-                <SelectContent className="z-[9999] bg-background">
-                  {options?.map((option) => (
-                    <SelectItem key={option.value} value={option.value} className="text-xs">
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          )}
+          render={({ field }) => {
+            const eventHandlers = createEventHandlers(field);
+            return (
+              <div>
+                <div className="text-xs text-blue-600 mb-1">TabIndex: {tabIndex}</div>
+                <div className="relative focus-within:z-50">
+                  <select
+                    {...field}
+                    {...eventHandlers}
+                    className={`w-full h-8 px-3 text-xs rounded-md border bg-white focus:ring-1 focus:z-50 focus:relative focus:outline-none appearance-none ${
+                      hasError 
+                        ? 'border-red-500 focus:border-red-500 focus:ring-red-500' 
+                        : 'border-gray-300 focus:border-blue-500 focus:ring-blue-500'
+                    }`}
+                    tabIndex={tabIndex}
+                  >
+                    <option value="">Select...</option>
+                    {options?.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                  <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                    <svg className="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+            );
+          }}
         />
       );
 
