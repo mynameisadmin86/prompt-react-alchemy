@@ -591,6 +591,7 @@ export const PlanActualDetailsDrawer: React.FC<PlanActualDetailsDrawerProps> = (
             <TabsContent value="actuals" className="flex-1 m-0 overflow-y-auto p-6 space-y-4">
               {/* Wagon Details */}
               <SimpleDynamicPanel
+                key={`wagon-${activeWagonId}`}
                 title="Wagon Details"
                 config={[
                   {
@@ -701,6 +702,7 @@ export const PlanActualDetailsDrawer: React.FC<PlanActualDetailsDrawerProps> = (
 
               {/* Container Details */}
               <SimpleDynamicPanel
+                key={`container-${activeWagonId}`}
                 title="Container Details"
                 config={[
                   {
@@ -777,6 +779,7 @@ export const PlanActualDetailsDrawer: React.FC<PlanActualDetailsDrawerProps> = (
 
               {/* Product Details */}
               <SimpleDynamicPanel
+                key={`product-${activeWagonId}`}
                 title="Product Details"
                 config={[
                   {
@@ -866,6 +869,7 @@ export const PlanActualDetailsDrawer: React.FC<PlanActualDetailsDrawerProps> = (
 
               {/* THU Details */}
               <SimpleDynamicPanel
+                key={`thu-${activeWagonId}`}
                 title="THU Details"
                 config={[
                   {
@@ -983,6 +987,7 @@ export const PlanActualDetailsDrawer: React.FC<PlanActualDetailsDrawerProps> = (
 
               {/* Journey and Scheduling Details */}
               <SimpleDynamicPanel
+                key={`journey-${activeWagonId}`}
                 title="Journey and Scheduling Details"
                 config={[
                   {
@@ -1037,6 +1042,7 @@ export const PlanActualDetailsDrawer: React.FC<PlanActualDetailsDrawerProps> = (
 
               {/* Other Details */}
               <SimpleDynamicPanel
+                key={`other-${activeWagonId}`}
                 title="Other Details"
                 config={[
                   {
