@@ -36,6 +36,15 @@ export type PanelFieldConfig =
       options: { label: string; value: string }[];
       onChange?: (selected: { label: string; value: string } | null) => void;
       onClick?: () => void;
+    }
+  | {
+      fieldType: 'inputdropdown';
+      key: string;
+      label: string;
+      options: { label: string; value: string }[];
+      placeholder?: string;
+      onChange?: (value: string) => void;
+      onClick?: () => void;
     };
 
 export interface FieldConfig {

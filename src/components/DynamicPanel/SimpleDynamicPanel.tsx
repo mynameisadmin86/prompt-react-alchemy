@@ -7,6 +7,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { LazySelect } from '@/components/SmartGrid/LazySelect';
+import { InputDropdown } from '@/components/ui/input-dropdown';
+import { splitInputDropdownValue, combineInputDropdownValue } from '@/utils/inputDropdown';
 import { Search, Calendar, Clock } from 'lucide-react';
 import { PanelFieldConfig } from '@/types/dynamicPanel';
 
@@ -307,6 +309,38 @@ export const SimpleDynamicPanel: React.FC<SimpleDynamicPanelProps> = ({
                   </div>
                 </div>
               )}
+            />
+          );
+        }
+        break;
+
+      case 'inputdropdown':
+        if (fieldConfig.fieldType === 'inputdropdown') {
+          return (
+            <Controller
+              name={key}
+              control={control}
+              render={({ field }) => {
+                const splitValue = splitInputDropdownValue(field.value);
+                return (
+                  <div className="space-y-2">
+                    <Label htmlFor={key}>{label}</Label>
+                    <div onClick={fieldConfig.onClick}>
+                      <InputDropdown
+                        value={{ dropdown: splitValue.dropdown || '', input: splitValue.input || '' }}
+                        onChange={(value) => {
+                          const combinedValue = combineInputDropdownValue(value);
+                          field.onChange(combinedValue);
+                          fieldConfig.onChange?.(combinedValue);
+                        }}
+                        options={fieldConfig.options}
+                        placeholder={fieldConfig.placeholder}
+                        className="h-8 text-xs"
+                      />
+                    </div>
+                  </div>
+                );
+              }}
             />
           );
         }
