@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { MoreVertical, Edit, Copy, Plus, X, ChevronDown, ChevronUp } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { DynamicLazySelect } from '@/components/DynamicPanel/DynamicLazySelect';
 import { usePlanActualStore } from '@/stores/planActualStore';
 
 const PlanActuals = () => {
@@ -16,6 +17,39 @@ const PlanActuals = () => {
   const [selectedTab, setSelectedTab] = useState('actuals');
   const [wagonCollapsed, setWagonCollapsed] = useState(false);
   const [containerCollapsed, setContainerCollapsed] = useState(false);
+  const [plannedWagonType, setPlannedWagonType] = useState<string | undefined>();
+  const [actualsWagonType, setActualsWagonType] = useState<string | undefined>();
+
+  // Mock fetch function for wagon types with lazy loading
+  const fetchWagonTypes = async ({ searchTerm, offset, limit }: { searchTerm: string; offset: number; limit: number }) => {
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 300));
+    
+    // Mock data - in production this would be an API call
+    const allTypes = [
+      { value: 'hasbins', label: 'Hasbins' },
+      { value: 'zaccs', label: 'Zaccs' },
+      { value: 'type-a-wagon', label: 'A Type Wagon' },
+      { value: 'closed-wagon', label: 'Closed Wagon' },
+      { value: 'open-wagon', label: 'Open Wagon' },
+      { value: 'flat-wagon', label: 'Flat Wagon' },
+      { value: 'tank-wagon', label: 'Tank Wagon' },
+      { value: 'hopper-wagon', label: 'Hopper Wagon' },
+      { value: 'box-wagon', label: 'Box Wagon' },
+      { value: 'refrigerated-wagon', label: 'Refrigerated Wagon' },
+    ];
+
+    // Filter by search term
+    const filtered = searchTerm
+      ? allTypes.filter(type => 
+          type.label.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          type.value.toLowerCase().includes(searchTerm.toLowerCase())
+        )
+      : allTypes;
+
+    // Paginate
+    return filtered.slice(offset, offset + limit);
+  };
 
   const wagonList = Object.entries(wagonItems).map(([id, data]) => ({
     id,
@@ -124,16 +158,12 @@ const PlanActuals = () => {
                     <div className="grid grid-cols-3 gap-4">
                       <div>
                         <Label htmlFor="wagon-type">Wagon Type</Label>
-                        <Select>
-                          <SelectTrigger id="wagon-type">
-                            <SelectValue placeholder="Select Type" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="type1">Type 1</SelectItem>
-                            <SelectItem value="type2">Type 2</SelectItem>
-                            <SelectItem value="type3">Type 3</SelectItem>
-                          </SelectContent>
-                        </Select>
+                        <DynamicLazySelect
+                          fetchOptions={fetchWagonTypes}
+                          value={plannedWagonType}
+                          onChange={(value) => setPlannedWagonType(value as string)}
+                          placeholder="Select Type"
+                        />
                       </div>
                       <div>
                         <Label htmlFor="wagon-id">Wagon ID</Label>
@@ -316,16 +346,12 @@ const PlanActuals = () => {
                     <div className="grid grid-cols-3 gap-4">
                       <div>
                         <Label htmlFor="actuals-wagon-type">Wagon Type</Label>
-                        <Select>
-                          <SelectTrigger id="actuals-wagon-type">
-                            <SelectValue placeholder="Select Type" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="type1">Type 1</SelectItem>
-                            <SelectItem value="type2">Type 2</SelectItem>
-                            <SelectItem value="type3">Type 3</SelectItem>
-                          </SelectContent>
-                        </Select>
+                        <DynamicLazySelect
+                          fetchOptions={fetchWagonTypes}
+                          value={actualsWagonType}
+                          onChange={(value) => setActualsWagonType(value as string)}
+                          placeholder="Select Type"
+                        />
                       </div>
                       <div>
                         <Label htmlFor="actuals-wagon-id">Wagon ID</Label>
