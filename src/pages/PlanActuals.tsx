@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { format } from 'date-fns';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -7,11 +8,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { MoreVertical, Edit, Copy, Plus, X, ChevronDown, ChevronUp } from 'lucide-react';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { MoreVertical, Edit, Copy, Plus, X, ChevronDown, ChevronUp, CalendarIcon, Clock } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { DynamicLazySelect } from '@/components/DynamicPanel/DynamicLazySelect';
 import { InputDropdown, InputDropdownValue } from '@/components/ui/input-dropdown';
 import { usePlanActualStore } from '@/stores/planActualStore';
+import { cn } from '@/lib/utils';
 
 const PlanActuals = () => {
   const { wagonItems, activeWagonId, setActiveWagon } = usePlanActualStore();
@@ -22,6 +26,10 @@ const PlanActuals = () => {
   const [actualsWagonType, setActualsWagonType] = useState<string | undefined>();
   const [plannedWagonQuantity, setPlannedWagonQuantity] = useState<InputDropdownValue>({ dropdown: 'KG', input: '' });
   const [actualsWagonQuantity, setActualsWagonQuantity] = useState<InputDropdownValue>({ dropdown: 'KG', input: '' });
+  const [plannedContainerDate, setPlannedContainerDate] = useState<Date>();
+  const [plannedContainerTime, setPlannedContainerTime] = useState('00:00');
+  const [actualsContainerDate, setActualsContainerDate] = useState<Date>();
+  const [actualsContainerTime, setActualsContainerTime] = useState('00:00');
 
   const quantityUnitOptions = [
     { label: 'KG', value: 'KG' },
@@ -316,6 +324,45 @@ const PlanActuals = () => {
                           <Input id="container-load-weight" placeholder="Enter Value" className="flex-1" />
                         </div>
                       </div>
+                      <div>
+                        <Label>Container Date</Label>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <Button
+                              variant="outline"
+                              className={cn(
+                                "w-full justify-start text-left font-normal",
+                                !plannedContainerDate && "text-muted-foreground"
+                              )}
+                            >
+                              <CalendarIcon className="mr-2 h-4 w-4" />
+                              {plannedContainerDate ? format(plannedContainerDate, "PPP") : <span>Pick a date</span>}
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0" align="start">
+                            <Calendar
+                              mode="single"
+                              selected={plannedContainerDate}
+                              onSelect={setPlannedContainerDate}
+                              initialFocus
+                              className="pointer-events-auto"
+                            />
+                          </PopoverContent>
+                        </Popover>
+                      </div>
+                      <div>
+                        <Label htmlFor="planned-container-time">Container Time</Label>
+                        <div className="flex items-center gap-2">
+                          <Clock className="h-4 w-4 text-muted-foreground" />
+                          <Input
+                            id="planned-container-time"
+                            type="time"
+                            value={plannedContainerTime}
+                            onChange={(e) => setPlannedContainerTime(e.target.value)}
+                            className="flex-1"
+                          />
+                        </div>
+                      </div>
                     </div>
                   </CardContent>
                 </CollapsibleContent>
@@ -507,6 +554,45 @@ const PlanActuals = () => {
                             </SelectContent>
                           </Select>
                           <Input id="actuals-container-load-weight" placeholder="Enter Value" className="flex-1" />
+                        </div>
+                      </div>
+                      <div>
+                        <Label>Container Date</Label>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <Button
+                              variant="outline"
+                              className={cn(
+                                "w-full justify-start text-left font-normal",
+                                !actualsContainerDate && "text-muted-foreground"
+                              )}
+                            >
+                              <CalendarIcon className="mr-2 h-4 w-4" />
+                              {actualsContainerDate ? format(actualsContainerDate, "PPP") : <span>Pick a date</span>}
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0" align="start">
+                            <Calendar
+                              mode="single"
+                              selected={actualsContainerDate}
+                              onSelect={setActualsContainerDate}
+                              initialFocus
+                              className="pointer-events-auto"
+                            />
+                          </PopoverContent>
+                        </Popover>
+                      </div>
+                      <div>
+                        <Label htmlFor="actuals-container-time">Container Time</Label>
+                        <div className="flex items-center gap-2">
+                          <Clock className="h-4 w-4 text-muted-foreground" />
+                          <Input
+                            id="actuals-container-time"
+                            type="time"
+                            value={actualsContainerTime}
+                            onChange={(e) => setActualsContainerTime(e.target.value)}
+                            className="flex-1"
+                          />
                         </div>
                       </div>
                     </div>
