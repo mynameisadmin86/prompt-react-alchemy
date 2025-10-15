@@ -135,6 +135,9 @@ interface PlanActualStore {
   updateActualsData: (wagonId: string, data: Partial<ActualsData>) => void;
   getWagonData: (wagonId: string) => WagonItemData | null;
   initializeWagon: (wagonId: string) => void;
+  loadFromJson: (jsonData: any[]) => void;
+  exportToJson: () => any[];
+  getAllWagonIds: () => string[];
 }
 
 const createDefaultWagonData = (id: string): WagonItemData => ({
@@ -194,5 +197,151 @@ export const usePlanActualStore = create<PlanActualStore>((set, get) => ({
   getWagonData: (wagonId) => {
     const state = get();
     return state.wagonItems[wagonId] || null;
+  },
+
+  getAllWagonIds: () => {
+    const state = get();
+    return Object.keys(state.wagonItems);
+  },
+
+  loadFromJson: (jsonData) => {
+    const newWagonItems: Record<string, WagonItemData> = {};
+    
+    jsonData.forEach((item, index) => {
+      const wagonId = item.Wagon || `WAGON_${index + 1}`;
+      
+      newWagonItems[wagonId] = {
+        id: wagonId,
+        planned: {},
+        actuals: {
+          wagonType: item.WagonType,
+          wagonId: item.Wagon,
+          wagonQuantity: item.WagonQty?.toString(),
+          wagonQuantityUnit: item.WagonQtyUOM,
+          wagonTareWeight: item.WagonTareWeight,
+          wagonTareWeightUnit: item.WagonTareWeightUOM,
+          wagonGrossWeight: item.WagonGrossWeight,
+          wagonGrossWeightUnit: item.WagonGrossWeightUOM,
+          wagonLength: item.WagonLength,
+          wagonLengthUnit: item.WagonLengthUOM,
+          wagonSequence: item.Seqno,
+          
+          containerType: item.ContainerType,
+          containerId: item.ContainerId,
+          containerQuantity: item.ContainerQty?.toString(),
+          containerQuantityUnit: item.ContainerQtyUOM,
+          containerTareWeight: item.ContainerTareWeight,
+          containerTareWeightUnit: item.ContainerTareWeightUOM,
+          containerLoadWeight: item.ProductWeight,
+          containerLoadWeightUnit: item.ProductWeightUOM,
+          
+          hazardousGoods: item.ContainsHazardousGoods === '1',
+          nhm: item.NHM,
+          productId: item.Product,
+          productQuantity: item.ProductWeight,
+          productQuantityUnit: item.ProductWeightUOM,
+          classOfStores: item.ClassOfStores,
+          unCode: item.UNCode,
+          dgClass: item.DGClass,
+          
+          thuId: item.Thu,
+          thuQuantity: item.ThuQty?.toString(),
+          thuQuantityUnit: item.ThuWeightUOM,
+          thuGrossWeight: item.ThuWeight,
+          thuGrossWeightUnit: item.ThuWeightUOM,
+          thuTareWeight: item.ThuTareWeight,
+          thuTareWeightUnit: item.ThuWeightUOM,
+          
+          departure: item.ShuntInLocation,
+          destination: item.ShuntOutLocation,
+          fromDate: item.ShuntInDate,
+          fromTime: item.ShuntInTime,
+          toDate: item.ShuntOutDate,
+          toTime: item.ShuntOutTime,
+          
+          qcUserdefined1: item.QuickCode1,
+          qcUserdefined2: item.QuickCode2,
+          qcUserdefined3: item.QuickCode3,
+          remarks1: item.Remarks1,
+          remarks2: item.Remarks2,
+          remarks3: item.Remarks3,
+        },
+      };
+    });
+    
+    set({ 
+      wagonItems: newWagonItems,
+      activeWagonId: Object.keys(newWagonItems)[0] || null
+    });
+  },
+
+  exportToJson: () => {
+    const state = get();
+    return Object.values(state.wagonItems).map((wagon) => ({
+      Seqno: wagon.actuals.wagonSequence || '1',
+      PlanToActualCopy: null,
+      WagonPosition: null,
+      WagonType: wagon.actuals.wagonType,
+      Wagon: wagon.actuals.wagonId,
+      WagonDescription: wagon.actuals.wagonId,
+      WagonQty: wagon.actuals.wagonQuantity ? Number(wagon.actuals.wagonQuantity) : null,
+      WagonQtyUOM: wagon.actuals.wagonQuantityUnit,
+      ContainerType: wagon.actuals.containerType,
+      ContainerId: wagon.actuals.containerId,
+      ContainerDescription: wagon.actuals.containerId,
+      ContainerQty: wagon.actuals.containerQuantity ? Number(wagon.actuals.containerQuantity) : null,
+      ContainerQtyUOM: wagon.actuals.containerQuantityUnit,
+      Product: wagon.actuals.productId,
+      ProductWeight: wagon.actuals.productQuantity,
+      ProductWeightUOM: wagon.actuals.productQuantityUnit,
+      Thu: wagon.actuals.thuId,
+      ThuSerialNo: null,
+      ThuQty: wagon.actuals.thuQuantity ? Number(wagon.actuals.thuQuantity) : null,
+      ThuWeight: wagon.actuals.thuGrossWeight,
+      ThuWeightUOM: wagon.actuals.thuGrossWeightUnit,
+      ShuntingOption: null,
+      ReplacedWagon: null,
+      ShuntingReasonCode: null,
+      Remarks: null,
+      ShuntInLocation: wagon.actuals.departure,
+      ShuntInLocationDescription: wagon.actuals.departure || 'UD',
+      ShuntOutLocation: wagon.actuals.destination,
+      ShuntOutLocationDescription: wagon.actuals.destination || 'UD',
+      ShuntInDate: wagon.actuals.fromDate,
+      ShuntInTime: wagon.actuals.fromTime,
+      ShuntOutDate: wagon.actuals.toDate,
+      ShuntOutTime: wagon.actuals.toTime,
+      ClassOfStores: wagon.actuals.classOfStores,
+      NHM: wagon.actuals.nhm,
+      NHMDescription: wagon.actuals.nhm,
+      UNCode: wagon.actuals.unCode,
+      UNCodeDescription: wagon.actuals.unCode,
+      DGClass: wagon.actuals.dgClass,
+      ContainsHazardousGoods: wagon.actuals.hazardousGoods ? '1' : '0',
+      WagonSealNo: null,
+      ContainerSealNo: null,
+      ContainerTareWeight: wagon.actuals.containerTareWeight,
+      ContainerTareWeightUOM: wagon.actuals.containerTareWeightUnit,
+      LastCommodityTransported1: null,
+      LastCommodityTransportedDate1: null,
+      LastCommodityTransported2: null,
+      LastCommodityTransportedDate2: null,
+      LastCommodityTransported3: null,
+      LastCommodityTransportedDate3: null,
+      WagonTareWeight: wagon.actuals.wagonTareWeight,
+      WagonTareWeightUOM: wagon.actuals.wagonTareWeightUnit,
+      WagonLength: wagon.actuals.wagonLength,
+      WagonLengthUOM: wagon.actuals.wagonLengthUnit,
+      QuickCode1: wagon.actuals.qcUserdefined1,
+      QuickCode2: wagon.actuals.qcUserdefined2,
+      QuickCode3: wagon.actuals.qcUserdefined3,
+      QuickCodeValue1: null,
+      QuickCodeValue2: null,
+      QuickCodeValue3: null,
+      Remarks1: wagon.actuals.remarks1,
+      Remarks2: wagon.actuals.remarks2,
+      Remarks3: wagon.actuals.remarks3,
+      ModeFlag: 'Nochange',
+    }));
   },
 }));
