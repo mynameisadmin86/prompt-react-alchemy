@@ -8,7 +8,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Separator } from '@/components/ui/separator';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
-import { SimpleDynamicPanel } from '@/components/DynamicPanel/SimpleDynamicPanel';
+import { DynamicPanel } from '@/components/DynamicPanel';
 import { PanelFieldConfig } from '@/types/dynamicPanel';
 import { usePlanActualStore, ActualsData } from '@/stores/planActualStore';
 
@@ -590,8 +590,9 @@ export const PlanActualDetailsDrawer: React.FC<PlanActualDetailsDrawerProps> = (
 
             <TabsContent value="actuals" className="flex-1 m-0 overflow-y-auto p-6 space-y-4">
               {/* Wagon Details */}
-              <SimpleDynamicPanel
-                title="Wagon Details"
+              <DynamicPanel
+                panelId="wagon-details-actuals"
+                panelTitle="Wagon Details"
                 config={[
                   {
                     fieldType: 'lazyselect',
@@ -700,8 +701,9 @@ export const PlanActualDetailsDrawer: React.FC<PlanActualDetailsDrawerProps> = (
               />
 
               {/* Container Details */}
-              <SimpleDynamicPanel
-                title="Container Details"
+              <DynamicPanel
+                panelId="container-details-actuals"
+                panelTitle="Container Details"
                 config={[
                   {
                     fieldType: 'select',
@@ -776,8 +778,9 @@ export const PlanActualDetailsDrawer: React.FC<PlanActualDetailsDrawerProps> = (
               />
 
               {/* Product Details */}
-              <SimpleDynamicPanel
-                title="Product Details"
+              <DynamicPanel
+                panelId="product-details-actuals"
+                panelTitle="Product Details"
                 config={[
                   {
                     fieldType: 'radio',
@@ -865,8 +868,9 @@ export const PlanActualDetailsDrawer: React.FC<PlanActualDetailsDrawerProps> = (
               />
 
               {/* THU Details */}
-              <SimpleDynamicPanel
-                title="THU Details"
+              <DynamicPanel
+                panelId="thu-details-actuals"
+                panelTitle="THU Details"
                 config={[
                   {
                     fieldType: 'select',
@@ -982,8 +986,9 @@ export const PlanActualDetailsDrawer: React.FC<PlanActualDetailsDrawerProps> = (
               />
 
               {/* Journey and Scheduling Details */}
-              <SimpleDynamicPanel
-                title="Journey and Scheduling Details"
+              <DynamicPanel
+                panelId="journey-scheduling-details-actuals"
+                panelTitle="Journey and Scheduling Details"
                 config={[
                   {
                     fieldType: 'select',
@@ -1036,8 +1041,9 @@ export const PlanActualDetailsDrawer: React.FC<PlanActualDetailsDrawerProps> = (
               />
 
               {/* Other Details */}
-              <SimpleDynamicPanel
-                title="Other Details"
+              <DynamicPanel
+                panelId="other-details-actuals"
+                panelTitle="Other Details"
                 config={[
                   {
                     fieldType: 'select',
