@@ -9,7 +9,8 @@ import { Separator } from '@/components/ui/separator';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { DynamicPanel } from '@/components/DynamicPanel';
-import { PanelConfig, FieldConfig } from '@/types/dynamicPanel';
+import { SimpleDynamicPanel } from '@/components/DynamicPanel/SimpleDynamicPanel';
+import { PanelConfig, FieldConfig, PanelFieldConfig } from '@/types/dynamicPanel';
 import { usePlanActualStore, ActualsData } from '@/stores/planActualStore';
 
 interface PlanActualDetailsDrawerProps {
@@ -192,6 +193,7 @@ export const PlanActualDetailsDrawer: React.FC<PlanActualDetailsDrawerProps> = (
               <TabsList>
                 <TabsTrigger value="planned">Planned</TabsTrigger>
                 <TabsTrigger value="actuals">Actuals</TabsTrigger>
+                <TabsTrigger value="actuals2">Actuals2</TabsTrigger>
               </TabsList>
             </div>
 
@@ -1366,6 +1368,518 @@ export const PlanActualDetailsDrawer: React.FC<PlanActualDetailsDrawerProps> = (
                 initialData={actualsData}
                 onDataChange={(data) => updateCurrentActuals(data)}
                 className="border-0 shadow-none"
+              />
+            </TabsContent>
+
+            <TabsContent value="actuals2" className="flex-1 m-0 overflow-y-auto p-6 space-y-4">
+              {/* Wagon Details - SimpleDynamicPanel */}
+              <SimpleDynamicPanel
+                title="Wagon Details"
+                config={[
+                  {
+                    fieldType: 'lazyselect',
+                    key: 'wagonType',
+                    label: 'Wagon Type',
+                    fetchOptions: async ({ searchTerm, offset, limit }) => {
+                      const allOptions = [
+                        { label: 'Habbins', value: 'habbins' },
+                        { label: 'Zaccs', value: 'zaccs' },
+                        { label: 'A Type Wagon', value: 'a-type' },
+                        { label: 'Closed Wagon', value: 'closed' },
+                      ];
+                      const filtered = searchTerm
+                        ? allOptions.filter(opt => opt.label.toLowerCase().includes(searchTerm.toLowerCase()))
+                        : allOptions;
+                      return filtered.slice(offset, offset + limit);
+                    },
+                    onChange: (value: any) => {
+                      const selectedValue = value && typeof value === 'object' ? value.value : value;
+                      updateCurrentActuals({ wagonType: selectedValue as string });
+                    },
+                  },
+                  {
+                    fieldType: 'search',
+                    key: 'wagonId',
+                    label: 'Wagon ID',
+                    placeholder: 'Search Wagon ID',
+                    onChange: (value) => updateCurrentActuals({ wagonId: value }),
+                  },
+                  {
+                    fieldType: 'text',
+                    key: 'wagonQuantity',
+                    label: 'Wagon Quantity',
+                    placeholder: 'Enter quantity',
+                    onChange: (value) => updateCurrentActuals({ wagonQuantity: value }),
+                  },
+                  {
+                    fieldType: 'select',
+                    key: 'wagonQuantityUnit',
+                    label: 'Unit',
+                    options: [
+                      { label: 'EA', value: 'EA' },
+                      { label: 'KG', value: 'KG' },
+                    ],
+                    onChange: (value) => updateCurrentActuals({ wagonQuantityUnit: value }),
+                  },
+                  {
+                    fieldType: 'currency',
+                    key: 'wagonTareWeight',
+                    label: 'Wagon Tare Weight',
+                    placeholder: 'Enter weight',
+                    onChange: (value) => updateCurrentActuals({ wagonTareWeight: value }),
+                  },
+                  {
+                    fieldType: 'select',
+                    key: 'wagonTareWeightUnit',
+                    label: 'Unit',
+                    options: [
+                      { label: 'TON', value: 'TON' },
+                      { label: 'KG', value: 'KG' },
+                    ],
+                    onChange: (value) => updateCurrentActuals({ wagonTareWeightUnit: value }),
+                  },
+                  {
+                    fieldType: 'currency',
+                    key: 'wagonGrossWeight',
+                    label: 'Wagon Gross Weight',
+                    placeholder: 'Enter weight',
+                    onChange: (value) => updateCurrentActuals({ wagonGrossWeight: value }),
+                  },
+                  {
+                    fieldType: 'select',
+                    key: 'wagonGrossWeightUnit',
+                    label: 'Unit',
+                    options: [
+                      { label: 'TON', value: 'TON' },
+                      { label: 'KG', value: 'KG' },
+                    ],
+                    onChange: (value) => updateCurrentActuals({ wagonGrossWeightUnit: value }),
+                  },
+                  {
+                    fieldType: 'currency',
+                    key: 'wagonLength',
+                    label: 'Wagon Length',
+                    placeholder: 'Enter length',
+                    onChange: (value) => updateCurrentActuals({ wagonLength: value }),
+                  },
+                  {
+                    fieldType: 'select',
+                    key: 'wagonLengthUnit',
+                    label: 'Unit',
+                    options: [
+                      { label: 'M', value: 'M' },
+                      { label: 'FT', value: 'FT' },
+                    ],
+                    onChange: (value) => updateCurrentActuals({ wagonLengthUnit: value }),
+                  },
+                  {
+                    fieldType: 'text',
+                    key: 'wagonSequence',
+                    label: 'Wagon Sequence',
+                    placeholder: 'Enter sequence',
+                    onChange: (value) => updateCurrentActuals({ wagonSequence: value }),
+                  },
+                ] as PanelFieldConfig[]}
+                initialData={actualsData}
+                collapsible={true}
+                defaultCollapsed={false}
+              />
+
+              {/* Container Details - SimpleDynamicPanel */}
+              <SimpleDynamicPanel
+                title="Container Details"
+                config={[
+                  {
+                    fieldType: 'select',
+                    key: 'containerType',
+                    label: 'Container Type',
+                    options: [
+                      { label: '20ft Standard', value: '20ft' },
+                      { label: '40ft Standard', value: '40ft' },
+                      { label: 'Container A', value: 'container-a' },
+                    ],
+                    onChange: (value) => updateCurrentActuals({ containerType: value }),
+                  },
+                  {
+                    fieldType: 'search',
+                    key: 'containerId',
+                    label: 'Container ID',
+                    placeholder: 'Search Container ID',
+                    onChange: (value) => updateCurrentActuals({ containerId: value }),
+                  },
+                  {
+                    fieldType: 'text',
+                    key: 'containerQuantity',
+                    label: 'Container Quantity',
+                    placeholder: 'Enter quantity',
+                    onChange: (value) => updateCurrentActuals({ containerQuantity: value }),
+                  },
+                  {
+                    fieldType: 'select',
+                    key: 'containerQuantityUnit',
+                    label: 'Unit',
+                    options: [{ label: 'EA', value: 'EA' }],
+                    onChange: (value) => updateCurrentActuals({ containerQuantityUnit: value }),
+                  },
+                  {
+                    fieldType: 'currency',
+                    key: 'containerTareWeight',
+                    label: 'Container Tare Weight',
+                    placeholder: 'Enter weight',
+                    onChange: (value) => updateCurrentActuals({ containerTareWeight: value }),
+                  },
+                  {
+                    fieldType: 'select',
+                    key: 'containerTareWeightUnit',
+                    label: 'Unit',
+                    options: [
+                      { label: 'TON', value: 'TON' },
+                      { label: 'KG', value: 'KG' },
+                    ],
+                    onChange: (value) => updateCurrentActuals({ containerTareWeightUnit: value }),
+                  },
+                  {
+                    fieldType: 'currency',
+                    key: 'containerLoadWeight',
+                    label: 'Container Load Weight',
+                    placeholder: 'Enter weight',
+                    onChange: (value) => updateCurrentActuals({ containerLoadWeight: value }),
+                  },
+                  {
+                    fieldType: 'select',
+                    key: 'containerLoadWeightUnit',
+                    label: 'Unit',
+                    options: [
+                      { label: 'TON', value: 'TON' },
+                      { label: 'KG', value: 'KG' },
+                    ],
+                    onChange: (value) => updateCurrentActuals({ containerLoadWeightUnit: value }),
+                  },
+                ] as PanelFieldConfig[]}
+                initialData={actualsData}
+                collapsible={true}
+                defaultCollapsed={false}
+              />
+
+              {/* Product Details - SimpleDynamicPanel */}
+              <SimpleDynamicPanel
+                title="Product Details"
+                config={[
+                  {
+                    fieldType: 'radio',
+                    key: 'hazardousGoods',
+                    label: 'Hazardous Goods',
+                    options: [
+                      { label: 'Yes', value: 'yes' },
+                      { label: 'No', value: 'no' },
+                    ],
+                    onChange: (value) => updateCurrentActuals({ hazardousGoods: value === 'yes' }),
+                  },
+                  {
+                    fieldType: 'select',
+                    key: 'nhm',
+                    label: 'NHM',
+                    options: [
+                      { label: '2WQ1E32R43', value: '2WQ1E32R43' },
+                      { label: 'NHM 1', value: 'nhm1' },
+                      { label: 'NHM 2', value: 'nhm2' },
+                    ],
+                    onChange: (value) => updateCurrentActuals({ nhm: value }),
+                  },
+                  {
+                    fieldType: 'text',
+                    key: 'productId',
+                    label: 'Product ID',
+                    placeholder: 'Enter Product ID',
+                    onChange: (value) => updateCurrentActuals({ productId: value }),
+                  },
+                  {
+                    fieldType: 'text',
+                    key: 'productQuantity',
+                    label: 'Product Quantity',
+                    placeholder: 'Enter quantity',
+                    onChange: (value) => updateCurrentActuals({ productQuantity: value }),
+                  },
+                  {
+                    fieldType: 'select',
+                    key: 'productQuantityUnit',
+                    label: 'Unit',
+                    options: [
+                      { label: 'TON', value: 'TON' },
+                      { label: 'EA', value: 'EA' },
+                      { label: 'KG', value: 'KG' },
+                    ],
+                    onChange: (value) => updateCurrentActuals({ productQuantityUnit: value }),
+                  },
+                  {
+                    fieldType: 'select',
+                    key: 'classOfStores',
+                    label: 'Class of Stores',
+                    options: [
+                      { label: 'Class A', value: 'class-a' },
+                      { label: 'Class 1', value: 'class1' },
+                      { label: 'Class 2', value: 'class2' },
+                    ],
+                    onChange: (value) => updateCurrentActuals({ classOfStores: value }),
+                  },
+                  {
+                    fieldType: 'select',
+                    key: 'unCode',
+                    label: 'UN Code',
+                    options: [
+                      { label: '2432', value: '2432' },
+                      { label: 'UN 1', value: 'un1' },
+                      { label: 'UN 2', value: 'un2' },
+                    ],
+                    onChange: (value) => updateCurrentActuals({ unCode: value }),
+                  },
+                  {
+                    fieldType: 'select',
+                    key: 'dgClass',
+                    label: 'DG Class',
+                    options: [
+                      { label: 'AAA', value: 'AAA' },
+                      { label: 'DG 1', value: 'dg1' },
+                      { label: 'DG 2', value: 'dg2' },
+                    ],
+                    onChange: (value) => updateCurrentActuals({ dgClass: value }),
+                  },
+                ] as PanelFieldConfig[]}
+                initialData={actualsData}
+                collapsible={true}
+                defaultCollapsed={false}
+              />
+
+              {/* THU Details - SimpleDynamicPanel */}
+              <SimpleDynamicPanel
+                title="THU Details"
+                config={[
+                  {
+                    fieldType: 'select',
+                    key: 'thuId',
+                    label: 'THU ID',
+                    options: [
+                      { label: 'THU329847', value: 'THU329847' },
+                      { label: 'THU 1', value: 'thu1' },
+                      { label: 'THU 2', value: 'thu2' },
+                    ],
+                    onChange: (value) => updateCurrentActuals({ thuId: value }),
+                  },
+                  {
+                    fieldType: 'text',
+                    key: 'thuQuantity',
+                    label: 'THU Quantity',
+                    placeholder: 'Enter quantity',
+                    onChange: (value) => updateCurrentActuals({ thuQuantity: value }),
+                  },
+                  {
+                    fieldType: 'select',
+                    key: 'thuQuantityUnit',
+                    label: 'Unit',
+                    options: [{ label: 'EA', value: 'EA' }],
+                    onChange: (value) => updateCurrentActuals({ thuQuantityUnit: value }),
+                  },
+                  {
+                    fieldType: 'currency',
+                    key: 'thuGrossWeight',
+                    label: 'THU Gross Weight',
+                    placeholder: 'Enter weight',
+                    onChange: (value) => updateCurrentActuals({ thuGrossWeight: value }),
+                  },
+                  {
+                    fieldType: 'select',
+                    key: 'thuGrossWeightUnit',
+                    label: 'Unit',
+                    options: [
+                      { label: 'TON', value: 'TON' },
+                      { label: 'KG', value: 'KG' },
+                    ],
+                    onChange: (value) => updateCurrentActuals({ thuGrossWeightUnit: value }),
+                  },
+                  {
+                    fieldType: 'currency',
+                    key: 'thuTareWeight',
+                    label: 'THU Tare Weight',
+                    placeholder: 'Enter weight',
+                    onChange: (value) => updateCurrentActuals({ thuTareWeight: value }),
+                  },
+                  {
+                    fieldType: 'select',
+                    key: 'thuTareWeightUnit',
+                    label: 'Unit',
+                    options: [
+                      { label: 'TON', value: 'TON' },
+                      { label: 'KG', value: 'KG' },
+                    ],
+                    onChange: (value) => updateCurrentActuals({ thuTareWeightUnit: value }),
+                  },
+                  {
+                    fieldType: 'currency',
+                    key: 'thuNetWeight',
+                    label: 'THU Net Weight',
+                    placeholder: 'Enter weight',
+                    onChange: (value) => updateCurrentActuals({ thuNetWeight: value }),
+                  },
+                  {
+                    fieldType: 'select',
+                    key: 'thuNetWeightUnit',
+                    label: 'Unit',
+                    options: [
+                      { label: 'TON', value: 'TON' },
+                      { label: 'KG', value: 'KG' },
+                    ],
+                    onChange: (value) => updateCurrentActuals({ thuNetWeightUnit: value }),
+                  },
+                  {
+                    fieldType: 'currency',
+                    key: 'thuLength',
+                    label: 'THU Length',
+                    placeholder: 'Enter length',
+                    onChange: (value) => updateCurrentActuals({ thuLength: value }),
+                  },
+                  {
+                    fieldType: 'currency',
+                    key: 'thuWidth',
+                    label: 'THU Width',
+                    placeholder: 'Enter width',
+                    onChange: (value) => updateCurrentActuals({ thuWidth: value }),
+                  },
+                  {
+                    fieldType: 'currency',
+                    key: 'thuHeight',
+                    label: 'THU Height',
+                    placeholder: 'Enter height',
+                    onChange: (value) => updateCurrentActuals({ thuHeight: value }),
+                  },
+                  {
+                    fieldType: 'select',
+                    key: 'thuDimensionUnit',
+                    label: 'Dimension Unit',
+                    options: [
+                      { label: 'M', value: 'M' },
+                      { label: 'CM', value: 'CM' },
+                    ],
+                    onChange: (value) => updateCurrentActuals({ thuDimensionUnit: value }),
+                  },
+                ] as PanelFieldConfig[]}
+                initialData={actualsData}
+                collapsible={true}
+                defaultCollapsed={false}
+              />
+
+              {/* Journey and Scheduling Details - SimpleDynamicPanel */}
+              <SimpleDynamicPanel
+                title="Journey and Scheduling Details"
+                config={[
+                  {
+                    fieldType: 'select',
+                    key: 'departure',
+                    label: 'Departure',
+                    options: [
+                      { label: 'Frankfurt Station Point A', value: 'frankfurt-a' },
+                      { label: 'Frankfurt Station Point B', value: 'frankfurt-b' },
+                    ],
+                    onChange: (value) => updateCurrentActuals({ departure: value }),
+                  },
+                  {
+                    fieldType: 'select',
+                    key: 'destination',
+                    label: 'Destination',
+                    options: [
+                      { label: 'Frankfurt Station Point A', value: 'frankfurt-a' },
+                      { label: 'Frankfurt Station Point B', value: 'frankfurt-b' },
+                    ],
+                    onChange: (value) => updateCurrentActuals({ destination: value }),
+                  },
+                  {
+                    fieldType: 'date',
+                    key: 'fromDate',
+                    label: 'From Date',
+                    onChange: (value) => updateCurrentActuals({ fromDate: value }),
+                  },
+                  {
+                    fieldType: 'time',
+                    key: 'fromTime',
+                    label: 'From Time',
+                    onChange: (value) => updateCurrentActuals({ fromTime: value }),
+                  },
+                  {
+                    fieldType: 'date',
+                    key: 'toDate',
+                    label: 'To Date',
+                    onChange: (value) => updateCurrentActuals({ toDate: value }),
+                  },
+                  {
+                    fieldType: 'time',
+                    key: 'toTime',
+                    label: 'To Time',
+                    onChange: (value) => updateCurrentActuals({ toTime: value }),
+                  },
+                ] as PanelFieldConfig[]}
+                initialData={actualsData}
+                collapsible={true}
+                defaultCollapsed={false}
+              />
+
+              {/* Other Details - SimpleDynamicPanel */}
+              <SimpleDynamicPanel
+                title="Other Details"
+                config={[
+                  {
+                    fieldType: 'select',
+                    key: 'qcUserdefined1',
+                    label: 'QC Userdefined 1',
+                    options: [
+                      { label: 'QC 1', value: 'qc1' },
+                      { label: 'QC 2', value: 'qc2' },
+                    ],
+                    onChange: (value) => updateCurrentActuals({ qcUserdefined1: value }),
+                  },
+                  {
+                    fieldType: 'select',
+                    key: 'qcUserdefined2',
+                    label: 'QC Userdefined 2',
+                    options: [
+                      { label: 'QC 1', value: 'qc1' },
+                      { label: 'QC 2', value: 'qc2' },
+                    ],
+                    onChange: (value) => updateCurrentActuals({ qcUserdefined2: value }),
+                  },
+                  {
+                    fieldType: 'select',
+                    key: 'qcUserdefined3',
+                    label: 'QC Userdefined 3',
+                    options: [
+                      { label: 'QC 1', value: 'qc1' },
+                      { label: 'QC 2', value: 'qc2' },
+                    ],
+                    onChange: (value) => updateCurrentActuals({ qcUserdefined3: value }),
+                  },
+                  {
+                    fieldType: 'textarea',
+                    key: 'remarks1',
+                    label: 'Remarks 1',
+                    placeholder: 'Enter remarks',
+                    onChange: (value) => updateCurrentActuals({ remarks1: value }),
+                  },
+                  {
+                    fieldType: 'textarea',
+                    key: 'remarks2',
+                    label: 'Remarks 2',
+                    placeholder: 'Enter remarks',
+                    onChange: (value) => updateCurrentActuals({ remarks2: value }),
+                  },
+                  {
+                    fieldType: 'textarea',
+                    key: 'remarks3',
+                    label: 'Remarks 3',
+                    placeholder: 'Enter remarks',
+                    onChange: (value) => updateCurrentActuals({ remarks3: value }),
+                  },
+                ] as PanelFieldConfig[]}
+                initialData={actualsData}
+                collapsible={true}
+                defaultCollapsed={false}
               />
             </TabsContent>
           </Tabs>
