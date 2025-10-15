@@ -29,7 +29,7 @@ export const PlanActualDetailsDrawer: React.FC<PlanActualDetailsDrawerProps> = (
   isOpen,
   onClose,
 }) => {
-  const { wagonItems, activeWagonId, setActiveWagon, updateActualsData, updatePlannedData, getWagonData, loadActualsFromJson, loadPlannedFromJson, exportActualsToJson, exportPlannedToJson, getAllWagonIds } = usePlanActualStore();
+  const { wagonItems, activeWagonId, setActiveWagon, updateActualsData, getWagonData } = usePlanActualStore();
   
   const [expandedSections, setExpandedSections] = useState({
     wagon: true,
@@ -40,87 +40,17 @@ export const PlanActualDetailsDrawer: React.FC<PlanActualDetailsDrawerProps> = (
     other: false,
   });
 
-  const [selectedItems, setSelectedItems] = useState<WagonItem[]>([]);
-  const [activeTab, setActiveTab] = useState('actuals');
+  const [selectedItems, setSelectedItems] = useState<WagonItem[]>([
+    { id: 'WAG00000001', name: 'WAG00000001', description: 'Habbins', price: '€ 1395.00', checked: true },
+    { id: 'WAG00000002', name: 'WAG00000002', description: 'Zaccs', price: '€ 1395.00', checked: false },
+    { id: 'WAG00000003', name: 'WAG00000003', description: 'A Type Wagon', price: '€ 1395.00', checked: false },
+    { id: 'WAG00000004', name: 'WAG00000004', description: 'Closed Wagon', price: '€ 1395.00', checked: false },
+  ]);
 
   const [selectAll, setSelectAll] = useState(false);
 
-  // Load sample JSON data when tabs are clicked
-  const handleTabChange = (value: string) => {
-    setActiveTab(value);
-    
-    if (value === 'actuals') {
-      // Sample JSON data for actuals
-      const sampleActuals = [
-        {
-          Seqno: "1",
-          WagonType: "CIS",
-          Wagon: "SDFGH23456",
-          WagonQty: 1,
-          WagonQtyUOM: "TON",
-        },
-        {
-          Seqno: "2",
-          WagonType: "CIS",
-          Wagon: "WAGON002",
-          WagonQty: 1,
-          WagonQtyUOM: "TON",
-        }
-      ];
-
-      loadActualsFromJson(sampleActuals);
-      
-      // Update the wagon list from the store
-      const wagonIds = getAllWagonIds();
-      const items: WagonItem[] = wagonIds.map(id => {
-        const wagonData = getWagonData(id);
-        return {
-          id,
-          name: id,
-          description: wagonData?.actuals.wagonType || 'Unknown',
-          price: `Seq: ${wagonData?.actuals.wagonSequence || '-'}`,
-          checked: false
-        };
-      });
-      setSelectedItems(items);
-    } else if (value === 'planned') {
-      // Sample JSON data for planned
-      const samplePlanned = [
-        {
-          Seqno: "2",
-          WagonType: "CIS",
-          WagonId: "SDFGH23456",
-          WagonQty: 1,
-          WagonWeightUOM: "TON",
-        }
-      ];
-
-      loadPlannedFromJson(samplePlanned);
-      
-      // Update the wagon list from the store
-      const wagonIds = getAllWagonIds();
-      const items: WagonItem[] = wagonIds.map(id => {
-        const wagonData = getWagonData(id);
-        return {
-          id,
-          name: id,
-          description: wagonData?.planned.wagonType || 'Unknown',
-          price: `Seq: ${wagonData?.planned.wagonSequence || '-'}`,
-          checked: false
-        };
-      });
-      setSelectedItems(items);
-    }
-  };
-
   const handleItemClick = (item: WagonItem) => {
     setActiveWagon(item.id);
-  };
-
-  const handleExportJson = () => {
-    const jsonOutput = activeTab === 'actuals' ? exportActualsToJson() : exportPlannedToJson();
-    console.log(`Exported ${activeTab} JSON:`, JSON.stringify(jsonOutput, null, 2));
-    // You can also download or send this to an API
   };
 
   // Get current wagon's actuals data
@@ -257,15 +187,12 @@ export const PlanActualDetailsDrawer: React.FC<PlanActualDetailsDrawerProps> = (
         {/* Main Content */}
         <div className="flex-1 flex flex-col">
           {/* Tabs */}
-          <Tabs value={activeTab} onValueChange={handleTabChange} className="flex-1 flex flex-col">
-            <div className="border-b px-6 pt-4 flex items-center justify-between">
+          <Tabs defaultValue="actuals" className="flex-1 flex flex-col">
+            <div className="border-b px-6 pt-4">
               <TabsList>
                 <TabsTrigger value="planned">Planned</TabsTrigger>
                 <TabsTrigger value="actuals">Actuals</TabsTrigger>
               </TabsList>
-              <Button onClick={handleExportJson} variant="outline" size="sm">
-                Export JSON
-              </Button>
             </div>
 
             <TabsContent value="planned" className="flex-1 m-0 overflow-y-auto p-6 space-y-4">
