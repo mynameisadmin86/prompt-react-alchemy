@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { X, ChevronDown, ChevronUp, Truck, Container as ContainerIcon, Package, Box, Calendar, Info } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { X, ChevronDown, ChevronUp, Truck, Container as ContainerIcon, Package, Box, Calendar, Info, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
@@ -11,6 +11,7 @@ import { cn } from '@/lib/utils';
 import { SimpleDynamicPanel } from '@/components/DynamicPanel/SimpleDynamicPanel';
 import { PanelFieldConfig } from '@/types/dynamicPanel';
 import { usePlanActualStore, ActualsData } from '@/stores/planActualStore';
+import { toast } from '@/hooks/use-toast';
 
 interface PlanActualDetailsDrawerProps {
   isOpen: boolean;
@@ -29,7 +30,7 @@ export const PlanActualDetailsDrawer: React.FC<PlanActualDetailsDrawerProps> = (
   isOpen,
   onClose,
 }) => {
-  const { wagonItems, activeWagonId, setActiveWagon, updateActualsData, getWagonData } = usePlanActualStore();
+  const { wagonItems, activeWagonId, setActiveWagon, updateActualsData, getWagonData, loadFromJson, exportToJson } = usePlanActualStore();
   
   const [expandedSections, setExpandedSections] = useState({
     wagon: true,
@@ -40,14 +41,86 @@ export const PlanActualDetailsDrawer: React.FC<PlanActualDetailsDrawerProps> = (
     other: false,
   });
 
-  const [selectedItems, setSelectedItems] = useState<WagonItem[]>([
-    { id: 'WAG00000001', name: 'WAG00000001', description: 'Habbins', price: '€ 1395.00', checked: true },
-    { id: 'WAG00000002', name: 'WAG00000002', description: 'Zaccs', price: '€ 1395.00', checked: false },
-    { id: 'WAG00000003', name: 'WAG00000003', description: 'A Type Wagon', price: '€ 1395.00', checked: false },
-    { id: 'WAG00000004', name: 'WAG00000004', description: 'Closed Wagon', price: '€ 1395.00', checked: false },
-  ]);
-
+  const [selectedItems, setSelectedItems] = useState<WagonItem[]>([]);
   const [selectAll, setSelectAll] = useState(false);
+
+  // Load sample JSON data on mount
+  useEffect(() => {
+    const sampleData = [
+      {
+        "Seqno": "1",
+        "WagonType": "CIS",
+        "Wagon": "SDFGH23456",
+        "WagonDescription": "SDFGH23456",
+        "WagonQty": 1,
+        "WagonQtyUOM": "TON",
+        "WagonTareWeight": "100",
+        "WagonTareWeightUOM": "TON",
+        "WagonLength": "15",
+        "WagonLengthUOM": "M",
+        "WagonPosition": "1",
+        "ContainerType": "20ft",
+        "ContainerId": "CONT001",
+        "ContainerQty": 1,
+        "ContainerQtyUOM": "EA",
+        "ContainerTareWeight": "50",
+        "ContainerTareWeightUOM": "TON",
+        "Product": "PROD001",
+        "ProductWeight": "80",
+        "ProductWeightUOM": "TON",
+        "ContainsHazardousGoods": "0",
+        "NHM": "NHM001",
+        "ClassOfStores": "Class A",
+        "UNCode": "UN1234",
+        "DGClass": "DG1",
+        "Thu": "THU001",
+        "ThuQty": 1,
+        "ThuWeight": "75",
+        "ThuWeightUOM": "TON",
+        "ShuntInLocation": "LOC001",
+        "ShuntOutLocation": "LOC002",
+        "ShuntInDate": "2024-01-01",
+        "ShuntInTime": "10:00",
+        "ShuntOutDate": "2024-01-02",
+        "ShuntOutTime": "12:00",
+        "QuickCode1": "QC1",
+        "QuickCodeValue1": "Value1",
+        "Remarks1": "Sample remark",
+        "WagonSealNo": "SEAL001",
+        "ContainerSealNo": "CSEAL001",
+        "ModeFlag": "Nochange"
+      },
+      {
+        "Seqno": "2",
+        "WagonType": "BOXN",
+        "Wagon": "BOXN98765",
+        "WagonDescription": "BOXN98765",
+        "WagonQty": 1,
+        "WagonQtyUOM": "TON",
+        "WagonTareWeight": "95",
+        "WagonTareWeightUOM": "TON",
+        "WagonLength": "14",
+        "WagonLengthUOM": "M",
+        "WagonPosition": "2",
+        "ContainsHazardousGoods": "1",
+        "ModeFlag": "Nochange"
+      }
+    ];
+    
+    loadFromJson(sampleData);
+  }, [loadFromJson]);
+
+  // Update selected items when wagon items change
+  useEffect(() => {
+    const items = Object.values(wagonItems).map(wagon => ({
+      id: wagon.id,
+      name: wagon.id,
+      description: wagon.actuals.wagonType || 'Unknown',
+      price: '€ 0.00',
+      checked: wagon.id === activeWagonId,
+    }));
+    setSelectedItems(items);
+  }, [wagonItems, activeWagonId]);
 
   const handleItemClick = (item: WagonItem) => {
     setActiveWagon(item.id);
@@ -83,6 +156,21 @@ export const PlanActualDetailsDrawer: React.FC<PlanActualDetailsDrawerProps> = (
     setSelectedItems(prev => prev.map(item => ({ ...item, checked: newValue })));
   };
 
+  const handleExportJson = () => {
+    const jsonData = exportToJson();
+    const blob = new Blob([JSON.stringify({ Actual: jsonData }, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'actuals-data.json';
+    a.click();
+    URL.revokeObjectURL(url);
+    toast({
+      title: 'Export Successful',
+      description: 'Actuals data exported to JSON file',
+    });
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -96,9 +184,15 @@ export const PlanActualDetailsDrawer: React.FC<PlanActualDetailsDrawerProps> = (
       {/* Header */}
       <div className="h-14 border-b flex items-center justify-between px-6">
         <h2 className="text-lg font-semibold">Plan and Actual Details</h2>
-        <Button variant="ghost" size="icon" onClick={onClose}>
-          <X className="h-5 w-5" />
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" onClick={handleExportJson}>
+            <Download className="h-4 w-4 mr-2" />
+            Export JSON
+          </Button>
+          <Button variant="ghost" size="icon" onClick={onClose}>
+            <X className="h-5 w-5" />
+          </Button>
+        </div>
       </div>
 
       <div className="flex h-[calc(100vh-56px)]">
@@ -987,47 +1081,48 @@ export const PlanActualDetailsDrawer: React.FC<PlanActualDetailsDrawerProps> = (
                 config={[
                   {
                     fieldType: 'select',
-                    key: 'departure',
-                    label: 'Departure',
+                    key: 'shuntInLocation',
+                    label: 'Shunt In Location',
                     options: [
-                      { label: 'Frankfurt Station Point A', value: 'frankfurt-a' },
+                      { label: 'LOC001', value: 'LOC001' },
+                      { label: 'LOC002', value: 'LOC002' },
                       { label: 'Frankfurt Station Point B', value: 'frankfurt-b' },
                     ],
-                    onChange: (value) => updateCurrentActuals({ departure: value }),
+                    onChange: (value) => updateCurrentActuals({ shuntInLocation: value }),
                   },
                   {
                     fieldType: 'select',
-                    key: 'destination',
-                    label: 'Destination',
+                    key: 'shuntOutLocation',
+                    label: 'Shunt Out Location',
                     options: [
-                      { label: 'Frankfurt Station Point A', value: 'frankfurt-a' },
-                      { label: 'Frankfurt Station Point B', value: 'frankfurt-b' },
+                      { label: 'LOC001', value: 'LOC001' },
+                      { label: 'LOC002', value: 'LOC002' },
                     ],
-                    onChange: (value) => updateCurrentActuals({ destination: value }),
+                    onChange: (value) => updateCurrentActuals({ shuntOutLocation: value }),
                   },
                   {
                     fieldType: 'date',
-                    key: 'fromDate',
-                    label: 'From Date',
-                    onChange: (value) => updateCurrentActuals({ fromDate: value }),
+                    key: 'shuntInDate',
+                    label: 'Shunt In Date',
+                    onChange: (value) => updateCurrentActuals({ shuntInDate: value }),
                   },
                   {
                     fieldType: 'time',
-                    key: 'fromTime',
-                    label: 'From Time',
-                    onChange: (value) => updateCurrentActuals({ fromTime: value }),
+                    key: 'shuntInTime',
+                    label: 'Shunt In Time',
+                    onChange: (value) => updateCurrentActuals({ shuntInTime: value }),
                   },
                   {
                     fieldType: 'date',
-                    key: 'toDate',
-                    label: 'To Date',
-                    onChange: (value) => updateCurrentActuals({ toDate: value }),
+                    key: 'shuntOutDate',
+                    label: 'Shunt Out Date',
+                    onChange: (value) => updateCurrentActuals({ shuntOutDate: value }),
                   },
                   {
                     fieldType: 'time',
-                    key: 'toTime',
-                    label: 'To Time',
-                    onChange: (value) => updateCurrentActuals({ toTime: value }),
+                    key: 'shuntOutTime',
+                    label: 'Shunt Out Time',
+                    onChange: (value) => updateCurrentActuals({ shuntOutTime: value }),
                   },
                 ] as PanelFieldConfig[]}
                 initialData={actualsData}
@@ -1040,34 +1135,69 @@ export const PlanActualDetailsDrawer: React.FC<PlanActualDetailsDrawerProps> = (
                 title="Other Details"
                 config={[
                   {
-                    fieldType: 'select',
-                    key: 'qcUserdefined1',
-                    label: 'QC Userdefined 1',
-                    options: [
-                      { label: 'QC 1', value: 'qc1' },
-                      { label: 'QC 2', value: 'qc2' },
-                    ],
-                    onChange: (value) => updateCurrentActuals({ qcUserdefined1: value }),
+                    fieldType: 'text',
+                    key: 'wagonSealNo',
+                    label: 'Wagon Seal No',
+                    placeholder: 'Enter wagon seal number',
+                    onChange: (value) => updateCurrentActuals({ wagonSealNo: value }),
+                  },
+                  {
+                    fieldType: 'text',
+                    key: 'containerSealNo',
+                    label: 'Container Seal No',
+                    placeholder: 'Enter container seal number',
+                    onChange: (value) => updateCurrentActuals({ containerSealNo: value }),
                   },
                   {
                     fieldType: 'select',
-                    key: 'qcUserdefined2',
-                    label: 'QC Userdefined 2',
+                    key: 'quickCode1',
+                    label: 'Quick Code 1',
                     options: [
-                      { label: 'QC 1', value: 'qc1' },
+                      { label: 'QC1', value: 'QC1' },
                       { label: 'QC 2', value: 'qc2' },
                     ],
-                    onChange: (value) => updateCurrentActuals({ qcUserdefined2: value }),
+                    onChange: (value) => updateCurrentActuals({ quickCode1: value }),
+                  },
+                  {
+                    fieldType: 'text',
+                    key: 'quickCodeValue1',
+                    label: 'Quick Code Value 1',
+                    placeholder: 'Enter value',
+                    onChange: (value) => updateCurrentActuals({ quickCodeValue1: value }),
                   },
                   {
                     fieldType: 'select',
-                    key: 'qcUserdefined3',
-                    label: 'QC Userdefined 3',
+                    key: 'quickCode2',
+                    label: 'Quick Code 2',
                     options: [
-                      { label: 'QC 1', value: 'qc1' },
+                      { label: 'QC1', value: 'QC1' },
                       { label: 'QC 2', value: 'qc2' },
                     ],
-                    onChange: (value) => updateCurrentActuals({ qcUserdefined3: value }),
+                    onChange: (value) => updateCurrentActuals({ quickCode2: value }),
+                  },
+                  {
+                    fieldType: 'text',
+                    key: 'quickCodeValue2',
+                    label: 'Quick Code Value 2',
+                    placeholder: 'Enter value',
+                    onChange: (value) => updateCurrentActuals({ quickCodeValue2: value }),
+                  },
+                  {
+                    fieldType: 'select',
+                    key: 'quickCode3',
+                    label: 'Quick Code 3',
+                    options: [
+                      { label: 'QC1', value: 'QC1' },
+                      { label: 'QC 2', value: 'qc2' },
+                    ],
+                    onChange: (value) => updateCurrentActuals({ quickCode3: value }),
+                  },
+                  {
+                    fieldType: 'text',
+                    key: 'quickCodeValue3',
+                    label: 'Quick Code Value 3',
+                    placeholder: 'Enter value',
+                    onChange: (value) => updateCurrentActuals({ quickCodeValue3: value }),
                   },
                   {
                     fieldType: 'textarea',
