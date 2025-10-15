@@ -12,6 +12,7 @@ import {
 
 const SimpleDynamicPanelDemo = () => {
   const [formData, setFormData] = useState({});
+  const [isPanelCollapsed, setIsPanelCollapsed] = useState(false);
 
   const panelConfig: PanelFieldConfig[] = [
     {
@@ -157,7 +158,7 @@ const SimpleDynamicPanelDemo = () => {
           </p>
         </div>
 
-        {/* Demo Panel */}
+        {/* Demo Panel with Collapsible */}
         <SimpleDynamicPanel
           title="Trip Planning Form"
           config={panelConfig}
@@ -165,6 +166,19 @@ const SimpleDynamicPanelDemo = () => {
             setFormData(data);
             console.log('Form data updated:', data);
           }}
+          collapsible={true}
+          defaultCollapsed={false}
+          onCollapsedChange={(collapsed) => {
+            setIsPanelCollapsed(collapsed);
+            console.log('Panel collapsed:', collapsed);
+          }}
+          className="max-w-4xl"
+        />
+
+        {/* Non-collapsible Panel Example */}
+        <SimpleDynamicPanel
+          title="Non-Collapsible Panel"
+          config={panelConfig.slice(0, 3)}
           className="max-w-4xl"
         />
 
