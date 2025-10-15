@@ -43,72 +43,77 @@ export const PlanActualDetailsDrawer: React.FC<PlanActualDetailsDrawerProps> = (
 
   const [selectedItems, setSelectedItems] = useState<WagonItem[]>([]);
   const [selectAll, setSelectAll] = useState(false);
+  const [activeTab, setActiveTab] = useState('planned');
 
-  // Load sample JSON data on mount
-  useEffect(() => {
-    const sampleData = [
-      {
-        "Seqno": "1",
-        "WagonType": "CIS",
-        "Wagon": "SDFGH23456",
-        "WagonDescription": "SDFGH23456",
-        "WagonQty": 1,
-        "WagonQtyUOM": "TON",
-        "WagonTareWeight": "100",
-        "WagonTareWeightUOM": "TON",
-        "WagonLength": "15",
-        "WagonLengthUOM": "M",
-        "WagonPosition": "1",
-        "ContainerType": "20ft",
-        "ContainerId": "CONT001",
-        "ContainerQty": 1,
-        "ContainerQtyUOM": "EA",
-        "ContainerTareWeight": "50",
-        "ContainerTareWeightUOM": "TON",
-        "Product": "PROD001",
-        "ProductWeight": "80",
-        "ProductWeightUOM": "TON",
-        "ContainsHazardousGoods": "0",
-        "NHM": "NHM001",
-        "ClassOfStores": "Class A",
-        "UNCode": "UN1234",
-        "DGClass": "DG1",
-        "Thu": "THU001",
-        "ThuQty": 1,
-        "ThuWeight": "75",
-        "ThuWeightUOM": "TON",
-        "ShuntInLocation": "LOC001",
-        "ShuntOutLocation": "LOC002",
-        "ShuntInDate": "2024-01-01",
-        "ShuntInTime": "10:00",
-        "ShuntOutDate": "2024-01-02",
-        "ShuntOutTime": "12:00",
-        "QuickCode1": "QC1",
-        "QuickCodeValue1": "Value1",
-        "Remarks1": "Sample remark",
-        "WagonSealNo": "SEAL001",
-        "ContainerSealNo": "CSEAL001",
-        "ModeFlag": "Nochange"
-      },
-      {
-        "Seqno": "2",
-        "WagonType": "BOXN",
-        "Wagon": "BOXN98765",
-        "WagonDescription": "BOXN98765",
-        "WagonQty": 1,
-        "WagonQtyUOM": "TON",
-        "WagonTareWeight": "95",
-        "WagonTareWeightUOM": "TON",
-        "WagonLength": "14",
-        "WagonLengthUOM": "M",
-        "WagonPosition": "2",
-        "ContainsHazardousGoods": "1",
-        "ModeFlag": "Nochange"
-      }
-    ];
+  // Load sample JSON data when actuals tab is clicked
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
     
-    loadFromJson(sampleData);
-  }, [loadFromJson]);
+    if (value === 'actuals') {
+      const sampleData = [
+        {
+          "Seqno": "1",
+          "WagonType": "CIS",
+          "Wagon": "SDFGH23456",
+          "WagonDescription": "SDFGH23456",
+          "WagonQty": 1,
+          "WagonQtyUOM": "TON",
+          "WagonTareWeight": "100",
+          "WagonTareWeightUOM": "TON",
+          "WagonLength": "15",
+          "WagonLengthUOM": "M",
+          "WagonPosition": "1",
+          "ContainerType": "20ft",
+          "ContainerId": "CONT001",
+          "ContainerQty": 1,
+          "ContainerQtyUOM": "EA",
+          "ContainerTareWeight": "50",
+          "ContainerTareWeightUOM": "TON",
+          "Product": "PROD001",
+          "ProductWeight": "80",
+          "ProductWeightUOM": "TON",
+          "ContainsHazardousGoods": "0",
+          "NHM": "NHM001",
+          "ClassOfStores": "Class A",
+          "UNCode": "UN1234",
+          "DGClass": "DG1",
+          "Thu": "THU001",
+          "ThuQty": 1,
+          "ThuWeight": "75",
+          "ThuWeightUOM": "TON",
+          "ShuntInLocation": "LOC001",
+          "ShuntOutLocation": "LOC002",
+          "ShuntInDate": "2024-01-01",
+          "ShuntInTime": "10:00",
+          "ShuntOutDate": "2024-01-02",
+          "ShuntOutTime": "12:00",
+          "QuickCode1": "QC1",
+          "QuickCodeValue1": "Value1",
+          "Remarks1": "Sample remark",
+          "WagonSealNo": "SEAL001",
+          "ContainerSealNo": "CSEAL001",
+          "ModeFlag": "Nochange"
+        },
+        {
+          "Seqno": "2",
+          "WagonType": "BOXN",
+          "Wagon": "BOXN98765",
+          "WagonDescription": "BOXN98765",
+          "WagonQty": 1,
+          "WagonQtyUOM": "TON",
+          "WagonTareWeight": "95",
+          "WagonTareWeightUOM": "TON",
+          "WagonLength": "14",
+          "WagonLengthUOM": "M",
+          "WagonPosition": "2",
+          "ContainsHazardousGoods": "1",
+          "ModeFlag": "Nochange"
+        }
+      ];
+      
+      loadFromJson(sampleData);
+    }
+  };
 
   // Update selected items when wagon items change
   useEffect(() => {
@@ -281,7 +286,7 @@ export const PlanActualDetailsDrawer: React.FC<PlanActualDetailsDrawerProps> = (
         {/* Main Content */}
         <div className="flex-1 flex flex-col">
           {/* Tabs */}
-          <Tabs defaultValue="actuals" className="flex-1 flex flex-col">
+          <Tabs value={activeTab} onValueChange={handleTabChange} className="flex-1 flex flex-col">
             <div className="border-b px-6 pt-4">
               <TabsList>
                 <TabsTrigger value="planned">Planned</TabsTrigger>
