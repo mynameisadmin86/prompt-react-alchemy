@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 
+// Plan and Actual Store - manages wagon data for both planned and actual states
 export interface ActualsData {
   // Wagon Details
   wagonType?: string;
