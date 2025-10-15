@@ -34,6 +34,7 @@ import OrderListPage from "./pages/OrderListPage";
 import CreateOrderPage from "./pages/CreateOrderPage";
 import ManageTripExecution from "./pages/ManageTripExecution";
 import TripPlanning from "./pages/TripPlanning";
+import ActualsDetailsPage from "./pages/ActualsDetailsPage";
 
 const queryClient = new QueryClient();
 
@@ -73,6 +74,7 @@ const App = () => (
           <Route path="/create-order" element={<CreateOrderPage />} />
           <Route path="/trip-log" element={<ManageTripExecution />} />
           <Route path="/trip-planning" element={<TripPlanning />} />
+          <Route path="/actuals-details" element={<ActualsDetailsPage />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

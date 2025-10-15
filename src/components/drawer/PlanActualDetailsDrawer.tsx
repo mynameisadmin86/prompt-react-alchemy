@@ -1,16 +1,14 @@
 import React, { useState } from 'react';
-import { X, ChevronDown, ChevronUp, Truck, Container as ContainerIcon, Package, Box, Calendar, Info } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { X, ChevronDown, ChevronUp, Truck, Container as ContainerIcon, Package, Box, Calendar, Info, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Separator } from '@/components/ui/separator';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
-import { DynamicPanel } from '@/components/DynamicPanel';
-import { PanelConfig, FieldConfig } from '@/types/dynamicPanel';
-import { usePlanActualStore, ActualsData } from '@/stores/planActualStore';
+import { usePlanActualStore } from '@/stores/planActualStore';
 
 interface PlanActualDetailsDrawerProps {
   isOpen: boolean;
@@ -29,7 +27,8 @@ export const PlanActualDetailsDrawer: React.FC<PlanActualDetailsDrawerProps> = (
   isOpen,
   onClose,
 }) => {
-  const { wagonItems, activeWagonId, setActiveWagon, updateActualsData, getWagonData } = usePlanActualStore();
+  const navigate = useNavigate();
+  const { wagonItems, activeWagonId, setActiveWagon, getWagonData } = usePlanActualStore();
   
   const [expandedSections, setExpandedSections] = useState({
     wagon: true,
@@ -53,16 +52,12 @@ export const PlanActualDetailsDrawer: React.FC<PlanActualDetailsDrawerProps> = (
     setActiveWagon(item.id);
   };
 
-  // Get current wagon's actuals data
+  // Get current wagon's planned data
   const currentWagonData = activeWagonId ? getWagonData(activeWagonId) : null;
-  const actualsData = currentWagonData?.actuals || {};
   const plannedData = currentWagonData?.planned || {};
 
-  // Helper to update actuals for the current wagon
-  const updateCurrentActuals = (data: Partial<ActualsData>) => {
-    if (activeWagonId) {
-      updateActualsData(activeWagonId, data);
-    }
+  const handleNavigateToActuals = () => {
+    navigate('/actuals-details');
   };
 
   const toggleSection = (section: keyof typeof expandedSections) => {
@@ -186,16 +181,19 @@ export const PlanActualDetailsDrawer: React.FC<PlanActualDetailsDrawerProps> = (
 
         {/* Main Content */}
         <div className="flex-1 flex flex-col">
-          {/* Tabs */}
-          <Tabs defaultValue="actuals" className="flex-1 flex flex-col">
-            <div className="border-b px-6 pt-4">
-              <TabsList>
-                <TabsTrigger value="planned">Planned</TabsTrigger>
-                <TabsTrigger value="actuals">Actuals</TabsTrigger>
-              </TabsList>
-            </div>
+          {/* Header with Actuals Button */}
+          <div className="border-b px-6 py-4 flex items-center justify-between">
+            <h3 className="text-lg font-semibold">Planned Details</h3>
+            <Button 
+              onClick={handleNavigateToActuals}
+              className="gap-2"
+            >
+              View Actuals
+              <ArrowRight className="h-4 w-4" />
+            </Button>
+          </div>
 
-            <TabsContent value="planned" className="flex-1 m-0 overflow-y-auto p-6 space-y-4">
+          <div className="flex-1 overflow-y-auto p-6 space-y-4">
               {/* Wagon Details - Planned */}
               <div className="border rounded-lg bg-card">
                 <div
