@@ -56,6 +56,13 @@ const Index = () => {
       color: "text-fuchsia-600"
     },
     {
+      title: "Simple Dynamic Panel Demo",
+      description: "Simplified panel with easy config format and all field types including InputDropdown",
+      icon: PanelLeft,
+      path: "/simple-dynamic-panel-demo",
+      color: "text-rose-600"
+    },
+    {
       title: "FlexGrid Demo",
       description: "Flexible grid layouts with drag-and-drop and responsive design",
       icon: Layout,

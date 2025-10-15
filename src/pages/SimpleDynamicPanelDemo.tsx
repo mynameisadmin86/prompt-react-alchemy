@@ -114,6 +114,18 @@ const SimpleDynamicPanelDemo = () => {
         { label: 'Pending', value: 'pending' }
       ],
       onChange: (value) => console.log('Status changed:', value)
+    },
+    {
+      fieldType: 'inputdropdown',
+      key: 'quantity',
+      label: 'Quantity',
+      placeholder: 'Enter value',
+      options: [
+        { label: 'KG', value: 'kg' },
+        { label: 'TON', value: 'ton' },
+        { label: 'LBS', value: 'lbs' }
+      ],
+      onChange: (value) => console.log('Quantity changed:', value)
     }
   ];
 
