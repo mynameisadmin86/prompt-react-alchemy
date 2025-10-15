@@ -63,6 +63,13 @@ const Index = () => {
       color: "text-rose-600"
     },
     {
+      title: "Plan Actuals",
+      description: "Plan and actual details management with wagon and container tracking",
+      icon: Workflow,
+      path: "/plan-actuals",
+      color: "text-violet-600"
+    },
+    {
       title: "FlexGrid Demo",
       description: "Flexible grid layouts with drag-and-drop and responsive design",
       icon: Layout,
