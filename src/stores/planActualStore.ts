@@ -135,8 +135,10 @@ interface PlanActualStore {
   updateActualsData: (wagonId: string, data: Partial<ActualsData>) => void;
   getWagonData: (wagonId: string) => WagonItemData | null;
   initializeWagon: (wagonId: string) => void;
-  loadFromJson: (jsonData: any[]) => void;
-  exportToJson: () => any[];
+  loadActualsFromJson: (jsonData: any[]) => void;
+  loadPlannedFromJson: (jsonData: any[]) => void;
+  exportActualsToJson: () => any[];
+  exportPlannedToJson: () => any[];
   getAllWagonIds: () => string[];
 }
 
@@ -204,7 +206,7 @@ export const usePlanActualStore = create<PlanActualStore>((set, get) => ({
     return Object.keys(state.wagonItems);
   },
 
-  loadFromJson: (jsonData) => {
+  loadActualsFromJson: (jsonData) => {
     const newWagonItems: Record<string, WagonItemData> = {};
     
     jsonData.forEach((item, index) => {
@@ -275,7 +277,71 @@ export const usePlanActualStore = create<PlanActualStore>((set, get) => ({
     });
   },
 
-  exportToJson: () => {
+  loadPlannedFromJson: (jsonData) => {
+    const newWagonItems: Record<string, WagonItemData> = {};
+    
+    jsonData.forEach((item, index) => {
+      const wagonId = item.WagonId || `WAGON_${index + 1}`;
+      
+      newWagonItems[wagonId] = {
+        id: wagonId,
+        actuals: {},
+        planned: {
+          wagonType: item.WagonType,
+          wagonId: item.WagonId,
+          wagonQuantity: item.WagonQty?.toString(),
+          wagonTareWeight: item.WagonTareWeight,
+          wagonGrossWeight: item.GrossWeight,
+          wagonLength: item.WagonLength,
+          wagonSequence: item.Seqno,
+          
+          containerType: item.ContainerType,
+          containerId: item.ContainerId,
+          containerQuantity: item.ContainerQty?.toString(),
+          containerTareWeight: item.ContainerAvgTareWeight,
+          containerLoadWeight: item.ContainerAvgLoadWeight,
+          
+          hazardousGoods: item.ContainsHazardousGoods,
+          nhm: item.NHM,
+          productId: item.Product,
+          productQuantity: item.ProductWeight,
+          classOfStores: item.ClassOfStores,
+          unCode: item.UNCode,
+          dgClass: item.DGClass,
+          
+          thuId: item.ThuId,
+          thuQuantity: item.ThuQty?.toString(),
+          thuGrossWeight: item.ThuWeight,
+          thuTareWeight: item.ThuTareWeight,
+          thuNetWeight: item.ThuNetWeight,
+          thuLength: item.ThuLength,
+          thuWidth: item.ThuWidth,
+          thuHeight: item.ThuHeight,
+          
+          departure: item.Departure,
+          destination: item.Arrival,
+          fromDate: item.FromDate,
+          fromTime: item.FromTime,
+          toDate: item.ToDate,
+          toTime: item.ToTime,
+          
+          qcUserdefined1: item.QuickCode1,
+          qcUserdefined2: item.QuickCode2,
+          qcUserdefined3: item.QuickCode3,
+          remarks1: item.Remarks1,
+          remarks2: item.Remarks2,
+          remarks3: item.Remarks3,
+        },
+      };
+    });
+    
+    set({ 
+      wagonItems: newWagonItems,
+      activeWagonId: Object.keys(newWagonItems)[0] || null
+    });
+  },
+
+  exportActualsToJson: () => {
     const state = get();
     return Object.values(state.wagonItems).map((wagon) => ({
       Seqno: wagon.actuals.wagonSequence || '1',
@@ -342,6 +408,53 @@ export const usePlanActualStore = create<PlanActualStore>((set, get) => ({
       Remarks2: wagon.actuals.remarks2,
       Remarks3: wagon.actuals.remarks3,
       ModeFlag: 'Nochange',
+    }));
+  },
+
+  exportPlannedToJson: () => {
+    const state = get();
+    return Object.values(state.wagonItems).map((wagon) => ({
+      Seqno: wagon.planned.wagonSequence || '1',
+      WagonType: wagon.planned.wagonType,
+      WagonId: wagon.planned.wagonId,
+      WagonDescription: wagon.planned.wagonId || 'UD',
+      WagonQty: wagon.planned.wagonQuantity ? Number(wagon.planned.wagonQuantity) : null,
+      WagonAvgLoadWeight: null,
+      WagonWeightUOM: 'TON',
+      ContainerType: wagon.planned.containerType,
+      ContainerId: wagon.planned.containerId,
+      ContainerDescription: wagon.planned.containerId || 'UD',
+      WagonAvgTareWeight: wagon.planned.wagonTareWeight,
+      WagonAvgLength: wagon.planned.wagonLength,
+      WagonAvgLengthUOM: null,
+      ContainerQty: wagon.planned.containerQuantity ? Number(wagon.planned.containerQuantity) : null,
+      ContainerAvgTareWeight: wagon.planned.containerTareWeight,
+      ContainerAvgLoadWeight: wagon.planned.containerLoadWeight,
+      ContainerWeightUOM: 'TON',
+      Product: wagon.planned.productId,
+      ProductWeight: wagon.planned.productQuantity,
+      ProductWeightUOM: 'TON',
+      ThuId: wagon.planned.thuId,
+      ThuSerialNo: null,
+      ThuQty: wagon.planned.thuQuantity ? Number(wagon.planned.thuQuantity) : 1,
+      ThuWeight: wagon.planned.thuGrossWeight,
+      ThuWeightUOM: 'TON',
+      Remarks1: wagon.planned.remarks1,
+      Remarks2: wagon.planned.remarks2,
+      Remarks3: wagon.planned.remarks3,
+      WagonTareWeight: wagon.planned.wagonTareWeight,
+      WagonTareWeightUOM: null,
+      GrossWeight: wagon.planned.wagonGrossWeight,
+      GrossWeightUOM: null,
+      WagonLength: wagon.planned.wagonLength,
+      WagonLengthUOM: null,
+      LastCommodityTransported1: null,
+      LastCommodityTransportedDate1: null,
+      LastCommodityTransported2: null,
+      LastCommodityTransportedDate2: null,
+      LastCommodityTransported3: null,
+      LastCommodityTransportedDate3: null,
+      Modeflag: 'Nochange',
     }));
   },
 }));

@@ -29,7 +29,7 @@ export const PlanActualDetailsDrawer: React.FC<PlanActualDetailsDrawerProps> = (
   isOpen,
   onClose,
 }) => {
-  const { wagonItems, activeWagonId, setActiveWagon, updateActualsData, getWagonData, loadFromJson, exportToJson, getAllWagonIds } = usePlanActualStore();
+  const { wagonItems, activeWagonId, setActiveWagon, updateActualsData, updatePlannedData, getWagonData, loadActualsFromJson, loadPlannedFromJson, exportActualsToJson, exportPlannedToJson, getAllWagonIds } = usePlanActualStore();
   
   const [expandedSections, setExpandedSections] = useState({
     wagon: true,
@@ -45,147 +45,30 @@ export const PlanActualDetailsDrawer: React.FC<PlanActualDetailsDrawerProps> = (
 
   const [selectAll, setSelectAll] = useState(false);
 
-  // Load sample JSON data when actuals tab is clicked
+  // Load sample JSON data when tabs are clicked
   const handleTabChange = (value: string) => {
     setActiveTab(value);
-    if (value === 'actuals' && selectedItems.length === 0) {
-      // Sample JSON data from user
+    
+    if (value === 'actuals') {
+      // Sample JSON data for actuals
       const sampleActuals = [
         {
           Seqno: "1",
-          PlanToActualCopy: null,
-          WagonPosition: null,
           WagonType: "CIS",
           Wagon: "SDFGH23456",
-          WagonDescription: "SDFGH23456",
           WagonQty: 1,
           WagonQtyUOM: "TON",
-          ContainerType: null,
-          ContainerId: null,
-          ContainerDescription: null,
-          ContainerQty: null,
-          ContainerQtyUOM: "TON",
-          Product: null,
-          ProductWeight: null,
-          ProductWeightUOM: "TON",
-          Thu: null,
-          ThuSerialNo: null,
-          ThuQty: null,
-          ThuWeight: null,
-          ThuWeightUOM: "TON",
-          ShuntingOption: null,
-          ReplacedWagon: null,
-          ShuntingReasonCode: null,
-          Remarks: null,
-          ShuntInLocation: null,
-          ShuntInLocationDescription: "UD",
-          ShuntOutLocation: null,
-          ShuntOutLocationDescription: "UD",
-          ShuntInDate: null,
-          ShuntInTime: null,
-          ShuntOutDate: null,
-          ShuntOutTime: null,
-          ClassOfStores: null,
-          NHM: null,
-          NHMDescription: null,
-          UNCode: null,
-          UNCodeDescription: null,
-          DGClass: null,
-          ContainsHazardousGoods: "0",
-          WagonSealNo: null,
-          ContainerSealNo: null,
-          ContainerTareWeight: null,
-          ContainerTareWeightUOM: null,
-          LastCommodityTransported1: null,
-          LastCommodityTransportedDate1: null,
-          LastCommodityTransported2: null,
-          LastCommodityTransportedDate2: null,
-          LastCommodityTransported3: null,
-          LastCommodityTransportedDate3: null,
-          WagonTareWeight: null,
-          WagonTareWeightUOM: null,
-          WagonLength: null,
-          WagonLengthUOM: null,
-          QuickCode1: null,
-          QuickCode2: null,
-          QuickCode3: null,
-          QuickCodeValue1: null,
-          QuickCodeValue2: null,
-          QuickCodeValue3: null,
-          Remarks1: null,
-          Remarks2: null,
-          Remarks3: null,
-          ModeFlag: "Nochange"
         },
         {
           Seqno: "2",
-          PlanToActualCopy: null,
-          WagonPosition: null,
           WagonType: "CIS",
           Wagon: "WAGON002",
-          WagonDescription: "WAGON002",
           WagonQty: 1,
           WagonQtyUOM: "TON",
-          ContainerType: null,
-          ContainerId: null,
-          ContainerDescription: null,
-          ContainerQty: null,
-          ContainerQtyUOM: "TON",
-          Product: null,
-          ProductWeight: null,
-          ProductWeightUOM: "TON",
-          Thu: null,
-          ThuSerialNo: null,
-          ThuQty: null,
-          ThuWeight: null,
-          ThuWeightUOM: "TON",
-          ShuntingOption: null,
-          ReplacedWagon: null,
-          ShuntingReasonCode: null,
-          Remarks: null,
-          ShuntInLocation: null,
-          ShuntInLocationDescription: "UD",
-          ShuntOutLocation: null,
-          ShuntOutLocationDescription: "UD",
-          ShuntInDate: null,
-          ShuntInTime: null,
-          ShuntOutDate: null,
-          ShuntOutTime: null,
-          ClassOfStores: null,
-          NHM: null,
-          NHMDescription: null,
-          UNCode: null,
-          UNCodeDescription: null,
-          DGClass: null,
-          ContainsHazardousGoods: "0",
-          WagonSealNo: null,
-          ContainerSealNo: null,
-          ContainerTareWeight: null,
-          ContainerTareWeightUOM: null,
-          LastCommodityTransported1: null,
-          LastCommodityTransportedDate1: null,
-          LastCommodityTransported2: null,
-          LastCommodityTransportedDate2: null,
-          LastCommodityTransported3: null,
-          LastCommodityTransportedDate3: null,
-          WagonTareWeight: null,
-          WagonTareWeightUOM: null,
-          WagonLength: null,
-          WagonLengthUOM: null,
-          QuickCode1: null,
-          QuickCode2: null,
-          QuickCode3: null,
-          QuickCodeValue1: null,
-          QuickCodeValue2: null,
-          QuickCodeValue3: null,
-          Remarks1: null,
-          Remarks2: null,
-          Remarks3: null,
-          ModeFlag: "Nochange"
         }
       ];
 
-      loadFromJson(sampleActuals);
+      loadActualsFromJson(sampleActuals);
       
       // Update the wagon list from the store
       const wagonIds = getAllWagonIds();
@@ -200,6 +83,33 @@ export const PlanActualDetailsDrawer: React.FC<PlanActualDetailsDrawerProps> = (
         };
       });
       setSelectedItems(items);
+    } else if (value === 'planned') {
+      // Sample JSON data for planned
+      const samplePlanned = [
+        {
+          Seqno: "2",
+          WagonType: "CIS",
+          WagonId: "SDFGH23456",
+          WagonQty: 1,
+          WagonWeightUOM: "TON",
+        }
+      ];
+
+      loadPlannedFromJson(samplePlanned);
+      
+      // Update the wagon list from the store
+      const wagonIds = getAllWagonIds();
+      const items: WagonItem[] = wagonIds.map(id => {
+        const wagonData = getWagonData(id);
+        return {
+          id,
+          name: id,
+          description: wagonData?.planned.wagonType || 'Unknown',
+          price: `Seq: ${wagonData?.planned.wagonSequence || '-'}`,
+          checked: false
+        };
+      });
+      setSelectedItems(items);
     }
   };
 
@@ -208,8 +118,8 @@ export const PlanActualDetailsDrawer: React.FC<PlanActualDetailsDrawerProps> = (
   };
 
   const handleExportJson = () => {
-    const jsonOutput = exportToJson();
-    console.log('Exported JSON:', JSON.stringify(jsonOutput, null, 2));
+    const jsonOutput = activeTab === 'actuals' ? exportActualsToJson() : exportPlannedToJson();
+    console.log(`Exported ${activeTab} JSON:`, JSON.stringify(jsonOutput, null, 2));
     // You can also download or send this to an API
   };
 
