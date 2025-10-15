@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { MoreVertical, Edit, Copy, Plus, X, ChevronDown, ChevronUp } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { DynamicLazySelect } from '@/components/DynamicPanel/DynamicLazySelect';
+import { InputDropdown, InputDropdownValue } from '@/components/ui/input-dropdown';
 import { usePlanActualStore } from '@/stores/planActualStore';
 
 const PlanActuals = () => {
@@ -19,6 +20,15 @@ const PlanActuals = () => {
   const [containerCollapsed, setContainerCollapsed] = useState(false);
   const [plannedWagonType, setPlannedWagonType] = useState<string | undefined>();
   const [actualsWagonType, setActualsWagonType] = useState<string | undefined>();
+  const [plannedWagonQuantity, setPlannedWagonQuantity] = useState<InputDropdownValue>({ dropdown: 'KG', input: '' });
+  const [actualsWagonQuantity, setActualsWagonQuantity] = useState<InputDropdownValue>({ dropdown: 'KG', input: '' });
+
+  const quantityUnitOptions = [
+    { label: 'KG', value: 'KG' },
+    { label: 'TON', value: 'TON' },
+    { label: 'LBS', value: 'LBS' },
+    { label: 'MT', value: 'MT' },
+  ];
 
   // Mock fetch function for wagon types with lazy loading
   const fetchWagonTypes = async ({ searchTerm, offset, limit }: { searchTerm: string; offset: number; limit: number }) => {
@@ -171,18 +181,12 @@ const PlanActuals = () => {
                       </div>
                       <div>
                         <Label htmlFor="wagon-quantity">Wagon Quantity</Label>
-                        <div className="flex gap-2">
-                          <Select defaultValue="EA">
-                            <SelectTrigger className="w-20">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="EA">EA</SelectItem>
-                              <SelectItem value="TON">TON</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <Input id="wagon-quantity" placeholder="1" className="flex-1" />
-                        </div>
+                        <InputDropdown
+                          value={plannedWagonQuantity}
+                          onChange={setPlannedWagonQuantity}
+                          options={quantityUnitOptions}
+                          placeholder="Enter Quantity"
+                        />
                       </div>
                       <div>
                         <Label htmlFor="wagon-tare-weight">Wagon Tare Weight</Label>
@@ -359,18 +363,12 @@ const PlanActuals = () => {
                       </div>
                       <div>
                         <Label htmlFor="actuals-wagon-quantity">Wagon Quantity</Label>
-                        <div className="flex gap-2">
-                          <Select defaultValue="EA">
-                            <SelectTrigger className="w-20">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="EA">EA</SelectItem>
-                              <SelectItem value="TON">TON</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <Input id="actuals-wagon-quantity" placeholder="1" className="flex-1" />
-                        </div>
+                        <InputDropdown
+                          value={actualsWagonQuantity}
+                          onChange={setActualsWagonQuantity}
+                          options={quantityUnitOptions}
+                          placeholder="Enter Quantity"
+                        />
                       </div>
                       <div>
                         <Label htmlFor="actuals-wagon-tare-weight">Wagon Tare Weight</Label>
