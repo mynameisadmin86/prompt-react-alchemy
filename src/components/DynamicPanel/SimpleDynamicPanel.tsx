@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -9,8 +9,10 @@ import { Label } from '@/components/ui/label';
 import { LazySelect } from '@/components/SmartGrid/LazySelect';
 import { InputDropdown } from '@/components/ui/input-dropdown';
 import { splitInputDropdownValue, combineInputDropdownValue } from '@/utils/inputDropdown';
-import { Search, Calendar, Clock } from 'lucide-react';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Search, Calendar, Clock, ChevronDown, ChevronUp } from 'lucide-react';
 import { PanelFieldConfig } from '@/types/dynamicPanel';
+import { Button } from '@/components/ui/button';
 
 interface SimpleDynamicPanelProps {
   title: string;
@@ -18,6 +20,9 @@ interface SimpleDynamicPanelProps {
   initialData?: Record<string, any>;
   onDataChange?: (data: Record<string, any>) => void;
   className?: string;
+  collapsible?: boolean;
+  defaultCollapsed?: boolean;
+  onCollapsedChange?: (collapsed: boolean) => void;
 }
 
 export const SimpleDynamicPanel: React.FC<SimpleDynamicPanelProps> = ({
@@ -26,13 +31,23 @@ export const SimpleDynamicPanel: React.FC<SimpleDynamicPanelProps> = ({
   initialData = {},
   onDataChange,
   className = '',
+  collapsible = false,
+  defaultCollapsed = false,
+  onCollapsedChange,
 }) => {
+  const [isCollapsed, setIsCollapsed] = useState(defaultCollapsed);
+  
   const { control } = useForm({
     defaultValues: config.reduce((acc, field) => {
       acc[field.key] = initialData[field.key] || '';
       return acc;
     }, {} as Record<string, any>),
   });
+
+  const handleCollapsedChange = (collapsed: boolean) => {
+    setIsCollapsed(collapsed);
+    onCollapsedChange?.(collapsed);
+  };
 
   const renderField = (fieldConfig: PanelFieldConfig) => {
     const { key, label, fieldType } = fieldConfig;
@@ -350,6 +365,44 @@ export const SimpleDynamicPanel: React.FC<SimpleDynamicPanelProps> = ({
         return null;
     }
   };
+
+  if (collapsible) {
+    return (
+      <Collapsible
+        open={!isCollapsed}
+        onOpenChange={(open) => handleCollapsedChange(!open)}
+        className={className}
+      >
+        <Card>
+          <CardHeader className="pb-3">
+            <CollapsibleTrigger asChild>
+              <div className="flex items-center justify-between cursor-pointer">
+                <CardTitle className="text-lg font-semibold">{title}</CardTitle>
+                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                  {isCollapsed ? (
+                    <ChevronDown className="h-4 w-4" />
+                  ) : (
+                    <ChevronUp className="h-4 w-4" />
+                  )}
+                </Button>
+              </div>
+            </CollapsibleTrigger>
+          </CardHeader>
+          <CollapsibleContent>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {config.map((fieldConfig) => (
+                  <div key={fieldConfig.key}>
+                    {renderField(fieldConfig)}
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </CollapsibleContent>
+        </Card>
+      </Collapsible>
+    );
+  }
 
   return (
     <Card className={className}>
