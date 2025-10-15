@@ -1,121 +1,21 @@
 import { useState } from 'react';
-import { SimpleDynamicPanel } from '@/components/DynamicPanel/SimpleDynamicPanel';
-import { PanelFieldConfig } from '@/types/dynamicPanel';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
-import { MoreVertical, Edit, Copy, Plus, X } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { MoreVertical, Edit, Copy, Plus, X, ChevronDown, ChevronUp } from 'lucide-react';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { usePlanActualStore } from '@/stores/planActualStore';
 
 const PlanActuals = () => {
   const { wagonItems, activeWagonId, setActiveWagon } = usePlanActualStore();
   const [selectedTab, setSelectedTab] = useState('actuals');
-
-  // Wagon Details Panel Configuration
-  const wagonDetailsConfig: PanelFieldConfig[] = [
-    {
-      key: 'wagonType',
-      label: 'Wagon Type',
-      fieldType: 'select',
-      options: [
-        { value: 'type1', label: 'Type 1' },
-        { value: 'type2', label: 'Type 2' },
-        { value: 'type3', label: 'Type 3' },
-      ],
-    },
-    {
-      key: 'wagonId',
-      label: 'Wagon ID',
-      fieldType: 'text',
-    },
-    {
-      key: 'wagonQuantity',
-      label: 'Wagon Quantity',
-      fieldType: 'inputdropdown',
-      options: [
-        { value: 'EA', label: 'EA' },
-        { value: 'TON', label: 'TON' },
-      ],
-    },
-    {
-      key: 'wagonTareWeight',
-      label: 'Wagon Tare Weight',
-      fieldType: 'inputdropdown',
-      options: [
-        { value: 'TON', label: 'TON' },
-        { value: 'KG', label: 'KG' },
-      ],
-    },
-    {
-      key: 'wagonGrossWeight',
-      label: 'Wagon Gross Weight',
-      fieldType: 'inputdropdown',
-      options: [
-        { value: 'TON', label: 'TON' },
-        { value: 'KG', label: 'KG' },
-      ],
-    },
-    {
-      key: 'wagonLength',
-      label: 'Wagon Length',
-      fieldType: 'inputdropdown',
-      options: [
-        { value: 'M', label: 'M' },
-        { value: 'FT', label: 'FT' },
-      ],
-    },
-    {
-      key: 'wagonSequence',
-      label: 'Wagon Sequence',
-      fieldType: 'text',
-    },
-  ];
-
-  // Container Details Panel Configuration
-  const containerDetailsConfig: PanelFieldConfig[] = [
-    {
-      key: 'containerType',
-      label: 'Container Type',
-      fieldType: 'select',
-      options: [
-        { value: 'type1', label: 'Type 1' },
-        { value: 'type2', label: 'Type 2' },
-      ],
-    },
-    {
-      key: 'containerId',
-      label: 'Container ID',
-      fieldType: 'text',
-    },
-    {
-      key: 'containerQuantity',
-      label: 'Container Quantity',
-      fieldType: 'inputdropdown',
-      options: [
-        { value: 'EA', label: 'EA' },
-        { value: 'TON', label: 'TON' },
-      ],
-    },
-    {
-      key: 'containerTareWeight',
-      label: 'Container Tare Weight',
-      fieldType: 'inputdropdown',
-      options: [
-        { value: 'TON', label: 'TON' },
-        { value: 'KG', label: 'KG' },
-      ],
-    },
-    {
-      key: 'containerLoadWeight',
-      label: 'Container Load Weight',
-      fieldType: 'inputdropdown',
-      options: [
-        { value: 'TON', label: 'TON' },
-        { value: 'KG', label: 'KG' },
-      ],
-    },
-  ];
+  const [wagonCollapsed, setWagonCollapsed] = useState(false);
+  const [containerCollapsed, setContainerCollapsed] = useState(false);
 
   const wagonList = Object.entries(wagonItems).map(([id, data]) => ({
     id,
@@ -210,22 +110,183 @@ const PlanActuals = () => {
 
           {/* Planned Tab */}
           <TabsContent value="planned" className="flex-1 overflow-y-auto p-6 space-y-4">
-            <SimpleDynamicPanel
-              title="Wagon Details"
-              config={wagonDetailsConfig}
-              initialData={{}}
-              onDataChange={(data) => console.log('Planned wagon data:', data)}
-              collapsible={true}
-              defaultCollapsed={false}
-            />
-            <SimpleDynamicPanel
-              title="Container Details"
-              config={containerDetailsConfig}
-              initialData={{}}
-              onDataChange={(data) => console.log('Planned container data:', data)}
-              collapsible={true}
-              defaultCollapsed={false}
-            />
+            {/* Wagon Details */}
+            <Collapsible open={!wagonCollapsed} onOpenChange={(open) => setWagonCollapsed(!open)}>
+              <Card>
+                <CardHeader className="cursor-pointer">
+                  <CollapsibleTrigger className="flex items-center justify-between w-full">
+                    <CardTitle className="text-base">Wagon Details</CardTitle>
+                    {wagonCollapsed ? <ChevronDown className="h-4 w-4" /> : <ChevronUp className="h-4 w-4" />}
+                  </CollapsibleTrigger>
+                </CardHeader>
+                <CollapsibleContent>
+                  <CardContent>
+                    <div className="grid grid-cols-3 gap-4">
+                      <div>
+                        <Label htmlFor="wagon-type">Wagon Type</Label>
+                        <Select>
+                          <SelectTrigger id="wagon-type">
+                            <SelectValue placeholder="Select Type" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="type1">Type 1</SelectItem>
+                            <SelectItem value="type2">Type 2</SelectItem>
+                            <SelectItem value="type3">Type 3</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <Label htmlFor="wagon-id">Wagon ID</Label>
+                        <Input id="wagon-id" placeholder="Enter ID" />
+                      </div>
+                      <div>
+                        <Label htmlFor="wagon-quantity">Wagon Quantity</Label>
+                        <div className="flex gap-2">
+                          <Select defaultValue="EA">
+                            <SelectTrigger className="w-20">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="EA">EA</SelectItem>
+                              <SelectItem value="TON">TON</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <Input id="wagon-quantity" placeholder="1" className="flex-1" />
+                        </div>
+                      </div>
+                      <div>
+                        <Label htmlFor="wagon-tare-weight">Wagon Tare Weight</Label>
+                        <div className="flex gap-2">
+                          <Select defaultValue="TON">
+                            <SelectTrigger className="w-20">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="TON">TON</SelectItem>
+                              <SelectItem value="KG">KG</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <Input id="wagon-tare-weight" placeholder="Enter Value" className="flex-1" />
+                        </div>
+                      </div>
+                      <div>
+                        <Label htmlFor="wagon-gross-weight">Wagon Gross Weight</Label>
+                        <div className="flex gap-2">
+                          <Select defaultValue="TON">
+                            <SelectTrigger className="w-20">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="TON">TON</SelectItem>
+                              <SelectItem value="KG">KG</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <Input id="wagon-gross-weight" placeholder="Enter Value" className="flex-1" />
+                        </div>
+                      </div>
+                      <div>
+                        <Label htmlFor="wagon-length">Wagon Length</Label>
+                        <div className="flex gap-2">
+                          <Select defaultValue="M">
+                            <SelectTrigger className="w-20">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="M">M</SelectItem>
+                              <SelectItem value="FT">FT</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <Input id="wagon-length" placeholder="Enter Value" className="flex-1" />
+                        </div>
+                      </div>
+                      <div className="col-span-3">
+                        <Label htmlFor="wagon-sequence">Wagon Sequence</Label>
+                        <Input id="wagon-sequence" placeholder="Enter Wagon Sequence" />
+                      </div>
+                    </div>
+                  </CardContent>
+                </CollapsibleContent>
+              </Card>
+            </Collapsible>
+
+            {/* Container Details */}
+            <Collapsible open={!containerCollapsed} onOpenChange={(open) => setContainerCollapsed(!open)}>
+              <Card>
+                <CardHeader className="cursor-pointer">
+                  <CollapsibleTrigger className="flex items-center justify-between w-full">
+                    <CardTitle className="text-base">Container Details</CardTitle>
+                    {containerCollapsed ? <ChevronDown className="h-4 w-4" /> : <ChevronUp className="h-4 w-4" />}
+                  </CollapsibleTrigger>
+                </CardHeader>
+                <CollapsibleContent>
+                  <CardContent>
+                    <div className="grid grid-cols-3 gap-4">
+                      <div>
+                        <Label htmlFor="container-type">Container Type</Label>
+                        <Select>
+                          <SelectTrigger id="container-type">
+                            <SelectValue placeholder="Select Type" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="type1">Type 1</SelectItem>
+                            <SelectItem value="type2">Type 2</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <Label htmlFor="container-id">Container ID</Label>
+                        <Input id="container-id" placeholder="Enter ID" />
+                      </div>
+                      <div>
+                        <Label htmlFor="container-quantity">Container Quantity</Label>
+                        <div className="flex gap-2">
+                          <Select defaultValue="EA">
+                            <SelectTrigger className="w-20">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="EA">EA</SelectItem>
+                              <SelectItem value="TON">TON</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <Input id="container-quantity" placeholder="1" className="flex-1" />
+                        </div>
+                      </div>
+                      <div>
+                        <Label htmlFor="container-tare-weight">Container Tare Weight</Label>
+                        <div className="flex gap-2">
+                          <Select defaultValue="TON">
+                            <SelectTrigger className="w-20">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="TON">TON</SelectItem>
+                              <SelectItem value="KG">KG</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <Input id="container-tare-weight" placeholder="Enter Value" className="flex-1" />
+                        </div>
+                      </div>
+                      <div>
+                        <Label htmlFor="container-load-weight">Container Load Weight</Label>
+                        <div className="flex gap-2">
+                          <Select defaultValue="TON">
+                            <SelectTrigger className="w-20">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="TON">TON</SelectItem>
+                              <SelectItem value="KG">KG</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <Input id="container-load-weight" placeholder="Enter Value" className="flex-1" />
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </CollapsibleContent>
+              </Card>
+            </Collapsible>
           </TabsContent>
 
           {/* Actuals Tab */}
@@ -240,14 +301,105 @@ const PlanActuals = () => {
                 </Badge>
               </div>
             </div>
-            <SimpleDynamicPanel
-              title="Wagon Details"
-              config={wagonDetailsConfig}
-              initialData={{}}
-              onDataChange={(data) => console.log('Actuals wagon data:', data)}
-              collapsible={true}
-              defaultCollapsed={false}
-            />
+            
+            {/* Wagon Details */}
+            <Collapsible open={!wagonCollapsed} onOpenChange={(open) => setWagonCollapsed(!open)}>
+              <Card>
+                <CardHeader className="cursor-pointer">
+                  <CollapsibleTrigger className="flex items-center justify-between w-full">
+                    <CardTitle className="text-base">Wagon Details</CardTitle>
+                    {wagonCollapsed ? <ChevronDown className="h-4 w-4" /> : <ChevronUp className="h-4 w-4" />}
+                  </CollapsibleTrigger>
+                </CardHeader>
+                <CollapsibleContent>
+                  <CardContent>
+                    <div className="grid grid-cols-3 gap-4">
+                      <div>
+                        <Label htmlFor="actuals-wagon-type">Wagon Type</Label>
+                        <Select>
+                          <SelectTrigger id="actuals-wagon-type">
+                            <SelectValue placeholder="Select Type" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="type1">Type 1</SelectItem>
+                            <SelectItem value="type2">Type 2</SelectItem>
+                            <SelectItem value="type3">Type 3</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <Label htmlFor="actuals-wagon-id">Wagon ID</Label>
+                        <Input id="actuals-wagon-id" placeholder="Enter ID" />
+                      </div>
+                      <div>
+                        <Label htmlFor="actuals-wagon-quantity">Wagon Quantity</Label>
+                        <div className="flex gap-2">
+                          <Select defaultValue="EA">
+                            <SelectTrigger className="w-20">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="EA">EA</SelectItem>
+                              <SelectItem value="TON">TON</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <Input id="actuals-wagon-quantity" placeholder="1" className="flex-1" />
+                        </div>
+                      </div>
+                      <div>
+                        <Label htmlFor="actuals-wagon-tare-weight">Wagon Tare Weight</Label>
+                        <div className="flex gap-2">
+                          <Select defaultValue="TON">
+                            <SelectTrigger className="w-20">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="TON">TON</SelectItem>
+                              <SelectItem value="KG">KG</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <Input id="actuals-wagon-tare-weight" placeholder="Enter Value" className="flex-1" />
+                        </div>
+                      </div>
+                      <div>
+                        <Label htmlFor="actuals-wagon-gross-weight">Wagon Gross Weight</Label>
+                        <div className="flex gap-2">
+                          <Select defaultValue="TON">
+                            <SelectTrigger className="w-20">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="TON">TON</SelectItem>
+                              <SelectItem value="KG">KG</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <Input id="actuals-wagon-gross-weight" placeholder="Enter Value" className="flex-1" />
+                        </div>
+                      </div>
+                      <div>
+                        <Label htmlFor="actuals-wagon-length">Wagon Length</Label>
+                        <div className="flex gap-2">
+                          <Select defaultValue="M">
+                            <SelectTrigger className="w-20">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="M">M</SelectItem>
+                              <SelectItem value="FT">FT</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <Input id="actuals-wagon-length" placeholder="Enter Value" className="flex-1" />
+                        </div>
+                      </div>
+                      <div className="col-span-3">
+                        <Label htmlFor="actuals-wagon-sequence">Wagon Sequence</Label>
+                        <Input id="actuals-wagon-sequence" placeholder="Enter Wagon Sequence" />
+                      </div>
+                    </div>
+                  </CardContent>
+                </CollapsibleContent>
+              </Card>
+            </Collapsible>
 
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-2">
@@ -259,14 +411,85 @@ const PlanActuals = () => {
                 </Badge>
               </div>
             </div>
-            <SimpleDynamicPanel
-              title="Container Details"
-              config={containerDetailsConfig}
-              initialData={{}}
-              onDataChange={(data) => console.log('Actuals container data:', data)}
-              collapsible={true}
-              defaultCollapsed={false}
-            />
+            
+            {/* Container Details */}
+            <Collapsible open={!containerCollapsed} onOpenChange={(open) => setContainerCollapsed(!open)}>
+              <Card>
+                <CardHeader className="cursor-pointer">
+                  <CollapsibleTrigger className="flex items-center justify-between w-full">
+                    <CardTitle className="text-base">Container Details</CardTitle>
+                    {containerCollapsed ? <ChevronDown className="h-4 w-4" /> : <ChevronUp className="h-4 w-4" />}
+                  </CollapsibleTrigger>
+                </CardHeader>
+                <CollapsibleContent>
+                  <CardContent>
+                    <div className="grid grid-cols-3 gap-4">
+                      <div>
+                        <Label htmlFor="actuals-container-type">Container Type</Label>
+                        <Select>
+                          <SelectTrigger id="actuals-container-type">
+                            <SelectValue placeholder="Select Type" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="type1">Type 1</SelectItem>
+                            <SelectItem value="type2">Type 2</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <Label htmlFor="actuals-container-id">Container ID</Label>
+                        <Input id="actuals-container-id" placeholder="Enter ID" />
+                      </div>
+                      <div>
+                        <Label htmlFor="actuals-container-quantity">Container Quantity</Label>
+                        <div className="flex gap-2">
+                          <Select defaultValue="EA">
+                            <SelectTrigger className="w-20">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="EA">EA</SelectItem>
+                              <SelectItem value="TON">TON</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <Input id="actuals-container-quantity" placeholder="1" className="flex-1" />
+                        </div>
+                      </div>
+                      <div>
+                        <Label htmlFor="actuals-container-tare-weight">Container Tare Weight</Label>
+                        <div className="flex gap-2">
+                          <Select defaultValue="TON">
+                            <SelectTrigger className="w-20">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="TON">TON</SelectItem>
+                              <SelectItem value="KG">KG</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <Input id="actuals-container-tare-weight" placeholder="Enter Value" className="flex-1" />
+                        </div>
+                      </div>
+                      <div>
+                        <Label htmlFor="actuals-container-load-weight">Container Load Weight</Label>
+                        <div className="flex gap-2">
+                          <Select defaultValue="TON">
+                            <SelectTrigger className="w-20">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="TON">TON</SelectItem>
+                              <SelectItem value="KG">KG</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <Input id="actuals-container-load-weight" placeholder="Enter Value" className="flex-1" />
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </CollapsibleContent>
+              </Card>
+            </Collapsible>
           </TabsContent>
         </Tabs>
 
