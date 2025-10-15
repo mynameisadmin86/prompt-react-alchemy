@@ -50,6 +50,7 @@ export interface ActualsData {
   thuWidthUnit?: string;
   thuHeight?: string;
   thuHeightUnit?: string;
+  thuDimensionUnit?: string;
 
   // Journey Details
   departure?: string;
