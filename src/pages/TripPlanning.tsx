@@ -431,81 +431,229 @@ const TripPlanning = () => {
             </div>
           </div>
         ) : (
-          /* Customer Orders Card - Default */
-          <div className="bg-card border border-border rounded-lg p-6">
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <Package className="h-5 w-5 text-primary" />
+          /* Customer Orders Section */
+          <>
+            {!consolidatedTrip ? (
+              /* Default View - Single Customer Orders Card */
+              <div className="bg-card border border-border rounded-lg p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                      <Package className="h-5 w-5 text-primary" />
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <h2 className="text-lg font-medium">Customer Orders</h2>
+                      <Badge variant="secondary" className="rounded-full">0</Badge>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input 
+                        placeholder="Search"
+                        value={customerOrderSearch}
+                        onChange={(e) => setCustomerOrderSearch(e.target.value)}
+                        className="pl-9 w-64"
+                      />
+                    </div>
+                    <Button variant="ghost" size="icon">
+                      <Settings className="h-5 w-5" />
+                    </Button>
+                    <Button variant="ghost" size="icon">
+                      <Search className="h-5 w-5" />
+                    </Button>
+                    <Button variant="ghost" size="icon">
+                      <ExternalLink className="h-5 w-5" />
+                    </Button>
+                    <Button variant="ghost" size="icon">
+                      <Settings className="h-5 w-5" />
+                    </Button>
+                  </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <h2 className="text-lg font-medium">Customer Orders</h2>
-                  <Badge variant="secondary" className="rounded-full">0</Badge>
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input 
-                    placeholder="Search"
-                    value={customerOrderSearch}
-                    onChange={(e) => setCustomerOrderSearch(e.target.value)}
-                    className="pl-9 w-64"
+
+                {/* SmartGrid */}
+                <div className="mt-4">
+                  <SmartGrid
+                    columns={customerOrdersColumns}
+                    data={customerOrdersData}
+                    onUpdate={async (row) => {
+                      console.log('Data changed:', row);
+                    }}
+                    selectedRows={selectedOrders}
+                    onSelectionChange={(rows) => {
+                      setSelectedOrders(rows);
+                      console.log('Selection changed:', rows);
+                    }}
+                    paginationMode="pagination"
                   />
                 </div>
-                <Button variant="ghost" size="icon">
-                  <Settings className="h-5 w-5" />
-                </Button>
-                <Button variant="ghost" size="icon">
-                  <Search className="h-5 w-5" />
-                </Button>
-                <Button variant="ghost" size="icon">
-                  <ExternalLink className="h-5 w-5" />
-                </Button>
-                <Button variant="ghost" size="icon">
-                  <Settings className="h-5 w-5" />
-                </Button>
-              </div>
-            </div>
 
-            {/* SmartGrid */}
-            <div className="mt-4">
-              <SmartGrid
-                columns={customerOrdersColumns}
-                data={customerOrdersData}
-                onUpdate={async (row) => {
-                  console.log('Data changed:', row);
-                }}
-                selectedRows={selectedOrders}
-                onSelectionChange={(rows) => {
-                  setSelectedOrders(rows);
-                  console.log('Selection changed:', rows);
-                }}
-                paginationMode="pagination"
-              />
-            </div>
-
-            {/* Trip Creation Controls */}
-            <div className="mt-6 flex items-center justify-between border-t border-border pt-6">
-              <div className="flex items-center gap-4">
-                <Label htmlFor="consolidated-trip" className="cursor-pointer text-foreground font-medium">
-                  Create Single trip with Consolidated COs
-                </Label>
-                <Switch 
-                  id="consolidated-trip"
-                  checked={consolidatedTrip}
-                  onCheckedChange={setConsolidatedTrip}
-                  className="data-[state=checked]:bg-orange-500"
-                />
-                <span className="text-sm text-muted-foreground">
-                  {consolidatedTrip ? 'Switch off' : 'Switch on'}
-                </span>
+                {/* Trip Creation Controls */}
+                <div className="mt-6 flex items-center justify-between border-t border-border pt-6">
+                  <div className="flex items-center gap-4">
+                    <Label htmlFor="consolidated-trip" className="cursor-pointer text-foreground font-medium">
+                      Create Single trip with Consolidated COs
+                    </Label>
+                    <Switch 
+                      id="consolidated-trip"
+                      checked={consolidatedTrip}
+                      onCheckedChange={setConsolidatedTrip}
+                      className="data-[state=checked]:bg-orange-500"
+                    />
+                    <span className="text-sm text-muted-foreground">
+                      {consolidatedTrip ? 'Switch off' : 'Switch on'}
+                    </span>
+                  </div>
+                  <Button className="bg-primary hover:bg-primary/90">
+                    Create Trip
+                  </Button>
+                </div>
               </div>
-              <Button className="bg-primary hover:bg-primary/90">
-                Create Trip
-              </Button>
-            </div>
-          </div>
+            ) : (
+              /* Split View - Customer Orders & Resources */
+              <div className="flex gap-4">
+                {/* Customer Orders - Left Panel */}
+                <div className="flex-1 bg-card border border-border rounded-lg overflow-hidden">
+                  {/* Header */}
+                  <div className="bg-blue-500 text-white p-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        <div className="h-8 w-8 rounded-lg bg-white/20 flex items-center justify-center">
+                          <Package className="h-5 w-5" />
+                        </div>
+                        <h2 className="text-lg font-semibold">Customer Orders</h2>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Button variant="ghost" size="icon" className="text-white hover:bg-white/20">
+                          <Settings className="h-4 w-4" />
+                        </Button>
+                        <Button variant="ghost" size="icon" className="text-white hover:bg-white/20">
+                          <Search className="h-4 w-4" />
+                        </Button>
+                        <Button variant="ghost" size="icon" className="text-white hover:bg-white/20">
+                          <ExternalLink className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                    <p className="text-sm text-white/90">12 orders ready for planning</p>
+                  </div>
+
+                  {/* Content */}
+                  <div className="p-4">
+                    {/* Search */}
+                    <div className="relative mb-4">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input 
+                        placeholder="Search orders..."
+                        value={customerOrderSearch}
+                        onChange={(e) => setCustomerOrderSearch(e.target.value)}
+                        className="pl-9"
+                      />
+                    </div>
+
+                    {/* Toggle */}
+                    <div className="flex items-center gap-3 mb-4 p-3 bg-muted/30 rounded-lg">
+                      <Switch 
+                        id="consolidated-trip-inline"
+                        checked={consolidatedTrip}
+                        onCheckedChange={setConsolidatedTrip}
+                        className="data-[state=checked]:bg-orange-500"
+                      />
+                      <Label htmlFor="consolidated-trip-inline" className="cursor-pointer text-sm font-medium">
+                        Create single trip with consolidated orders
+                      </Label>
+                    </div>
+
+                    {/* Grid */}
+                    <SmartGrid
+                      columns={customerOrdersColumns}
+                      data={customerOrdersData}
+                      onUpdate={async (row) => {
+                        console.log('Data changed:', row);
+                      }}
+                      selectedRows={selectedOrders}
+                      onSelectionChange={(rows) => {
+                        setSelectedOrders(rows);
+                        console.log('Selection changed:', rows);
+                      }}
+                      paginationMode="pagination"
+                    />
+                  </div>
+                </div>
+
+                {/* Resources - Right Panel */}
+                <div className="w-96 bg-card border border-border rounded-lg overflow-hidden">
+                  {/* Header */}
+                  <div className="bg-emerald-500 text-white p-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        <div className="h-8 w-8 rounded-lg bg-white/20 flex items-center justify-center">
+                          <Truck className="h-5 w-5" />
+                        </div>
+                        <h2 className="text-lg font-semibold">Resources</h2>
+                      </div>
+                    </div>
+                    <p className="text-sm text-white/90">Assign supplies and schedules</p>
+                  </div>
+
+                  {/* Content */}
+                  <div className="p-4 space-y-4">
+                    {/* Supplier Section */}
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Supplier</label>
+                      <Select defaultValue="supplier1">
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="supplier1">Supplier 1</SelectItem>
+                          <SelectItem value="supplier2">Supplier 2</SelectItem>
+                          <SelectItem value="supplier3">Supplier 3</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {/* Schedule Section */}
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Schedule</label>
+                      <Select defaultValue="">
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select Schedule" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="schedule1">Schedule 1</SelectItem>
+                          <SelectItem value="schedule2">Schedule 2</SelectItem>
+                          <SelectItem value="schedule3">Schedule 3</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {/* More Resources Button */}
+                    <Button variant="outline" className="w-full text-emerald-600 border-emerald-300 hover:bg-emerald-50">
+                      <Plus className="h-4 w-4 mr-2" />
+                      More Resources
+                    </Button>
+
+                    {/* Statistics */}
+                    <div className="border-t border-border pt-4 mt-6 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-muted-foreground">Total Orders:</span>
+                        <span className="font-semibold">12</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-muted-foreground">Assigned:</span>
+                        <span className="font-semibold text-emerald-600">5</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-muted-foreground">Unassigned:</span>
+                        <span className="font-semibold text-orange-600">7</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </>
         )}
       </main>
     </div>
