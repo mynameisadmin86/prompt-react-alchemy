@@ -482,6 +482,24 @@ const TripPlanning = () => {
                 paginationMode="pagination"
               />
             </div>
+
+            {/* Trip Creation Controls */}
+            <div className="mt-6 flex items-center justify-between border-t border-border pt-6">
+              <div className="flex items-center gap-4">
+                <RadioGroup defaultValue="consolidated" className="flex items-center gap-2">
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="consolidated" id="consolidated" className="border-orange-500 text-orange-500" />
+                    <Label htmlFor="consolidated" className="cursor-pointer text-orange-600 font-medium">
+                      Create Single trip with Consolidated COs
+                    </Label>
+                  </div>
+                </RadioGroup>
+                <span className="text-sm text-muted-foreground">Switch off</span>
+              </div>
+              <Button className="bg-primary hover:bg-primary/90">
+                Create Trip
+              </Button>
+            </div>
           </div>
         )}
       </main>
