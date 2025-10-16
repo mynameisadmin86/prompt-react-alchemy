@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Card } from '@/components/ui/card';
 import { Search, Package, Settings, ExternalLink, Home, ChevronRight, CalendarIcon, MapPin, Building2, Users, Truck, Calendar as CalendarIcon2, Box, UserCog, Car, UserCircle, Plus } from 'lucide-react';
@@ -31,6 +32,7 @@ const TripPlanning = () => {
   const [arrivalCode, setArrivalCode] = useState('52115');
   const [arrivalLocation, setArrivalLocation] = useState('Frankfurt Station');
   const [selectedOrders, setSelectedOrders] = useState<Set<number>>(new Set());
+  const [consolidatedTrip, setConsolidatedTrip] = useState(true);
 
   const isWagonContainer = tripType === 'Wagon/Container Movement';
 
@@ -486,15 +488,18 @@ const TripPlanning = () => {
             {/* Trip Creation Controls */}
             <div className="mt-6 flex items-center justify-between border-t border-border pt-6">
               <div className="flex items-center gap-4">
-                <RadioGroup defaultValue="consolidated" className="flex items-center gap-2">
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="consolidated" id="consolidated" className="border-orange-500 text-orange-500" />
-                    <Label htmlFor="consolidated" className="cursor-pointer text-orange-600 font-medium">
-                      Create Single trip with Consolidated COs
-                    </Label>
-                  </div>
-                </RadioGroup>
-                <span className="text-sm text-muted-foreground">Switch off</span>
+                <Label htmlFor="consolidated-trip" className="cursor-pointer text-orange-600 font-medium">
+                  Create Single trip with Consolidated COs
+                </Label>
+                <Switch 
+                  id="consolidated-trip"
+                  checked={consolidatedTrip}
+                  onCheckedChange={setConsolidatedTrip}
+                  className="data-[state=checked]:bg-orange-500"
+                />
+                <span className="text-sm text-muted-foreground">
+                  {consolidatedTrip ? 'Switch off' : 'Switch on'}
+                </span>
               </div>
               <Button className="bg-primary hover:bg-primary/90">
                 Create Trip
