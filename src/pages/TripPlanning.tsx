@@ -488,7 +488,7 @@ const TripPlanning = () => {
             {/* Trip Creation Controls */}
             <div className="mt-6 flex items-center justify-between border-t border-border pt-6">
               <div className="flex items-center gap-4">
-                <Label htmlFor="consolidated-trip" className="cursor-pointer text-orange-600 font-medium">
+                <Label htmlFor="consolidated-trip" className="cursor-pointer text-foreground font-medium">
                   Create Single trip with Consolidated COs
                 </Label>
                 <Switch 
