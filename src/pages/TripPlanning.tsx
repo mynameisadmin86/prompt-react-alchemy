@@ -11,7 +11,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Card } from '@/components/ui/card';
-import { Search, Package, Settings, ExternalLink, Home, ChevronRight, CalendarIcon, MapPin, Building2, Users, Truck, Calendar as CalendarIcon2, Box, UserCog, Car, UserCircle, Plus } from 'lucide-react';
+import { Search, Package, Settings, ExternalLink, Home, ChevronRight, CalendarIcon, MapPin, Building2, Users, Truck, Calendar as CalendarIcon2, Box, UserCog, Car, UserCircle, Plus, AlertTriangle, Info, Printer, MoreVertical } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { SmartGrid } from '@/components/SmartGrid';
@@ -41,6 +41,49 @@ const TripPlanning = () => {
   const [consolidatedTrip, setConsolidatedTrip] = useState(true);
 
   const isWagonContainer = tripType === 'Wagon/Container Movement';
+
+  // Customer Orders Grid Configuration for Manage Mode
+  const manageOrdersColumns: GridColumnConfig[] = [
+    { key: 'customerOrder', label: 'Customer Order', type: 'Text', width: 150, editable: false },
+    { key: 'coStatus', label: 'CO Status', type: 'Badge', width: 120, editable: false },
+    { key: 'legFromTo', label: 'Leg From & To', type: 'Text', width: 180, editable: false },
+    { key: 'departureDate', label: 'Departure Date', type: 'Text', width: 150, editable: false },
+    { key: 'arrivalDate', label: 'Arrival Date', type: 'Text', width: 150, editable: false },
+    { key: 'trainPara', label: 'Train Para.', type: 'Text', width: 100, editable: false },
+  ];
+
+  const manageOrdersData = [
+    {
+      id: '1',
+      customerOrder: 'CO000122025',
+      coStatus: 'Pickup',
+      legFromTo: 'Voila - Curtioi',
+      departureDate: '10-Mar-2025\n10:00 AM',
+      arrivalDate: '10-Mar-2025\n10:00 AM',
+      trainPara: 'warning',
+      coDescription: 'CO Description',
+    },
+    {
+      id: '2',
+      customerOrder: 'CO000122025',
+      coStatus: 'Delivery',
+      legFromTo: 'Voila - Curtioi',
+      departureDate: '10-Mar-2025\n10:00 AM',
+      arrivalDate: '10-Mar-2025\n10:00 AM',
+      trainPara: 'warning',
+      coDescription: 'CO Description',
+    },
+    {
+      id: '3',
+      customerOrder: 'CO000122026',
+      coStatus: 'PUD',
+      legFromTo: 'Voila - Curtioi',
+      departureDate: '10-Mar-2025\n10:00 AM',
+      arrivalDate: '10-Mar-2025\n10:00 AM',
+      trainPara: 'warning',
+      coDescription: 'CO Description',
+    },
+  ];
 
   // Customer Orders Grid Configuration
   const customerOrdersColumns: GridColumnConfig[] = [
@@ -147,81 +190,84 @@ const TripPlanning = () => {
           {/* Trip Header */}
           <div className="mb-6">
             <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-4">
-                <h1 className="text-2xl font-semibold">Trip No.</h1>
-                <span className="text-xl font-medium">{tripId}</span>
-                <Badge variant="outline" className="bg-orange-50 text-orange-600 border-orange-200">
+              <div className="flex items-center gap-3">
+                <h1 className="text-xl font-medium text-muted-foreground">Trip No.</h1>
+                <Input 
+                  value={tripId} 
+                  readOnly
+                  className="w-48 font-medium"
+                />
+                <Button variant="ghost" size="icon" className="h-8 w-8">
+                  <Search className="h-4 w-4 text-muted-foreground" />
+                </Button>
+                <Badge className="bg-[#FFF4E6] text-[#F97316] border-[#FED7AA] hover:bg-[#FFF4E6] font-normal px-3">
                   Draft
                 </Badge>
-                <Button variant="outline" size="sm">
-                  <Search className="h-4 w-4" />
-                </Button>
               </div>
               <div className="flex items-center gap-2">
-                <Button variant="outline" size="icon">
-                  <ExternalLink className="h-4 w-4" />
+                <Button variant="outline" className="text-primary border-primary hover:bg-primary/5">
+                  Manage Trips
                 </Button>
-                <Button variant="ghost" size="icon">
-                  <Settings className="h-5 w-5" />
+                <Button variant="ghost" size="icon" className="h-9 w-9">
+                  <Printer className="h-4 w-4" />
+                </Button>
+                <Button variant="ghost" size="icon" className="h-9 w-9">
+                  <MoreVertical className="h-4 w-4" />
                 </Button>
               </div>
             </div>
 
             {/* Route Information */}
-            <div className="flex items-center gap-6 mb-4">
+            <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-2">
-                <MapPin className="h-5 w-5 text-blue-500" />
+                <Info className="h-4 w-4 text-muted-foreground" />
                 <div>
-                  <p className="font-semibold">PAR565, Paris</p>
+                  <p className="font-semibold text-foreground">PAR565, Paris</p>
                   <p className="text-sm text-muted-foreground">10-Mar-2025 10:00AM</p>
                 </div>
               </div>
-              <div className="flex-1 border-t border-dashed border-muted-foreground/30"></div>
+              <div className="h-px flex-1 mx-6 border-t-2 border-dashed border-muted-foreground/30"></div>
               <div className="flex items-center gap-2">
-                <MapPin className="h-5 w-5 text-orange-500" />
+                <Info className="h-4 w-4 text-muted-foreground" />
                 <div>
-                  <p className="font-semibold">BER323, Berlin</p>
+                  <p className="font-semibold text-foreground">BER323, Berlin</p>
                   <p className="text-sm text-muted-foreground">10-Mar-2025 10:00AM</p>
                 </div>
               </div>
-            </div>
-
-            {/* Revenue and Cost */}
-            <div className="flex items-center gap-8">
-              <div>
-                <p className="text-sm text-muted-foreground">Expected Revenue</p>
-                <p className="text-lg font-semibold text-purple-600">€ 5580,00</p>
+              <div className="ml-auto pl-8 flex items-center gap-8">
+                <div>
+                  <p className="text-xs text-muted-foreground mb-1">Expected Revenue</p>
+                  <p className="text-base font-semibold text-[#7C3AED]">€ 5580,00</p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground mb-1">Expected Cost</p>
+                  <p className="text-base font-semibold text-[#EC4899]">€ 1580,00</p>
+                </div>
+                <Button variant="ghost" size="icon" className="h-8 w-8">
+                  <ExternalLink className="h-4 w-4" />
+                </Button>
               </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Expected Cost</p>
-                <p className="text-lg font-semibold text-red-600">€ 1580,00</p>
-              </div>
-              <Button variant="ghost" size="icon" className="ml-auto">
-                <ExternalLink className="h-4 w-4" />
-              </Button>
             </div>
           </div>
 
           {/* Planning Details Card */}
-          <div className="bg-card border border-border rounded-lg p-6 mb-6">
-            <div className="flex items-center justify-between mb-6">
+          <div className="bg-card border border-border rounded-lg px-6 py-4 mb-4">
+            <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <h2 className="text-lg font-medium">Planning Details</h2>
-                <div className="flex items-center gap-1 text-muted-foreground">
-                  <div className="h-4 w-4 rounded-full border border-muted-foreground flex items-center justify-center">
-                    <div className="h-2 w-2 rounded-full bg-muted-foreground" />
+                <h2 className="text-base font-medium">Planning Details</h2>
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <div className="h-4 w-4 rounded-full border-2 border-muted-foreground flex items-center justify-center">
+                    <div className="h-1.5 w-1.5 rounded-full bg-muted-foreground" />
                   </div>
                   <span className="text-sm">Forwardis GMBH</span>
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <Badge variant="outline" className="bg-orange-50 text-orange-600 border-orange-200">
+                <Badge className="bg-[#FFF4E6] text-[#F97316] border-[#FED7AA] hover:bg-[#FFF4E6] font-normal">
                   Normal Trip
                 </Badge>
-                <Badge variant="outline" className="text-muted-foreground">
-                  12-Mar-2025
-                </Badge>
-                <Button variant="ghost" size="icon">
+                <span className="text-sm text-muted-foreground">12-Mar-2025</span>
+                <Button variant="ghost" size="icon" className="h-8 w-8">
                   <ChevronRight className="h-4 w-4" />
                 </Button>
               </div>
@@ -233,26 +279,26 @@ const TripPlanning = () => {
             {/* Customer Orders - Left Panel */}
             <div className="flex-1 bg-card border border-border rounded-lg overflow-hidden">
               {/* Header */}
-              <div className="bg-blue-500 text-white p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-2">
-                    <div className="h-8 w-8 rounded-lg bg-white/20 flex items-center justify-center">
+              <div className="bg-[#3B82F6] text-white px-4 py-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="h-9 w-9 rounded bg-white/10 flex items-center justify-center">
                       <Package className="h-5 w-5" />
                     </div>
-                    <h2 className="text-lg font-semibold">Customer Orders</h2>
-                    <Badge variant="secondary" className="bg-white/20 text-white border-white/30">12</Badge>
+                    <h2 className="text-base font-medium">Customer Orders</h2>
+                    <Badge className="bg-white/20 text-white hover:bg-white/20 border-none font-normal">12</Badge>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Button variant="ghost" size="icon" className="text-white hover:bg-white/20">
+                  <div className="flex items-center gap-1">
+                    <Button variant="ghost" size="icon" className="h-8 w-8 text-white hover:bg-white/10">
                       <Settings className="h-4 w-4" />
                     </Button>
-                    <Button variant="ghost" size="icon" className="text-white hover:bg-white/20">
+                    <Button variant="ghost" size="icon" className="h-8 w-8 text-white hover:bg-white/10">
                       <Search className="h-4 w-4" />
                     </Button>
-                    <Button variant="ghost" size="icon" className="text-white hover:bg-white/20">
+                    <Button variant="ghost" size="icon" className="h-8 w-8 text-white hover:bg-white/10">
                       <ExternalLink className="h-4 w-4" />
                     </Button>
-                    <Button variant="ghost" size="icon" className="text-white hover:bg-white/20">
+                    <Button variant="ghost" size="icon" className="h-8 w-8 text-white hover:bg-white/10">
                       <Plus className="h-4 w-4" />
                     </Button>
                   </div>
@@ -261,51 +307,140 @@ const TripPlanning = () => {
 
               {/* Content */}
               <div className="p-4">
-                {/* Search */}
-                <div className="relative mb-4">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input 
-                    placeholder="Search"
-                    className="pl-9"
-                  />
+                {/* Search Bar */}
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="relative flex-1">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input 
+                      placeholder="Search"
+                      className="pl-9 bg-muted/50"
+                    />
+                  </div>
+                  <Button size="icon" variant="outline" className="h-9 w-9">
+                    <Settings className="h-4 w-4" />
+                  </Button>
+                  <Button size="icon" variant="outline" className="h-9 w-9">
+                    <Search className="h-4 w-4" />
+                  </Button>
+                  <Button size="icon" className="h-9 w-9 bg-primary text-white">
+                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    </svg>
+                  </Button>
+                  <Button size="icon" variant="destructive" className="h-9 w-9">
+                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                  </Button>
+                  <Button size="icon" variant="outline" className="h-9 w-9">
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                  <Button size="icon" variant="outline" className="h-9 w-9">
+                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12M8 12h12M8 17h12M4 7h.01M4 12h.01M4 17h.01" />
+                    </svg>
+                  </Button>
                 </div>
 
-                {/* Grid */}
-                <SmartGrid
-                  columns={customerOrdersColumns}
-                  data={customerOrdersData}
-                  onUpdate={async (row) => {
-                    console.log('Data changed:', row);
-                  }}
-                  selectedRows={selectedOrders}
-                  onSelectionChange={(rows) => {
-                    setSelectedOrders(rows);
-                    console.log('Selection changed:', rows);
-                  }}
-                  paginationMode="pagination"
-                />
+                {/* Table */}
+                <div className="border rounded-lg overflow-hidden">
+                  <table className="w-full">
+                    <thead className="bg-muted/50">
+                      <tr className="border-b">
+                        <th className="w-12 p-3">
+                          <Checkbox />
+                        </th>
+                        <th className="text-left p-3 text-sm font-medium">Customer Order</th>
+                        <th className="text-left p-3 text-sm font-medium">CO Status</th>
+                        <th className="text-left p-3 text-sm font-medium">Leg From & To</th>
+                        <th className="text-left p-3 text-sm font-medium">Departure Date</th>
+                        <th className="text-left p-3 text-sm font-medium">Arrival Date</th>
+                        <th className="text-left p-3 text-sm font-medium">Train Para.</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {manageOrdersData.map((order, idx) => (
+                        <tr key={order.id} className="border-b hover:bg-muted/30">
+                          <td className="p-3">
+                            <Checkbox />
+                          </td>
+                          <td className="p-3">
+                            <div>
+                              <p className="text-sm font-medium">{order.customerOrder}</p>
+                              <p className="text-xs text-muted-foreground">{order.coDescription}</p>
+                            </div>
+                          </td>
+                          <td className="p-3">
+                            <Badge 
+                              className={
+                                order.coStatus === 'Pickup' 
+                                  ? 'bg-[#FEF3C7] text-[#92400E] hover:bg-[#FEF3C7] border-none font-normal'
+                                  : order.coStatus === 'Delivery'
+                                  ? 'bg-[#D1FAE5] text-[#065F46] hover:bg-[#D1FAE5] border-none font-normal'
+                                  : 'bg-[#FEF3C7] text-[#92400E] hover:bg-[#FEF3C7] border-none font-normal'
+                              }
+                            >
+                              {order.coStatus}
+                            </Badge>
+                          </td>
+                          <td className="p-3">
+                            <div className="flex items-center gap-1">
+                              <Info className="h-4 w-4 text-muted-foreground" />
+                              <span className="text-sm">{order.legFromTo}</span>
+                            </div>
+                          </td>
+                          <td className="p-3">
+                            <div className="text-sm whitespace-pre-line">{order.departureDate}</div>
+                          </td>
+                          <td className="p-3">
+                            <div className="text-sm whitespace-pre-line">{order.arrivalDate}</div>
+                          </td>
+                          <td className="p-3">
+                            <AlertTriangle className="h-5 w-5 text-[#F97316]" />
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Footer */}
+                <div className="flex items-center justify-between mt-4 text-sm text-muted-foreground">
+                  <div className="flex items-center gap-4">
+                    <Button variant="ghost" size="icon" className="h-8 w-8">
+                      <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                      </svg>
+                    </Button>
+                    <Button variant="ghost" size="icon" className="h-8 w-8">
+                      <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                    </Button>
+                  </div>
+                </div>
               </div>
             </div>
 
             {/* Resources - Right Panel */}
-            <div className="w-96 bg-card border border-border rounded-lg overflow-hidden">
+            <div className="w-[420px] bg-card border border-border rounded-lg overflow-hidden">
               {/* Header */}
-              <div className="bg-emerald-500 text-white p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-2">
-                    <div className="h-8 w-8 rounded-lg bg-white/20 flex items-center justify-center">
+              <div className="bg-[#EC4899] text-white px-4 py-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="h-9 w-9 rounded bg-white/10 flex items-center justify-center">
                       <Users className="h-5 w-5" />
                     </div>
-                    <h2 className="text-lg font-semibold">Resources</h2>
+                    <h2 className="text-base font-medium">Resources</h2>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Badge variant="secondary" className="bg-orange-500 text-white border-none">
-                      Supplier 1
+                    <Badge className="bg-[#F97316] text-white hover:bg-[#F97316] border-none font-normal px-2.5">
+                      Supplier: 1
                     </Badge>
-                    <Badge variant="secondary" className="bg-orange-500 text-white border-none">
-                      Handler 1
+                    <Badge className="bg-[#F97316] text-white hover:bg-[#F97316] border-none font-normal px-2.5">
+                      Handler: 1
                     </Badge>
-                    <Button variant="ghost" size="icon" className="text-white hover:bg-white/20">
+                    <Button variant="ghost" size="icon" className="h-8 w-8 text-white hover:bg-white/10">
                       <Settings className="h-4 w-4" />
                     </Button>
                   </div>
@@ -315,37 +450,44 @@ const TripPlanning = () => {
               {/* Content */}
               <div className="p-4 space-y-4">
                 {/* Supplier Card */}
-                <div className="border border-border rounded-lg p-4 space-y-3">
-                  <div className="flex items-center gap-2">
-                    <div className="h-8 w-8 rounded-lg bg-cyan-100 flex items-center justify-center">
-                      <Truck className="h-4 w-4 text-cyan-600" />
+                <div className="border border-border rounded-lg overflow-hidden">
+                  <div className="flex items-center justify-between px-4 py-3 bg-muted/30">
+                    <div className="flex items-center gap-2">
+                      <div className="h-9 w-9 rounded bg-[#A5F3FC] flex items-center justify-center">
+                        <Truck className="h-5 w-5 text-[#0E7490]" />
+                      </div>
+                      <h3 className="font-medium">Supplier</h3>
                     </div>
-                    <h3 className="font-semibold">Supplier</h3>
-                    <Button variant="ghost" size="icon" className="ml-auto">
+                    <Button variant="ghost" size="icon" className="h-8 w-8">
                       <Plus className="h-4 w-4" />
                     </Button>
                   </div>
-                  <div className="bg-muted/30 p-3 rounded-lg">
-                    <p className="font-medium">VEN0000001</p>
-                    <p className="text-sm text-muted-foreground">Vendor Name</p>
-                    <div className="grid grid-cols-2 gap-2 mt-2 text-sm">
+                  <div className="p-4 bg-muted/20 space-y-3">
+                    <div>
+                      <p className="font-semibold text-base">VEN0000001</p>
+                      <p className="text-sm text-muted-foreground">Vendor Name</p>
+                    </div>
+                    <div className="grid grid-cols-2 gap-x-4 gap-y-3 text-sm">
                       <div>
-                        <p className="text-muted-foreground">Contract ID</p>
+                        <p className="text-muted-foreground text-xs mb-1">Contract ID</p>
                         <p className="font-medium">AG-00000001</p>
                       </div>
                       <div>
-                        <p className="text-muted-foreground">Cost</p>
+                        <p className="text-muted-foreground text-xs mb-1">Cost</p>
                         <p className="font-medium">10 USD</p>
                       </div>
                       <div>
-                        <p className="text-muted-foreground">Cost</p>
+                        <p className="text-muted-foreground text-xs mb-1">Cost</p>
                         <p className="font-medium">10 USD</p>
                       </div>
                       <div>
-                        <p className="text-muted-foreground">Estimated Time</p>
+                        <p className="text-muted-foreground text-xs mb-1">Estimated Time</p>
                         <p className="font-medium">1 Hr</p>
                       </div>
                     </div>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 -ml-2">
+                      <MoreVertical className="h-4 w-4" />
+                    </Button>
                   </div>
                 </div>
               </div>
@@ -353,14 +495,14 @@ const TripPlanning = () => {
           </div>
 
           {/* Action Buttons */}
-          <div className="flex items-center justify-end gap-3 border-t border-border pt-4">
-            <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50">
+          <div className="flex items-center justify-end gap-3 border-t border-border pt-6">
+            <Button variant="ghost" className="text-[#DC2626] hover:text-[#DC2626] hover:bg-red-50">
               Cancel
             </Button>
-            <Button variant="outline" className="text-primary border-primary hover:bg-primary/5">
+            <Button variant="outline" className="border-primary text-primary hover:bg-primary/5">
               Confirm
             </Button>
-            <Button className="bg-primary hover:bg-primary/90">
+            <Button className="bg-primary hover:bg-primary/90 text-white">
               Confirm & Release
             </Button>
           </div>
