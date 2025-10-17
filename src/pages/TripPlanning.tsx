@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -17,6 +18,11 @@ import { SmartGrid } from '@/components/SmartGrid';
 import type { GridColumnConfig } from '@/types/smartgrid';
 
 const TripPlanning = () => {
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const isManageMode = searchParams.get('manage') === 'true';
+  const tripId = searchParams.get('tripId') || '';
+  
   const [tripNo, setTripNo] = useState('');
   const [location, setLocation] = useState('Forwardis GMBH');
   const [cluster, setCluster] = useState('10000406');
@@ -92,6 +98,277 @@ const TripPlanning = () => {
     },
   ];
 
+  // If in manage mode, show the detailed trip management view
+  if (isManageMode && tripId) {
+    return (
+      <div className="min-h-screen bg-background">
+        {/* Header */}
+        <header className="border-b border-border bg-card">
+          <div className="flex items-center justify-between px-6 py-3">
+            <div className="flex items-center gap-4">
+              <Button variant="ghost" size="icon" className="lg:hidden">
+                <Settings className="h-5 w-5" />
+              </Button>
+              <div className="flex items-center gap-2">
+                <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
+                  <Package className="h-5 w-5 text-primary-foreground" />
+                </div>
+                <span className="text-lg font-semibold">Logistics</span>
+              </div>
+            </div>
+            <div className="flex items-center gap-4">
+              <div className="relative hidden md:block">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input 
+                  placeholder="Search" 
+                  className="pl-9 w-64 bg-muted/50"
+                />
+              </div>
+              <Button variant="ghost" size="icon">
+                <Search className="h-5 w-5" />
+              </Button>
+              <Button variant="ghost" size="icon">
+                <Settings className="h-5 w-5" />
+              </Button>
+            </div>
+          </div>
+        </header>
+
+        {/* Main Content */}
+        <main className="px-6 py-6">
+          {/* Breadcrumb */}
+          <div className="flex items-center gap-2 text-sm mb-6">
+            <Home className="h-4 w-4 text-primary" />
+            <a href="/" className="text-primary hover:underline">Home</a>
+            <ChevronRight className="h-4 w-4 text-muted-foreground" />
+            <span className="text-muted-foreground">Transport Planning</span>
+          </div>
+
+          {/* Trip Header */}
+          <div className="mb-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-4">
+                <h1 className="text-2xl font-semibold">Trip No.</h1>
+                <span className="text-xl font-medium">{tripId}</span>
+                <Badge variant="outline" className="bg-orange-50 text-orange-600 border-orange-200">
+                  Draft
+                </Badge>
+                <Button variant="outline" size="sm">
+                  <Search className="h-4 w-4" />
+                </Button>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button variant="outline" size="icon">
+                  <ExternalLink className="h-4 w-4" />
+                </Button>
+                <Button variant="ghost" size="icon">
+                  <Settings className="h-5 w-5" />
+                </Button>
+              </div>
+            </div>
+
+            {/* Route Information */}
+            <div className="flex items-center gap-6 mb-4">
+              <div className="flex items-center gap-2">
+                <MapPin className="h-5 w-5 text-blue-500" />
+                <div>
+                  <p className="font-semibold">PAR565, Paris</p>
+                  <p className="text-sm text-muted-foreground">10-Mar-2025 10:00AM</p>
+                </div>
+              </div>
+              <div className="flex-1 border-t border-dashed border-muted-foreground/30"></div>
+              <div className="flex items-center gap-2">
+                <MapPin className="h-5 w-5 text-orange-500" />
+                <div>
+                  <p className="font-semibold">BER323, Berlin</p>
+                  <p className="text-sm text-muted-foreground">10-Mar-2025 10:00AM</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Revenue and Cost */}
+            <div className="flex items-center gap-8">
+              <div>
+                <p className="text-sm text-muted-foreground">Expected Revenue</p>
+                <p className="text-lg font-semibold text-purple-600">€ 5580,00</p>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Expected Cost</p>
+                <p className="text-lg font-semibold text-red-600">€ 1580,00</p>
+              </div>
+              <Button variant="ghost" size="icon" className="ml-auto">
+                <ExternalLink className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+
+          {/* Planning Details Card */}
+          <div className="bg-card border border-border rounded-lg p-6 mb-6">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <h2 className="text-lg font-medium">Planning Details</h2>
+                <div className="flex items-center gap-1 text-muted-foreground">
+                  <div className="h-4 w-4 rounded-full border border-muted-foreground flex items-center justify-center">
+                    <div className="h-2 w-2 rounded-full bg-muted-foreground" />
+                  </div>
+                  <span className="text-sm">Forwardis GMBH</span>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <Badge variant="outline" className="bg-orange-50 text-orange-600 border-orange-200">
+                  Normal Trip
+                </Badge>
+                <Badge variant="outline" className="text-muted-foreground">
+                  12-Mar-2025
+                </Badge>
+                <Button variant="ghost" size="icon">
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          </div>
+
+          {/* Split View - Customer Orders & Resources */}
+          <div className="flex gap-4 mb-6">
+            {/* Customer Orders - Left Panel */}
+            <div className="flex-1 bg-card border border-border rounded-lg overflow-hidden">
+              {/* Header */}
+              <div className="bg-blue-500 text-white p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    <div className="h-8 w-8 rounded-lg bg-white/20 flex items-center justify-center">
+                      <Package className="h-5 w-5" />
+                    </div>
+                    <h2 className="text-lg font-semibold">Customer Orders</h2>
+                    <Badge variant="secondary" className="bg-white/20 text-white border-white/30">12</Badge>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button variant="ghost" size="icon" className="text-white hover:bg-white/20">
+                      <Settings className="h-4 w-4" />
+                    </Button>
+                    <Button variant="ghost" size="icon" className="text-white hover:bg-white/20">
+                      <Search className="h-4 w-4" />
+                    </Button>
+                    <Button variant="ghost" size="icon" className="text-white hover:bg-white/20">
+                      <ExternalLink className="h-4 w-4" />
+                    </Button>
+                    <Button variant="ghost" size="icon" className="text-white hover:bg-white/20">
+                      <Plus className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Content */}
+              <div className="p-4">
+                {/* Search */}
+                <div className="relative mb-4">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input 
+                    placeholder="Search"
+                    className="pl-9"
+                  />
+                </div>
+
+                {/* Grid */}
+                <SmartGrid
+                  columns={customerOrdersColumns}
+                  data={customerOrdersData}
+                  onUpdate={async (row) => {
+                    console.log('Data changed:', row);
+                  }}
+                  selectedRows={selectedOrders}
+                  onSelectionChange={(rows) => {
+                    setSelectedOrders(rows);
+                    console.log('Selection changed:', rows);
+                  }}
+                  paginationMode="pagination"
+                />
+              </div>
+            </div>
+
+            {/* Resources - Right Panel */}
+            <div className="w-96 bg-card border border-border rounded-lg overflow-hidden">
+              {/* Header */}
+              <div className="bg-emerald-500 text-white p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    <div className="h-8 w-8 rounded-lg bg-white/20 flex items-center justify-center">
+                      <Users className="h-5 w-5" />
+                    </div>
+                    <h2 className="text-lg font-semibold">Resources</h2>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="secondary" className="bg-orange-500 text-white border-none">
+                      Supplier 1
+                    </Badge>
+                    <Badge variant="secondary" className="bg-orange-500 text-white border-none">
+                      Handler 1
+                    </Badge>
+                    <Button variant="ghost" size="icon" className="text-white hover:bg-white/20">
+                      <Settings className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Content */}
+              <div className="p-4 space-y-4">
+                {/* Supplier Card */}
+                <div className="border border-border rounded-lg p-4 space-y-3">
+                  <div className="flex items-center gap-2">
+                    <div className="h-8 w-8 rounded-lg bg-cyan-100 flex items-center justify-center">
+                      <Truck className="h-4 w-4 text-cyan-600" />
+                    </div>
+                    <h3 className="font-semibold">Supplier</h3>
+                    <Button variant="ghost" size="icon" className="ml-auto">
+                      <Plus className="h-4 w-4" />
+                    </Button>
+                  </div>
+                  <div className="bg-muted/30 p-3 rounded-lg">
+                    <p className="font-medium">VEN0000001</p>
+                    <p className="text-sm text-muted-foreground">Vendor Name</p>
+                    <div className="grid grid-cols-2 gap-2 mt-2 text-sm">
+                      <div>
+                        <p className="text-muted-foreground">Contract ID</p>
+                        <p className="font-medium">AG-00000001</p>
+                      </div>
+                      <div>
+                        <p className="text-muted-foreground">Cost</p>
+                        <p className="font-medium">10 USD</p>
+                      </div>
+                      <div>
+                        <p className="text-muted-foreground">Cost</p>
+                        <p className="font-medium">10 USD</p>
+                      </div>
+                      <div>
+                        <p className="text-muted-foreground">Estimated Time</p>
+                        <p className="font-medium">1 Hr</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex items-center justify-end gap-3 border-t border-border pt-4">
+            <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50">
+              Cancel
+            </Button>
+            <Button variant="outline" className="text-primary border-primary hover:bg-primary/5">
+              Confirm
+            </Button>
+            <Button className="bg-primary hover:bg-primary/90">
+              Confirm & Release
+            </Button>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -141,7 +418,11 @@ const TripPlanning = () => {
           <div className="flex items-center justify-between mb-4">
             <h1 className="text-2xl font-semibold">Trip No.</h1>
             <div className="flex items-center gap-2">
-              <Button variant="outline" className="text-primary border-primary">
+              <Button 
+                variant="outline" 
+                className="text-primary border-primary"
+                onClick={() => navigate('/trip-planning?manage=true&tripId=TRIP00000001')}
+              >
                 Manage Trips
               </Button>
               <Button variant="ghost" size="icon">
