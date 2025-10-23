@@ -165,6 +165,7 @@ export interface SmartGridProps {
   onSelectionChange?(selectedRows: Set<number>): void;
   onRowClick?(row: any, index: number): void;
   rowClassName?: (row: any, index: number) => string;
+  highlightedRowIndices?: number[];
   configurableButtons?: ConfigurableButtonConfig[];
   showDefaultConfigurableButton?: boolean;
   defaultConfigurableButtonLabel?: string;

@@ -53,6 +53,7 @@ export function SmartGrid({
   onSelectionChange,
   onRowClick,
   rowClassName,
+  highlightedRowIndices = [],
   configurableButtons,
   showDefaultConfigurableButton,
   defaultConfigurableButtonLabel,
@@ -1157,7 +1158,8 @@ export function SmartGrid({
                         <TableRow key={rowIndex}
                           data-row-id={row.id || rowIndex}
                           className={cn(
-                            "hover:bg-gray-50/50 transition-colors duration-150 border-b border-gray-100 cursor-pointer",
+                            "hover:bg-gray-50/50 transition-all duration-300 border-b border-gray-100 cursor-pointer",
+                            highlightedRowIndices.includes(rowIndex) && "bg-yellow-100 border-l-4 border-yellow-500 hover:bg-yellow-100/80",
                             rowClassName ? rowClassName(row, rowIndex) : ''
                           )}
                           onClick={(e) => {

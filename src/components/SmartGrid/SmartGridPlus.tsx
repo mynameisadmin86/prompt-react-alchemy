@@ -52,6 +52,7 @@ export function SmartGridPlus({
   selectedRows,
   onSelectionChange,
   rowClassName,
+  highlightedRowIndices = [],
   configurableButtons,
   showDefaultConfigurableButton,
   defaultConfigurableButtonLabel,
@@ -1328,9 +1329,10 @@ export function SmartGridPlus({
                       <React.Fragment key={row.id || actualIndex}>
                         <TableRow 
                           className={cn(
-                            "hover:bg-gray-50 border-b border-gray-100 transition-colors",
+                            "hover:bg-gray-50 border-b border-gray-100 transition-all duration-300",
                             isSelected && "bg-blue-50",
                             isRowEditing && "bg-yellow-50",
+                            highlightedRowIndices.includes(index) && "bg-yellow-100 border-l-4 border-yellow-500 hover:bg-yellow-100/80",
                             rowClassName?.(row, actualIndex)
                           )}
                           onDoubleClick={() => handleCellDoubleClick(actualIndex, row)}
