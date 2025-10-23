@@ -202,6 +202,13 @@ const Index = () => {
       path: "/order-list",
       color: "text-purple-500"
     },
+    {
+      title: "SmartGrid Highlight Demo",
+      description: "Interactive demo showcasing row highlighting feature with dynamic controls",
+      icon: Grid3x3,
+      path: "/smartgrid-highlight-demo",
+      color: "text-yellow-600"
+    },
   ];
 
   return (
