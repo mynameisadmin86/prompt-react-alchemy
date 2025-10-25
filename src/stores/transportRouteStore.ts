@@ -1,5 +1,21 @@
 import { create } from 'zustand';
 
+interface RouteLeg {
+  LegSequence: number;
+  LegID: string;
+  LegName: string;
+  Origin: string;
+  Destination: string;
+  VehicleNo: string;
+  DriverName: string;
+  DepartureTime: string;
+  ArrivalTime: string;
+  Status: string;
+  LegBehaviour: string;
+  TransportMode: string;
+  TripDetails?: string;
+}
+
 interface TransportRoute {
   id: string;
   CustomerOrderNo: string;
@@ -15,17 +31,31 @@ interface TransportRoute {
   orderDate?: string;
   deliveryDate?: string;
   totalItems?: number;
+  FromToLocation?: string;
+  Service?: string;
+  SubService?: string;
+  legs?: RouteLeg[];
 }
 
 interface TransportRouteStore {
   routes: TransportRoute[];
   selectedOrder: TransportRoute | null;
+  selectedRoute: TransportRoute | null;
   isDrawerOpen: boolean;
+  isRouteDrawerOpen: boolean;
   highlightedIndexes: number[];
   fetchRoutes: () => void;
   handleCustomerOrderClick: (order: TransportRoute) => void;
+  openRouteDrawer: (route: TransportRoute) => Promise<void>;
   closeDrawer: () => void;
+  closeRouteDrawer: () => void;
   highlightRowIndexes: (indexes: number[]) => void;
+  addLegPanel: () => void;
+  removeLegPanel: (index: number) => void;
+  updateLegData: (index: number, field: string, value: any) => void;
+  saveRouteDetails: () => Promise<void>;
+  fetchOrigins: (params: { searchTerm: string; offset: number; limit: number }) => Promise<{ label: string; value: string }[]>;
+  fetchDestinations: (params: { searchTerm: string; offset: number; limit: number }) => Promise<{ label: string; value: string }[]>;
 }
 
 // Mock data
@@ -240,10 +270,12 @@ const mockRoutes: TransportRoute[] = [
   }
 ];
 
-export const useTransportRouteStore = create<TransportRouteStore>((set) => ({
+export const useTransportRouteStore = create<TransportRouteStore>((set, get) => ({
   routes: [],
   selectedOrder: null,
+  selectedRoute: null,
   isDrawerOpen: false,
+  isRouteDrawerOpen: false,
   highlightedIndexes: [],
 
   fetchRoutes: () => {
@@ -255,11 +287,187 @@ export const useTransportRouteStore = create<TransportRouteStore>((set) => ({
     set({ selectedOrder: order, isDrawerOpen: true });
   },
 
+  openRouteDrawer: async (route: TransportRoute) => {
+    // Simulate API call to fetch detailed route data with legs
+    const mockLegs: RouteLeg[] = [
+      {
+        LegSequence: 1,
+        LegID: 'LEG01',
+        LegName: 'First Leg',
+        Origin: 'Berlin',
+        Destination: 'Heidelblick',
+        VehicleNo: 'VH-1234',
+        DriverName: 'John Doe',
+        DepartureTime: '2025-03-25T09:22:00',
+        ArrivalTime: '2025-03-25T12:22:00',
+        Status: 'Initiated',
+        LegBehaviour: 'Pickup',
+        TransportMode: 'Rail',
+        TripDetails: 'TRIP0000001 : Berlin, 25-Mar-2025 09:22 → Heidelblick, 25-Mar-2025 09:22 | Loaded'
+      },
+      {
+        LegSequence: 2,
+        LegID: 'LEG02',
+        LegName: 'Second Leg',
+        Origin: 'Heidelblick',
+        Destination: 'Dresden',
+        VehicleNo: 'VH-5678',
+        DriverName: 'Jane Smith',
+        DepartureTime: '2025-03-25T13:22:00',
+        ArrivalTime: '2025-03-25T16:22:00',
+        Status: 'Released',
+        LegBehaviour: 'Line Haul',
+        TransportMode: 'Rail',
+        TripDetails: 'TRIP0000002 : Heidelblick, 25-Mar-2025 09:22 → Dresden, 25-Mar-2025 09:22 | Empty'
+      },
+      {
+        LegSequence: 3,
+        LegID: 'LEG03',
+        LegName: 'Third Leg',
+        Origin: 'Dresden',
+        Destination: 'Czech Republic',
+        VehicleNo: 'VH-9012',
+        DriverName: 'Mike Johnson',
+        DepartureTime: '2025-03-25T17:22:00',
+        ArrivalTime: '2025-03-25T20:22:00',
+        Status: 'Planned',
+        LegBehaviour: 'Delivery',
+        TransportMode: 'Rail',
+        TripDetails: 'TRIP0000003 : Dresden, 25-Mar-2025 09:22 → Czech Republic, 25-Mar-2025 09:22'
+      }
+    ];
+
+    const detailedRoute: TransportRoute = {
+      ...route,
+      FromToLocation: `${route.Departure} - ${route.Arrival}`,
+      Service: 'Block Train Conventional',
+      SubService: 'Repair',
+      legs: mockLegs
+    };
+
+    set({ selectedRoute: detailedRoute, isRouteDrawerOpen: true });
+  },
+
   closeDrawer: () => {
     set({ isDrawerOpen: false, selectedOrder: null });
   },
 
+  closeRouteDrawer: () => {
+    set({ isRouteDrawerOpen: false, selectedRoute: null });
+  },
+
   highlightRowIndexes: (indexes: number[]) => {
     set({ highlightedIndexes: indexes });
+  },
+
+  addLegPanel: () => {
+    const { selectedRoute } = get();
+    if (!selectedRoute) return;
+
+    const newLeg: RouteLeg = {
+      LegSequence: (selectedRoute.legs?.length || 0) + 1,
+      LegID: '',
+      LegName: `Leg ${(selectedRoute.legs?.length || 0) + 1}`,
+      Origin: '',
+      Destination: '',
+      VehicleNo: '',
+      DriverName: '',
+      DepartureTime: '',
+      ArrivalTime: '',
+      Status: 'Planned',
+      LegBehaviour: '',
+      TransportMode: 'Rail'
+    };
+
+    set({
+      selectedRoute: {
+        ...selectedRoute,
+        legs: [...(selectedRoute.legs || []), newLeg]
+      }
+    });
+  },
+
+  removeLegPanel: (index: number) => {
+    const { selectedRoute } = get();
+    if (!selectedRoute || !selectedRoute.legs) return;
+
+    const updatedLegs = selectedRoute.legs.filter((_, i) => i !== index);
+    set({
+      selectedRoute: {
+        ...selectedRoute,
+        legs: updatedLegs
+      }
+    });
+  },
+
+  updateLegData: (index: number, field: string, value: any) => {
+    const { selectedRoute } = get();
+    if (!selectedRoute || !selectedRoute.legs) return;
+
+    const updatedLegs = [...selectedRoute.legs];
+    updatedLegs[index] = {
+      ...updatedLegs[index],
+      [field]: value
+    };
+
+    set({
+      selectedRoute: {
+        ...selectedRoute,
+        legs: updatedLegs
+      }
+    });
+  },
+
+  saveRouteDetails: async () => {
+    const { selectedRoute } = get();
+    if (!selectedRoute) return;
+
+    // Simulate API call
+    console.log('Saving route details:', selectedRoute);
+    
+    // Update the route in the routes array
+    const { routes } = get();
+    const updatedRoutes = routes.map(route => 
+      route.id === selectedRoute.id ? selectedRoute : route
+    );
+
+    set({ routes: updatedRoutes });
+  },
+
+  fetchOrigins: async ({ searchTerm, offset, limit }) => {
+    // Simulate API call
+    const mockOrigins = [
+      { label: 'Berlin', value: 'berlin' },
+      { label: 'Hamburg', value: 'hamburg' },
+      { label: 'Munich', value: 'munich' },
+      { label: 'Frankfurt', value: 'frankfurt' },
+      { label: 'Dresden', value: 'dresden' },
+      { label: 'Heidelblick', value: 'heidelblick' },
+      { label: 'Hannover', value: 'hannover' }
+    ];
+
+    return mockOrigins.filter(o => 
+      o.label.toLowerCase().includes(searchTerm.toLowerCase())
+    ).slice(offset, offset + limit);
+  },
+
+  fetchDestinations: async ({ searchTerm, offset, limit }) => {
+    // Simulate API call
+    const mockDestinations = [
+      { label: 'Berlin', value: 'berlin' },
+      { label: 'Hamburg', value: 'hamburg' },
+      { label: 'Munich', value: 'munich' },
+      { label: 'Frankfurt', value: 'frankfurt' },
+      { label: 'Dresden', value: 'dresden' },
+      { label: 'Czech Republic', value: 'czech_republic' },
+      { label: 'Poland', value: 'poland' },
+      { label: 'Heidelblick', value: 'heidelblick' },
+      { label: 'Hannover', value: 'hannover' },
+      { label: 'MUMES, Mumbai', value: 'mumbai' }
+    ];
+
+    return mockDestinations.filter(d => 
+      d.label.toLowerCase().includes(searchTerm.toLowerCase())
+    ).slice(offset, offset + limit);
   }
 }));

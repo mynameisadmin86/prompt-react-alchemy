@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { SmartGrid } from '@/components/SmartGrid';
 import { SideDrawer } from '@/components/ui/side-drawer';
 import { CustomerOrderDetailsDrawer } from '@/components/drawer/CustomerOrderDetailsDrawer';
+import { TransportRouteLegDrawer } from '@/components/drawer/TransportRouteLegDrawer';
 import { useTransportRouteStore } from '@/stores/transportRouteStore';
 import { GridColumnConfig } from '@/types/smartgrid';
 
@@ -10,10 +11,13 @@ const TransportRouteUpdate: React.FC = () => {
     routes,
     selectedOrder,
     isDrawerOpen,
+    isRouteDrawerOpen,
     highlightedIndexes,
     fetchRoutes,
     handleCustomerOrderClick,
+    openRouteDrawer,
     closeDrawer,
+    closeRouteDrawer,
     highlightRowIndexes
   } = useTransportRouteStore();
 
@@ -99,8 +103,9 @@ const TransportRouteUpdate: React.FC = () => {
     {
       key: 'LegDetails',
       label: 'Leg Details',
-      type: 'Text' as const,
-      width: 100
+      type: 'Link' as const,
+      width: 100,
+      onClick: (row: any) => openRouteDrawer(row)
     }
   ];
 
@@ -116,6 +121,7 @@ const TransportRouteUpdate: React.FC = () => {
         />
       </div>
 
+      {/* Customer Order Details Drawer */}
       <SideDrawer
         isOpen={isDrawerOpen}
         onClose={closeDrawer}
@@ -131,6 +137,17 @@ const TransportRouteUpdate: React.FC = () => {
         ]}
       >
         {selectedOrder && <CustomerOrderDetailsDrawer order={selectedOrder} />}
+      </SideDrawer>
+
+      {/* Transport Route Leg Drawer */}
+      <SideDrawer
+        isOpen={isRouteDrawerOpen}
+        onClose={closeRouteDrawer}
+        title="Transport Route Details"
+        width="100%"
+        showFooter={false}
+      >
+        <TransportRouteLegDrawer />
       </SideDrawer>
     </div>
   );
