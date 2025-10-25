@@ -35,7 +35,7 @@ const TransportRouteUpdate: React.FC = () => {
       width: 160,
       sortable: true,
       filterable: true,
-      onClick: (row: any) => handleCustomerOrderClick(row)
+      onClick: (row: any) => openRouteDrawer(row)
     },
     {
       key: 'COStatus',
@@ -103,9 +103,8 @@ const TransportRouteUpdate: React.FC = () => {
     {
       key: 'LegDetails',
       label: 'Leg Details',
-      type: 'Link' as const,
-      width: 100,
-      onClick: (row: any) => openRouteDrawer(row)
+      type: 'Text' as const,
+      width: 100
     }
   ];
 
