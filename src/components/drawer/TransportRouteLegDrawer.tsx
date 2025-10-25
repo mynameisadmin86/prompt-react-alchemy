@@ -3,22 +3,93 @@ import { DynamicPanel } from '@/components/DynamicPanel/DynamicPanel';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { PanelConfig } from '@/types/dynamicPanel';
-import { useTransportRouteStore } from '@/stores/transportRouteStore';
 import { Plus, Trash2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 
-export const TransportRouteLegDrawer: React.FC = () => {
-  const { selectedRoute, addLegPanel, removeLegPanel, updateLegData, saveRouteDetails, fetchDepartures, fetchArrivals } = useTransportRouteStore();
+interface TripInfo {
+  TripID: string;
+  Departure: string;
+  DepartureDescription: string;
+  Arrival: string;
+  ArrivalDescription: string;
+  DepartureActualDate: string;
+  ArrivalActualDate: string;
+  LoadType: string;
+  TripStatus: string;
+  DraftBillNo: string | null;
+  DraftBillStatus: string | null;
+  DraftBillWarning: string | null;
+  SupplierID: string;
+  SupplierDescription: string;
+}
+
+interface LegDetail {
+  LegSequence: number;
+  LegID: string;
+  LegUniqueId: string;
+  Departure: string;
+  DepartureDescription: string;
+  Arrival: string;
+  ArrivalDescription: string;
+  LegBehaviour: string;
+  LegBehaviourDescription: string;
+  TransportMode: string;
+  LegStatus: string | null;
+  TripInfo: TripInfo[] | null;
+  ModeFlag: string;
+  ReasonForUpdate: string | null;
+  QCCode1: string | null;
+  QCCode1Value: string | null;
+  Remarks: string | null;
+}
+
+interface TransportRoute {
+  ExecutionPlanID: string;
+  CustomerOrderID: string;
+  CustomerID: string;
+  CustomerName: string;
+  Service: string;
+  ServiceDescription: string;
+  SubService: string;
+  SubServiceDescription: string;
+  CODeparture: string;
+  CODepartureDescription: string;
+  COArrival: string;
+  COArrivalDescription: string;
+  RouteID: string;
+  RouteDescription: string;
+  Status: string;
+  LegDetails: LegDetail[];
+  ReasonForUpdate: string;
+}
+
+interface TransportRouteLegDrawerProps {
+  route: TransportRoute;
+  onAddLeg: () => void;
+  onRemoveLeg: (index: number) => void;
+  onUpdateLeg: (index: number, field: string, value: any) => void;
+  onSave: () => Promise<void>;
+  fetchDepartures: (params: { searchTerm: string; offset: number; limit: number }) => Promise<{ label: string; value: string }[]>;
+  fetchArrivals: (params: { searchTerm: string; offset: number; limit: number }) => Promise<{ label: string; value: string }[]>;
+}
+
+export const TransportRouteLegDrawer: React.FC<TransportRouteLegDrawerProps> = ({
+  route,
+  onAddLeg,
+  onRemoveLeg,
+  onUpdateLeg,
+  onSave,
+  fetchDepartures,
+  fetchArrivals
+}) => {
   const [reasonForUpdate, setReasonForUpdate] = useState('');
   const { toast } = useToast();
 
-  if (!selectedRoute) return null;
-
   const handleSave = async () => {
-    await saveRouteDetails();
+    await onSave();
     toast({
       title: 'Success',
       description: 'Route details saved successfully',
@@ -26,7 +97,7 @@ export const TransportRouteLegDrawer: React.FC = () => {
   };
 
   const createLegPanelConfig = (legIndex: number): PanelConfig => {
-    const leg = selectedRoute.LegDetails?.[legIndex];
+    const leg = route.LegDetails?.[legIndex];
     if (!leg) return {};
 
     return {
@@ -57,7 +128,7 @@ export const TransportRouteLegDrawer: React.FC = () => {
           { label: 'LEG03', value: 'LEG03' },
           { label: 'LEG04', value: 'LEG04' }
         ],
-        onChange: (value) => updateLegData(legIndex, 'LegID', value)
+        onChange: (value) => onUpdateLeg(legIndex, 'LegID', value)
       },
       Departure: {
         id: 'Departure',
@@ -70,7 +141,7 @@ export const TransportRouteLegDrawer: React.FC = () => {
         order: 3,
         width: 'third',
         fetchOptions: fetchDepartures,
-        onChange: (value) => updateLegData(legIndex, 'Departure', value)
+        onChange: (value) => onUpdateLeg(legIndex, 'Departure', value)
       },
       Arrival: {
         id: 'Arrival',
@@ -83,7 +154,7 @@ export const TransportRouteLegDrawer: React.FC = () => {
         order: 4,
         width: 'third',
         fetchOptions: fetchArrivals,
-        onChange: (value) => updateLegData(legIndex, 'Arrival', value)
+        onChange: (value) => onUpdateLeg(legIndex, 'Arrival', value)
       },
       LegBehaviour: {
         id: 'LegBehaviour',
@@ -100,7 +171,7 @@ export const TransportRouteLegDrawer: React.FC = () => {
           { label: 'LHV', value: 'LHV' },
           { label: 'Dvry', value: 'Dvry' }
         ],
-        onChange: (value) => updateLegData(legIndex, 'LegBehaviour', value)
+        onChange: (value) => onUpdateLeg(legIndex, 'LegBehaviour', value)
       },
       TransportMode: {
         id: 'TransportMode',
@@ -118,7 +189,7 @@ export const TransportRouteLegDrawer: React.FC = () => {
           { label: 'Air', value: 'Air' },
           { label: 'Sea', value: 'Sea' }
         ],
-        onChange: (value) => updateLegData(legIndex, 'TransportMode', value)
+        onChange: (value) => onUpdateLeg(legIndex, 'TransportMode', value)
       }
     };
   };
@@ -164,7 +235,7 @@ export const TransportRouteLegDrawer: React.FC = () => {
           <Button
             variant="outline"
             size="icon"
-            onClick={addLegPanel}
+            onClick={onAddLeg}
             className="h-8 w-8"
           >
             <Plus className="h-4 w-4" />
@@ -174,13 +245,13 @@ export const TransportRouteLegDrawer: React.FC = () => {
         {/* Order Info */}
         <div className="flex gap-2 items-center mb-4">
           <Badge variant="outline" className="text-sm">
-            {selectedRoute.CustomerOrderID}
+            {route.CustomerOrderID}
           </Badge>
           <Badge 
             variant="outline"
-            className={getStatusBadgeClass(selectedRoute.Status)}
+            className={getStatusBadgeClass(route.Status)}
           >
-            {selectedRoute.Status}
+            {route.Status}
           </Badge>
         </div>
 
@@ -188,19 +259,19 @@ export const TransportRouteLegDrawer: React.FC = () => {
         <div className="grid grid-cols-4 gap-4 text-sm">
           <div>
             <p className="text-muted-foreground mb-1">Customer</p>
-            <p className="font-medium">{selectedRoute.CustomerOrderID} - {selectedRoute.CustomerName}</p>
+            <p className="font-medium">{route.CustomerOrderID} - {route.CustomerName}</p>
           </div>
           <div>
             <p className="text-muted-foreground mb-1">From and To Location</p>
-            <p className="font-medium">{selectedRoute.CODepartureDescription} - {selectedRoute.COArrivalDescription}</p>
+            <p className="font-medium">{route.CODepartureDescription} - {route.COArrivalDescription}</p>
           </div>
           <div>
             <p className="text-muted-foreground mb-1">Service</p>
-            <p className="font-medium">{selectedRoute.ServiceDescription}</p>
+            <p className="font-medium">{route.ServiceDescription}</p>
           </div>
           <div>
             <p className="text-muted-foreground mb-1">Sub-Service</p>
-            <p className="font-medium">{selectedRoute.SubServiceDescription}</p>
+            <p className="font-medium">{route.SubServiceDescription}</p>
           </div>
         </div>
       </div>
@@ -208,13 +279,13 @@ export const TransportRouteLegDrawer: React.FC = () => {
       {/* Legs Section */}
       <div className="flex-1 overflow-y-auto p-6">
         <div className="space-y-4">
-          {selectedRoute.LegDetails?.map((leg, index) => (
+          {route.LegDetails?.map((leg, index) => (
             <Card key={leg.LegUniqueId} className="relative">
               <Button
                 variant="ghost"
                 size="icon"
                 className="absolute top-4 right-4 h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10 z-10"
-                onClick={() => removeLegPanel(index)}
+                onClick={() => onRemoveLeg(index)}
               >
                 <Trash2 className="h-4 w-4" />
               </Button>
