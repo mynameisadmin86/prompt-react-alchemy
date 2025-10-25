@@ -209,6 +209,13 @@ const Index = () => {
       path: "/smartgrid-highlight-demo",
       color: "text-yellow-600"
     },
+    {
+      title: "Transport Route Update",
+      description: "Manage transport routes with clickable customer orders and detailed side drawer view",
+      icon: Search,
+      path: "/transport-route-update",
+      color: "text-indigo-600"
+    },
   ];
 
   return (

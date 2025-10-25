@@ -36,6 +36,7 @@ import ManageTripExecution from "./pages/ManageTripExecution";
 import TripPlanning from "./pages/TripPlanning";
 import PlanActuals from "./pages/PlanActuals";
 import SmartGridHighlightDemo from "./pages/SmartGridHighlightDemo";
+import TransportRouteUpdate from "./pages/TransportRouteUpdate";
 
 const queryClient = new QueryClient();
 
@@ -77,6 +78,7 @@ const App = () => (
           <Route path="/trip-planning" element={<TripPlanning />} />
           <Route path="/plan-actuals" element={<PlanActuals />} />
           <Route path="/smartgrid-highlight-demo" element={<SmartGridHighlightDemo />} />
+          <Route path="/transport-route-update" element={<TransportRouteUpdate />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
