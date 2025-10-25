@@ -10,7 +10,6 @@ const TransportRouteUpdate: React.FC = () => {
   const {
     routes,
     selectedOrder,
-    selectedRoute,
     isDrawerOpen,
     isRouteDrawerOpen,
     highlightedIndexes,
@@ -19,13 +18,7 @@ const TransportRouteUpdate: React.FC = () => {
     openRouteDrawer,
     closeDrawer,
     closeRouteDrawer,
-    highlightRowIndexes,
-    addLegPanel,
-    removeLegPanel,
-    updateLegData,
-    saveRouteDetails,
-    fetchDepartures,
-    fetchArrivals
+    highlightRowIndexes
   } = useTransportRouteStore();
 
   useEffect(() => {
@@ -145,17 +138,7 @@ const TransportRouteUpdate: React.FC = () => {
         width="100%"
         showFooter={false}
       >
-        {selectedRoute && (
-          <TransportRouteLegDrawer
-            route={selectedRoute}
-            onAddLeg={addLegPanel}
-            onRemoveLeg={removeLegPanel}
-            onUpdateLeg={updateLegData}
-            onSave={saveRouteDetails}
-            fetchDepartures={fetchDepartures}
-            fetchArrivals={fetchArrivals}
-          />
-        )}
+        <TransportRouteLegDrawer />
       </SideDrawer>
     </div>
   );
