@@ -29,7 +29,7 @@ const TransportRouteUpdate: React.FC = () => {
 
   const columns: GridColumnConfig[] = [
     {
-      key: 'CustomerOrderNo',
+      key: 'CustomerOrderID',
       label: 'Customer Order No.',
       type: 'Link' as const,
       width: 160,
@@ -38,7 +38,7 @@ const TransportRouteUpdate: React.FC = () => {
       onClick: (row: any) => openRouteDrawer(row)
     },
     {
-      key: 'COStatus',
+      key: 'Status',
       label: 'CO Status',
       type: 'Badge' as const,
       width: 160,
@@ -46,14 +46,16 @@ const TransportRouteUpdate: React.FC = () => {
       filterable: true,
       statusMap: {
         'Confirmed': 'bg-green-100 text-green-800 border-green-200 border',
+        'PRTDLV': 'bg-yellow-100 text-yellow-800 border-yellow-200 border',
         'Partial-Delivered': 'bg-yellow-100 text-yellow-800 border-yellow-200 border',
         'Closed': 'bg-red-100 text-red-800 border-red-200 border',
+        'INCMPLT': 'bg-orange-100 text-orange-800 border-orange-200 border',
         'In-Complete': 'bg-orange-100 text-orange-800 border-orange-200 border',
         'Fully-Delivered': 'bg-emerald-100 text-emerald-800 border-emerald-200 border'
       }
     },
     {
-      key: 'Departure',
+      key: 'CODepartureDescription',
       label: 'Departure',
       type: 'Text' as const,
       width: 140,
@@ -61,7 +63,7 @@ const TransportRouteUpdate: React.FC = () => {
       filterable: true
     },
     {
-      key: 'Arrival',
+      key: 'COArrivalDescription',
       label: 'Arrival',
       type: 'Text' as const,
       width: 140,
@@ -69,42 +71,28 @@ const TransportRouteUpdate: React.FC = () => {
       filterable: true
     },
     {
-      key: 'DepartureDate',
-      label: 'Departure Date',
+      key: 'ServiceDescription',
+      label: 'Service',
       type: 'Text' as const,
       width: 180,
       sortable: true,
       filterable: true
     },
     {
-      key: 'ArrivalDate',
-      label: 'Arrival Date',
+      key: 'SubServiceDescription',
+      label: 'Sub-Service',
       type: 'Text' as const,
       width: 180,
       sortable: true,
       filterable: true
     },
     {
-      key: 'Mode',
-      label: 'Mode',
+      key: 'RouteDescription',
+      label: 'Route',
       type: 'Text' as const,
       width: 120,
       sortable: true,
       filterable: true
-    },
-    {
-      key: 'LegExecuted',
-      label: 'Leg Executed',
-      type: 'Text' as const,
-      width: 120,
-      sortable: true,
-      filterable: true
-    },
-    {
-      key: 'LegDetails',
-      label: 'Leg Details',
-      type: 'Text' as const,
-      width: 100
     }
   ];
 
@@ -135,7 +123,11 @@ const TransportRouteUpdate: React.FC = () => {
           }
         ]}
       >
-        {selectedOrder && <CustomerOrderDetailsDrawer order={selectedOrder} />}
+        {selectedOrder && (
+          <div className="p-6">
+            <p className="text-sm text-muted-foreground">Customer order details would go here</p>
+          </div>
+        )}
       </SideDrawer>
 
       {/* Transport Route Leg Drawer */}

@@ -1,40 +1,60 @@
 import { create } from 'zustand';
 
-interface RouteLeg {
+interface TripInfo {
+  TripID: string;
+  Departure: string;
+  DepartureDescription: string;
+  Arrival: string;
+  ArrivalDescription: string;
+  DepartureActualDate: string;
+  ArrivalActualDate: string;
+  LoadType: string;
+  TripStatus: string;
+  DraftBillNo: string | null;
+  DraftBillStatus: string | null;
+  DraftBillWarning: string | null;
+  SupplierID: string;
+  SupplierDescription: string;
+}
+
+interface LegDetail {
   LegSequence: number;
   LegID: string;
-  LegName: string;
-  Origin: string;
-  Destination: string;
-  VehicleNo: string;
-  DriverName: string;
-  DepartureTime: string;
-  ArrivalTime: string;
-  Status: string;
+  LegUniqueId: string;
+  Departure: string;
+  DepartureDescription: string;
+  Arrival: string;
+  ArrivalDescription: string;
   LegBehaviour: string;
+  LegBehaviourDescription: string;
   TransportMode: string;
-  TripDetails?: string;
+  LegStatus: string | null;
+  TripInfo: TripInfo[] | null;
+  ModeFlag: string;
+  ReasonForUpdate: string | null;
+  QCCode1: string | null;
+  QCCode1Value: string | null;
+  Remarks: string | null;
 }
 
 interface TransportRoute {
-  id: string;
-  CustomerOrderNo: string;
-  COStatus: string;
-  Departure: string;
-  Arrival: string;
-  DepartureDate: string;
-  ArrivalDate: string;
-  Mode: string;
-  LegExecuted: string;
-  customerName?: string;
-  customerAddress?: string;
-  orderDate?: string;
-  deliveryDate?: string;
-  totalItems?: number;
-  FromToLocation?: string;
-  Service?: string;
-  SubService?: string;
-  legs?: RouteLeg[];
+  ExecutionPlanID: string;
+  CustomerOrderID: string;
+  CustomerID: string;
+  CustomerName: string;
+  Service: string;
+  ServiceDescription: string;
+  SubService: string;
+  SubServiceDescription: string;
+  CODeparture: string;
+  CODepartureDescription: string;
+  COArrival: string;
+  COArrivalDescription: string;
+  RouteID: string;
+  RouteDescription: string;
+  Status: string;
+  LegDetails: LegDetail[];
+  ReasonForUpdate: string;
 }
 
 interface TransportRouteStore {
@@ -54,220 +74,144 @@ interface TransportRouteStore {
   removeLegPanel: (index: number) => void;
   updateLegData: (index: number, field: string, value: any) => void;
   saveRouteDetails: () => Promise<void>;
-  fetchOrigins: (params: { searchTerm: string; offset: number; limit: number }) => Promise<{ label: string; value: string }[]>;
-  fetchDestinations: (params: { searchTerm: string; offset: number; limit: number }) => Promise<{ label: string; value: string }[]>;
+  fetchDepartures: (params: { searchTerm: string; offset: number; limit: number }) => Promise<{ label: string; value: string }[]>;
+  fetchArrivals: (params: { searchTerm: string; offset: number; limit: number }) => Promise<{ label: string; value: string }[]>;
 }
 
 // Mock data
 const mockRoutes: TransportRoute[] = [
   {
-    id: '1',
-    CustomerOrderNo: 'CO00000001',
-    COStatus: 'Confirmed',
-    Departure: 'Berlin',
-    Arrival: 'Czech Republic',
-    DepartureDate: '25-Mar-2025 09:22',
-    ArrivalDate: '25-Mar-2025 09:22',
-    Mode: 'Rail',
-    LegExecuted: '0/3',
-    customerName: 'ABC Logistics GmbH',
-    customerAddress: 'Hauptstraße 123, Berlin, Germany',
-    orderDate: '20-Mar-2025',
-    deliveryDate: '25-Mar-2025',
-    totalItems: 150
+    ExecutionPlanID: "EXE/2021/00002761",
+    CustomerOrderID: "BR/2021/00009245",
+    CustomerID: "10026536",
+    CustomerName: "KAZPHOSPHATE LLC",
+    Service: "CT",
+    ServiceDescription: "SINGLE CONTAINER TRANSPORT",
+    SubService: "WW",
+    SubServiceDescription: "WITH WAGON",
+    CODeparture: "27-706709",
+    CODepartureDescription: "Assa ( 27-706709- )",
+    COArrival: "80-154807",
+    COArrivalDescription: "Hürth-Kalscheuren ( 80-15480-7 )",
+    RouteID: "YP_Route9",
+    RouteDescription: "YP_Route9",
+    Status: "INCMPLT",
+    LegDetails: [
+      {
+        LegSequence: 1,
+        LegID: "YP_Leg7",
+        LegUniqueId: "4349296C-B419-4442-BBF6-B88E693CBDCC",
+        Departure: "27-706709",
+        DepartureDescription: "Assa ( 27-706709- )",
+        Arrival: "20-RU",
+        ArrivalDescription: "Ossinki ( 20-RU- )",
+        LegBehaviour: "Pick",
+        LegBehaviourDescription: "Pick",
+        TransportMode: "Rail",
+        LegStatus: "CF",
+        TripInfo: [
+          {
+            TripID: "TP/2021/00002557",
+            Departure: "27-706709",
+            DepartureDescription: "Assa ( 27-706709- )",
+            Arrival: "20-RU",
+            ArrivalDescription: "Ossinki ( 20-RU- )",
+            DepartureActualDate: "2021-09-20 03:31:00",
+            ArrivalActualDate: "2021-09-20 03:31:20",
+            LoadType: "Loaded",
+            TripStatus: "Initiated",
+            DraftBillNo: null,
+            DraftBillStatus: null,
+            DraftBillWarning: null,
+            SupplierID: "010221",
+            SupplierDescription: "CER HUNGARY ZRT"
+          }
+        ],
+        ModeFlag: "Nochange",
+        ReasonForUpdate: null,
+        QCCode1: null,
+        QCCode1Value: null,
+        Remarks: null
+      },
+      {
+        LegSequence: 2,
+        LegID: "YP_Leg8",
+        LegUniqueId: "D53D38DB-E5A3-48DE-A995-06F1A46F2216",
+        Departure: "20-RU",
+        DepartureDescription: "Ossinki ( 20-RU- )",
+        Arrival: "21-130505",
+        ArrivalDescription: "Brest-Zevernui Eks ( 21-130505- )",
+        LegBehaviour: "LHV",
+        LegBehaviourDescription: "LHV",
+        TransportMode: "Rail",
+        LegStatus: "AC",
+        TripInfo: null,
+        ModeFlag: "Nochange",
+        ReasonForUpdate: null,
+        QCCode1: null,
+        QCCode1Value: null,
+        Remarks: null
+      },
+      {
+        LegSequence: 3,
+        LegID: "YP_leg5",
+        LegUniqueId: "E0E49D3C-6D4E-480E-B321-902C2BA2AFBD",
+        Departure: "21-130505",
+        DepartureDescription: "Brest-Zevernui Eks ( 21-130505- )",
+        Arrival: "80-000136",
+        ArrivalDescription: "Hamburg-Waltershof ( 80-136- )",
+        LegBehaviour: "LHV",
+        LegBehaviourDescription: "LHV",
+        TransportMode: "Rail",
+        LegStatus: null,
+        TripInfo: null,
+        ModeFlag: "Nochange",
+        ReasonForUpdate: null,
+        QCCode1: null,
+        QCCode1Value: null,
+        Remarks: null
+      },
+      {
+        LegSequence: 4,
+        LegID: "YP_Leg6",
+        LegUniqueId: "E70126E3-AF16-4392-845B-D11A3EA89C9A",
+        Departure: "80-000136",
+        DepartureDescription: "Hamburg-Waltershof ( 80-136- )",
+        Arrival: "80-154807",
+        ArrivalDescription: "Hürth-Kalscheuren ( 80-15480-7 )",
+        LegBehaviour: "Dvry",
+        LegBehaviourDescription: "Dvry",
+        TransportMode: "Rail",
+        LegStatus: null,
+        TripInfo: null,
+        ModeFlag: "Nochange",
+        ReasonForUpdate: null,
+        QCCode1: null,
+        QCCode1Value: null,
+        Remarks: null
+      }
+    ],
+    ReasonForUpdate: ""
   },
   {
-    id: '2',
-    CustomerOrderNo: 'CO00000002',
-    COStatus: 'Partial-Delivered',
-    Departure: 'Berlin',
-    Arrival: 'Poland',
-    DepartureDate: '25-Mar-2025 09:22',
-    ArrivalDate: '25-Mar-2025 09:22',
-    Mode: 'Rail',
-    LegExecuted: '0/3',
-    customerName: 'Transport Solutions Ltd',
-    customerAddress: 'Alexanderplatz 45, Berlin, Germany',
-    orderDate: '21-Mar-2025',
-    deliveryDate: '26-Mar-2025',
-    totalItems: 200
+    ExecutionPlanID: "EXE/2021/00002762",
+    CustomerOrderID: "BR/2021/00009246",
+    CustomerID: "10026537",
+    CustomerName: "Transport Solutions Ltd",
+    Service: "MT",
+    ServiceDescription: "MULTI CONTAINER TRANSPORT",
+    SubService: "WW",
+    SubServiceDescription: "WITH WAGON",
+    CODeparture: "27-706709",
+    CODepartureDescription: "Berlin ( 27-706709- )",
+    COArrival: "21-130505",
+    COArrivalDescription: "Poland ( 21-130505- )",
+    RouteID: "YP_Route10",
+    RouteDescription: "YP_Route10",
+    Status: "PRTDLV",
+    LegDetails: [],
+    ReasonForUpdate: ""
   },
-  {
-    id: '3',
-    CustomerOrderNo: 'CO00000003',
-    COStatus: 'Confirmed',
-    Departure: 'Berlin',
-    Arrival: 'Hannover',
-    DepartureDate: '25-Mar-2025 09:22',
-    ArrivalDate: '25-Mar-2025 09:22',
-    Mode: 'Multimodal',
-    LegExecuted: '0/3',
-    customerName: 'Express Cargo Services',
-    customerAddress: 'Friedrichstraße 78, Berlin, Germany',
-    orderDate: '22-Mar-2025',
-    deliveryDate: '25-Mar-2025',
-    totalItems: 95
-  },
-  {
-    id: '4',
-    CustomerOrderNo: 'CO00000004',
-    COStatus: 'Confirmed',
-    Departure: 'Frankfurt',
-    Arrival: 'Berlin',
-    DepartureDate: '25-Mar-2025 09:22',
-    ArrivalDate: '25-Mar-2025 09:22',
-    Mode: 'Rail',
-    LegExecuted: '0/3',
-    customerName: 'Deutsche Spedition AG',
-    customerAddress: 'Müllerstraße 56, Frankfurt, Germany',
-    orderDate: '19-Mar-2025',
-    deliveryDate: '25-Mar-2025',
-    totalItems: 180
-  },
-  {
-    id: '5',
-    CustomerOrderNo: 'CO00000005',
-    COStatus: 'Closed',
-    Departure: 'Dresden',
-    Arrival: 'Czech Republic',
-    DepartureDate: '25-Mar-2025 09:22',
-    ArrivalDate: '25-Mar-2025 09:22',
-    Mode: 'Rail',
-    LegExecuted: '0/3',
-    customerName: 'Cargo Masters International',
-    customerAddress: 'Königstraße 12, Dresden, Germany',
-    orderDate: '18-Mar-2025',
-    deliveryDate: '24-Mar-2025',
-    totalItems: 120
-  },
-  {
-    id: '6',
-    CustomerOrderNo: 'CO00000006',
-    COStatus: 'In-Complete',
-    Departure: 'Czech Republic',
-    Arrival: 'Berlin',
-    DepartureDate: '25-Mar-2025 09:22',
-    ArrivalDate: '25-Mar-2025 09:22',
-    Mode: 'Multimodal',
-    LegExecuted: '0/3',
-    customerName: 'Continental Freight Co',
-    customerAddress: 'Wenceslas Square 34, Prague, Czech Republic',
-    orderDate: '23-Mar-2025',
-    deliveryDate: '28-Mar-2025',
-    totalItems: 75
-  },
-  {
-    id: '7',
-    CustomerOrderNo: 'CO00000007',
-    COStatus: 'Fully-Delivered',
-    Departure: 'Berlin',
-    Arrival: 'MUMES, Mumbai',
-    DepartureDate: '25-Mar-2025 09:22',
-    ArrivalDate: '25-Mar-2025 09:22',
-    Mode: 'Rail',
-    LegExecuted: '0/3',
-    customerName: 'Global Shipping Partners',
-    customerAddress: 'Potsdamer Platz 2, Berlin, Germany',
-    orderDate: '15-Mar-2025',
-    deliveryDate: '22-Mar-2025',
-    totalItems: 300
-  },
-  {
-    id: '8',
-    CustomerOrderNo: 'CO00000008',
-    COStatus: 'Closed',
-    Departure: 'Berlin',
-    Arrival: 'Czech Republic',
-    DepartureDate: '25-Mar-2025 09:22',
-    ArrivalDate: '25-Mar-2025 09:22',
-    Mode: 'Rail',
-    LegExecuted: '0/3',
-    customerName: 'Euro Transport Group',
-    customerAddress: 'Unter den Linden 77, Berlin, Germany',
-    orderDate: '17-Mar-2025',
-    deliveryDate: '24-Mar-2025',
-    totalItems: 140
-  },
-  {
-    id: '9',
-    CustomerOrderNo: 'CO00000009',
-    COStatus: 'Partial-Delivered',
-    Departure: 'Frankfurt',
-    Arrival: 'Hannover',
-    DepartureDate: '25-Mar-2025 09:22',
-    ArrivalDate: '25-Mar-2025 09:22',
-    Mode: 'Multimodal',
-    LegExecuted: '0/3',
-    customerName: 'Quick Logistics Solutions',
-    customerAddress: 'Bahnhofstraße 89, Frankfurt, Germany',
-    orderDate: '21-Mar-2025',
-    deliveryDate: '27-Mar-2025',
-    totalItems: 165
-  },
-  {
-    id: '10',
-    CustomerOrderNo: 'CO00000010',
-    COStatus: 'In-Complete',
-    Departure: 'Czech Republic',
-    Arrival: 'Berlin',
-    DepartureDate: '25-Mar-2025 09:22',
-    ArrivalDate: '25-Mar-2025 09:22',
-    Mode: 'Rail',
-    LegExecuted: '0/3',
-    customerName: 'Prime Cargo Services',
-    customerAddress: 'Masarykova 56, Prague, Czech Republic',
-    orderDate: '24-Mar-2025',
-    deliveryDate: '29-Mar-2025',
-    totalItems: 88
-  },
-  {
-    id: '11',
-    CustomerOrderNo: 'CO00000011',
-    COStatus: 'Confirmed',
-    Departure: 'Hannover',
-    Arrival: 'Berlin',
-    DepartureDate: '25-Mar-2025 09:22',
-    ArrivalDate: '25-Mar-2025 09:22',
-    Mode: 'Rail',
-    LegExecuted: '0/3',
-    customerName: 'Northern Transport Ltd',
-    customerAddress: 'Ernst-August-Platz 5, Hannover, Germany',
-    orderDate: '22-Mar-2025',
-    deliveryDate: '25-Mar-2025',
-    totalItems: 110
-  },
-  {
-    id: '12',
-    CustomerOrderNo: 'CO00000005',
-    COStatus: 'Closed',
-    Departure: 'Dresden',
-    Arrival: 'Czech Republic',
-    DepartureDate: '25-Mar-2025 09:22',
-    ArrivalDate: '25-Mar-2025 09:22',
-    Mode: 'Rail',
-    LegExecuted: '0/3',
-    customerName: 'Cargo Masters International',
-    customerAddress: 'Königstraße 12, Dresden, Germany',
-    orderDate: '18-Mar-2025',
-    deliveryDate: '24-Mar-2025',
-    totalItems: 120
-  },
-  {
-    id: '13',
-    CustomerOrderNo: 'CO00000006',
-    COStatus: 'In-Complete',
-    Departure: 'Czech Republic',
-    Arrival: 'Berlin',
-    DepartureDate: '25-Mar-2025 09:22',
-    ArrivalDate: '25-Mar-2025 09:22',
-    Mode: 'Multimodal',
-    LegExecuted: '0/3',
-    customerName: 'Continental Freight Co',
-    customerAddress: 'Wenceslas Square 34, Prague, Czech Republic',
-    orderDate: '23-Mar-2025',
-    deliveryDate: '28-Mar-2025',
-    totalItems: 75
-  }
 ];
 
 export const useTransportRouteStore = create<TransportRouteStore>((set, get) => ({
@@ -288,64 +232,8 @@ export const useTransportRouteStore = create<TransportRouteStore>((set, get) => 
   },
 
   openRouteDrawer: async (route: TransportRoute) => {
-    // Simulate API call to fetch detailed route data with legs
-    const mockLegs: RouteLeg[] = [
-      {
-        LegSequence: 1,
-        LegID: 'LEG01',
-        LegName: 'First Leg',
-        Origin: 'Berlin',
-        Destination: 'Heidelblick',
-        VehicleNo: 'VH-1234',
-        DriverName: 'John Doe',
-        DepartureTime: '2025-03-25T09:22:00',
-        ArrivalTime: '2025-03-25T12:22:00',
-        Status: 'Initiated',
-        LegBehaviour: 'Pickup',
-        TransportMode: 'Rail',
-        TripDetails: 'TRIP0000001 : Berlin, 25-Mar-2025 09:22 → Heidelblick, 25-Mar-2025 09:22 | Loaded'
-      },
-      {
-        LegSequence: 2,
-        LegID: 'LEG02',
-        LegName: 'Second Leg',
-        Origin: 'Heidelblick',
-        Destination: 'Dresden',
-        VehicleNo: 'VH-5678',
-        DriverName: 'Jane Smith',
-        DepartureTime: '2025-03-25T13:22:00',
-        ArrivalTime: '2025-03-25T16:22:00',
-        Status: 'Released',
-        LegBehaviour: 'Line Haul',
-        TransportMode: 'Rail',
-        TripDetails: 'TRIP0000002 : Heidelblick, 25-Mar-2025 09:22 → Dresden, 25-Mar-2025 09:22 | Empty'
-      },
-      {
-        LegSequence: 3,
-        LegID: 'LEG03',
-        LegName: 'Third Leg',
-        Origin: 'Dresden',
-        Destination: 'Czech Republic',
-        VehicleNo: 'VH-9012',
-        DriverName: 'Mike Johnson',
-        DepartureTime: '2025-03-25T17:22:00',
-        ArrivalTime: '2025-03-25T20:22:00',
-        Status: 'Planned',
-        LegBehaviour: 'Delivery',
-        TransportMode: 'Rail',
-        TripDetails: 'TRIP0000003 : Dresden, 25-Mar-2025 09:22 → Czech Republic, 25-Mar-2025 09:22'
-      }
-    ];
-
-    const detailedRoute: TransportRoute = {
-      ...route,
-      FromToLocation: `${route.Departure} - ${route.Arrival}`,
-      Service: 'Block Train Conventional',
-      SubService: 'Repair',
-      legs: mockLegs
-    };
-
-    set({ selectedRoute: detailedRoute, isRouteDrawerOpen: true });
+    // Simulate API call - in real scenario, fetch from backend
+    set({ selectedRoute: route, isRouteDrawerOpen: true });
   },
 
   closeDrawer: () => {
@@ -364,47 +252,52 @@ export const useTransportRouteStore = create<TransportRouteStore>((set, get) => 
     const { selectedRoute } = get();
     if (!selectedRoute) return;
 
-    const newLeg: RouteLeg = {
-      LegSequence: (selectedRoute.legs?.length || 0) + 1,
+    const newLeg: LegDetail = {
+      LegSequence: (selectedRoute.LegDetails?.length || 0) + 1,
       LegID: '',
-      LegName: `Leg ${(selectedRoute.legs?.length || 0) + 1}`,
-      Origin: '',
-      Destination: '',
-      VehicleNo: '',
-      DriverName: '',
-      DepartureTime: '',
-      ArrivalTime: '',
-      Status: 'Planned',
-      LegBehaviour: '',
-      TransportMode: 'Rail'
+      LegUniqueId: crypto.randomUUID(),
+      Departure: '',
+      DepartureDescription: '',
+      Arrival: '',
+      ArrivalDescription: '',
+      LegBehaviour: 'Pick',
+      LegBehaviourDescription: 'Pick',
+      TransportMode: 'Rail',
+      LegStatus: null,
+      TripInfo: null,
+      ModeFlag: 'Nochange',
+      ReasonForUpdate: null,
+      QCCode1: null,
+      QCCode1Value: null,
+      Remarks: null
     };
 
     set({
       selectedRoute: {
         ...selectedRoute,
-        legs: [...(selectedRoute.legs || []), newLeg]
+        LegDetails: [...selectedRoute.LegDetails, newLeg]
       }
     });
   },
 
   removeLegPanel: (index: number) => {
     const { selectedRoute } = get();
-    if (!selectedRoute || !selectedRoute.legs) return;
+    if (!selectedRoute) return;
 
-    const updatedLegs = selectedRoute.legs.filter((_, i) => i !== index);
+    const updatedLegs = selectedRoute.LegDetails.filter((_, i) => i !== index);
     set({
       selectedRoute: {
         ...selectedRoute,
-        legs: updatedLegs
+        LegDetails: updatedLegs
       }
     });
   },
 
   updateLegData: (index: number, field: string, value: any) => {
     const { selectedRoute } = get();
-    if (!selectedRoute || !selectedRoute.legs) return;
+    if (!selectedRoute) return;
 
-    const updatedLegs = [...selectedRoute.legs];
+    const updatedLegs = [...selectedRoute.LegDetails];
     updatedLegs[index] = {
       ...updatedLegs[index],
       [field]: value
@@ -413,7 +306,7 @@ export const useTransportRouteStore = create<TransportRouteStore>((set, get) => 
     set({
       selectedRoute: {
         ...selectedRoute,
-        legs: updatedLegs
+        LegDetails: updatedLegs
       }
     });
   },
@@ -428,45 +321,40 @@ export const useTransportRouteStore = create<TransportRouteStore>((set, get) => 
     // Update the route in the routes array
     const { routes } = get();
     const updatedRoutes = routes.map(route => 
-      route.id === selectedRoute.id ? selectedRoute : route
+      route.ExecutionPlanID === selectedRoute.ExecutionPlanID ? selectedRoute : route
     );
 
     set({ routes: updatedRoutes });
   },
 
-  fetchOrigins: async ({ searchTerm, offset, limit }) => {
+  fetchDepartures: async ({ searchTerm, offset, limit }) => {
     // Simulate API call
-    const mockOrigins = [
-      { label: 'Berlin', value: 'berlin' },
-      { label: 'Hamburg', value: 'hamburg' },
-      { label: 'Munich', value: 'munich' },
-      { label: 'Frankfurt', value: 'frankfurt' },
-      { label: 'Dresden', value: 'dresden' },
-      { label: 'Heidelblick', value: 'heidelblick' },
-      { label: 'Hannover', value: 'hannover' }
+    const mockDepartures = [
+      { label: 'Assa ( 27-706709- )', value: '27-706709' },
+      { label: 'Berlin ( 27-706709- )', value: '27-706709' },
+      { label: 'Ossinki ( 20-RU- )', value: '20-RU' },
+      { label: 'Brest-Zevernui Eks ( 21-130505- )', value: '21-130505' },
+      { label: 'Hamburg-Waltershof ( 80-136- )', value: '80-000136' },
+      { label: 'Dresden ( 80-000136- )', value: '80-000136' }
     ];
 
-    return mockOrigins.filter(o => 
+    return mockDepartures.filter(o => 
       o.label.toLowerCase().includes(searchTerm.toLowerCase())
     ).slice(offset, offset + limit);
   },
 
-  fetchDestinations: async ({ searchTerm, offset, limit }) => {
+  fetchArrivals: async ({ searchTerm, offset, limit }) => {
     // Simulate API call
-    const mockDestinations = [
-      { label: 'Berlin', value: 'berlin' },
-      { label: 'Hamburg', value: 'hamburg' },
-      { label: 'Munich', value: 'munich' },
-      { label: 'Frankfurt', value: 'frankfurt' },
-      { label: 'Dresden', value: 'dresden' },
-      { label: 'Czech Republic', value: 'czech_republic' },
-      { label: 'Poland', value: 'poland' },
-      { label: 'Heidelblick', value: 'heidelblick' },
-      { label: 'Hannover', value: 'hannover' },
-      { label: 'MUMES, Mumbai', value: 'mumbai' }
+    const mockArrivals = [
+      { label: 'Ossinki ( 20-RU- )', value: '20-RU' },
+      { label: 'Brest-Zevernui Eks ( 21-130505- )', value: '21-130505' },
+      { label: 'Hamburg-Waltershof ( 80-136- )', value: '80-000136' },
+      { label: 'Hürth-Kalscheuren ( 80-15480-7 )', value: '80-154807' },
+      { label: 'Poland ( 21-130505- )', value: '21-130505' },
+      { label: 'Czech Republic', value: 'czech_republic' }
     ];
 
-    return mockDestinations.filter(d => 
+    return mockArrivals.filter(d => 
       d.label.toLowerCase().includes(searchTerm.toLowerCase())
     ).slice(offset, offset + limit);
   }

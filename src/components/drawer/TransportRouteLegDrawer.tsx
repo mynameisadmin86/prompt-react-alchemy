@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { DynamicPanel, DynamicPanelRef } from '@/components/DynamicPanel/DynamicPanel';
+import { DynamicPanel } from '@/components/DynamicPanel/DynamicPanel';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { PanelConfig } from '@/types/dynamicPanel';
@@ -11,7 +11,7 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 
 export const TransportRouteLegDrawer: React.FC = () => {
-  const { selectedRoute, addLegPanel, removeLegPanel, updateLegData, saveRouteDetails, fetchOrigins, fetchDestinations } = useTransportRouteStore();
+  const { selectedRoute, addLegPanel, removeLegPanel, updateLegData, saveRouteDetails, fetchDepartures, fetchArrivals } = useTransportRouteStore();
   const [reasonForUpdate, setReasonForUpdate] = useState('');
   const { toast } = useToast();
 
@@ -26,7 +26,7 @@ export const TransportRouteLegDrawer: React.FC = () => {
   };
 
   const createLegPanelConfig = (legIndex: number): PanelConfig => {
-    const leg = selectedRoute.legs?.[legIndex];
+    const leg = selectedRoute.LegDetails?.[legIndex];
     if (!leg) return {};
 
     return {
@@ -59,31 +59,31 @@ export const TransportRouteLegDrawer: React.FC = () => {
         ],
         onChange: (value) => updateLegData(legIndex, 'LegID', value)
       },
-      Origin: {
-        id: 'Origin',
+      Departure: {
+        id: 'Departure',
         label: 'Departure',
         fieldType: 'lazyselect',
-        value: leg.Origin,
+        value: leg.DepartureDescription || leg.Departure,
         mandatory: true,
         visible: true,
         editable: true,
         order: 3,
         width: 'third',
-        fetchOptions: fetchOrigins,
-        onChange: (value) => updateLegData(legIndex, 'Origin', value)
+        fetchOptions: fetchDepartures,
+        onChange: (value) => updateLegData(legIndex, 'Departure', value)
       },
-      Destination: {
-        id: 'Destination',
+      Arrival: {
+        id: 'Arrival',
         label: 'Arrival',
         fieldType: 'lazyselect',
-        value: leg.Destination,
+        value: leg.ArrivalDescription || leg.Arrival,
         mandatory: true,
         visible: true,
         editable: true,
         order: 4,
         width: 'third',
-        fetchOptions: fetchDestinations,
-        onChange: (value) => updateLegData(legIndex, 'Destination', value)
+        fetchOptions: fetchArrivals,
+        onChange: (value) => updateLegData(legIndex, 'Arrival', value)
       },
       LegBehaviour: {
         id: 'LegBehaviour',
@@ -96,9 +96,9 @@ export const TransportRouteLegDrawer: React.FC = () => {
         order: 5,
         width: 'third',
         options: [
-          { label: 'Pickup', value: 'Pickup' },
-          { label: 'Line Haul', value: 'Line Haul' },
-          { label: 'Delivery', value: 'Delivery' }
+          { label: 'Pick', value: 'Pick' },
+          { label: 'LHV', value: 'LHV' },
+          { label: 'Dvry', value: 'Dvry' }
         ],
         onChange: (value) => updateLegData(legIndex, 'LegBehaviour', value)
       },
@@ -119,19 +119,40 @@ export const TransportRouteLegDrawer: React.FC = () => {
           { label: 'Sea', value: 'Sea' }
         ],
         onChange: (value) => updateLegData(legIndex, 'TransportMode', value)
-      },
-      TripDetails: {
-        id: 'TripDetails',
-        label: 'Trip Details',
-        fieldType: 'text',
-        value: leg.TripDetails || '',
-        mandatory: false,
-        visible: true,
-        editable: false,
-        order: 7,
-        width: 'full'
       }
     };
+  };
+
+  const getStatusBadgeClass = (status: string) => {
+    switch (status) {
+      case 'INCMPLT':
+      case 'In-Complete':
+        return 'bg-orange-100 text-orange-800 border-orange-200';
+      case 'PRTDLV':
+      case 'Partial-Delivered':
+        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      case 'Confirmed':
+        return 'bg-green-100 text-green-800 border-green-200';
+      case 'Closed':
+        return 'bg-red-100 text-red-800 border-red-200';
+      default:
+        return 'bg-gray-100 text-gray-800 border-gray-200';
+    }
+  };
+
+  const getLegStatusBadgeClass = (status: string | null) => {
+    if (!status) return 'bg-gray-100 text-gray-800 border-gray-200';
+    
+    switch (status) {
+      case 'CF':
+      case 'Initiated':
+        return 'bg-blue-100 text-blue-800 border-blue-200';
+      case 'AC':
+      case 'Released':
+        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      default:
+        return 'bg-gray-100 text-gray-800 border-gray-200';
+    }
   };
 
   return (
@@ -153,18 +174,13 @@ export const TransportRouteLegDrawer: React.FC = () => {
         {/* Order Info */}
         <div className="flex gap-2 items-center mb-4">
           <Badge variant="outline" className="text-sm">
-            {selectedRoute.CustomerOrderNo}
+            {selectedRoute.CustomerOrderID}
           </Badge>
           <Badge 
-            className={
-              selectedRoute.COStatus === 'Confirmed' 
-                ? 'bg-green-100 text-green-800 border-green-200'
-                : selectedRoute.COStatus === 'Partial-Delivered'
-                ? 'bg-yellow-100 text-yellow-800 border-yellow-200'
-                : 'bg-gray-100 text-gray-800 border-gray-200'
-            }
+            variant="outline"
+            className={getStatusBadgeClass(selectedRoute.Status)}
           >
-            {selectedRoute.COStatus}
+            {selectedRoute.Status}
           </Badge>
         </div>
 
@@ -172,19 +188,19 @@ export const TransportRouteLegDrawer: React.FC = () => {
         <div className="grid grid-cols-4 gap-4 text-sm">
           <div>
             <p className="text-muted-foreground mb-1">Customer</p>
-            <p className="font-medium">{selectedRoute.CustomerOrderNo} - {selectedRoute.customerName}</p>
+            <p className="font-medium">{selectedRoute.CustomerOrderID} - {selectedRoute.CustomerName}</p>
           </div>
           <div>
             <p className="text-muted-foreground mb-1">From and To Location</p>
-            <p className="font-medium">{selectedRoute.FromToLocation}</p>
+            <p className="font-medium">{selectedRoute.CODepartureDescription} - {selectedRoute.COArrivalDescription}</p>
           </div>
           <div>
             <p className="text-muted-foreground mb-1">Service</p>
-            <p className="font-medium">{selectedRoute.Service}</p>
+            <p className="font-medium">{selectedRoute.ServiceDescription}</p>
           </div>
           <div>
             <p className="text-muted-foreground mb-1">Sub-Service</p>
-            <p className="font-medium">{selectedRoute.SubService}</p>
+            <p className="font-medium">{selectedRoute.SubServiceDescription}</p>
           </div>
         </div>
       </div>
@@ -192,12 +208,12 @@ export const TransportRouteLegDrawer: React.FC = () => {
       {/* Legs Section */}
       <div className="flex-1 overflow-y-auto p-6">
         <div className="space-y-4">
-          {selectedRoute.legs?.map((leg, index) => (
-            <Card key={index} className="relative">
+          {selectedRoute.LegDetails?.map((leg, index) => (
+            <Card key={leg.LegUniqueId} className="relative">
               <Button
                 variant="ghost"
                 size="icon"
-                className="absolute top-4 right-4 h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                className="absolute top-4 right-4 h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10 z-10"
                 onClick={() => removeLegPanel(index)}
               >
                 <Trash2 className="h-4 w-4" />
@@ -205,7 +221,7 @@ export const TransportRouteLegDrawer: React.FC = () => {
               
               <DynamicPanel
                 panelId={`leg-${index}`}
-                panelTitle={`Leg Sequence`}
+                panelTitle="Leg Sequence"
                 panelConfig={createLegPanelConfig(index)}
                 initialData={leg}
                 collapsible={true}
@@ -215,23 +231,39 @@ export const TransportRouteLegDrawer: React.FC = () => {
               />
 
               {/* Trip Details with Badges */}
-              {leg.TripDetails && (
-                <div className="px-6 pb-4 text-sm text-muted-foreground flex items-center gap-2 flex-wrap">
-                  <span>{leg.TripDetails}</span>
-                  {leg.Status && (
-                    <Badge 
-                      variant="outline"
-                      className={
-                        leg.Status === 'Initiated' 
-                          ? 'bg-blue-100 text-blue-800 border-blue-200'
-                          : leg.Status === 'Released'
-                          ? 'bg-yellow-100 text-yellow-800 border-yellow-200'
-                          : 'bg-gray-100 text-gray-800 border-gray-200'
-                      }
-                    >
-                      {leg.Status}
-                    </Badge>
-                  )}
+              {leg.TripInfo && leg.TripInfo.length > 0 && (
+                <div className="px-6 pb-4">
+                  {leg.TripInfo.map((trip, tripIndex) => (
+                    <div key={tripIndex} className="text-sm text-muted-foreground flex items-center gap-2 flex-wrap mb-2">
+                      <span>
+                        {trip.TripID} : {trip.DepartureDescription}, {trip.DepartureActualDate} → {trip.ArrivalDescription}, {trip.ArrivalActualDate}
+                      </span>
+                      {trip.LoadType && (
+                        <Badge variant="outline" className="bg-gray-100 text-gray-800 border-gray-200">
+                          {trip.LoadType}
+                        </Badge>
+                      )}
+                      {trip.TripStatus && (
+                        <Badge 
+                          variant="outline"
+                          className={getLegStatusBadgeClass(trip.TripStatus)}
+                        >
+                          {trip.TripStatus}
+                        </Badge>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+              
+              {leg.LegStatus && (
+                <div className="px-6 pb-4">
+                  <Badge 
+                    variant="outline"
+                    className={getLegStatusBadgeClass(leg.LegStatus)}
+                  >
+                    Status: {leg.LegStatus}
+                  </Badge>
                 </div>
               )}
             </Card>
