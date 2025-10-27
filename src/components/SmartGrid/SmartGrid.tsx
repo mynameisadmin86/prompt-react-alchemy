@@ -50,6 +50,7 @@ export function SmartGrid({
   onRowExpansionOverride,
   plugins = [],
   selectedRows,
+  defaultSelectedRows,
   onSelectionChange,
   onRowClick,
   rowClassName,
@@ -141,6 +142,13 @@ export function SmartGrid({
   const [showAdvancedFilter, setShowAdvancedFilter] = useState(false);
   const [filterSystemFilters, setFilterSystemFilters] = useState<Record<string, any>>({});
   const { toast } = useToast();
+
+  // Initialize internal selected rows with default values if provided
+  useEffect(() => {
+    if (defaultSelectedRows && !selectedRows) {
+      setInternalSelectedRows(defaultSelectedRows);
+    }
+  }, [defaultSelectedRows, selectedRows, setInternalSelectedRows]);
 
   // Use external selectedRows if provided, otherwise use internal state
   const currentSelectedRows = selectedRows || internalSelectedRows;

@@ -162,6 +162,7 @@ export interface SmartGridProps {
   onRowExpansionOverride?(rowIndex: number): void;
   plugins?: GridPlugin[];
   selectedRows?: Set<number>;
+  defaultSelectedRows?: Set<number>;
   onSelectionChange?(selectedRows: Set<number>): void;
   onRowClick?(row: any, index: number): void;
   rowClassName?: (row: any, index: number) => string;
