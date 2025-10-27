@@ -46,19 +46,32 @@ const SmartGridSelectionDemo = () => {
     { key: 'supplier', label: 'Supplier', type: 'Text', sortable: true, filterable: true, width: 150 },
   ];
 
-  // Default selected rows - pre-select rows with indices 0, 2, and 6 (Laptop, USB-C Hub, Standing Desk)
-  const [defaultSelectedRows] = useState<Set<number>>(new Set([0, 2, 6]));
-  const [selectedRows, setSelectedRows] = useState<Set<number>>(defaultSelectedRows);
+  // Default selected rows - pre-select rows with IDs 1, 3, and 7 (Laptop, USB-C Hub, Standing Desk)
+  const [defaultSelectedRowIds] = useState<Set<number>>(new Set([1, 3, 7]));
+  const [selectedRowIds, setSelectedRowIds] = useState<Set<number>>(defaultSelectedRowIds);
+  const [selectedRows, setSelectedRows] = useState<Set<number>>(new Set([0, 2, 6])); // indices for initial selection
 
   // Get selected products
-  const selectedProducts = Array.from(selectedRows)
-    .map(index => sampleData[index])
-    .filter(Boolean);
-
+  const selectedProducts = sampleData.filter(product => selectedRowIds.has(product.id));
   const totalValue = selectedProducts.reduce((sum, product) => sum + (product?.price || 0), 0);
 
-  const handleSelectionChange = (newSelection: Set<number>) => {
-    setSelectedRows(newSelection);
+  // Handle row click to toggle selection
+  const handleRowClick = (row: typeof sampleData[0], index: number) => {
+    const newSelectedRowIds = new Set(selectedRowIds);
+    const newSelectedRows = new Set(selectedRows);
+    
+    if (newSelectedRowIds.has(row.id)) {
+      // Deselect
+      newSelectedRowIds.delete(row.id);
+      newSelectedRows.delete(index);
+    } else {
+      // Select
+      newSelectedRowIds.add(row.id);
+      newSelectedRows.add(index);
+    }
+    
+    setSelectedRowIds(newSelectedRowIds);
+    setSelectedRows(newSelectedRows);
   };
 
   const handleProcessOrder = () => {
@@ -69,7 +82,8 @@ const SmartGridSelectionDemo = () => {
   };
 
   const handleResetSelection = () => {
-    setSelectedRows(defaultSelectedRows);
+    setSelectedRowIds(defaultSelectedRowIds);
+    setSelectedRows(new Set([0, 2, 6])); // Reset to initial indices
     toast({
       title: "Selection Reset",
       description: "Selection has been reset to default products",
@@ -105,8 +119,8 @@ const SmartGridSelectionDemo = () => {
               Feature Overview
             </CardTitle>
             <CardDescription>
-              This demo showcases the <code className="px-1.5 py-0.5 rounded bg-muted">defaultSelectedRows</code> prop that allows you to pre-select rows on initial load. 
-              Users can still change the selection by checking/unchecking rows.
+              This demo showcases row selection by clicking. Click any row to select/deselect it. 
+              Three products are pre-selected by default, and the selection state is managed through the row click handler.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -114,10 +128,10 @@ const SmartGridSelectionDemo = () => {
               <div className="space-y-2">
                 <h3 className="font-semibold text-sm">How it works:</h3>
                 <ul className="text-sm text-muted-foreground space-y-1 list-disc list-inside">
-                  <li>Pass <code className="px-1 py-0.5 rounded bg-muted">defaultSelectedRows</code> prop to SmartGrid</li>
-                  <li>Selected rows are highlighted on initial load</li>
-                  <li>Users can change selection by clicking checkboxes</li>
-                  <li>Selection state is managed via <code className="px-1 py-0.5 rounded bg-muted">onSelectionChange</code></li>
+                  <li>Click on any row to select or deselect it</li>
+                  <li>Selected rows are highlighted with blue background</li>
+                  <li>No checkboxes needed - just click the row</li>
+                  <li>Selection state is managed via <code className="px-1 py-0.5 rounded bg-muted">onRowClick</code></li>
                 </ul>
               </div>
               <div className="space-y-2">
@@ -193,16 +207,30 @@ const SmartGridSelectionDemo = () => {
           <CardHeader>
             <CardTitle>Product Inventory</CardTitle>
             <CardDescription>
-              Select products to add to your order. Three items are pre-selected by default.
+              Click on any row to select/deselect it. Three items are pre-selected by default.
             </CardDescription>
           </CardHeader>
           <CardContent>
+            <style>{`
+              ${Array.from(selectedRowIds).map((rowId) => {
+                return `
+                  tr[data-row-id="${rowId}"] {
+                    background-color: #eff6ff !important;
+                    border-left: 4px solid #3b82f6 !important;
+                  }
+                  tr[data-row-id="${rowId}"]:hover {
+                    background-color: #dbeafe !important;
+                  }
+                `;
+              }).join('\n')}
+            `}</style>
             <SmartGrid
               columns={columns}
               data={sampleData}
-              defaultSelectedRows={defaultSelectedRows}
-              selectedRows={selectedRows}
-              onSelectionChange={handleSelectionChange}
+              onRowClick={handleRowClick}
+              rowClassName={(row: any) => {
+                return selectedRowIds.has(row.id) ? 'selected' : '';
+              }}
               paginationMode="pagination"
               showCreateButton={false}
               searchPlaceholder="Search products..."
@@ -218,29 +246,41 @@ const SmartGridSelectionDemo = () => {
           </CardHeader>
           <CardContent>
             <pre className="bg-muted p-4 rounded-lg overflow-x-auto text-sm">
-              <code>{`// Define default selected rows (row indices)
-const [defaultSelectedRows] = useState<Set<number>>(
-  new Set([0, 2, 6])
+              <code>{`// Track selected row IDs
+const [selectedRowIds, setSelectedRowIds] = useState<Set<number>>(
+  new Set([1, 3, 7]) // Initial selected product IDs
 );
 
-// Track current selection
-const [selectedRows, setSelectedRows] = useState<Set<number>>(
-  defaultSelectedRows
-);
-
-// Handle selection changes
-const handleSelectionChange = (newSelection: Set<number>) => {
-  setSelectedRows(newSelection);
+// Handle row click to toggle selection
+const handleRowClick = (row: Product, index: number) => {
+  const newSelectedRowIds = new Set(selectedRowIds);
+  
+  if (newSelectedRowIds.has(row.id)) {
+    newSelectedRowIds.delete(row.id); // Deselect
+  } else {
+    newSelectedRowIds.add(row.id); // Select
+  }
+  
+  setSelectedRowIds(newSelectedRowIds);
 };
 
-// Use in SmartGrid
-<SmartGrid
-  columns={columns}
-  data={data}
-  defaultSelectedRows={defaultSelectedRows}
-  selectedRows={selectedRows}
-  onSelectionChange={handleSelectionChange}
-/>`}</code>
+// Use in SmartGrid with custom styling
+<>
+  <style>{\`
+    \${Array.from(selectedRowIds).map((rowId) => \`
+      tr[data-row-id="\${rowId}"] {
+        background-color: #eff6ff !important;
+        border-left: 4px solid #3b82f6 !important;
+      }
+    \`).join('\\n')}
+  \`}</style>
+  <SmartGrid
+    columns={columns}
+    data={data}
+    onRowClick={handleRowClick}
+    rowClassName={(row) => selectedRowIds.has(row.id) ? 'selected' : ''}
+  />
+</>`}</code>
             </pre>
           </CardContent>
         </Card>
