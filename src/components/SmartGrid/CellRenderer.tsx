@@ -307,6 +307,20 @@ export const CellRenderer: React.FC<CellRendererProps> = ({
     }
   };
 
+  // SubRow renderer - shows count of items
+  const renderSubRow = () => {
+    if (!value || !Array.isArray(value)) {
+      return <span className="text-gray-400">-</span>;
+    }
+    
+    const count = value.length;
+    return (
+      <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+        {count} {count === 1 ? 'item' : 'items'}
+      </Badge>
+    );
+  };
+
   // Main renderer switch
   const renderCellContent = () => {
     switch (column.type) {
@@ -326,8 +340,14 @@ export const CellRenderer: React.FC<CellRendererProps> = ({
         return renderDropdown();
       case 'Date':
         return renderDate();
+      case 'SubRow':
+        return renderSubRow();
       case 'Text':
       default:
+        // Safely handle objects and arrays
+        if (value && typeof value === 'object') {
+          return <span className="text-gray-400">-</span>;
+        }
         return <span className="text-gray-900 truncate" title={String(value)}>{value}</span>;
     }
   };
