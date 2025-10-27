@@ -223,6 +223,13 @@ const Index = () => {
       path: "/smartgrid-selection-demo",
       color: "text-teal-600"
     },
+    {
+      title: "Enterprise Grid Demo",
+      description: "AG-Grid style comprehensive data grid with 1,375 space missions, advanced filtering, sorting, selection & plugins",
+      icon: Grid3x3,
+      path: "/enterprise-grid-demo",
+      color: "text-blue-600"
+    },
   ];
 
   return (
