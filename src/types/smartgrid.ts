@@ -15,7 +15,12 @@ export type GridColumnType =
   | 'DropdownText'         // Dropdown + Text combination
   | 'Dropdown'             // Selectable value from list (for edit or filter)
   | 'EditableText'         // Inline editable text
-  | 'SubRow';              // Sub-row expandable content
+  | 'SubRow'               // Sub-row expandable content
+  | 'String'               // String input for editing
+  | 'Integer'              // Integer number input
+  | 'Time'                 // Time picker
+  | 'Select'               // Select dropdown
+  | 'LazySelect';          // Lazy-loaded select with search
 
 export interface GridColumnConfig {
   key: string;
@@ -47,6 +52,11 @@ export interface GridColumnConfig {
   
   // SubRow specific properties
   subRowColumns?: GridColumnConfig[];
+  
+  // LazySelect specific properties
+  fetchOptions?: (params: { searchTerm: string; offset: number; limit: number }) => Promise<{ label: string; value: string }[]>;
+  hideSearch?: boolean;
+  disableLazyLoading?: boolean;
 }
 
 // Legacy interfaces for backward compatibility

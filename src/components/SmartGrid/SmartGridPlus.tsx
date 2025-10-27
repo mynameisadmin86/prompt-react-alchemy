@@ -25,6 +25,7 @@ import { useSmartGridState } from '@/hooks/useSmartGridState';
 import { processGridData } from '@/utils/gridDataProcessing';
 import { calculateColumnWidths } from '@/utils/columnWidthCalculations';
 import { CellRenderer } from './CellRenderer';
+import { EnhancedCellEditor } from './EnhancedCellEditor';
 import { GridToolbar } from './GridToolbar';
 import { PluginRenderer, PluginRowActions } from './PluginRenderer';
 import { ColumnFilter } from './ColumnFilter';
@@ -890,17 +891,14 @@ export function SmartGridPlus({
       const editingValue = editingValues[column.key];
       return (
         <div className="space-y-1">
-          <Input
-            type="text"
-            value={editingValue || ''}
-            onChange={(e) => handleEditingCellChange(rowIndex, column.key, e.target.value)}
-            className={cn(
-              "h-8 text-sm",
-              validationErrors[column.key] && "border-red-500"
-            )}
+          <EnhancedCellEditor
+            value={editingValue}
+            column={column}
+            onSave={(value) => handleEditingCellChange(rowIndex, column.key, value)}
+            onCancel={handleCancelEditRow}
           />
           {validationErrors[column.key] && (
-            <div className="text-xs text-red-600">
+            <div className="text-xs text-destructive mt-1">
               {validationErrors[column.key]}
             </div>
           )}
@@ -961,21 +959,17 @@ export function SmartGridPlus({
               </div>
             ) : (
               <div className="space-y-1">
-                <Input
-                  type="text"
-                  value={newRowValues[column.key] || ''}
-                  onChange={(e) => setNewRowValues(prev => ({
+                <EnhancedCellEditor
+                  value={newRowValues[column.key]}
+                  column={column}
+                  onSave={(value) => setNewRowValues(prev => ({
                     ...prev,
-                    [column.key]: e.target.value
+                    [column.key]: value
                   }))}
-                  className={cn(
-                    "h-8 text-sm",
-                    validationErrors[column.key] && "border-red-500"
-                  )}
-                  placeholder={column.label}
+                  onCancel={handleCancelNewRow}
                 />
                 {validationErrors[column.key] && (
-                  <div className="text-xs text-red-600">
+                  <div className="text-xs text-destructive mt-1">
                     {validationErrors[column.key]}
                   </div>
                 )}

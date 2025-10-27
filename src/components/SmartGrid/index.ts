@@ -4,6 +4,7 @@ export { SmartGridPlus } from './SmartGridPlus';
 export { SmartGridWithGrouping } from './SmartGridWithGrouping';
 export { ServersideFilter } from './ServersideFilter';
 export { CellEditor } from './CellEditor';
+export { EnhancedCellEditor } from './EnhancedCellEditor';
 export { ColumnManager } from './ColumnManager';
 export { ColumnVisibilityManager } from './ColumnVisibilityManager';
 export { ColumnFilter } from './ColumnFilter';
