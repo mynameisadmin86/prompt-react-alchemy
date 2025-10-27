@@ -19,6 +19,8 @@ import { toast } from 'sonner';
 import { PlanActualDetailsDrawer } from './PlanActualDetailsDrawer';
 import { SmartGrid } from '@/components/SmartGrid';
 import type { GridColumnConfig } from '@/types/smartgrid';
+import { SideDrawer } from '@/components/ui/side-drawer';
+import { TransportRouteLegDrawer } from './TransportRouteLegDrawer';
 
 interface TripExecutionCreateDrawerScreenProps {
   onClose: () => void;
@@ -155,6 +157,8 @@ export const TripExecutionCreateDrawerScreen: React.FC<TripExecutionCreateDrawer
   const [currentPage, setCurrentPage] = useState(1);
   const [showAddViaPointsDialog, setShowAddViaPointsDialog] = useState(false);
   const [showPlanActualDrawer, setShowPlanActualDrawer] = useState(false);
+  const [isRouteDrawerOpen, setIsRouteDrawerOpen] = useState(false);
+  const [selectedRouteData, setSelectedRouteData] = useState<any>(null);
   
   // Add Via Points dialog state
   const [viaPointForm, setViaPointForm] = useState({
@@ -213,6 +217,76 @@ export const TripExecutionCreateDrawerScreen: React.FC<TripExecutionCreateDrawer
       }
     }
   ];
+
+  // Handle opening route drawer
+  const handleOpenRouteDrawer = (leg: any) => {
+    const mockRouteData = {
+      ExecutionPlanID: tripId,
+      CustomerOrderID: `CO${leg.id}`,
+      CustomerID: 'CUST001',
+      CustomerName: 'ABC Customer',
+      Service: 'SERVICE001',
+      ServiceDescription: 'Rail Transport',
+      SubService: 'SUBSERV001',
+      SubServiceDescription: 'Express',
+      CODeparture: leg.from,
+      CODepartureDescription: leg.from,
+      COArrival: leg.to,
+      COArrivalDescription: leg.to,
+      RouteID: `ROUTE${leg.id}`,
+      RouteDescription: `${leg.from} - ${leg.to}`,
+      Status: 'Released',
+      LegDetails: [
+        {
+          LegSequence: 1,
+          LegID: `LEG${leg.id}`,
+          LegUniqueId: leg.id,
+          Departure: leg.from,
+          DepartureDescription: leg.from,
+          Arrival: leg.to,
+          ArrivalDescription: leg.to,
+          LegBehaviour: 'STANDARD',
+          LegBehaviourDescription: 'Standard Transport',
+          TransportMode: 'RAIL',
+          LegStatus: 'Released',
+          TripInfo: null,
+          ModeFlag: 'A',
+          ReasonForUpdate: null,
+          QCCode1: null,
+          QCCode1Value: null,
+          Remarks: null,
+        }
+      ],
+      ReasonForUpdate: ''
+    };
+    setSelectedRouteData(mockRouteData);
+    setIsRouteDrawerOpen(true);
+  };
+
+  const handleCloseRouteDrawer = () => {
+    setIsRouteDrawerOpen(false);
+    setSelectedRouteData(null);
+  };
+
+  const handleSaveRoute = async () => {
+    toast.success('Route details saved successfully');
+  };
+
+  const mockFetchDepartures = async (params: any) => {
+    return [
+      { label: 'Berlin Hauptbahnhof', value: 'BERLIN_HBF' },
+      { label: 'Munich Central', value: 'MUNICH_CTR' },
+      { label: 'Hamburg Station', value: 'HAMBURG_STN' },
+    ];
+  };
+
+  const mockFetchArrivals = async (params: any) => {
+    return [
+      { label: 'Frankfurt Main', value: 'FRANKFURT_MAIN' },
+      { label: 'Dresden Station', value: 'DRESDEN_STN' },
+      { label: 'Cologne Central', value: 'COLOGNE_CTR' },
+    ];
+  };
 
   return (
     <>
@@ -287,6 +361,18 @@ export const TripExecutionCreateDrawerScreen: React.FC<TripExecutionCreateDrawer
                             <Info className="h-3 w-3" />
                           </Badge>
                         )}
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="h-5 w-5"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleOpenRouteDrawer(leg);
+                          }}
+                          title="View Route Details"
+                        >
+                          <FileEdit className="h-3 w-3" />
+                        </Button>
                         <Button
                           size="icon"
                           variant="ghost"
@@ -1113,6 +1199,29 @@ export const TripExecutionCreateDrawerScreen: React.FC<TripExecutionCreateDrawer
         isOpen={showPlanActualDrawer}
         onClose={() => setShowPlanActualDrawer(false)}
       />
+
+      {/* Transport Route Details Drawer */}
+      <SideDrawer
+        isOpen={isRouteDrawerOpen}
+        onClose={handleCloseRouteDrawer}
+        title="Transport Route Details"
+        width="100%"
+        showFooter={false}
+      >
+        {selectedRouteData && (
+          <TransportRouteLegDrawer 
+            route={selectedRouteData}
+            onAddLeg={() => toast.info('Add leg functionality')}
+            onRemoveLeg={(index) => toast.info(`Remove leg ${index}`)}
+            onUpdateLeg={(index, field, value) => {
+              console.log('Update leg:', index, field, value);
+            }}
+            onSave={handleSaveRoute}
+            fetchDepartures={mockFetchDepartures}
+            fetchArrivals={mockFetchArrivals}
+          />
+        )}
+      </SideDrawer>
     </>
   );
 };
