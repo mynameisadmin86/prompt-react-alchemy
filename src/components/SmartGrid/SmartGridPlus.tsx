@@ -890,19 +890,12 @@ export function SmartGridPlus({
     if (isRowEditing && inlineRowEditing && column.key !== 'actions') {
       const editingValue = editingValues[column.key];
       return (
-        <div className="space-y-1">
-          <EnhancedCellEditor
-            value={editingValue}
-            column={column}
-            onSave={(value) => handleEditingCellChange(rowIndex, column.key, value)}
-            onCancel={handleCancelEditRow}
-          />
-          {validationErrors[column.key] && (
-            <div className="text-xs text-destructive mt-1">
-              {validationErrors[column.key]}
-            </div>
-          )}
-        </div>
+        <EnhancedCellEditor
+          value={editingValue}
+          column={column}
+          onChange={(value) => handleEditingCellChange(rowIndex, column.key, value)}
+          error={validationErrors[column.key]}
+        />
       );
     }
 
@@ -962,17 +955,22 @@ export function SmartGridPlus({
                 <EnhancedCellEditor
                   value={newRowValues[column.key]}
                   column={column}
-                  onSave={(value) => setNewRowValues(prev => ({
-                    ...prev,
-                    [column.key]: value
-                  }))}
-                  onCancel={handleCancelNewRow}
+                  onChange={(value) => {
+                    setNewRowValues(prev => ({
+                      ...prev,
+                      [column.key]: value
+                    }));
+                    // Clear validation error for this field
+                    if (validationErrors[column.key]) {
+                      setValidationErrors(prev => {
+                        const newErrors = { ...prev };
+                        delete newErrors[column.key];
+                        return newErrors;
+                      });
+                    }
+                  }}
+                  error={validationErrors[column.key]}
                 />
-                {validationErrors[column.key] && (
-                  <div className="text-xs text-destructive mt-1">
-                    {validationErrors[column.key]}
-                  </div>
-                )}
               </div>
             )}
           </TableCell>

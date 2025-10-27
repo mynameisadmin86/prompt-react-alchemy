@@ -1,7 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Check, X } from 'lucide-react';
 import { GridColumnConfig } from '@/types/smartgrid';
 import { DynamicLazySelect } from '@/components/DynamicPanel/DynamicLazySelect';
 import { cn } from '@/lib/utils';
@@ -9,106 +7,60 @@ import { cn } from '@/lib/utils';
 interface EnhancedCellEditorProps {
   value: any;
   column: GridColumnConfig;
-  onSave: (value: any) => void;
-  onCancel: () => void;
+  onChange: (value: any) => void;
+  error?: string;
 }
 
-export function EnhancedCellEditor({ value, column, onSave, onCancel }: EnhancedCellEditorProps) {
+export function EnhancedCellEditor({ value, column, onChange, error }: EnhancedCellEditorProps) {
   const [editValue, setEditValue] = useState(value ?? '');
-  const [error, setError] = useState<string>('');
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (inputRef.current && !['LazySelect', 'Select'].includes(column.type)) {
       inputRef.current.focus();
-      inputRef.current.select();
     }
   }, [column.type]);
 
-  const validateValue = (val: any): string | null => {
-    if (column.mandatory && (val === '' || val === null || val === undefined)) {
-      return 'This field is required';
-    }
-
-    switch (column.type) {
-      case 'Integer':
-        if (val !== '' && (isNaN(val) || !Number.isInteger(Number(val)))) {
-          return 'Must be a valid integer';
-        }
-        break;
-      case 'Time':
-        if (val && !/^\d{2}:\d{2}$/.test(val)) {
-          return 'Must be in HH:MM format';
-        }
-        break;
-      case 'Date':
-        if (val && isNaN(Date.parse(val))) {
-          return 'Must be a valid date';
-        }
-        break;
-    }
-
-    return null;
-  };
-
-  const handleSave = () => {
-    const validationError = validateValue(editValue);
-    if (validationError) {
-      setError(validationError);
-      return;
-    }
-
-    let finalValue = editValue;
-
+  const handleChange = (newValue: any) => {
+    setEditValue(newValue);
+    
     // Type conversion
+    let finalValue = newValue;
     switch (column.type) {
       case 'Integer':
-        finalValue = editValue === '' ? null : parseInt(editValue, 10);
+        finalValue = newValue === '' ? null : parseInt(newValue, 10);
         break;
       case 'String':
       case 'Text':
-        finalValue = String(editValue);
+        finalValue = String(newValue);
         break;
       case 'Date':
       case 'Time':
-        finalValue = editValue || null;
+        finalValue = newValue || null;
         break;
     }
-
-    onSave(finalValue);
-    setError('');
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSave();
-    } else if (e.key === 'Escape') {
-      onCancel();
-    }
+    
+    onChange(finalValue);
   };
 
   // LazySelect renderer
   if (column.type === 'LazySelect' && column.fetchOptions) {
     return (
-      <div className="flex items-center space-x-1 p-1 bg-background border rounded shadow-sm min-w-[200px]">
-        <div className="flex-1">
-          <DynamicLazySelect
-            fetchOptions={column.fetchOptions}
-            value={editValue}
-            onChange={(val) => setEditValue(val)}
-            placeholder="Select..."
-            multiSelect={column.multiSelect}
-            hideSearch={column.hideSearch}
-            disableLazyLoading={column.disableLazyLoading}
-          />
-        </div>
-        <Button size="sm" variant="ghost" onClick={handleSave} className="h-8 w-8 p-0">
-          <Check className="h-3 w-3" />
-        </Button>
-        <Button size="sm" variant="ghost" onClick={onCancel} className="h-8 w-8 p-0">
-          <X className="h-3 w-3" />
-        </Button>
+      <div className="w-full">
+        <DynamicLazySelect
+          fetchOptions={column.fetchOptions}
+          value={editValue}
+          onChange={handleChange}
+          placeholder="Select..."
+          multiSelect={column.multiSelect}
+          hideSearch={column.hideSearch}
+          disableLazyLoading={column.disableLazyLoading}
+        />
+        {error && (
+          <div className="mt-1 text-xs text-destructive">
+            {error}
+          </div>
+        )}
       </div>
     );
   }
@@ -116,12 +68,14 @@ export function EnhancedCellEditor({ value, column, onSave, onCancel }: Enhanced
   // Select/Dropdown renderer
   if ((column.type === 'Select' || column.type === 'Dropdown') && column.options) {
     return (
-      <div className="flex items-center space-x-1 p-1 bg-background border rounded shadow-sm">
+      <div className="w-full">
         <select
           value={editValue}
-          onChange={(e) => setEditValue(e.target.value)}
-          onKeyDown={handleKeyDown}
-          className="flex-1 px-2 py-1 text-sm border-0 bg-background focus:ring-0 focus:outline-none"
+          onChange={(e) => handleChange(e.target.value)}
+          className={cn(
+            "w-full px-3 py-2 text-sm border rounded-md bg-background",
+            error && 'border-destructive focus-visible:ring-destructive'
+          )}
           autoFocus
         >
           <option value="">Select...</option>
@@ -131,12 +85,11 @@ export function EnhancedCellEditor({ value, column, onSave, onCancel }: Enhanced
             </option>
           ))}
         </select>
-        <Button size="sm" variant="ghost" onClick={handleSave} className="h-8 w-8 p-0">
-          <Check className="h-3 w-3" />
-        </Button>
-        <Button size="sm" variant="ghost" onClick={onCancel} className="h-8 w-8 p-0">
-          <X className="h-3 w-3" />
-        </Button>
+        {error && (
+          <div className="mt-1 text-xs text-destructive">
+            {error}
+          </div>
+        )}
       </div>
     );
   }
@@ -159,30 +112,20 @@ export function EnhancedCellEditor({ value, column, onSave, onCancel }: Enhanced
 
   // Standard input renderer
   return (
-    <div className="flex items-center space-x-1 p-1 bg-background border rounded shadow-sm relative">
+    <div className="w-full">
       <Input
         ref={inputRef}
         type={inputType}
         value={editValue}
-        onChange={(e) => {
-          setEditValue(e.target.value);
-          setError('');
-        }}
-        onKeyDown={handleKeyDown}
+        onChange={(e) => handleChange(e.target.value)}
         className={cn(
-          'flex-1 h-8 px-2 text-sm',
+          'w-full',
           error && 'border-destructive focus-visible:ring-destructive'
         )}
         step={column.type === 'Integer' ? '1' : undefined}
       />
-      <Button size="sm" variant="ghost" onClick={handleSave} className="h-8 w-8 p-0">
-        <Check className="h-3 w-3" />
-      </Button>
-      <Button size="sm" variant="ghost" onClick={onCancel} className="h-8 w-8 p-0">
-        <X className="h-3 w-3" />
-      </Button>
       {error && (
-        <div className="absolute top-full left-0 mt-1 p-2 bg-destructive/10 border border-destructive/20 rounded text-xs text-destructive z-50 whitespace-nowrap">
+        <div className="mt-1 text-xs text-destructive">
           {error}
         </div>
       )}
