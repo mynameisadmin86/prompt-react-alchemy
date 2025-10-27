@@ -216,6 +216,13 @@ const Index = () => {
       path: "/transport-route-update",
       color: "text-indigo-600"
     },
+    {
+      title: "SmartGrid Selection Demo",
+      description: "Interactive demo showcasing default selected rows with selection controls and management",
+      icon: Grid3x3,
+      path: "/smartgrid-selection-demo",
+      color: "text-teal-600"
+    },
   ];
 
   return (
