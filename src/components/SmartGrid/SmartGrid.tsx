@@ -150,6 +150,13 @@ export function SmartGrid({
     }
   }, [defaultSelectedRows, selectedRows, setInternalSelectedRows]);
 
+  // Auto-enable checkboxes when defaultSelectedRows or selectedRows is provided
+  useEffect(() => {
+    if ((defaultSelectedRows && defaultSelectedRows.size > 0) || (selectedRows && selectedRows.size > 0)) {
+      setShowCheckboxes(true);
+    }
+  }, [defaultSelectedRows, selectedRows, setShowCheckboxes]);
+
   // Use external selectedRows if provided, otherwise use internal state
   const currentSelectedRows = selectedRows || internalSelectedRows;
   const handleSelectionChange = onSelectionChange || setInternalSelectedRows;
@@ -1144,7 +1151,7 @@ export function SmartGrid({
                   </TableRow>
                 ) : (
                   paginatedData.map((row, rowIndex) => (
-                    <>
+                    <React.Fragment key={row.id || rowIndex}>
                       {/* Group Header Row - spans all columns */}
                       {row.__isGroupHeader ? (
                         <TableRow key={rowIndex}
@@ -1249,7 +1256,7 @@ export function SmartGrid({
                           </TableCell>
                         </TableRow>
                       )}
-                    </>
+                    </React.Fragment>
                   ))
                 )}
               </TableBody>
