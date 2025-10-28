@@ -263,22 +263,22 @@ const ConsignmentDetailsPage = () => {
             <div className="grid grid-cols-4 gap-4">
               {summaryCards.map((card) => (
                 <Card key={card.id}>
-                  <CardContent className="p-6">
-                    <div className="flex items-start justify-between mb-4">
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-4">
                       <div
                         className={cn(
-                          "h-10 w-10 rounded-lg bg-muted flex items-center justify-center",
+                          "h-12 w-12 rounded-lg bg-muted/50 flex items-center justify-center flex-shrink-0",
                           card.iconColor
                         )}
                       >
                         {card.icon}
                       </div>
-                    </div>
-                    <div className="space-y-1">
-                      <p className="text-2xl font-semibold">{card.value}</p>
-                      <p className="text-sm text-muted-foreground">
-                        {card.title}
-                      </p>
+                      <div className="flex flex-col">
+                        <p className="text-lg font-semibold">{card.value}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {card.title}
+                        </p>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
