@@ -304,6 +304,7 @@ export default function SmartGridPlusDemo() {
             addRowButtonLabel="Add Product"
             addRowButtonPosition="top-left"
             paginationMode="pagination"
+            showFilterControls={false}
           />
         </CardContent>
       </Card>
