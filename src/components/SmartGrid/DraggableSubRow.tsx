@@ -1,9 +1,14 @@
 
 import React, { useState, useCallback } from 'react';
 import { GridColumnConfig, GridPreferences } from '@/types/smartgrid';
-import { GripVertical, Edit2 } from 'lucide-react';
+import { GripVertical, Edit2, Calendar as CalendarIcon, Clock } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { DynamicLazySelect } from '@/components/DynamicPanel/DynamicLazySelect';
+import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 
 interface DraggableSubRowProps {
@@ -119,19 +124,135 @@ export const DraggableSubRow: React.FC<DraggableSubRowProps> = ({
     const isEditing = editingCell?.rowIndex === rowIndex && editingCell?.columnKey === column.key;
     const isEditable = column.editable;
 
+    // Render editing UI based on column type
     if (isEditing) {
-      return (
-        <Input
-          value={tempValue}
-          onChange={(e) => setTempValue(e.target.value)}
-          onBlur={() => handleSave(column.key)}
-          onKeyDown={(e) => handleKeyDown(e, column.key)}
-          className="w-full h-8 text-sm"
-          autoFocus
-        />
-      );
+      switch (column.type) {
+        case 'Date':
+          const dateValue = tempValue ? new Date(tempValue) : undefined;
+          return (
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={cn(
+                    "w-full h-8 justify-start text-left font-normal text-xs px-3",
+                    !dateValue && "text-muted-foreground"
+                  )}
+                  autoFocus
+                >
+                  <CalendarIcon className="mr-2 h-3 w-3" />
+                  {dateValue ? format(dateValue, "PPP") : <span>Pick a date</span>}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={dateValue}
+                  onSelect={(date) => {
+                    const dateString = date ? format(date, 'yyyy-MM-dd') : '';
+                    setTempValue(dateString);
+                    handleSave(column.key);
+                  }}
+                  initialFocus
+                  className={cn("p-3 pointer-events-auto")}
+                />
+              </PopoverContent>
+            </Popover>
+          );
+
+        case 'Time':
+          return (
+            <div className="relative">
+              <Input
+                type="time"
+                value={tempValue}
+                onChange={(e) => setTempValue(e.target.value)}
+                onBlur={() => handleSave(column.key)}
+                onKeyDown={(e) => handleKeyDown(e, column.key)}
+                className="w-full h-8 text-sm"
+                autoFocus
+              />
+              <Clock className="absolute right-2 top-1/2 transform -translate-y-1/2 w-3 h-3 text-gray-400 pointer-events-none" />
+            </div>
+          );
+
+        case 'Integer':
+          return (
+            <Input
+              type="number"
+              value={tempValue}
+              onChange={(e) => setTempValue(e.target.value)}
+              onBlur={() => handleSave(column.key)}
+              onKeyDown={(e) => handleKeyDown(e, column.key)}
+              className="w-full h-8 text-sm"
+              autoFocus
+            />
+          );
+
+        case 'Select':
+        case 'Dropdown':
+          return (
+            <select
+              value={tempValue}
+              onChange={(e) => {
+                setTempValue(e.target.value);
+                handleSave(column.key);
+              }}
+              onBlur={() => handleSave(column.key)}
+              className="w-full h-8 px-3 text-xs rounded-md border border-gray-300 bg-white focus:ring-1 focus:border-blue-500 focus:ring-blue-500"
+              autoFocus
+            >
+              <option value="">Select...</option>
+              {column.options?.map((option) => (
+                <option key={option} value={option}>
+                  {option}
+                </option>
+              ))}
+            </select>
+          );
+
+        case 'LazySelect':
+          if (!column.fetchOptions) {
+            return (
+              <div className="text-xs text-red-600 bg-red-50 p-2 rounded border">
+                fetchOptions is required for LazySelect
+              </div>
+            );
+          }
+          return (
+            <DynamicLazySelect
+              fetchOptions={column.fetchOptions}
+              value={tempValue}
+              onChange={(newValue) => {
+                const stringValue = Array.isArray(newValue) ? newValue[0] : (newValue || '');
+                setTempValue(stringValue);
+                handleSave(column.key);
+              }}
+              placeholder="Select..."
+              className="h-8 text-xs"
+              hideSearch={column.hideSearch}
+              disableLazyLoading={column.disableLazyLoading}
+            />
+          );
+
+        case 'String':
+        case 'Text':
+        case 'EditableText':
+        default:
+          return (
+            <Input
+              value={tempValue}
+              onChange={(e) => setTempValue(e.target.value)}
+              onBlur={() => handleSave(column.key)}
+              onKeyDown={(e) => handleKeyDown(e, column.key)}
+              className="w-full h-8 text-sm"
+              autoFocus
+            />
+          );
+      }
     }
 
+    // Render display value based on column type
     if (value === null || value === undefined) {
       return <span className="text-gray-400">-</span>;
     }
@@ -155,6 +276,7 @@ export const DraggableSubRow: React.FC<DraggableSubRowProps> = ({
               {displayValue}
             </Badge>
           );
+
         case 'DateTimeRange':
           const dateTimeString = String(value);
           if (dateTimeString.includes('\n')) {
@@ -169,6 +291,7 @@ export const DraggableSubRow: React.FC<DraggableSubRowProps> = ({
             );
           }
           return <div className="font-medium text-sm">{dateTimeString}</div>;
+
         case 'Date':
           try {
             const date = new Date(value);
@@ -176,6 +299,21 @@ export const DraggableSubRow: React.FC<DraggableSubRowProps> = ({
           } catch {
             return <div className="font-medium text-sm">{String(value)}</div>;
           }
+
+        case 'Time':
+          return <div className="font-medium text-sm">{String(value)}</div>;
+
+        case 'Integer':
+          return <div className="font-medium text-sm">{Number(value).toLocaleString()}</div>;
+
+        case 'Select':
+        case 'Dropdown':
+        case 'LazySelect':
+          return <div className="font-medium text-sm">{String(value)}</div>;
+
+        case 'String':
+        case 'Text':
+        case 'EditableText':
         default:
           return <div className="font-medium text-sm break-words">{String(value)}</div>;
       }
