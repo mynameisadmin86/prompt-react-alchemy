@@ -154,8 +154,8 @@ const columns: GridColumnConfig[] = [
     filterable: false,
     width: 150,
     subRowColumns: [
-      { key: 'spec', label: 'Spec', type: 'String', width: 80, editable: true },
-      { key: 'value', label: 'Value', type: 'String', width: 120, editable: true }
+      { key: 'spec', label: 'Spec', type: 'Text', width: 80 },
+      { key: 'value', label: 'Value', type: 'Text', width: 120 }
     ]
   },
   {
@@ -166,9 +166,9 @@ const columns: GridColumnConfig[] = [
     filterable: false,
     width: 150,
     subRowColumns: [
-      { key: 'reviewer', label: 'Reviewer', type: 'String', width: 80, editable: true },
-      { key: 'rating', label: 'Rating', type: 'Integer', width: 60, editable: true },
-      { key: 'comment', label: 'Comment', type: 'String', width: 150, editable: true }
+      { key: 'reviewer', label: 'Reviewer', type: 'Text', width: 80 },
+      { key: 'rating', label: 'Rating', type: 'Text', width: 60 },
+      { key: 'comment', label: 'Comment', type: 'Text', width: 150 }
     ]
   },
   {
@@ -210,8 +210,12 @@ export default function SmartGridPlusDemo() {
     status: 'Active',
     dateAdded: new Date().toISOString().split('T')[0],
     supplier: '',
-    specifications: [],
-    reviews: []
+    specifications: [
+      { spec: '', value: '' }
+    ],
+    reviews: [
+      { reviewer: '', rating: 5, comment: '' }
+    ]
   };
 
   const validationRules = {

@@ -133,7 +133,6 @@ export function SmartGridPlus({
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
   const [isAddingRow, setIsAddingRow] = useState(false);
   const [newRowValues, setNewRowValues] = useState<Record<string, any>>(defaultRowValues);
-  const [expandedSubRows, setExpandedSubRows] = useState<Record<string, boolean>>({});
 
   // Use external selectedRows if provided, otherwise use internal state
   const currentSelectedRows = selectedRows || internalSelectedRows;
@@ -700,7 +699,6 @@ export function SmartGridPlus({
     setIsAddingRow(false);
     setNewRowValues(defaultRowValues);
     setValidationErrors({});
-    setExpandedSubRows({});
   }, [defaultRowValues]);
 
   // Edit Row functionality
@@ -925,189 +923,65 @@ export function SmartGridPlus({
   const renderAddRowForm = () => {
     if (!isAddingRow) return null;
 
-    const subRowColumns = orderedColumns.filter(col => col.type === 'SubRow');
-    const hasSubRows = subRowColumns.length > 0;
-
     return (
-      <>
-        <TableRow className="bg-blue-50 border-2 border-blue-200">
-          {showCheckboxes && (
-            <TableCell className="p-2">
-              {/* Empty space for checkbox column */}
-            </TableCell>
-          )}
-          {orderedColumns.map((column) => (
-            <TableCell key={column.key} className="p-2">
-              {column.key === 'actions' ? (
-                <div className="flex items-center gap-1">
-                  <Button
-                    size="sm"
-                    onClick={handleSaveNewRow}
-                    className="h-8 w-8 p-0"
-                  >
-                    <Check className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={handleCancelNewRow}
-                    className="h-8 w-8 p-0"
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
-                </div>
-              ) : column.type === 'SubRow' ? (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => {
-                    setExpandedSubRows(prev => ({
-                      ...prev,
-                      [column.key]: !prev[column.key]
-                    }));
-                  }}
-                  className="h-8 flex items-center gap-1"
-                >
-                  {expandedSubRows[column.key] ? (
-                    <ChevronDown className="h-4 w-4" />
-                  ) : (
-                    <ChevronRight className="h-4 w-4" />
-                  )}
-                  <span className="text-xs">
-                    {Array.isArray(newRowValues[column.key]) ? newRowValues[column.key].length : 0} items
-                  </span>
-                </Button>
-              ) : (
-                <div className="space-y-1">
-                  <EnhancedCellEditor
-                    value={newRowValues[column.key]}
-                    column={column}
-                    onChange={(value) => {
-                      setNewRowValues(prev => ({
-                        ...prev,
-                        [column.key]: value
-                      }));
-                      // Clear validation error for this field
-                      if (validationErrors[column.key]) {
-                        setValidationErrors(prev => {
-                          const newErrors = { ...prev };
-                          delete newErrors[column.key];
-                          return newErrors;
-                        });
-                      }
-                    }}
-                    error={validationErrors[column.key]}
-                  />
-                </div>
-              )}
-            </TableCell>
-          ))}
-          {/* Plugin row actions column */}
-          {plugins.some(plugin => plugin.rowActions) && (
-            <TableCell className="p-2">
-              {/* Empty space for plugin actions */}
-            </TableCell>
-          )}
-        </TableRow>
-        
-        {/* Render expanded sub-rows */}
-        {hasSubRows && subRowColumns.some(col => expandedSubRows[col.key]) && (
-          <TableRow>
-            <TableCell colSpan={orderedColumns.length + (showCheckboxes ? 1 : 0) + (plugins.some(plugin => plugin.rowActions) ? 1 : 0)}>
-              <div className="bg-gray-50 p-4 space-y-4">
-                {subRowColumns.map(subRowCol => {
-                  if (!expandedSubRows[subRowCol.key]) return null;
-                  
-                  const subRowData = Array.isArray(newRowValues[subRowCol.key]) 
-                    ? newRowValues[subRowCol.key] 
-                    : [];
-                  
-                  return (
-                    <div key={subRowCol.key} className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <h4 className="text-sm font-medium text-gray-700">{subRowCol.label}</h4>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => {
-                            const newSubRowItem: any = {};
-                            subRowCol.subRowColumns?.forEach(col => {
-                              newSubRowItem[col.key] = '';
-                            });
-                            setNewRowValues(prev => ({
-                              ...prev,
-                              [subRowCol.key]: [...subRowData, newSubRowItem]
-                            }));
-                          }}
-                          className="h-7 text-xs"
-                        >
-                          <Plus className="h-3 w-3 mr-1" />
-                          Add {subRowCol.label}
-                        </Button>
-                      </div>
-                      
-                      {subRowData.length === 0 ? (
-                        <div className="text-sm text-gray-500 text-center py-4 border border-dashed rounded">
-                          No {subRowCol.label.toLowerCase()} added yet
-                        </div>
-                      ) : (
-                        <div className="space-y-2">
-                          {subRowData.map((item: any, itemIndex: number) => (
-                            <div key={itemIndex} className="bg-white p-3 rounded border space-y-2">
-                              <div className="flex items-center justify-between mb-2">
-                                <span className="text-xs font-medium text-gray-600">
-                                  {subRowCol.label} #{itemIndex + 1}
-                                </span>
-                                <Button
-                                  size="sm"
-                                  variant="ghost"
-                                  onClick={() => {
-                                    setNewRowValues(prev => ({
-                                      ...prev,
-                                      [subRowCol.key]: subRowData.filter((_: any, idx: number) => idx !== itemIndex)
-                                    }));
-                                  }}
-                                  className="h-6 w-6 p-0 text-red-500 hover:text-red-700"
-                                >
-                                  <Trash2 className="h-3 w-3" />
-                                </Button>
-                              </div>
-                              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
-                                {subRowCol.subRowColumns?.map(subCol => (
-                                  <div key={subCol.key} className="space-y-1">
-                                    <label className="text-xs font-medium text-gray-600">
-                                      {subCol.label}
-                                    </label>
-                                    <EnhancedCellEditor
-                                      value={item[subCol.key]}
-                                      column={subCol}
-                                      onChange={(value) => {
-                                        const updatedSubRowData = [...subRowData];
-                                        updatedSubRowData[itemIndex] = {
-                                          ...updatedSubRowData[itemIndex],
-                                          [subCol.key]: value
-                                        };
-                                        setNewRowValues(prev => ({
-                                          ...prev,
-                                          [subRowCol.key]: updatedSubRowData
-                                        }));
-                                      }}
-                                    />
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            </TableCell>
-          </TableRow>
+      <TableRow className="bg-blue-50 border-2 border-blue-200">
+        {showCheckboxes && (
+          <TableCell className="p-2">
+            {/* Empty space for checkbox column */}
+          </TableCell>
         )}
-      </>
+        {orderedColumns.map((column) => (
+          <TableCell key={column.key} className="p-2">
+            {column.key === 'actions' ? (
+              <div className="flex items-center gap-1">
+                <Button
+                  size="sm"
+                  onClick={handleSaveNewRow}
+                  className="h-8 w-8 p-0"
+                >
+                  <Check className="h-4 w-4" />
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={handleCancelNewRow}
+                  className="h-8 w-8 p-0"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            ) : (
+              <div className="space-y-1">
+                <EnhancedCellEditor
+                  value={newRowValues[column.key]}
+                  column={column}
+                  onChange={(value) => {
+                    setNewRowValues(prev => ({
+                      ...prev,
+                      [column.key]: value
+                    }));
+                    // Clear validation error for this field
+                    if (validationErrors[column.key]) {
+                      setValidationErrors(prev => {
+                        const newErrors = { ...prev };
+                        delete newErrors[column.key];
+                        return newErrors;
+                      });
+                    }
+                  }}
+                  error={validationErrors[column.key]}
+                />
+              </div>
+            )}
+          </TableCell>
+        ))}
+        {/* Plugin row actions column */}
+        {plugins.some(plugin => plugin.rowActions) && (
+          <TableCell className="p-2">
+            {/* Empty space for plugin actions */}
+          </TableCell>
+        )}
+      </TableRow>
     );
   };
 
