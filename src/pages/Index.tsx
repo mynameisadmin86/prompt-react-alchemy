@@ -223,6 +223,13 @@ const Index = () => {
       path: "/smartgrid-selection-demo",
       color: "text-teal-600"
     },
+    {
+      title: "Consignment Details",
+      description: "Comprehensive consignment management with leg cards, summary cards, and plan details",
+      icon: Workflow,
+      path: "/consignment-details",
+      color: "text-blue-600"
+    },
   ];
 
   return (

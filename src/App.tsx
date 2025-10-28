@@ -28,6 +28,7 @@ import BulkUploadDemo from "./pages/BulkUploadDemo";
 import SmartGridGroupingDemo from "./pages/SmartGridGroupingDemo";
 import NotFound from "./pages/NotFound";
 import DynamicCardView from "./pages/DynamicCardView";
+import ConsignmentDetailsPage from "./pages/ConsignmentDetailsPage";
 import QuickOrderManagement from "./pages/QuickOrderManagement";
 import QuickOrderServerSideManagement from "./pages/QuickOrderServerSideManagement";
 import OrderListPage from "./pages/OrderListPage";
@@ -81,6 +82,7 @@ const App = () => (
           <Route path="/smartgrid-highlight-demo" element={<SmartGridHighlightDemo />} />
           <Route path="/transport-route-update" element={<TransportRouteUpdate />} />
           <Route path="/smartgrid-selection-demo" element={<SmartGridSelectionDemo />} />
+          <Route path="/consignment-details" element={<ConsignmentDetailsPage />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
