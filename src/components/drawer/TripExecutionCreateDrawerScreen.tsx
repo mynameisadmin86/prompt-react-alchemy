@@ -495,51 +495,6 @@ export const TripExecutionCreateDrawerScreen: React.FC<TripExecutionCreateDrawer
                                 <div className="text-xs text-muted-foreground">Add activity details</div>
                               </div>
                             </div>
-                            <div className="flex items-center gap-2">
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => {
-                                  if (!newActivity.category || !newActivity.subCategory) {
-                                    toast.error('Please fill in required fields');
-                                    return;
-                                  }
-                                  // Here you would call updateActivity from the store
-                                  toast.success('Activity added successfully');
-                                  setIsAddingActivity(false);
-                                  setNewActivity({
-                                    category: '',
-                                    subCategory: '',
-                                    plannedDate: '',
-                                    plannedTime: '',
-                                    location: '',
-                                    status: 'pending',
-                                    remarks: '',
-                                  });
-                                }}
-                              >
-                                <Check className="h-4 w-4 mr-1" />
-                                Save
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => {
-                                  setIsAddingActivity(false);
-                                  setNewActivity({
-                                    category: '',
-                                    subCategory: '',
-                                    plannedDate: '',
-                                    plannedTime: '',
-                                    location: '',
-                                    status: 'pending',
-                                    remarks: '',
-                                  });
-                                }}
-                              >
-                                <X className="h-4 w-4" />
-                              </Button>
-                            </div>
                           </div>
 
                           {/* Activity Details Form */}
