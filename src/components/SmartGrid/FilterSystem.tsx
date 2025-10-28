@@ -252,64 +252,6 @@ export function FilterSystem({
 
   return (
     <div className="space-y-2">
-      {/* Filter Controls */}
-      <div className="flex items-center justify-between bg-gray-50 p-2 rounded border">
-        <div className="flex items-center space-x-2">
-          <Button
-            variant={showFilterRow ? "default" : "outline"}
-            size="sm"
-            onClick={onToggleFilterRow}
-            className={cn(
-              "transition-all",
-              showFilterRow && "bg-blue-600 hover:bg-blue-700 text-white"
-            )}
-          >
-            <Filter className="h-4 w-4 mr-1" />
-            Filters
-            {activeFilterCount > 0 && (
-              <span className="ml-1 text-xs bg-white text-blue-600 rounded-full px-1.5 py-0.5">
-                {activeFilterCount}
-              </span>
-            )}
-          </Button>
-
-          {activeFilterCount > 0 && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={clearAllFilters}
-              className="text-red-600 hover:bg-red-50"
-            >
-              <X className="h-4 w-4 mr-1" />
-              Clear All
-            </Button>
-          )}
-        </div>
-
-        <div className="flex items-center space-x-2">
-          {activeFilterCount > 0 && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setShowSaveModal(true)}
-              disabled={loading}
-              className="transition-all hover:bg-yellow-50 hover:border-yellow-300"
-            >
-              <Star className="h-4 w-4 mr-1" />
-              Save Set
-            </Button>
-          )}
-
-          <FilterSetDropdown
-            filterSets={filterSets}
-            onApply={applyFilterSet}
-            onSetDefault={handleSetDefault}
-            onRename={handleRename}
-            onDelete={handleDelete}
-          />
-        </div>
-      </div>
-
       {/* Filter Panel - Only show when showFilterRow is true */}
       {showFilterRow && (
         <div className="bg-white border rounded shadow-sm">
