@@ -155,16 +155,16 @@ export const TripExecutionCreateDrawerScreen: React.FC<TripExecutionCreateDrawer
   const [currentPage, setCurrentPage] = useState(1);
   const [showAddViaPointsDialog, setShowAddViaPointsDialog] = useState(false);
   const [showPlanActualDrawer, setShowPlanActualDrawer] = useState(false);
-  const [isAddingActivity, setIsAddingActivity] = useState(false);
-  const [newActivity, setNewActivity] = useState({
-    category: '',
-    subCategory: '',
-    plannedDate: '',
-    plannedTime: '',
-    location: '',
-    status: 'pending' as const,
-    remarks: '',
-  });
+  const [newActivities, setNewActivities] = useState<Array<{
+    id: string;
+    category: string;
+    subCategory: string;
+    plannedDate: string;
+    plannedTime: string;
+    location: string;
+    status: 'pending' | 'completed' | 'in-progress';
+    remarks: string;
+  }>>([]);
   
   // Add Via Points dialog state
   const [viaPointForm, setViaPointForm] = useState({
@@ -367,7 +367,17 @@ export const TripExecutionCreateDrawerScreen: React.FC<TripExecutionCreateDrawer
                     size="sm" 
                     className="gap-2"
                     onClick={() => {
-                      setIsAddingActivity(true);
+                      const newActivity = {
+                        id: `new-activity-${Date.now()}`,
+                        category: '',
+                        subCategory: '',
+                        plannedDate: '',
+                        plannedTime: '',
+                        location: '',
+                        status: 'pending' as const,
+                        remarks: '',
+                      };
+                      setNewActivities([...newActivities, newActivity]);
                       setExpandedActivities(true);
                     }}
                   >
@@ -389,7 +399,7 @@ export const TripExecutionCreateDrawerScreen: React.FC<TripExecutionCreateDrawer
                   <h3 className="text-sm font-semibold flex items-center gap-2">
                     Activities
                     <Badge variant="secondary" className="rounded-full h-5 px-2 text-xs">
-                      {selectedLeg.activities.length}
+                      {selectedLeg.activities.length + newActivities.length}
                     </Badge>
                   </h3>
                   {expandedActivities ? (
@@ -481,9 +491,9 @@ export const TripExecutionCreateDrawerScreen: React.FC<TripExecutionCreateDrawer
                         </div>
                       ))}
 
-                      {/* New Activity Form */}
-                      {isAddingActivity && (
-                        <div className="border rounded-lg bg-card">
+                      {/* New Activity Forms */}
+                      {newActivities.map((activity) => (
+                        <div key={activity.id} className="border rounded-lg bg-card">
                           {/* Activity Header */}
                           <div className="flex items-center justify-between p-4 bg-muted/30">
                             <div className="flex items-center gap-3">
@@ -505,8 +515,12 @@ export const TripExecutionCreateDrawerScreen: React.FC<TripExecutionCreateDrawer
                                   Category <span className="text-destructive">*</span>
                                 </Label>
                                 <Input
-                                  value={newActivity.category}
-                                  onChange={(e) => setNewActivity({ ...newActivity, category: e.target.value })}
+                                  value={activity.category}
+                                  onChange={(e) => {
+                                    setNewActivities(newActivities.map(a => 
+                                      a.id === activity.id ? { ...a, category: e.target.value } : a
+                                    ));
+                                  }}
                                   placeholder="e.g., Loading"
                                   className="text-sm h-9"
                                 />
@@ -516,8 +530,12 @@ export const TripExecutionCreateDrawerScreen: React.FC<TripExecutionCreateDrawer
                                   Sub Category <span className="text-destructive">*</span>
                                 </Label>
                                 <Input
-                                  value={newActivity.subCategory}
-                                  onChange={(e) => setNewActivity({ ...newActivity, subCategory: e.target.value })}
+                                  value={activity.subCategory}
+                                  onChange={(e) => {
+                                    setNewActivities(newActivities.map(a => 
+                                      a.id === activity.id ? { ...a, subCategory: e.target.value } : a
+                                    ));
+                                  }}
                                   placeholder="e.g., Container Loading"
                                   className="text-sm h-9"
                                 />
@@ -531,8 +549,12 @@ export const TripExecutionCreateDrawerScreen: React.FC<TripExecutionCreateDrawer
                                 </Label>
                                 <Input
                                   type="date"
-                                  value={newActivity.plannedDate}
-                                  onChange={(e) => setNewActivity({ ...newActivity, plannedDate: e.target.value })}
+                                  value={activity.plannedDate}
+                                  onChange={(e) => {
+                                    setNewActivities(newActivities.map(a => 
+                                      a.id === activity.id ? { ...a, plannedDate: e.target.value } : a
+                                    ));
+                                  }}
                                   className="text-sm h-9"
                                 />
                               </div>
@@ -542,8 +564,12 @@ export const TripExecutionCreateDrawerScreen: React.FC<TripExecutionCreateDrawer
                                 </Label>
                                 <Input
                                   type="time"
-                                  value={newActivity.plannedTime}
-                                  onChange={(e) => setNewActivity({ ...newActivity, plannedTime: e.target.value })}
+                                  value={activity.plannedTime}
+                                  onChange={(e) => {
+                                    setNewActivities(newActivities.map(a => 
+                                      a.id === activity.id ? { ...a, plannedTime: e.target.value } : a
+                                    ));
+                                  }}
                                   className="text-sm h-9"
                                 />
                               </div>
@@ -552,8 +578,12 @@ export const TripExecutionCreateDrawerScreen: React.FC<TripExecutionCreateDrawer
                                   Location
                                 </Label>
                                 <Input
-                                  value={newActivity.location}
-                                  onChange={(e) => setNewActivity({ ...newActivity, location: e.target.value })}
+                                  value={activity.location}
+                                  onChange={(e) => {
+                                    setNewActivities(newActivities.map(a => 
+                                      a.id === activity.id ? { ...a, location: e.target.value } : a
+                                    ));
+                                  }}
                                   placeholder="Enter location"
                                   className="text-sm h-9"
                                 />
@@ -563,15 +593,19 @@ export const TripExecutionCreateDrawerScreen: React.FC<TripExecutionCreateDrawer
                             <div className="space-y-2">
                               <Label className="text-xs text-muted-foreground">Remarks</Label>
                               <Input
-                                value={newActivity.remarks}
-                                onChange={(e) => setNewActivity({ ...newActivity, remarks: e.target.value })}
+                                value={activity.remarks}
+                                onChange={(e) => {
+                                  setNewActivities(newActivities.map(a => 
+                                    a.id === activity.id ? { ...a, remarks: e.target.value } : a
+                                  ));
+                                }}
                                 placeholder="Add any remarks..."
                                 className="text-sm h-9"
                               />
                             </div>
                           </div>
                         </div>
-                      )}
+                      ))}
                     </motion.div>
                   )}
                 </AnimatePresence>
