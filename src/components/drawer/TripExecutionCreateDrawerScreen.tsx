@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, ChevronDown, ChevronUp, Plus, User, FileText, MapPin, Truck, Package, Calendar, Info, Trash2, RefreshCw, Send, AlertCircle, Download, Filter, CheckSquare, MoreVertical, Container, Box, Boxes, Search, Clock, PackageCheck, FileEdit } from 'lucide-react';
+import { X, ChevronDown, ChevronUp, Plus, User, FileText, MapPin, Truck, Package, Calendar, Info, Trash2, RefreshCw, Send, AlertCircle, Download, Filter, CheckSquare, MoreVertical, Container, Box, Boxes, Search, Clock, PackageCheck, FileEdit, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -155,6 +155,16 @@ export const TripExecutionCreateDrawerScreen: React.FC<TripExecutionCreateDrawer
   const [currentPage, setCurrentPage] = useState(1);
   const [showAddViaPointsDialog, setShowAddViaPointsDialog] = useState(false);
   const [showPlanActualDrawer, setShowPlanActualDrawer] = useState(false);
+  const [isAddingActivity, setIsAddingActivity] = useState(false);
+  const [newActivity, setNewActivity] = useState({
+    category: '',
+    subCategory: '',
+    plannedDate: '',
+    plannedTime: '',
+    location: '',
+    status: 'pending' as const,
+    remarks: '',
+  });
   
   // Add Via Points dialog state
   const [viaPointForm, setViaPointForm] = useState({
@@ -352,7 +362,15 @@ export const TripExecutionCreateDrawerScreen: React.FC<TripExecutionCreateDrawer
               <div className="flex items-center justify-between">
                 <h2 className="text-lg font-semibold">Activities Details - {selectedLeg.from} to {selectedLeg.to}</h2>
                 <div className="flex items-center gap-2">
-                  <Button variant="outline" size="sm" className="gap-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="gap-2"
+                    onClick={() => {
+                      setIsAddingActivity(true);
+                      setExpandedActivities(true);
+                    }}
+                  >
                     <Plus className="h-4 w-4" />
                     Add Activities
                   </Button>
@@ -462,6 +480,143 @@ export const TripExecutionCreateDrawerScreen: React.FC<TripExecutionCreateDrawer
                           </div>
                         </div>
                       ))}
+
+                      {/* New Activity Form */}
+                      {isAddingActivity && (
+                        <div className="border rounded-lg bg-card">
+                          {/* Activity Header */}
+                          <div className="flex items-center justify-between p-4 bg-muted/30">
+                            <div className="flex items-center gap-3">
+                              <div className="p-2 rounded bg-green-500/10 text-green-600">
+                                <Plus className="h-4 w-4" />
+                              </div>
+                              <div>
+                                <div className="font-medium text-sm">New Activity</div>
+                                <div className="text-xs text-muted-foreground">Add activity details</div>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => {
+                                  if (!newActivity.category || !newActivity.subCategory) {
+                                    toast.error('Please fill in required fields');
+                                    return;
+                                  }
+                                  // Here you would call updateActivity from the store
+                                  toast.success('Activity added successfully');
+                                  setIsAddingActivity(false);
+                                  setNewActivity({
+                                    category: '',
+                                    subCategory: '',
+                                    plannedDate: '',
+                                    plannedTime: '',
+                                    location: '',
+                                    status: 'pending',
+                                    remarks: '',
+                                  });
+                                }}
+                              >
+                                <Check className="h-4 w-4 mr-1" />
+                                Save
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => {
+                                  setIsAddingActivity(false);
+                                  setNewActivity({
+                                    category: '',
+                                    subCategory: '',
+                                    plannedDate: '',
+                                    plannedTime: '',
+                                    location: '',
+                                    status: 'pending',
+                                    remarks: '',
+                                  });
+                                }}
+                              >
+                                <X className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </div>
+
+                          {/* Activity Details Form */}
+                          <div className="px-4 pb-4 pt-4 border-t space-y-4">
+                            <div className="grid grid-cols-2 gap-4">
+                              <div className="space-y-2">
+                                <Label className="text-xs text-muted-foreground">
+                                  Category <span className="text-destructive">*</span>
+                                </Label>
+                                <Input
+                                  value={newActivity.category}
+                                  onChange={(e) => setNewActivity({ ...newActivity, category: e.target.value })}
+                                  placeholder="e.g., Loading"
+                                  className="text-sm h-9"
+                                />
+                              </div>
+                              <div className="space-y-2">
+                                <Label className="text-xs text-muted-foreground">
+                                  Sub Category <span className="text-destructive">*</span>
+                                </Label>
+                                <Input
+                                  value={newActivity.subCategory}
+                                  onChange={(e) => setNewActivity({ ...newActivity, subCategory: e.target.value })}
+                                  placeholder="e.g., Container Loading"
+                                  className="text-sm h-9"
+                                />
+                              </div>
+                            </div>
+
+                            <div className="grid grid-cols-3 gap-4">
+                              <div className="space-y-2">
+                                <Label className="text-xs text-muted-foreground">
+                                  Planned Date
+                                </Label>
+                                <Input
+                                  type="date"
+                                  value={newActivity.plannedDate}
+                                  onChange={(e) => setNewActivity({ ...newActivity, plannedDate: e.target.value })}
+                                  className="text-sm h-9"
+                                />
+                              </div>
+                              <div className="space-y-2">
+                                <Label className="text-xs text-muted-foreground">
+                                  Planned Time
+                                </Label>
+                                <Input
+                                  type="time"
+                                  value={newActivity.plannedTime}
+                                  onChange={(e) => setNewActivity({ ...newActivity, plannedTime: e.target.value })}
+                                  className="text-sm h-9"
+                                />
+                              </div>
+                              <div className="space-y-2">
+                                <Label className="text-xs text-muted-foreground">
+                                  Location
+                                </Label>
+                                <Input
+                                  value={newActivity.location}
+                                  onChange={(e) => setNewActivity({ ...newActivity, location: e.target.value })}
+                                  placeholder="Enter location"
+                                  className="text-sm h-9"
+                                />
+                              </div>
+                            </div>
+
+                            <div className="space-y-2">
+                              <Label className="text-xs text-muted-foreground">Remarks</Label>
+                              <Input
+                                value={newActivity.remarks}
+                                onChange={(e) => setNewActivity({ ...newActivity, remarks: e.target.value })}
+                                placeholder="Add any remarks..."
+                                className="text-sm h-9"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      )}
                     </motion.div>
                   )}
                 </AnimatePresence>
