@@ -13,7 +13,7 @@ import { formattedAmount, dateFormatter, dateTimeFormatter } from '@/utils/forma
 import { WorkOrderBadge } from './WorkOrderBadge';
 import { OrderCountBadge } from './OrderCountBadge';
 import { IncidentBadgeComponent } from './BadgeComponents/IncidentBadge';
-import LocationDetailsTooltip from '@/components/Common/LocationDetailsTooltip';
+// import LocationDetailsTooltip from '@/components/Common/LocationDetailsTooltip';
 
 interface CellRendererProps {
   value: any;
@@ -349,20 +349,17 @@ export const CellRenderer: React.FC<CellRendererProps> = ({
 
   // LegLocationFormat renderer
   const renderLegLocationFormat = () => {
-    // const [showLocationDetails, setShowLocationDetails] = useState(false);
     if (column.key === "ArrivalPoint" && column.type === "LegLocationFormat") {
       return (
         <div className="relative text-sm min-w-0 flex items-center">
           <div className="text-Gray-800 font-normal truncate">{row?.DeparturePointDescription} - {row?.ArrivalPointDescription}</div>
-          <LocationDetailsTooltip row={row} type="LegLocationFormat" value={value} propKey={column.key} />
         </div>
       );
     }
     if(column.key === "PlannedActual" && column.type === "LegLocationFormat") {
       return (
         <div className="relative text-sm flex items-center w-full">
-          {/* <div className="text-Gray-800 font-normal truncate">{value} - {row?.DeparturePoint}</div> */}
-          <LocationDetailsTooltip row={row} type="LegLocationFormat" value={value} propKey={column.key} />
+          <div className="text-Gray-800 font-normal truncate">{value}</div>
         </div>
       );
     }

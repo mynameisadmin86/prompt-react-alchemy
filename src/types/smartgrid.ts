@@ -5,11 +5,16 @@ import { ConfigurableButtonConfig } from '@/components/ui/configurable-button';
 export type GridColumnType =
   | 'Link'                 // Clickable cell with optional onClick or URL
   | 'Badge'                // Color-coded label based on value
+  | 'BadgeCombinationCount' // Badge showing combination count
   | 'DateTimeRange'        // Two date-time values in a vertical stack
   | 'TextWithTooltip'      // Text with an info icon showing a tooltip
   | 'ExpandableCount'      // "+N" style count, expandable to view details
+  | 'CustomerCountBadge'   // Badge showing customer count
   | 'Text'                 // Standard text cell
+  | 'TextPipedData'        // Text with piped data format
+  | 'TextCustom'           // Custom text rendering
   | 'Date'                 // Formatted date
+  | 'DateFormat'           // Custom date format
   | 'DateRange'            // Date range picker
   | 'NumberRange'          // Number range with from/to inputs
   | 'DropdownText'         // Dropdown + Text combination
@@ -20,7 +25,10 @@ export type GridColumnType =
   | 'Integer'              // Integer number input
   | 'Time'                 // Time picker
   | 'Select'               // Select dropdown
-  | 'LazySelect';          // Lazy-loaded select with search
+  | 'LazySelect'           // Lazy-loaded select with search
+  | 'CurrencyWithSymbol'   // Currency with symbol
+  | 'ActionButton'         // Action button column
+  | 'LegLocationFormat';   // Location format for legs
 
 export interface GridColumnConfig {
   key: string;
@@ -57,6 +65,14 @@ export interface GridColumnConfig {
   fetchOptions?: (params: { searchTerm: string; offset: number; limit: number }) => Promise<{ label: string; value: string }[]>;
   hideSearch?: boolean;
   disableLazyLoading?: boolean;
+  
+  // ActionButton specific properties
+  actionButtons?: Array<{
+    icon: React.ReactNode;
+    onClick: (row: any) => void;
+    disabled?: boolean | ((row: any) => boolean);
+    tooltip?: string;
+  }>;
 }
 
 // Legacy interfaces for backward compatibility
@@ -137,6 +153,7 @@ export interface ServerFilter {
   defaultValue?: any; // Default value for the filter field
   hideSearch?: boolean; // Hide search box in lazy select
   disableLazyLoading?: boolean; // Disable infinite scroll in lazy select
+  returnType?: 'single' | 'array'; // Return type for the filter
 }
 
 export interface ExtraFilter {
@@ -164,7 +181,7 @@ export interface SmartGridProps {
   onDataFetch?(page: number, pageSize: number): Promise<any[]>;
   onUpdate?(row: any): Promise<void>;
   onFiltersChange?(filters: Record<string, any>): void;
-  onLinkClick?(rowData: any, columnKey: string): void;
+  onLinkClick?(rowData: any, columnKey: string, rowIndex: any): void;
   onSubRowToggle?(columnKey: string): void;
   onServerFilter?(filters: FilterConfig[]): Promise<void>;
   paginationMode?: 'pagination' | 'infinite';
@@ -176,7 +193,7 @@ export interface SmartGridProps {
   onSelectionChange?(selectedRows: Set<number>): void;
   onRowClick?(row: any, index: number): void;
   rowClassName?: (row: any, index: number) => string;
-  highlightedRowIndices?: number[];
+  highlightedRowIndices?: (number | string)[];
   configurableButtons?: ConfigurableButtonConfig[];
   showDefaultConfigurableButton?: boolean;
   defaultConfigurableButtonLabel?: string;
@@ -184,6 +201,10 @@ export interface SmartGridProps {
   recordCount?: number;
   showCreateButton?: boolean;
   searchPlaceholder?: string;
+  parentPage?: string;
+  hideToolbar?: boolean;
+  customPageSize?: number;
+  onClearAll?: () => void;
   // Advanced Filter props
   extraFilters?: ExtraFilter[];
   subRowFilters?: SubRowFilter[];
