@@ -29,7 +29,6 @@ import { FilterSystem } from './FilterSystem';
 import { AdvancedFilter } from './AdvancedFilter';
 import { mockFilterAPI } from '@/utils/mockFilterAPI';
 import { ServersideFilter } from './ServersideFilter';
-import customerOrders from '@/assets/images/customer_orders.png';
 
 import { cn } from '@/lib/utils';
 
@@ -1182,11 +1181,7 @@ export function SmartGrid({
                   >
                     {(gridTitle == 'Trip Customer Orders' || gridTitle == 'Trip Customer Orders Multi') ? 
                     (<div className="space-y-2">
-                      <div className="text-lg font-medium flex items-center justify-center">
-                        {/* <div className="text-lg font-medium">No data available</div> */}
-                        {/* <img src="../../../assets/images/customer_orders.png" alt="" /> */}
-                        <img src={customerOrders} alt="Customer Orders" width={180} height={180} />
-                      </div>
+                      <div className="text-lg font-medium">No customer orders available</div>
                       <div className="text-sm">There are no customer orders to display. Please use the “search” to find orders.</div>
                     </div>) : (<div className="space-y-2">
                       <div className="text-lg font-medium">No data available</div>
