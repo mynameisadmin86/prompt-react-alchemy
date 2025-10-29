@@ -2,7 +2,6 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Star, X, Search, Settings } from 'lucide-react';
 import { ColumnFilterInput } from './ColumnFilterInput';
-import { LazySelect } from './LazySelect';
 import { FilterSetModal } from './FilterSetModal';
 import { FilterSetDropdown } from './FilterSetDropdown';
 import { ServerFilterFieldModal } from './ServerFilterFieldModal';
@@ -11,6 +10,7 @@ import { FilterValue, FilterSet, FilterSystemAPI } from '@/types/filterSystem';
 import { useToast } from '@/hooks/use-toast';
 import { useFilterStore } from '@/stores/filterStore';
 import { cn } from '@/lib/utils';
+import { LazySelect } from './LazySelect';
 
 interface ServersideFilterProps {
   serverFilters: ServerFilter[];
@@ -19,6 +19,7 @@ interface ServersideFilterProps {
   onToggle: () => void;
   onFiltersChange: (filters: Record<string, FilterValue>) => void;
   onSearch: () => void;
+  onClearAll: () => void;
   gridId: string;
   userId: string;
   api?: FilterSystemAPI;
@@ -31,6 +32,7 @@ export function ServersideFilter({
   onToggle,
   onFiltersChange,
   onSearch,
+  onClearAll,
   gridId,
   userId,
   api
@@ -46,7 +48,7 @@ export function ServersideFilter({
   const [fieldOrder, setFieldOrder] = useState<string[]>([]);
   
   const { toast } = useToast();
-  
+
   // Get current grid's active filters
   const currentActiveFilters = activeFilters[gridId] || {};
   
@@ -81,7 +83,7 @@ export function ServersideFilter({
       }
     }
   }, [currentActiveFilters, serverFilters, gridId]);
-
+  
   // Initialize field visibility and order
   useEffect(() => {
     if (serverFilters.length > 0 && visibleFields.length === 0) {
@@ -281,6 +283,12 @@ export function ServersideFilter({
     setPendingFilters({});
     setActiveFilters(gridId, {});
     onFiltersChange({});
+    // console.log('active filter::::::::::', activeFilters);
+    // console.log('active filter::::::::::', pendingFilters);
+
+    setTimeout(() => {
+      onClearAll();
+    }, 0);
     
     if (api) {
       api.applyGridFilters({});
@@ -329,13 +337,15 @@ export function ServersideFilter({
                 placeholder={`Select ${filter.label.toLowerCase()}...`}
                 hideSearch={filter.hideSearch}
                 disableLazyLoading={filter.disableLazyLoading}
+                returnType={filter.returnType} // 👈 Pass from config to LazySelect
               />
               {pendingFilters[filter.key] && (
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => handleFilterChange(filter.key, undefined)}
-                  className="absolute right-1 top-1/2 transform -translate-y-1/2 h-6 w-6 p-0 hover:bg-gray-100 z-10"
+                  // className="absolute right-1 top-1/2 transform -translate-y-1/2 h-6 w-6 p-0 hover:bg-gray-100 z-10"
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2 h-6 w-6 p-0 bg-gray-50 hover:bg-gray-100"
                 >
                   <X className="h-3 w-3" />
                 </Button>
@@ -344,7 +354,6 @@ export function ServersideFilter({
           </div>
         );
       }
-
       // Convert ServerFilter to GridColumnConfig for compatibility with ColumnFilterInput
       const columnConfig: GridColumnConfig = {
         key: filter.key,
@@ -361,7 +370,7 @@ export function ServersideFilter({
 
       return (
         <div key={filter.key} className="space-y-1">
-          <div className="text-xs font-medium text-gray-600 truncate">
+          <div className="text-xs font-medium text-Gray-600 truncate">
             {filter.label}
           </div>
           <div className="relative">
@@ -370,13 +379,15 @@ export function ServersideFilter({
               value={pendingFilters[filter.key]}
               onChange={(value) => handleFilterChange(filter.key, value)}
               showFilterTypeDropdown={showFilterTypeDropdown}
+              renderOptionLabel={option => option.name || option.label || option}
+              renderOptionValue={option => option.id || option.value || option}
             />
             {pendingFilters[filter.key] && (
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => handleFilterChange(filter.key, undefined)}
-                className="absolute right-1 top-1/2 transform -translate-y-1/2 h-6 w-6 p-0 hover:bg-gray-100"
+                className="absolute right-1 top-1/2 transform -translate-y-1/2 h-6 w-6 p-0 bg-gray-50 hover:bg-gray-100"
               >
                 <X className="h-3 w-3" />
               </Button>
@@ -390,9 +401,9 @@ export function ServersideFilter({
   if (!visible) return null;
 
   return (
-    <div className="space-y-2">
+    <div className="">
       {/* Filter Controls */}
-      <div className="flex items-center justify-between bg-gray-50 p-2 rounded border">
+      <div className="flex items-center justify-between bg-gray-50 p-2 rounded border mb-3">
         <div className="flex items-center space-x-2">
           <div className="text-sm font-medium text-gray-700">Search</div>
           {activeFilterCount > 0 && (
@@ -475,7 +486,7 @@ export function ServersideFilter({
       </div>
 
       {/* Filter Panel - Always expanded when visible */}
-      <div className="bg-white border rounded shadow-sm">
+      <div className="bg-white border rounded shadow-sm mb-4">
         <div className="p-3">
           <div className="grid gap-2" style={{ gridTemplateColumns: `repeat(${Math.min(visibleFields.length, 4)}, 1fr)` }}>
             {renderFilterInputs(serverFilters)}

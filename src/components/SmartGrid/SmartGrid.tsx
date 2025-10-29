@@ -4,14 +4,14 @@ import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { 
-  ArrowUpDown, 
-  ArrowUp, 
-  ArrowDown, 
-  Edit2, 
+import {
+  ArrowUpDown,
+  ArrowUp,
+  ArrowDown,
+  Edit2,
   GripVertical,
-  ChevronRight, 
-  ChevronDown, 
+  ChevronRight,
+  ChevronDown,
 } from 'lucide-react';
 import { SmartGridProps, GridColumnConfig, SortConfig, FilterConfig, GridAPI, ServerFilter } from '@/types/smartgrid';
 import { exportToCSV, exportToExcel } from '@/utils/gridExport';
@@ -27,13 +27,17 @@ import { ColumnFilter } from './ColumnFilter';
 import { DraggableSubRow } from './DraggableSubRow';
 import { FilterSystem } from './FilterSystem';
 import { AdvancedFilter } from './AdvancedFilter';
-import { ServersideFilter } from './ServersideFilter';
 import { mockFilterAPI } from '@/utils/mockFilterAPI';
+import { ServersideFilter } from './ServersideFilter';
+import customerOrders from '@/assets/images/customer_orders.png';
+
 import { cn } from '@/lib/utils';
 
+// Add exportFilename prop to SmartGridProps
 export function SmartGrid({
   columns,
   data,
+  parentPage,
   editableColumns = true,
   mandatoryColumns = [],
   onInlineEdit,
@@ -50,7 +54,6 @@ export function SmartGrid({
   onRowExpansionOverride,
   plugins = [],
   selectedRows,
-  defaultSelectedRows,
   onSelectionChange,
   onRowClick,
   rowClassName,
@@ -70,21 +73,25 @@ export function SmartGrid({
   showGroupingDropdown,
   clientSideSearch = false,
   showSubHeaders = true,
-  showMainRowFilters = true,
+  showMainRowFilters = false,
   showExtraFilters = true,
-  showSubRowFilters = true,
+  showSubRowFilters = false,
   // Server-side filter props
   showServersideFilter = false,
   onToggleServersideFilter,
   hideAdvancedFilter = false,
   hideCheckboxToggle = false,
+  hideToolbar = false,
   serverFilters = [],
   showFilterTypeDropdown = false,
   gridId,
   userId,
   api,
+  customPageSize,
   onSearch,
-}: SmartGridProps) {
+  onClearAll,
+  exportFilename = `export-${new Date().toISOString().split('T')[0]}`
+}: SmartGridProps & { exportFilename?: string }) {
   const {
     gridData,
     setGridData,
@@ -137,25 +144,11 @@ export function SmartGrid({
     handleSubRowEditCancel
   } = useSmartGridState();
 
-  const [pageSize] = useState(10);
+  const [pageSize] = useState(customPageSize || 10);
   const [showFilterRow, setShowFilterRow] = useState(false);
   const [showAdvancedFilter, setShowAdvancedFilter] = useState(false);
   const [filterSystemFilters, setFilterSystemFilters] = useState<Record<string, any>>({});
   const { toast } = useToast();
-
-  // Initialize internal selected rows with default values if provided
-  useEffect(() => {
-    if (defaultSelectedRows && !selectedRows) {
-      setInternalSelectedRows(defaultSelectedRows);
-    }
-  }, [defaultSelectedRows, selectedRows, setInternalSelectedRows]);
-
-  // Auto-enable checkboxes when defaultSelectedRows or selectedRows is provided
-  useEffect(() => {
-    if ((defaultSelectedRows && defaultSelectedRows.size > 0) || (selectedRows && selectedRows.size > 0)) {
-      setShowCheckboxes(true);
-    }
-  }, [defaultSelectedRows, selectedRows, setShowCheckboxes]);
 
   // Use external selectedRows if provided, otherwise use internal state
   const currentSelectedRows = selectedRows || internalSelectedRows;
@@ -202,15 +195,15 @@ export function SmartGrid({
   // Apply preferences to get ordered and visible columns - FILTER OUT SUB-ROW COLUMNS from main table
   const orderedColumns = useMemo(() => {
     const columnMap = new Map(currentColumns.map(col => [col.key, col]));
-    
+
     const visibleColumns = preferences.columnOrder
       .map(id => columnMap.get(id))
       .filter((col): col is GridColumnConfig => col !== undefined)
       .filter(col => !preferences.hiddenColumns.includes(col.key))
       .filter(col => !col.subRow); // Filter out sub-row columns from main table
-    
+
     const calculatedWidths = calculateColumnWidthsCallback(visibleColumns);
-    
+
     return visibleColumns.map(col => ({
       ...col,
       label: preferences.columnHeaders[col.key] || col.label,
@@ -223,7 +216,7 @@ export function SmartGrid({
   // Get sub-row columns (columns marked with subRow: true) with preferences applied
   const subRowColumns = useMemo(() => {
     const columnMap = new Map(currentColumns.map(col => [col.key, col]));
-    
+
     // Get columns that are marked as sub-row columns AND not hidden
     const visibleSubRowColumns = currentColumns
       .filter(col => col.subRow === true)
@@ -232,7 +225,7 @@ export function SmartGrid({
         ...col,
         label: preferences.columnHeaders[col.key] || col.label // Apply custom headers
       }));
-    
+
     return visibleSubRowColumns;
   }, [currentColumns, preferences]);
 
@@ -254,10 +247,10 @@ export function SmartGrid({
   // Handle sub-row toggle with proper column updates
   const handleSubRowToggleInternal = useCallback((columnKey: string) => {
     console.log('Internal sub-row toggle for column:', columnKey);
-    
+
     // Call the hook's toggle function
     handleSubRowToggle(columnKey);
-    
+
     // Also call the external handler if provided
     if (onSubRowToggle) {
       onSubRowToggle(columnKey);
@@ -267,7 +260,7 @@ export function SmartGrid({
   // Helper function to render collapsible cell values
   const renderCollapsibleCellValue = useCallback((value: any, column: GridColumnConfig) => {
     if (value == null) return '-';
-    
+
     switch (column.type) {
       case 'Badge':
         return (
@@ -351,36 +344,15 @@ export function SmartGrid({
   const handleAdvancedFilterSearch = useCallback(() => {
     // Reset to page 1 when search is performed
     setCurrentPage(1);
-    
-    // Call server-side filter if onServerFilter is provided
-    if (onServerFilter) {
-      // Combine all active filters: advanced filters + column filters + global search
-      const allFilters: FilterConfig[] = [];
-      
-      // Add advanced search filters (filterSystemFilters)
-      Object.entries(filterSystemFilters).forEach(([column, filterValue]) => {
-        if (filterValue && (filterValue.value !== undefined && filterValue.value !== '')) {
-          allFilters.push({
-            column,
-            value: filterValue.value || filterValue,
-            operator: filterValue.operator || 'contains'
-          });
-        }
-      });
-      
-      // Add existing column filters
-      allFilters.push(...filters);
-      
-      // Add global search as a filter if it exists
-      if (globalFilter && globalFilter.trim()) {
-        allFilters.push({
-          column: '_global',
-          value: globalFilter,
-          operator: 'contains'
-        });
-      }
-      
-      onServerFilter(allFilters).catch(error => {
+
+    // If we have server-side filtering, call the server
+    const serverFilters = filters.filter(filter => {
+      const column = currentColumns.find(col => col.key === filter.column);
+      return column?.filterMode === 'server';
+    });
+
+    if (serverFilters.length > 0 && onServerFilter) {
+      onServerFilter(serverFilters).catch(error => {
         console.error('Server-side filtering failed:', error);
         toast({
           title: "Error",
@@ -389,13 +361,10 @@ export function SmartGrid({
         });
       });
     }
-  }, [filterSystemFilters, filters, globalFilter, onServerFilter, toast, setCurrentPage]);
-
+  }, [filters, currentColumns, onServerFilter, toast, setCurrentPage]);
   // Handle filter system changes
   const handleFiltersChange = useCallback((newFilters: Record<string, any>) => {
     setFilterSystemFilters(newFilters);
-    
-    // Call parent's onFiltersChange callback with the filter data
     onFiltersChange?.(newFilters);
     // Convert filter system filters to legacy format if needed
     const legacyFilters = Object.entries(newFilters).map(([column, filterValue]) => ({
@@ -403,18 +372,18 @@ export function SmartGrid({
       value: filterValue.value,
       operator: filterValue.operator || 'contains'
     }));
-    
+
     // Check if any filters require server-side processing
     const serverFilters = legacyFilters.filter(filter => {
       const column = currentColumns.find(col => col.key === filter.column);
       return column?.filterMode === 'server';
     });
-    
+
     const localFilters = legacyFilters.filter(filter => {
       const column = currentColumns.find(col => col.key === filter.column);
       return column?.filterMode !== 'server';
     });
-    
+
     // Apply server-side filters if any and onServerFilter is provided
     if (serverFilters.length > 0 && onServerFilter) {
       onServerFilter(serverFilters).catch(error => {
@@ -426,28 +395,30 @@ export function SmartGrid({
         });
       });
     }
-    
+
     // Set local filters only
     setFilters(localFilters);
-    
     // Only reset to page 1 when actual filters change (not just row selections)
     if (legacyFilters.length > 0) {
       setCurrentPage(1);
     }
   }, [onFiltersChange, setFilters, currentColumns, onServerFilter, toast, setCurrentPage]);
-
   // Define handleExport and handleResetPreferences after processedData and orderedColumns
- const handleExport = useCallback((format: 'csv' | 'xlsx') => {
-    const filename = `export-${new Date().toISOString().split('T')[0]}.${format}`;
+  const handleExport = useCallback((format: 'csv' | 'xlsx') => {
+    const filename = `${exportFilename}.${format}`;
+    // Build export columns: initial columns order + any extra sub-row columns
+    const initialKeys = columns.map(col => col.key);
+    const extraSubRowColumns = subRowColumns.filter(col => !initialKeys.includes(col.key));
+    const exportColumns = [...columns, ...extraSubRowColumns];
     try {
       if (format === 'csv') {
-        exportToCSV(processedData, orderedColumns, filename);
+        exportToCSV(processedData, exportColumns, filename);
         toast({
           title: "Success",
           description: "CSV file exported successfully"
         });
       } else if (format === 'xlsx') {
-        exportToExcel(processedData, orderedColumns, filename);
+        exportToExcel(processedData, exportColumns, filename);
         toast({
           title: "Success",
           description: "Excel file exported successfully"
@@ -461,7 +432,7 @@ export function SmartGrid({
         variant: "destructive"
       });
     }
-  }, [processedData, orderedColumns, toast]);
+  }, [processedData, columns, subRowColumns, toast, exportFilename]);
 
   const handleResetPreferences = useCallback(async () => {
     const defaultPreferences = {
@@ -473,15 +444,16 @@ export function SmartGrid({
       subRowColumnOrder: [], // Reset sub-row column order
       filters: []
     };
-    
+
     try {
       await savePreferences(defaultPreferences);
       setSort(undefined);
       setFilters([]);
+      // setFilterSystemFilters({}); // Also clear filter system filters
       setGlobalFilter('');
       setColumnWidths({});
       setShowColumnFilters(false);
-      
+
       toast({
         title: "Success",
         description: "Column preferences have been reset to defaults"
@@ -500,20 +472,20 @@ export function SmartGrid({
   const handleResizeStart = useCallback((e: React.MouseEvent, columnKey: string) => {
     e.preventDefault();
     e.stopPropagation();
-    
+
     const startX = e.clientX;
     const currentColumn = orderedColumns.find(col => col.key === columnKey);
     const startWidth = currentColumn?.width || 100;
-    
+
     setResizingColumn(columnKey);
     resizeStartRef.current = { x: startX, width: startWidth };
 
     const handleMouseMove = (e: MouseEvent) => {
       if (!resizeStartRef.current) return;
-      
+
       const deltaX = e.clientX - resizeStartRef.current.x;
       const newWidth = Math.max(80, resizeStartRef.current.width + deltaX);
-      
+
       setColumnWidths(prev => ({
         ...prev,
         [columnKey]: newWidth
@@ -568,25 +540,26 @@ export function SmartGrid({
   // Pagination with auto-reset when current page has no data
   const paginatedData = useMemo(() => {
     if (paginationMode !== 'pagination' || onDataFetch) return processedData;
-    
+
     const totalPages = Math.ceil(processedData.length / pageSize);
-    
+
     // Reset to page 1 if current page is beyond available data
     if (currentPage > totalPages && totalPages > 0) {
       setCurrentPage(1);
       return processedData.slice(0, pageSize);
     }
-    
+
     const start = (currentPage - 1) * pageSize;
     return processedData.slice(start, start + pageSize);
   }, [processedData, paginationMode, currentPage, pageSize, onDataFetch, setCurrentPage]);
+
 
   const totalPages = Math.ceil(processedData.length / pageSize);
 
   // Handle header editing
   const handleHeaderEdit = useCallback((columnKey: string, newHeader: string) => {
     if (resizingColumn) return;
-    
+
     if (newHeader.trim() && newHeader !== preferences.columnHeaders[columnKey]) {
       updateColumnHeader(columnKey, newHeader.trim());
       toast({
@@ -619,7 +592,7 @@ export function SmartGrid({
       e.preventDefault();
       return;
     }
-    
+
     e.preventDefault();
     e.stopPropagation();
     if (draggedColumn && draggedColumn !== targetColumnKey) {
@@ -630,7 +603,7 @@ export function SmartGrid({
 
   const handleColumnDragLeave = useCallback((e: React.DragEvent) => {
     if (resizingColumn) return;
-    
+
     e.stopPropagation();
     if (!e.currentTarget.contains(e.relatedTarget as Node)) {
       setDragOverColumn(null);
@@ -642,10 +615,10 @@ export function SmartGrid({
       e.preventDefault();
       return;
     }
-    
+
     e.preventDefault();
     e.stopPropagation();
-    
+
     if (!draggedColumn || draggedColumn === targetColumnKey) {
       setDraggedColumn(null);
       setDragOverColumn(null);
@@ -662,7 +635,7 @@ export function SmartGrid({
     updateColumnOrder(newOrder);
     setDraggedColumn(null);
     setDragOverColumn(null);
-    
+
     toast({
       title: "Success",
       description: "Column order updated"
@@ -678,11 +651,11 @@ export function SmartGrid({
   // Determine if a column is editable
   const isColumnEditable = useCallback((column: GridColumnConfig, columnIndex: number) => {
     if (columnIndex === 0) return false;
-    
+
     if (Array.isArray(editableColumns)) {
       return editableColumns.includes(column.key);
     }
-    
+
     return editableColumns && column.editable;
   }, [editableColumns]);
 
@@ -692,11 +665,11 @@ export function SmartGrid({
     const updatedData = [...gridData];
     const originalRow = updatedData[actualRowIndex];
     const updatedRow = { ...originalRow, [columnKey]: value };
-    
+
     updatedData[actualRowIndex] = updatedRow;
     setGridData(updatedData);
     setEditingCell(null);
-    
+
     if (onUpdate) {
       setLoading(true);
       setError(null);
@@ -738,6 +711,7 @@ export function SmartGrid({
     const isEditing = editingCell?.rowIndex === rowIndex && editingCell?.columnKey === column.key;
     const isEditable = isColumnEditable(column, columnIndex);
 
+    // Only show expand/collapse arrow if subRowColumns count > 0 and in first cell of first column
     if (columnIndex === 0 && (effectiveNestedRowRenderer || hasCollapsibleColumns) && !row.__isGroupHeader) {
       const isExpanded = expandedRows.has(rowIndex);
       return (
@@ -808,6 +782,14 @@ export function SmartGrid({
     }
   }, [columns, setColumns]);
 
+  // Always sync columns and grid data from props if preferences change or are missing (fix for localStorage clear and hard refresh)
+  useEffect(() => {
+    if (columns.length > 0) {
+      setColumns(columns);
+      setGridData(data); // Ensure data is set after columns are initialized
+    }
+  }, [columns, preferences, data, setColumns, setGridData]);
+
   // Initialize plugins
   useEffect(() => {
     plugins.forEach(plugin => {
@@ -825,14 +807,33 @@ export function SmartGrid({
     };
   }, [plugins, gridAPI]);
 
+  // Auto-initialize preferences and grid data if missing on first mount
+  useEffect(() => {
+    // Only run on first mount
+    if (!preferences || !preferences.columnOrder || preferences.columnOrder.length === 0) {
+      const defaultPreferences = {
+        columnOrder: columns.map(col => col.key),
+        hiddenColumns: [],
+        columnWidths: {},
+        columnHeaders: {},
+        subRowColumns: [],
+        subRowColumnOrder: [],
+        filters: []
+      };
+      savePreferences(defaultPreferences);
+      setColumns(columns);
+      setGridData(data);
+    }
+  }, [preferences, columns, data, savePreferences, setColumns, setGridData]);
+
   // Error boundary component
   if (error) {
     return (
       <div className="p-4 border border-red-300 rounded-lg bg-red-50">
         <h3 className="text-lg font-medium text-red-800 mb-2">Error</h3>
         <p className="text-red-600 mb-4">{error}</p>
-        <Button 
-          variant="outline" 
+        <Button
+          variant="outline"
           onClick={() => setError(null)}
           className="text-red-700 border-red-300 hover:bg-red-100"
         >
@@ -845,7 +846,8 @@ export function SmartGrid({
   return (
     <div className="space-y-4 w-full">
       {/* Toolbar */}
-      <GridToolbar
+      {!hideToolbar && (
+        <GridToolbar
         globalFilter={globalFilter}
         setGlobalFilter={setGlobalFilter}
         showColumnFilters={showColumnFilters}
@@ -882,10 +884,11 @@ export function SmartGrid({
         onToggleServersideFilter={onToggleServersideFilter}
         hideCheckboxToggle={hideCheckboxToggle}
         gridId={gridId}
-        // Selection props
+         // Selection props
         selectedRowsCount={currentSelectedRows.size}
         onClearSelection={handleClearSelection}
       />
+      )}
 
       {/* Server-side Filter */}
       {showServersideFilter && (
@@ -893,388 +896,417 @@ export function SmartGrid({
           serverFilters={serverFilters}
           showFilterTypeDropdown={showFilterTypeDropdown}
           visible={showServersideFilter}
-          onToggle={onToggleServersideFilter || (() => {})}
-          onFiltersChange={onFiltersChange || (() => {})}
-          onSearch={onSearch || (() => {})}
+          onToggle={onToggleServersideFilter || (() => { })}
+          onFiltersChange={onFiltersChange || (() => { })}
+          onSearch={onSearch || (() => { })}
+          onClearAll={onClearAll || (() => { })}
           gridId={gridId || gridTitle || 'default'}
           userId={userId || 'default-user'}
           api={api}
         />
       )}
 
-       {/* Advanced Filter System - Only show when not using server-side filters */}
-        {!hideAdvancedFilter && (
-          <AdvancedFilter
-            columns={orderedColumns}
-            subRowColumns={subRowColumns}
-            extraFilters={extraFilters}
-            subRowFilters={subRowFilters}
-            visible={showAdvancedFilter}
-            onToggle={() => setShowAdvancedFilter(!showAdvancedFilter)}
-            onFiltersChange={handleFiltersChange}
-            onSearch={handleAdvancedFilterSearch}
-            gridId="smart-grid"
-            userId="demo-user"
-            clientSideSearch={clientSideSearch}
-            api={mockFilterAPI}
-            showSubHeaders={showSubHeaders}
-            showMainRowFilters={showMainRowFilters}
-            showExtraFilters={showExtraFilters}
-            showSubRowFilters={showSubRowFilters}
-          />
-        )}
-      
+      {/* Advanced Filter System */}
+      {/* <AdvancedFilter
+        columns={orderedColumns}
+        subRowColumns={subRowColumns}
+        extraFilters={extraFilters}
+        subRowFilters={subRowFilters}
+        visible={showAdvancedFilter}
+        onToggle={() => setShowAdvancedFilter(!showAdvancedFilter)}
+        onFiltersChange={handleFiltersChange}
+        onSearch={handleAdvancedFilterSearch}
+        gridId="smart-grid"
+        userId="demo-user"
+        clientSideSearch={clientSideSearch}
+        api={mockFilterAPI}
+      /> */}
+      {/* <AdvancedFilter
+          columns={orderedColumns}
+          subRowColumns={subRowColumns}
+          extraFilters={extraFilters}
+          subRowFilters={subRowFilters}
+          visible={showAdvancedFilter}
+          onToggle={() => setShowAdvancedFilter(!showAdvancedFilter)}
+          onFiltersChange={handleFiltersChange}
+          onSearch={handleAdvancedFilterSearch}
+          gridId="smart-grid"
+          userId="demo-user"
+          clientSideSearch={clientSideSearch}
+          api={mockFilterAPI}
+          showSubHeaders={showSubHeaders}
+          showMainRowFilters={showMainRowFilters}
+          showExtraFilters={showExtraFilters}
+          showSubRowFilters={showSubRowFilters}
+        /> */}
+      {/* Advanced Filter System - Only show when not using server-side filters */}
+      {!hideAdvancedFilter && (
+        <AdvancedFilter
+          columns={orderedColumns}
+          subRowColumns={subRowColumns}
+          extraFilters={extraFilters}
+          subRowFilters={subRowFilters}
+          visible={showAdvancedFilter}
+          onToggle={() => setShowAdvancedFilter(!showAdvancedFilter)}
+          onFiltersChange={handleFiltersChange}
+          onSearch={handleAdvancedFilterSearch}
+          gridId="smart-grid"
+          userId="demo-user"
+          clientSideSearch={clientSideSearch}
+          api={mockFilterAPI}
+          showSubHeaders={showSubHeaders}
+          showMainRowFilters={showMainRowFilters}
+          showExtraFilters={showExtraFilters}
+          showSubRowFilters={showSubRowFilters}
+        />
+      )}
+
       {/* Table Container with horizontal scroll prevention */}
-      <div className="bg-white rounded-lg border shadow-sm">
+      <div className="bg-white rounded shadow-sm m-0">
         <ScrollArea className="w-full">
-          <div className="min-w-full">
-            <Table className="w-full">
-              <TableHeader className="sticky top-0 z-20 bg-white shadow-sm border-b-2 border-gray-100">
-                <TableRow className="hover:bg-transparent">
-                  {/* Checkbox header */}
-                  {showCheckboxes && (
-                    <TableHead className="bg-gray-50/80 backdrop-blur-sm font-semibold text-gray-900 px-3 py-3 border-r border-gray-100 w-[50px] flex-shrink-0">
-                      <input 
-                        type="checkbox" 
-                        className="rounded" 
-                        onChange={(e) => {
-                          const target = e.target as HTMLInputElement;
-                          if (target.checked) {
-                            handleSelectionChange(new Set(Array.from({ length: paginatedData.length }, (_, i) => i)));
-                          } else {
-                            handleSelectionChange(new Set());
-                          }
+          {/* <div className="w-9/12"> */}
+          <Table className="w-full">
+            <TableHeader className="sticky top-0 bg-white border-b-2 border-gray-100">
+              <TableRow className="hover:bg-transparent">
+                {/* Checkbox header */}
+                {showCheckboxes && (
+                  <TableHead className="bg-gray-100 backdrop-blur-sm font-semibold text-gray-900 px-3 py-3 border-r border-gray-100 w-[50px] flex-shrink-0">
+                    <input
+                      type="checkbox"
+                      className="rounded cursor-pointer w-4 h-4"
+                      onChange={(e) => {
+                        const target = e.target as HTMLInputElement;
+                        if (target.checked) {
+                          handleSelectionChange(new Set(Array.from({ length: paginatedData.length }, (_, i) => i)));
+                        } else {
+                          handleSelectionChange(new Set());
+                        }
+                      }}
+                      checked={currentSelectedRows.size === paginatedData.length && paginatedData.length > 0}
+                    />
+                  </TableHead>
+                )}
+                {orderedColumns.map((column, index) => {
+                  const shouldHideIcons = resizeHoverColumn === column.key || resizingColumn === column.key;
+                  const currentFilter = filters.find(f => f.column === column.key);
+                  const widthPercentage = (column.width / orderedColumns.reduce((total, col) => total + col.width, 0)) * 100;
+
+                  return (
+                    <TableHead
+                      key={column.key}
+                      className={cn(
+                        "relative group bg-gray-100 backdrop-blur-sm font-semibold text-Gray-800 pl-1 py-0 pr-0 border-r border-gray-100 last:border-r-0 h-9",
+                        draggedColumn === column.key && "opacity-50",
+                        dragOverColumn === column.key && "bg-blue-100 border-blue-300",
+                        resizingColumn === column.key && "bg-blue-50",
+                        !resizingColumn && "cursor-move"
+                      )}
+                      style={{
+                        width: `${widthPercentage}%`,
+                        minWidth: `${Math.max(80, column.width * 0.8)}px`,
+                        maxWidth: `${column.width * 1.5}px`
+                      }}
+                      draggable={!editingHeader && !resizingColumn}
+                      onDragStart={(e) => handleColumnDragStart(e, column.key)}
+                      onDragOver={(e) => handleColumnDragOver(e, column.key)}
+                      onDragLeave={handleColumnDragLeave}
+                      onDrop={(e) => handleColumnDrop(e, column.key)}
+                      onDragEnd={handleColumnDragEnd}
+                    >
+                      <div className="flex items-center justify-between gap-1 min-w-0">
+                        <div className="flex items-center gap-1 min-w-0 flex-1">
+                          {!shouldHideIcons && (
+                            <GripVertical className="h-3 w-3 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
+                          )}
+                          {editingHeader === column.key ? (
+                            <Input
+                              defaultValue={column.label}
+                              onBlur={(e) => handleHeaderEdit(column.key, e.target.value)}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                  handleHeaderEdit(column.key, e.currentTarget.value);
+                                } else if (e.key === 'Escape') {
+                                  setEditingHeader(null);
+                                }
+                              }}
+                              className="h-5 px-1 text-sm font-semibold bg-white border-blue-300 focus:border-blue-500 min-w-0"
+                              autoFocus
+                              onFocus={(e) => e.target.select()}
+                              onClick={(e) => e.stopPropagation()}
+                              onDragStart={(e) => e.preventDefault()}
+                            />
+                          ) : (
+                            <div
+                              className={cn(
+                                "flex items-center gap-1 rounded px-1 py-0 -mx-1 -my-0.5 transition-colors group/header flex-1 min-w-0",
+                                !resizingColumn && "cursor-pointer hover:bg-gray-100/50"
+                              )}
+                              onClick={(e) => {
+                                if (resizingColumn) return;
+                                e.stopPropagation();
+                                handleHeaderClick(column.key);
+                              }}
+                              onDragStart={(e) => e.preventDefault()}
+                            >
+                              <span
+                                className="select-none text-sm font-semibold flex-1 min-w-0 truncate"
+                                title={column.label}
+                              >
+                                {column.label}
+                              </span>
+                              {column.editable && !shouldHideIcons && (
+                                <Edit2 className="h-3 w-3 text-gray-400 opacity-0 group-hover/header:opacity-100 transition-opacity flex-shrink-0" />
+                              )}
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="flex items-center gap-1">
+                          {column.sortable && !shouldHideIcons && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={(e) => {
+                                if (resizingColumn) return;
+                                e.stopPropagation();
+                                handleSort(column.key);
+                              }}
+                              className="h-5 w-5 p-0 hover:bg-transparent transition-opacity flex-shrink-0"
+                              disabled={loading || !!resizingColumn}
+                              onDragStart={(e) => e.preventDefault()}
+                            >
+                              {sort?.column === column.key ? (
+                                sort.direction === 'asc' ? (
+                                  <ArrowUp className="h-3 w-3 text-blue-600" />
+                                ) : (
+                                  <ArrowDown className="h-3 w-3 text-blue-600" />
+                                )
+                              ) : (
+                                <ArrowUpDown className="h-3 w-3 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+                              )}
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Resize Handle - Modified to only show on hover */}
+                      <div
+                        className="absolute top-0 right-0 w-2 h-full cursor-col-resize bg-transparent hover:bg-blue-300/50 transition-colors flex items-center justify-center group/resize z-30"
+                        onMouseDown={(e) => handleResizeStart(e, column.key)}
+                        onMouseEnter={() => setResizeHoverColumn(column.key)}
+                        onMouseLeave={() => setResizeHoverColumn(null)}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
                         }}
-                        checked={currentSelectedRows.size === paginatedData.length && paginatedData.length > 0}
-                      />
+                        onDragStart={(e) => e.preventDefault()}
+                      >
+                        <div className="w-0.5 h-4 bg-gray-300 opacity-0 group-hover/resize:opacity-100 transition-opacity" />
+                      </div>
+                    </TableHead>
+                  );
+                })}
+                {/* Plugin row actions header */}
+                {plugins.some(plugin => plugin.rowActions) && (
+                  <TableHead className="bg-gray-50/80 backdrop-blur-sm font-semibold text-gray-900 px-3 py-3 text-center w-[100px] flex-shrink-0">
+                    Actions
+                  </TableHead>
+                )}
+              </TableRow>
+
+              {/* Column Filter Row - Legacy support, hidden when using FilterSystem */}
+              {showColumnFilters && !showFilterRow && (
+                <TableRow className="hover:bg-transparent border-b border-gray-200">
+                  {/* Checkbox column space */}
+                  {showCheckboxes && (
+                    <TableHead className="bg-gray-25 px-3 py-2 border-r border-gray-100 w-[50px]">
+                      {/* Empty space for checkbox column */}
                     </TableHead>
                   )}
-                  {orderedColumns.map((column, index) => {
-                    const shouldHideIcons = resizeHoverColumn === column.key || resizingColumn === column.key;
+                  {orderedColumns.map((column) => {
                     const currentFilter = filters.find(f => f.column === column.key);
                     const widthPercentage = (column.width / orderedColumns.reduce((total, col) => total + col.width, 0)) * 100;
-                    
+
                     return (
-                      <TableHead 
-                        key={column.key}
-                        className={cn(
-                          "relative group bg-gray-50/80 backdrop-blur-sm font-semibold text-gray-900 px-2 py-3 border-r border-gray-100 last:border-r-0",
-                          draggedColumn === column.key && "opacity-50",
-                          dragOverColumn === column.key && "bg-blue-100 border-blue-300",
-                          resizingColumn === column.key && "bg-blue-50",
-                          !resizingColumn && "cursor-move"
-                        )}
-                        style={{ 
+                      <TableHead
+                        key={`filter-${column.key}`}
+                        className="bg-gray-25 px-2 py-2 border-r border-gray-100 last:border-r-0 relative"
+                        style={{
                           width: `${widthPercentage}%`,
-                          minWidth: `${Math.max(80, column.width * 0.8)}px`,
-                          maxWidth: `${column.width * 1.5}px`
+                          minWidth: `${Math.max(80, column.width * 0.8)}px`
                         }}
-                        draggable={!editingHeader && !resizingColumn}
-                        onDragStart={(e) => handleColumnDragStart(e, column.key)}
-                        onDragOver={(e) => handleColumnDragOver(e, column.key)}
-                        onDragLeave={handleColumnDragLeave}
-                        onDrop={(e) => handleColumnDrop(e, column.key)}
-                        onDragEnd={handleColumnDragEnd}
                       >
-                        <div className="flex items-center justify-between gap-1 min-w-0">
-                          <div className="flex items-center gap-1 min-w-0 flex-1">
-                            {!shouldHideIcons && (
-                              <GripVertical className="h-3 w-3 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
-                            )}
-                            {editingHeader === column.key ? (
-                              <Input
-                                defaultValue={column.label}
-                                onBlur={(e) => handleHeaderEdit(column.key, e.target.value)}
-                                onKeyDown={(e) => {
-                                  if (e.key === 'Enter') {
-                                    handleHeaderEdit(column.key, e.currentTarget.value);
-                                  } else if (e.key === 'Escape') {
-                                    setEditingHeader(null);
-                                  }
-                                }}
-                                className="h-5 px-1 text-sm font-semibold bg-white border-blue-300 focus:border-blue-500 min-w-0"
-                                autoFocus
-                                onFocus={(e) => e.target.select()}
-                                onClick={(e) => e.stopPropagation()}
-                                onDragStart={(e) => e.preventDefault()}
-                              />
-                            ) : (
-                              <div 
-                                className={cn(
-                                  "flex items-center gap-1 rounded px-1 py-0.5 -mx-1 -my-0.5 transition-colors group/header flex-1 min-w-0",
-                                  !resizingColumn && "cursor-pointer hover:bg-gray-100/50"
-                                )}
-                                onClick={(e) => {
-                                  if (resizingColumn) return;
-                                  e.stopPropagation();
-                                  handleHeaderClick(column.key);
-                                }}
-                                onDragStart={(e) => e.preventDefault()}
-                              >
-                                <span 
-                                  className="select-none text-sm font-semibold flex-1 min-w-0 truncate" 
-                                  title={column.label}
-                                >
-                                  {column.label}
-                                </span>
-                                {column.editable && !shouldHideIcons && (
-                                  <Edit2 className="h-3 w-3 text-gray-400 opacity-0 group-hover/header:opacity-100 transition-opacity flex-shrink-0" />
-                                )}
-                              </div>
-                            )}
-                          </div>
-                          
-                          <div className="flex items-center gap-1">
-                            {column.sortable && !shouldHideIcons && (
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={(e) => {
-                                  if (resizingColumn) return;
-                                  e.stopPropagation();
-                                  handleSort(column.key);
-                                }}
-                                className="h-5 w-5 p-0 hover:bg-transparent transition-opacity flex-shrink-0"
-                                disabled={loading || !!resizingColumn}
-                                onDragStart={(e) => e.preventDefault()}
-                              >
-                                {sort?.column === column.key ? (
-                                  sort.direction === 'asc' ? (
-                                    <ArrowUp className="h-3 w-3 text-blue-600" />
-                                  ) : (
-                                    <ArrowDown className="h-3 w-3 text-blue-600" />
-                                  )
-                                ) : (
-                                  <ArrowUpDown className="h-3 w-3 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" />
-                                )}
-                              </Button>
-                            )}
-                          </div>
-                        </div>
-                        
-                        {/* Resize Handle - Modified to only show on hover */}
-                        <div
-                          className="absolute top-0 right-0 w-2 h-full cursor-col-resize bg-transparent hover:bg-blue-300/50 transition-colors flex items-center justify-center group/resize z-30"
-                          onMouseDown={(e) => handleResizeStart(e, column.key)}
-                          onMouseEnter={() => setResizeHoverColumn(column.key)}
-                          onMouseLeave={() => setResizeHoverColumn(null)}
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                          }}
-                          onDragStart={(e) => e.preventDefault()}
-                        >
-                          <div className="w-0.5 h-4 bg-gray-300 opacity-0 group-hover/resize:opacity-100 transition-opacity" />
-                        </div>
+                        {column.filterable && (
+                          <ColumnFilter
+                            column={column}
+                            currentFilter={currentFilter}
+                            onFilterChange={(filter) => {
+                              if (filter) {
+                                handleColumnFilterChange(filter, column, onServerFilter);
+                              } else {
+                                handleClearColumnFilter(column.key);
+                              }
+                            }}
+                          />
+                        )}
                       </TableHead>
                     );
                   })}
-                  {/* Plugin row actions header */}
+                  {/* Plugin row actions column space */}
                   {plugins.some(plugin => plugin.rowActions) && (
-                    <TableHead className="bg-gray-50/80 backdrop-blur-sm font-semibold text-gray-900 px-3 py-3 text-center w-[100px] flex-shrink-0">
-                      Actions
+                    <TableHead className="bg-gray-25 px-3 py-2 text-center w-[100px]">
+                      {/* Empty space for actions column */}
                     </TableHead>
                   )}
                 </TableRow>
-                
-                {/* Column Filter Row - Legacy support, hidden when using FilterSystem */}
-                {showColumnFilters && !showFilterRow && (
-                  <TableRow className="hover:bg-transparent border-b border-gray-200">
-                    {/* Checkbox column space */}
-                    {showCheckboxes && (
-                      <TableHead className="bg-gray-25 px-3 py-2 border-r border-gray-100 w-[50px]">
-                        {/* Empty space for checkbox column */}
-                      </TableHead>
-                    )}
-                    {orderedColumns.map((column) => {
-                      const currentFilter = filters.find(f => f.column === column.key);
-                      const widthPercentage = (column.width / orderedColumns.reduce((total, col) => total + col.width, 0)) * 100;
-                      
-                      return (
-                        <TableHead 
-                          key={`filter-${column.key}`}
-                          className="bg-gray-25 px-2 py-2 border-r border-gray-100 last:border-r-0 relative"
-                          style={{ 
-                            width: `${widthPercentage}%`,
-                            minWidth: `${Math.max(80, column.width * 0.8)}px`
-                          }}
-                        >
-                          {column.filterable && (
-                            <ColumnFilter
-                              column={column}
-                              currentFilter={currentFilter}
-                              onFilterChange={(filter) => {
-                                if (filter) {
-                                  handleColumnFilterChange(filter, column, onServerFilter);
-                                } else {
-                                  handleClearColumnFilter(column.key);
-                                }
-                              }}
-                            />
-                          )}
-                        </TableHead>
-                      );
-                    })}
-                    {/* Plugin row actions column space */}
-                    {plugins.some(plugin => plugin.rowActions) && (
-                      <TableHead className="bg-gray-25 px-3 py-2 text-center w-[100px]">
-                        {/* Empty space for actions column */}
-                      </TableHead>
-                    )}
-                  </TableRow>
-                )}
-              </TableHeader>
-              <TableBody>
-                {loading ? (
-                  <TableRow>
-                    <TableCell 
-                      colSpan={orderedColumns.length + (showCheckboxes ? 1 : 0) + (plugins.some(plugin => plugin.rowActions) ? 1 : 0)} 
-                      className="text-center py-12"
-                    >
-                      <div className="flex items-center justify-center">
-                        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
-                        <span className="ml-2 text-gray-600">Loading...</span>
+              )}
+            </TableHeader>
+            <TableBody>
+              {loading ? (
+                <TableRow>
+                  <TableCell
+                    colSpan={orderedColumns.length + (showCheckboxes ? 1 : 0) + (plugins.some(plugin => plugin.rowActions) ? 1 : 0)}
+                    className="text-center py-12"
+                  >
+                    <div className="flex items-center justify-center">
+                      <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+                      <span className="ml-2 text-gray-600">Loading...</span>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ) : paginatedData.length === 0 ? (
+                <TableRow>
+                  <TableCell
+                    colSpan={orderedColumns.length + (showCheckboxes ? 1 : 0) + (plugins.some(plugin => plugin.rowActions) ? 1 : 0)}
+                    className="text-center py-12 text-gray-500"
+                  >
+                    {(gridTitle == 'Trip Customer Orders' || gridTitle == 'Trip Customer Orders Multi') ? 
+                    (<div className="space-y-2">
+                      <div className="text-lg font-medium flex items-center justify-center">
+                        {/* <div className="text-lg font-medium">No data available</div> */}
+                        {/* <img src="../../../assets/images/customer_orders.png" alt="" /> */}
+                        <img src={customerOrders} alt="Customer Orders" width={180} height={180} />
                       </div>
-                    </TableCell>
-                  </TableRow>
-                ) : paginatedData.length === 0 ? (
-                  <TableRow>
-                    <TableCell 
-                      colSpan={orderedColumns.length + (showCheckboxes ? 1 : 0) + (plugins.some(plugin => plugin.rowActions) ? 1 : 0)} 
-                      className="text-center py-12 text-gray-500"
-                    >
-                      <div className="space-y-2">
-                        <div className="text-lg font-medium">No data available</div>
-                        <div className="text-sm">Try adjusting your search or filters</div>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  paginatedData.map((row, rowIndex) => (
-                    <React.Fragment key={row.id || rowIndex}>
-                      {/* Group Header Row - spans all columns */}
-                      {row.__isGroupHeader ? (
-                        <TableRow key={rowIndex}
-                          className={cn(
-                            "hover:bg-gray-50/50 transition-colors duration-150 border-b border-gray-100",
-                            rowClassName ? rowClassName(row, rowIndex) : ''
-                          )}
-                        >
-                          <TableCell 
-                            colSpan={orderedColumns.length + (showCheckboxes ? 1 : 0) + (plugins.some(plugin => plugin.rowActions) ? 1 : 0)}
-                            className="px-3 py-3 font-semibold cursor-pointer"
-                            onClick={() => onLinkClick?.(row, orderedColumns[0]?.key)}
-                          >
-                            {row.__groupHeaderText}
-                          </TableCell>
-                        </TableRow>
-                      ) : (
-                        /* Regular Data Row */
-                        <TableRow key={rowIndex}
-                          data-row-id={row.id || rowIndex}
-                          className={cn(
-                            "hover:bg-gray-50/50 transition-all duration-300 border-b border-gray-100 cursor-pointer",
-                            highlightedRowIndices.includes(rowIndex) && "bg-yellow-100 border-l-4 border-yellow-500 hover:bg-yellow-100/80",
-                            rowClassName ? rowClassName(row, rowIndex) : ''
-                          )}
-                          onClick={(e) => {
-                            // Don't trigger row click if checkbox or button elements are clicked
-                            if (e.target instanceof HTMLElement && 
-                                ((e.target as HTMLInputElement).type === 'checkbox' || 
-                                 e.target.closest('button') || 
-                                 e.target.closest('input'))) {
-                              return;
-                            }
-                            onRowClick?.(row, rowIndex);
-                          }}
-                        >
-                          {/* Checkbox cell */}
-                          {showCheckboxes && (
-                            <TableCell className="px-3 py-3 border-r border-gray-50 w-[50px]">
-                              <input 
-                                type="checkbox" 
-                                className="rounded" 
-                                checked={currentSelectedRows.has(rowIndex)}
-                                onChange={() => {
-                                  const newSet = new Set(currentSelectedRows);
-                                  if (newSet.has(rowIndex)) {
-                                    newSet.delete(rowIndex);
-                                  } else {
-                                    newSet.add(rowIndex);
-                                  }
-                                  handleSelectionChange(newSet);
-                                }}
-                              />
-                            </TableCell>
-                          )}
-                          {orderedColumns.map((column, columnIndex) => {
-                            const widthPercentage = (column.width / orderedColumns.reduce((total, col) => total + col.width, 0)) * 100;
-                            
-                            return (
-                              <TableCell 
-                                key={column.key} 
-                                className="relative px-3 py-3 border-r border-gray-50 last:border-r-0 align-top"
-                                style={{ 
-                                  width: `${widthPercentage}%`,
-                                  minWidth: `${Math.max(80, column.width * 0.8)}px`,
-                                  maxWidth: `${column.width * 1.5}px`
-                                }}
-                              >
-                                <div className="overflow-hidden">
-                                  {renderCell(row, column, rowIndex, columnIndex)}
-                                </div>
-                              </TableCell>
-                            );
-                          })}
-                          {/* Plugin row actions */}
-                          {plugins.some(plugin => plugin.rowActions) && (
-                            <TableCell className="px-3 py-3 text-center align-top w-[100px]">
-                              <div className="flex items-center justify-center space-x-1">
-                                <PluginRowActions
-                                  plugins={plugins}
-                                  gridAPI={gridAPI}
-                                  row={row}
-                                  rowIndex={rowIndex}
-                                />
-                              </div>
-                            </TableCell>
-                          )}
-                        </TableRow>
+                      <div className="text-sm">There are no customer orders to display. Please use the “search” to find orders.</div>
+                    </div>) : (<div className="space-y-2">
+                      <div className="text-lg font-medium">No data available</div>
+                      <div className="text-sm">Try adjusting your search or filters</div>
+                    </div>)
+                    }
+                  </TableCell>
+                </TableRow>
+              ) : (
+                paginatedData.flatMap((row, rowIndex) => {
+                  const rows = [
+                    <TableRow key={rowIndex}
+                      data-row-id={ (gridTitle == 'Trip Plans' ?  row.TripPlanID : gridTitle == 'Planning Equipments' ? (row.EquipmentID || row.VehicleID || row.HandlerID || row.DriverCode || row.VendorID || row.SupplierID) : (gridTitle == 'Trip Customer Orders Multi' ? `${row.CustomerOrderID}-${row.LegBehaviour}` : rowIndex)) || rowIndex}
+                      className={cn(
+                        "hover:bg-gray-100 transition-all duration-100 border-gray-100 cursor-pointer",
+                        highlightedRowIndices.includes(`${row.CustomerOrderID}-${row.LegBehaviour}`) && "border-b-[0px] bg-blue-100 border-l-4 border-blue-500 hover:bg-blue-100/80",
+                        rowClassName ? rowClassName(row, rowIndex) : ''
                       )}
-                      {/* Nested row content */}
-                      {effectiveNestedRowRenderer && expandedRows.has(rowIndex) && (
-                        <TableRow className="bg-gray-50/30">
-                          <TableCell 
-                            colSpan={orderedColumns.length + (showCheckboxes ? 1 : 0) + (plugins.some(plugin => plugin.rowActions) ? 1 : 0)} 
-                            className="p-0 border-b border-gray-200"
+                      onClick={(e) => {
+                        // Don't trigger row click if checkbox or button elements are clicked
+                        if (e.target instanceof HTMLElement &&
+                          ((e.target as HTMLInputElement).type === 'checkbox' ||
+                            e.target.closest('button') ||
+                            e.target.closest('input'))) {
+                          return;
+                        }
+                        onRowClick?.(row, rowIndex);
+                      }}
+                    >
+                      {/* Checkbox cell */}
+                      {showCheckboxes && (
+                        <TableCell className="px-3 py-3 border-r border-gray-50 w-[50px]">
+                          <input
+                            type="checkbox"
+                            className="rounded cursor-pointer w-4 h-4"
+                            checked={currentSelectedRows.has(rowIndex)}
+                            onChange={() => {
+                              const newSet = new Set(currentSelectedRows);
+                              if (newSet.has(rowIndex)) {
+                                newSet.delete(rowIndex);
+                              } else {
+                                newSet.add(rowIndex);
+                              }
+                              handleSelectionChange(newSet);
+                            }}
+                          />
+                        </TableCell>
+                      )}
+                      {orderedColumns.map((column, columnIndex) => {
+                        const widthPercentage = (column.width / orderedColumns.reduce((total, col) => total + col.width, 0)) * 100;
+
+                        return (
+                          <TableCell
+                            key={column.key}
+                            className="relative text-[13px] pl-3 py-1 border-r border-gray-50 last:border-r-0 align-middle"
+                            style={{
+                              width: `${widthPercentage}%`,
+                              minWidth: `${Math.max(80, column.width * 0.8)}px`,
+                              maxWidth: `${column.width * 1.5}px`
+                            }}
                           >
-                            <div className="bg-gradient-to-r from-gray-50/50 to-white border-l-4 border-blue-500">
-                              <div className="p-6 pl-12">
-                                {effectiveNestedRowRenderer(row, rowIndex)}
-                              </div>
+                            <div className="overflow-hidden">
+                              {renderCell(row, column, rowIndex, columnIndex)}
                             </div>
                           </TableCell>
-                        </TableRow>
+                        );
+                      })}
+                      {/* Plugin row actions */}
+                      {plugins.some(plugin => plugin.rowActions) && (
+                        <TableCell className="px-3 py-3 text-center align-top w-[100px]">
+                          <div className="flex items-center justify-center space-x-1">
+                            <PluginRowActions
+                              plugins={plugins}
+                              gridAPI={gridAPI}
+                              row={row}
+                              rowIndex={rowIndex}
+                            />
+                          </div>
+                        </TableCell>
                       )}
-                    </React.Fragment>
-                  ))
-                )}
-              </TableBody>
-            </Table>
-          </div>
+                    </TableRow>
+                  ];
+
+                  // Add nested row if expanded
+                  if (effectiveNestedRowRenderer && expandedRows.has(rowIndex)) {
+                    rows.push(
+                      <TableRow key={`nested-${rowIndex}`} className="bg-gray-50/30">
+                        <TableCell
+                          colSpan={orderedColumns.length + (showCheckboxes ? 1 : 0) + (plugins.some(plugin => plugin.rowActions) ? 1 : 0)}
+                          className="p-0 border-b border-gray-200"
+                        >
+                          <div className="bg-gradient-to-r from-gray-50/50 to-white border-l-4 border-blue-500">
+                            <div className="">
+                              {effectiveNestedRowRenderer(row, rowIndex)}
+                            </div>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  }
+
+                  return rows;
+                })
+              )}
+            </TableBody>
+          </Table>
+          {/* </div> */}
         </ScrollArea>
       </div>
 
       {/* Pagination */}
       {paginationMode === 'pagination' && totalPages > 1 && (
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-white p-4 rounded-lg border shadow-sm">
-          <div className="text-sm text-gray-600 order-2 sm:order-1">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-white px-4 py-2 m-0 border-t shadow-sm">
+          <div className="text-sm text-Gray-800 order-2 sm:order-1 w-full">
             Showing {(currentPage - 1) * pageSize + 1} to{' '}
             {Math.min(currentPage * pageSize, processedData.length)} of{' '}
             {processedData.length} entries
           </div>
-          
-          <Pagination className="order-1 sm:order-2">
+
+          <Pagination className="order-1 sm:order-2 justify-end">
             <PaginationContent>
               <PaginationItem>
                 <PaginationPrevious
@@ -1284,7 +1316,7 @@ export function SmartGrid({
                   )}
                 />
               </PaginationItem>
-              
+
               {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
                 const pageNum = i + 1;
                 return (
@@ -1303,7 +1335,7 @@ export function SmartGrid({
                   </PaginationItem>
                 );
               })}
-              
+
               <PaginationItem>
                 <PaginationNext
                   onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}

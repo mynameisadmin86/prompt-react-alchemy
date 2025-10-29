@@ -280,25 +280,6 @@ export function AdvancedFilter({
     }
   };
 
-  // Helper function to strip prefixes from filter keys
-  const stripPrefixesFromFilters = (filters: Record<string, FilterValue>) => {
-    const strippedFilters: Record<string, FilterValue> = {};
-    
-    Object.entries(filters).forEach(([key, value]) => {
-      let cleanKey = key;
-      if (key.startsWith('extra-')) {
-        cleanKey = key.replace('extra-', '');
-      } else if (key.startsWith('subrow-')) {
-        cleanKey = key.replace('subrow-', '');
-      } else if (key.startsWith('subrowfilter-')) {
-        cleanKey = key.replace('subrowfilter-', '');
-      }
-      strippedFilters[cleanKey] = value;
-    });
-    
-    return strippedFilters;
-  };
-
   const activeFilterCount = Object.keys(pendingFilters).length;
   const filterableColumns = columns.filter(col => col.filterable !== false);
   const filterableSubRowColumns = subRowColumns.filter(col => col.filterable !== false);
@@ -359,15 +340,12 @@ export function AdvancedFilter({
             variant="default"
             size="sm"
             onClick={() => {
-              // Strip prefixes from pending filters for output
-              const cleanFilters = stripPrefixesFromFilters(pendingFilters);
-              
               // Apply pending filters to active filters
               setActiveFilters(pendingFilters);
               
-              // Apply clean filters (without prefixes) and trigger search for both client-side and server-side
+              // Apply filters and trigger search for both client-side and server-side
               if (api) {
-                api.applyGridFilters(cleanFilters);
+                api.applyGridFilters(pendingFilters);
               }
               onSearch();
             }}
@@ -478,7 +456,7 @@ export function AdvancedFilter({
             <CollapsibleContent>
               <div className={cn("bg-green-50/30 p-3", !showSubHeaders && "border-b")}>
                 <div className="grid gap-2" style={{ gridTemplateColumns: `repeat(${Math.min(extraFilters.length, 4)}, 1fr)` }}>
-                  {renderFilterInputs(extraFilters, 'extra-')}
+                  {renderFilterInputs(extraFilters, '')}
                 </div>
               </div>
             </CollapsibleContent>

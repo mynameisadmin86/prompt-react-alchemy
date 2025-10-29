@@ -1,13 +1,19 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Info } from 'lucide-react';
+import { Info, Package } from 'lucide-react';
 import { GridColumnConfig } from '@/types/smartgrid';
 import { cn } from '@/lib/utils';
+import { CustomerCountBadge } from './CustomerCountBadge';
+import { formattedAmount, dateFormatter, dateTimeFormatter } from '@/utils/formatter';
+import { WorkOrderBadge } from './WorkOrderBadge';
+import { OrderCountBadge } from './OrderCountBadge';
+import { IncidentBadgeComponent } from './BadgeComponents/IncidentBadge';
+import LocationDetailsTooltip from '@/components/Common/LocationDetailsTooltip';
 
 interface CellRendererProps {
   value: any;
@@ -20,7 +26,7 @@ interface CellRendererProps {
   onEdit: (rowIndex: number, columnKey: string, value: any) => void;
   onEditStart: (rowIndex: number, columnKey: string) => void;
   onEditCancel: () => void;
-  onLinkClick?: (rowData: any, columnKey: string) => void;
+  onLinkClick?: (rowData: any, columnKey: string, rowIndex: any) => void;
   loading?: boolean;
 }
 
@@ -38,7 +44,8 @@ export const CellRenderer: React.FC<CellRendererProps> = ({
   onLinkClick,
   loading = false
 }) => {
-  const [tempValue, setTempValue] = useState(value);
+  const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const [tempValue, setTempValue] = React.useState(value);
 
   const handleSave = () => {
     onEdit(rowIndex, column.key, tempValue);
@@ -68,33 +75,31 @@ export const CellRenderer: React.FC<CellRendererProps> = ({
       displayValue = String(value || '');
       statusColor = column.statusMap?.[displayValue] || getDefaultStatusColor(displayValue, column.key);
     }
+    // ✅ If displayValue is empty, return null (don't render Badge)
+    if (!displayValue || displayValue.trim() === "") {
+      return null;
+    }
 
-    const badgeContent = (
-      <Badge className={cn("whitespace-nowrap", statusColor, column.onClick && "cursor-pointer hover:opacity-80 transition-opacity")}>
+    return (
+      <Badge className={cn("whitespace-nowrap", statusColor)}>
         {displayValue}
       </Badge>
     );
-
-    if (column.onClick) {
-      return (
-        <button
-          onClick={() => column.onClick?.(row)}
-          className="focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded"
-          disabled={loading}
-        >
-          {badgeContent}
-        </button>
-      );
-    }
-
-    return badgeContent;
   };
+
+  const renderBadgeCombinationCount = () => {
+    return (
+      <Badge className='bg-gray-100 text-gray-800 border-gray-300 rounded-2xl font-medium'>
+        {row?.LegExecuted}/{row?.TotalLegs}
+      </Badge>
+    )
+  }
 
   // Default status color mapping based on common patterns
   const getDefaultStatusColor = (status: any, columnKey: string) => {
     // Safely convert to string and handle non-string inputs
     const statusString = String(status || '').toLowerCase();
-    
+
     if (columnKey.toLowerCase().includes('status')) {
       switch (statusString) {
         case 'released':
@@ -137,7 +142,7 @@ export const CellRenderer: React.FC<CellRendererProps> = ({
   const renderLink = () => {
     const handleClick = () => {
       if (onLinkClick) {
-        onLinkClick(row, column.key);
+        onLinkClick(row, column.key, rowIndex);
       } else if (column.onClick) {
         column.onClick(row);
       }
@@ -146,7 +151,7 @@ export const CellRenderer: React.FC<CellRendererProps> = ({
     return (
       <button
         onClick={handleClick}
-        className="text-blue-600 hover:text-blue-800 cursor-pointer font-medium hover:underline transition-colors duration-150 truncate max-w-full"
+        className="text-Primary-500 hover:text-blue-800 cursor-pointer font-medium hover:underline transition-colors duration-150 truncate max-w-full"
         disabled={loading}
         title={String(value)}
       >
@@ -155,24 +160,168 @@ export const CellRenderer: React.FC<CellRendererProps> = ({
     );
   };
 
-  // DateTimeRange renderer
-  const renderDateTimeRange = () => {
-    const [date, time] = String(value).split(' ');
+  // Simple text renderer
+  const renderTextData = () => {
     return (
       <div className="text-sm min-w-0">
-        <div className="text-gray-900 font-medium truncate">{date}</div>
-        <div className="text-gray-500 text-xs truncate">{time}</div>
+        <div className="text-Gray-800 font-normal truncate text-[13px]">{value}</div>
+        {/* {column.key == 'Contract' && (<div className="text-gray-500 text-[11px] truncate">{row?.ContractDescription}</div>)}
+        {column.key == 'CustomerOrVendor' && (<div className="text-gray-500 text-[11px] truncate">{row?.CustomerOrVendorName}</div>)} */}
       </div>
     );
+  };
+
+  const getPipedValue = (row: any, descKey: string, codeKey: string) => {
+    const desc = row?.[descKey];
+    const code = row?.[codeKey];
+    if (desc && code) return `${desc} || ${code}`;
+    return desc || code || "-";
+  };
+
+  const renderTextPipedData = () => {
+    return (
+      <div className="text-sm min-w-0">
+        {column.key === "Contract" && (
+          <div className="text-Gray-800 font-normal truncate text-[13px]">
+            {row?.ContractDescription && row?.Contract
+              ? `${row.ContractDescription} || ${row.Contract}`
+              : row?.ContractDescription || row?.Contract}
+          </div>
+        )}
+
+        {column.key === "CustomerOrVendor" && (
+          <div className="text-Gray-800 font-normal truncate text-[13px]">
+            {row?.CustomerOrVendorName && row?.CustomerOrVendor
+              ? `${row.CustomerOrVendorName} || ${row.CustomerOrVendor}`
+              : row?.CustomerOrVendorName || row?.CustomerOrVendor}
+          </div>
+        )}
+
+        {column.key === "DeparturePointDescription" && (
+          <div className="text-Gray-800 font-normal truncate text-[13px]">
+            {row?.DeparturePointDescription && row?.DeparturePoint
+              ? `${row.DeparturePointDescription} || ${row.DeparturePoint}`
+              : row?.DeparturePointDescription || row?.DeparturePoint}
+          </div>
+        )}
+        {column.key === "ArrivalPointDescription" && (
+          <div className="text-Gray-800 font-normal truncate text-[13px]">
+            {row?.ArrivalPointDescription && row?.ArrivalPoint
+              ? `${row.ArrivalPointDescription} || ${row.ArrivalPoint}`
+              : row?.ArrivalPointDescription || row?.ArrivalPoint}
+          </div>
+        )}
+        {column.key === "LegFromDescription" && (
+          <div className="text-Gray-800 font-normal truncate text-[13px]">
+            {/* {row?.LegFromDescription && row?.LegFrom
+              ? `${row.LegFromDescription} || ${row.LegFrom}`
+              : row?.LegFromDescription || row?.LegFrom} */}
+              {getPipedValue(row, 'LegFromDescription', 'LegFrom')}
+          </div>
+        )}
+        {column.key === "LegToDescription" && (
+          <div className="text-Gray-800 font-normal truncate text-[13px]">
+            {getPipedValue(row, 'LegToDescription', 'LegTo')}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  const renderTextCustomised = () => {
+    if (column.type === "TextCustom") {
+      const firstCustomer = row?.CustomerOrderDetails?.[0]; // only first element
+
+      if (column.key === "CustomerTransportMode") {
+        return (
+          <div className="text-Gray-800 font-normal truncate text-[13px]">
+            {firstCustomer?.TransportMode}
+          </div>
+        );
+      } else if (column.key === "CustomerService") {
+        return (
+          <div className="text-Gray-800 font-normal truncate text-[13px]" title={firstCustomer?.ServiceDescription}>
+            {firstCustomer?.ServiceDescription}
+          </div>
+        );
+      } else if (column.key === "CustomerSubService") {
+        return (
+          <div className="text-Gray-800 font-normal truncate text-[13px]" title={firstCustomer?.SubServiceDescription}>
+            {firstCustomer?.SubServiceDescription}
+          </div>
+        );
+      }
+      // else if (column.key === "CustomerOrders") {
+      //   return (
+      //     <>
+      //     <div className="font-normal truncate text-[13px] text-blue-600" title={firstCustomer?.CustomerOrder}>
+      //       <a>{firstCustomer?.CustomerOrder}</a>
+      //     </div>
+      //     </>
+      //   );
+      // }
+      else if (column.key === "CustomerOrders") {
+        const customerOrders = row?.CustomerOrderDetails || [];
+
+        return (
+          <>
+            {customerOrders.length > 0 ? (
+              <div className="font-normal text-[13px] text-blue-600">
+                {customerOrders.map((customer: any, index: number) => (
+                  <span key={index} className="hover:underline cursor-pointer text-blue-600" title={customer.CustomerOrder}>
+                    {/* <a
+                      href="#"
+                      className="hover:underline cursor-pointer text-blue-600"
+                      title={customer.CustomerOrder}
+                    > */}
+                    {customer.CustomerOrder}
+                    {/* </a> */}
+                    {index < customerOrders.length - 1 && ", "}
+                  </span>
+                ))}
+              </div>
+            ) : (
+              <div className="text-gray-400 text-[13px]"></div>
+            )}
+          </>
+        );
+      }
+    }
+
+    return (
+      <span className="truncate" title={String(value)}>
+        {value}
+      </span>
+    )
+
+  }
+
+  // DateTimeRange renderer
+  const renderDateTimeRange = () => {
+    // const [date, time] = String(value).split('\n');
+    // return (
+    //   <div className="text-sm min-w-0">
+    //     <div className="text-Gray-800 font-normal truncate">{date}</div>
+    //     <div className="text-gray-500 text-xs truncate">{time}</div>
+    //   </div>
+    // );
+    if (!value) return <div className="text-gray-400">-</div>;
+    try {
+      const date = new Date(value);
+      const formattedDate = dateTimeFormatter(date);
+      return <span className="truncate" title={formattedDate}>{formattedDate}</span>;
+    } catch {
+      return <span className="truncate" title={String(value)}>{value}</span>;
+    }
   };
 
   // TextWithTooltip renderer
   const renderTextWithTooltip = () => {
     const tooltipText = column.infoTextField ? row[column.infoTextField] : `More info about ${value}`;
-    
+
     return (
       <div className="flex items-center gap-2 min-w-0">
-        <span className="text-gray-900 font-medium truncate flex-1" title={String(value)}>
+        <span className="text-Gray-800 font-medium truncate flex-1" title={String(value)}>
           {value}
         </span>
         <TooltipProvider>
@@ -186,7 +335,7 @@ export const CellRenderer: React.FC<CellRendererProps> = ({
                 <Info className="h-3 w-3 text-blue-600" />
               </button>
             </TooltipTrigger>
-            <TooltipContent 
+            <TooltipContent
               className="max-w-xs p-3 text-sm bg-white border border-gray-200 shadow-lg z-50"
               sideOffset={5}
             >
@@ -198,6 +347,38 @@ export const CellRenderer: React.FC<CellRendererProps> = ({
     );
   };
 
+  // LegLocationFormat renderer
+  const renderLegLocationFormat = () => {
+    // const [showLocationDetails, setShowLocationDetails] = useState(false);
+    if (column.key === "ArrivalPoint" && column.type === "LegLocationFormat") {
+      return (
+        <div className="relative text-sm min-w-0 flex items-center">
+          <div className="text-Gray-800 font-normal truncate">{row?.DeparturePointDescription} - {row?.ArrivalPointDescription}</div>
+          <LocationDetailsTooltip row={row} type="LegLocationFormat" value={value} propKey={column.key} />
+        </div>
+      );
+    }
+    if(column.key === "PlannedActual" && column.type === "LegLocationFormat") {
+      return (
+        <div className="relative text-sm flex items-center w-full">
+          {/* <div className="text-Gray-800 font-normal truncate">{value} - {row?.DeparturePoint}</div> */}
+          <LocationDetailsTooltip row={row} type="LegLocationFormat" value={value} propKey={column.key} />
+        </div>
+      );
+    }
+    if(column.key === "Consignment" && column.type === "LegLocationFormat") {
+      return (
+        <div className="relative text-sm flex items-center w-full justify-center">
+          <div className='relative'>
+            <Package size={16} />
+            <span className="absolute top-0 right-0 block w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-white"></span>
+          </div>
+        </div>
+      );
+    }
+    return null;
+  };
+
   // ExpandableCount renderer with modal
   const renderExpandableCount = () => {
     return (
@@ -206,7 +387,7 @@ export const CellRenderer: React.FC<CellRendererProps> = ({
           <Button
             variant="outline"
             size="sm"
-            className="text-gray-900 font-medium hover:bg-blue-50 hover:border-blue-300 transition-colors duration-150 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+            className="text-Gray-800 font-medium hover:bg-blue-50 hover:border-blue-300 transition-colors duration-150 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
             disabled={loading}
             aria-label={`View ${value} details`}
           >
@@ -215,7 +396,7 @@ export const CellRenderer: React.FC<CellRendererProps> = ({
         </DialogTrigger>
         <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto bg-white">
           <DialogHeader className="pb-4 border-b border-gray-200">
-            <DialogTitle className="text-lg font-semibold text-gray-900">
+            <DialogTitle className="text-lg font-semibold text-Gray-800">
               Details
             </DialogTitle>
           </DialogHeader>
@@ -297,28 +478,134 @@ export const CellRenderer: React.FC<CellRendererProps> = ({
   // Date renderer
   const renderDate = () => {
     if (!value) return <span className="text-gray-400">-</span>;
-    
+
     try {
       const date = new Date(value);
-      const formattedDate = date.toLocaleDateString();
+      const formattedDate = dateFormatter(date);
       return <span className="truncate" title={formattedDate}>{formattedDate}</span>;
     } catch {
       return <span className="truncate" title={String(value)}>{value}</span>;
     }
   };
 
-  // SubRow renderer - shows count of items
-  const renderSubRow = () => {
-    if (!value || !Array.isArray(value)) {
+  // Date renderer
+  const renderDateFormat = () => {
+    if (!value) return <span className="text-gray-400">-</span>;
+
+    try {
+      const date = new Date(value);
+      const day = String(date.getDate()).padStart(2, '0');
+      const month = monthNames[date.getMonth()];
+      const year = date.getFullYear();
+      const formattedDate = `${day}-${month}-${year}`;
+      return <span className="truncate" title={formattedDate}>{formattedDate}</span>;
+    } catch {
+      return <span className="truncate" title={String(value)}>{value}</span>;
+    }
+  };
+
+  // Currency with symbol renderer
+  const renderCurrencySymbol = () => {
+    return <span className="font-bold">&euro; {formattedAmount(value)}</span>
+  }
+
+  // Action button renderer
+  const renderActionButton = () => {
+    if (!column.actionButtons || column.actionButtons.length === 0) {
       return <span className="text-gray-400">-</span>;
     }
-    
-    const count = value.length;
+
     return (
-      <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
-        {count} {count === 1 ? 'item' : 'items'}
-      </Badge>
+      <>
+        {column.actionButtons.map((button, index) => {
+          const isDisabled = typeof button.disabled === 'function'
+            ? button.disabled(row)
+            : button.disabled || false;
+
+          const buttonElement = (
+            <button
+              key={index}
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                button.onClick(row);
+              }}
+              disabled={isDisabled}
+              className="h-6 w-6 p-0 bg-transparent border-none"
+            >
+              {button.icon}
+            </button>
+          );
+
+          if (button.tooltip) {
+            return (
+              <Tooltip key={index}>
+                <TooltipTrigger asChild>
+                  {buttonElement}
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>{button.tooltip}</p>
+                </TooltipContent>
+              </Tooltip>
+            );
+          }
+
+          return buttonElement;
+        })}
+      </>
     );
+  };
+
+  // CustomerCountBadge renderer
+  const renderCustomerCountBadge = () => {
+    // Use customer data from row only
+    if (column.key == "CustomerOrderDetails") {
+      const customerData = row?.CustomerOrderDetails || [];
+      // console.log('customerData: ', customerData)
+      return (
+        <CustomerCountBadge
+          count={customerData?.length}
+          customers={customerData}
+          className="text-center"
+        />
+      );
+    }
+    if (column.key == "WorkOrderDetails") {
+      const WorkOrderDetailsData = row?.WorkOrderDetails || [];
+      // console.log('WorkOrderDetailsData: ', WorkOrderDetailsData)
+      return (
+        <WorkOrderBadge
+          count={WorkOrderDetailsData?.length}
+          workOrders={WorkOrderDetailsData}
+          className="text-center"
+        />
+      );
+    }
+    if (column.key == "IncidentDetails") {
+      const IncidentData = row?.IncidentDetails || [];
+      // console.log('WorkOrderDetailsData: ', WorkOrderDetailsData)
+      return (
+        <IncidentBadgeComponent
+          count={IncidentData?.length}
+          Incidents={IncidentData}
+          className="text-center"
+        />
+      );
+    }
+
+    // if(column.key == "OrderDetailsList") {
+    //   const customerOrdersListData = row?.CustomerOrderDetails || [];
+    //   return (
+    //     <OrderCountBadge
+    //       count={customerOrdersListData?.length}
+    //       COrderaData={customerOrdersListData}
+    //       className="text-center"
+    //     />
+    //   )
+
+    // }
+
+    return null; // Fallback
   };
 
   // Main renderer switch
@@ -328,33 +615,47 @@ export const CellRenderer: React.FC<CellRendererProps> = ({
         return renderLink();
       case 'Badge':
         return renderBadge();
+      case 'BadgeCombinationCount':
+        return renderBadgeCombinationCount();
       case 'DateTimeRange':
         return renderDateTimeRange();
       case 'TextWithTooltip':
         return renderTextWithTooltip();
       case 'ExpandableCount':
         return renderExpandableCount();
+      case 'CustomerCountBadge':
+        return renderCustomerCountBadge();
       case 'EditableText':
         return renderEditableText();
       case 'Dropdown':
         return renderDropdown();
       case 'Date':
         return renderDate();
-      case 'SubRow':
-        return renderSubRow();
+      case 'DateFormat':
+        return renderDateFormat();
+      case 'CurrencyWithSymbol':
+        return renderCurrencySymbol();
+      case 'ActionButton':
+        return renderActionButton();
       case 'Text':
+        return renderTextData();
+      case 'TextPipedData':
+        return renderTextPipedData();
+      case 'LegLocationFormat':
+        return renderLegLocationFormat();
+      case 'TextCustom':
+        // Custom text rendering logic can be added here
+        return renderTextCustomised();
       default:
-        // Safely handle objects and arrays
-        if (value && typeof value === 'object') {
-          return <span className="text-gray-400">-</span>;
-        }
-        return <span className="text-gray-900 truncate" title={String(value)}>{value}</span>;
+        return;
     }
   };
 
   return (
-    <div className="flex items-center min-w-0 w-full">
-      {renderCellContent()}
-    </div>
+    <TooltipProvider>
+      <div className={`flex items-center min-w-0 w-full ${column.type === 'ActionButton' ? 'justify-center' : ''}`}>
+        {renderCellContent()}
+      </div>
+    </TooltipProvider>
   );
 };

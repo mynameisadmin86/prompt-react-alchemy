@@ -27,6 +27,7 @@ interface SmartGridWithGroupingProps extends SmartGridProps {
   api?: any; // FilterSystemAPI
   gridId?: string;
   userId?: string;
+  customPageSize?: number | any;
 }
 
 export function SmartGridWithGrouping({
@@ -45,6 +46,7 @@ export function SmartGridWithGrouping({
   api,
   gridId,
   userId,
+  customPageSize,
   ...props
 }: SmartGridWithGroupingProps) {
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
@@ -159,14 +161,14 @@ export function SmartGridWithGrouping({
   }, []);
 
   // Handle link click for group headers (using onLinkClick prop)
-  const handleLinkClick = useCallback((row: any, columnKey: string) => {
+  const handleLinkClick = useCallback((row: any, columnKey: string, rowIndex: any) => {
     if (row.__isGroupHeader) {
       toggleGroupExpansion(row.__groupKey);
       return; // Don't proceed with regular link handling for group headers
     }
     // Call original onLinkClick if provided
     if (props.onLinkClick) {
-      props.onLinkClick(row, columnKey);
+      props.onLinkClick(row, columnKey, rowIndex);
     }
   }, [toggleGroupExpansion, props.onLinkClick]);
 
@@ -222,6 +224,22 @@ export function SmartGridWithGrouping({
 
   return (
     <div className="space-y-2">
+      {/* Server-side Filter */}
+      {/* {showServersideFilter && (
+        <ServersideFilter
+          serverFilters={serverFilters}
+          showFilterTypeDropdown={showFilterTypeDropdown}
+          visible={showServersideFilter}
+          onToggle={onToggleServersideFilter || (() => {})}
+          onFiltersChange={props.onFiltersChange || (() => {})}
+          onSearch={props.onSearch || (() => {})}
+          onClearAll={props.onClearAll || (() => {})}
+          gridId={gridId || props.gridTitle || 'default'}
+          userId={userId || 'default-user'}
+          api={api} // This should be passed from parent if needed
+        />
+      )} */}
+      
       <SmartGrid
         {...props}
         data={displayData}
@@ -246,6 +264,7 @@ export function SmartGridWithGrouping({
         onToggleServersideFilter={onToggleServersideFilter}
         hideAdvancedFilter={hideAdvancedFilter}
         hideCheckboxToggle={hideCheckboxToggle}
+        customPageSize={customPageSize}
         serverFilters={serverFilters}
         showFilterTypeDropdown={showFilterTypeDropdown}
         gridId={gridId || props.gridTitle || 'default'}
