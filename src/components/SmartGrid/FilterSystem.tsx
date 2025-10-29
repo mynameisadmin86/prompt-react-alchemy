@@ -20,7 +20,6 @@ interface FilterSystemProps {
   gridId: string;
   userId: string;
   api?: FilterSystemAPI;
-  showFilterControls?: boolean;
 }
 
 export function FilterSystem({
@@ -31,8 +30,7 @@ export function FilterSystem({
   onFiltersChange,
   gridId,
   userId,
-  api,
-  showFilterControls = true
+  api
 }: FilterSystemProps) {
   const [activeFilters, setActiveFilters] = useState<Record<string, FilterValue>>({});
   const [filterSets, setFilterSets] = useState<FilterSet[]>([]);
@@ -255,8 +253,7 @@ export function FilterSystem({
   return (
     <div className="space-y-2">
       {/* Filter Controls */}
-      {showFilterControls && (
-        <div className="flex items-center justify-between bg-gray-50 p-2 rounded border">
+      <div className="flex items-center justify-between bg-gray-50 p-2 rounded border">
         <div className="flex items-center space-x-2">
           <Button
             variant={showFilterRow ? "default" : "outline"}
@@ -312,7 +309,6 @@ export function FilterSystem({
           />
         </div>
       </div>
-      )}
 
       {/* Filter Panel - Only show when showFilterRow is true */}
       {showFilterRow && (

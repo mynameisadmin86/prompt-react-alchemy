@@ -286,5 +286,4 @@ export interface SmartGridPlusProps extends SmartGridProps {
   // UI configuration
   addRowButtonLabel?: string;
   addRowButtonPosition?: "top-left" | "top-right" | "top";
-  showFilterControls?: boolean;
 }

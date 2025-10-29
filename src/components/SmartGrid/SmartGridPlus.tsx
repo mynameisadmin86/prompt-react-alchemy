@@ -68,8 +68,7 @@ export function SmartGridPlus({
   defaultRowValues = {},
   validationRules = {},
   addRowButtonLabel = "Add Row",
-  addRowButtonPosition = "top-left",
-  showFilterControls = true
+  addRowButtonPosition = "top-left"
 }: SmartGridPlusProps) {
   const {
     gridData,
@@ -1088,7 +1087,6 @@ export function SmartGridPlus({
         gridId="smart-grid-plus"
         userId="demo-user"
         api={mockFilterAPI}
-        showFilterControls={showFilterControls}
       />
       
       {/* Table Container with horizontal scroll prevention */}
