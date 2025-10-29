@@ -65,6 +65,7 @@ export interface GridColumnConfig {
   fetchOptions?: (params: { searchTerm: string; offset: number; limit: number }) => Promise<{ label: string; value: string }[]>;
   hideSearch?: boolean;
   disableLazyLoading?: boolean;
+  returnType?: string;
   
   // ActionButton specific properties
   actionButtons?: Array<{

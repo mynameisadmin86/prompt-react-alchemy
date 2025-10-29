@@ -272,19 +272,20 @@ export const DraggableSubRow: React.FC<DraggableSubRowProps> = ({
           );
         }
         return (
-          <LazySelect
-            fetchOptions={column.fetchOptions}
-            value={tempValue}
-            onChange={(value) => {
-              const stringValue = Array.isArray(value) ? value.join(',') : (value || '');
-              setTempValue(stringValue);
-              onSubRowEdit(rowIndex, column.key, value);
-            }}
-            placeholder="Select..."
-            className="h-8 text-sm"
-            hideSearch={column.hideSearch}
-            disableLazyLoading={column.disableLazyLoading}
-          />
+          <div className="relative z-50">
+            <LazySelect
+              fetchOptions={column.fetchOptions}
+              value={row[column.key]}
+              onChange={(value) => {
+                onSubRowEdit(rowIndex, column.key, value);
+              }}
+              placeholder="Select..."
+              className="h-8 text-sm"
+              hideSearch={column.hideSearch}
+              disableLazyLoading={column.disableLazyLoading}
+              returnType={column.returnType}
+            />
+          </div>
         );
 
       default:
