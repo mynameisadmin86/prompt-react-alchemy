@@ -7,8 +7,10 @@ import { ChevronDown, Loader2, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface LazySelectOption {
-  label: string;
-  value: string;
+  label?: string;
+  value?: string;
+  id?: string;
+  name?: any;
 }
 
 interface DynamicLazySelectProps {
@@ -168,13 +170,13 @@ export function DynamicLazySelect({
     if (multiSelect && Array.isArray(value)) {
       if (value.length === 0) return placeholder;
       if (value.length === 1) {
-        const option = options.find(opt => opt.value === value[0]);
-        return option?.label || value[0];
+        const option = options.find(opt => (opt.value || opt.id) === value[0]);
+        return option ? (option.label || option.name || value[0]) : value[0];
       }
       return `${value.length} items selected`;
     } else if (typeof value === 'string') {
-      const option = options.find(opt => opt.value === value);
-      return option?.label || value;
+      const option = options.find(opt => (opt.value || opt.id) === value);
+      return option ? (option.label || option.name || value) : value;
     }
     
     return placeholder;
@@ -246,24 +248,29 @@ export function DynamicLazySelect({
               {hideSearch ? 'No options available.' : (debouncedSearchTerm ? 'No results found.' : 'Start typing to search...')}
             </div>
           ) : (
-            options.map((option) => (
-              <div
-                key={option.value}
-                className={cn(
-                  "flex items-center space-x-2 px-2 py-2 hover:bg-accent hover:text-accent-foreground cursor-pointer",
-                  isSelected(option.value) && "bg-accent"
-                )}
-                onClick={() => handleSelect(option.value)}
-              >
-                {multiSelect && (
-                  <Checkbox
-                    checked={isSelected(option.value)}
-                    onChange={() => {}}
-                  />
-                )}
-                <span className="flex-1 truncate">{option.label}</span>
-              </div>
-            ))
+            options.map((option) => {
+              const optionValue = option.value || option.id || '';
+              const optionLabel = option.label || option.name || optionValue;
+              
+              return (
+                <div
+                  key={optionValue}
+                  className={cn(
+                    "flex items-center space-x-2 px-2 py-2 hover:bg-accent hover:text-accent-foreground cursor-pointer",
+                    isSelected(optionValue) && "bg-accent"
+                  )}
+                  onClick={() => handleSelect(optionValue)}
+                >
+                  {multiSelect && (
+                    <Checkbox
+                      checked={isSelected(optionValue)}
+                      onChange={() => {}}
+                    />
+                  )}
+                  <span className="flex-1 truncate">{optionLabel}</span>
+                </div>
+              );
+            })
           )}
           {loading && (
             <div className="flex items-center justify-center py-4">

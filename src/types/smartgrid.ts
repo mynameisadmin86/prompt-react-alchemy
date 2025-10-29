@@ -62,7 +62,7 @@ export interface GridColumnConfig {
   subRowColumns?: GridColumnConfig[];
   
   // LazySelect specific properties
-  fetchOptions?: (params: { searchTerm: string; offset: number; limit: number }) => Promise<{ label: string; value: string }[]>;
+  fetchOptions?: (params: { searchTerm: string; offset: number; limit: number }) => Promise<Array<{ label?: string; value?: string; id?: string; name?: any }>>;
   hideSearch?: boolean;
   disableLazyLoading?: boolean;
   returnType?: string;

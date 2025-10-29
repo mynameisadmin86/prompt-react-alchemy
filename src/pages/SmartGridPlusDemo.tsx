@@ -143,7 +143,7 @@ const columns: GridColumnConfig[] = [
       );
       return filtered
         .slice(offset, offset + limit)
-        .map(s => ({ label: s, value: s }));
+        .map(s => ({ id: s, name: s }));
     }
   },
   {
