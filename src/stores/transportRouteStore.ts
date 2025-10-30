@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { tripService } from '@/api/services/tripService';
 
 interface TripInfo {
   TripID: string;
@@ -139,9 +140,12 @@ interface TransportRouteStore {
   isRouteDrawerOpen: boolean;
   isTripDrawerOpen: boolean;
   highlightedIndexes: number[];
+  isLoading: boolean;
+  isRouteLoading: boolean;
+  error: string | null;
   fetchRoutes: () => void;
   handleCustomerOrderClick: (order: TransportRoute) => void;
-  openRouteDrawer: (route: TransportRoute) => Promise<void>;
+  openRouteDrawer: (tripId: string) => Promise<void>;
   openTripDrawer: (tripId: string) => Promise<void>;
   closeDrawer: () => void;
   closeRouteDrawer: () => void;
@@ -466,9 +470,12 @@ export const useTransportRouteStore = create<TransportRouteStore>((set, get) => 
   isRouteDrawerOpen: false,
   isTripDrawerOpen: false,
   highlightedIndexes: [],
+  isLoading: false,
+  isRouteLoading: false,
+  error: null,
 
   fetchRoutes: () => {
-    // Simulate API call
+    // Keep mock population; API call happens in openRouteDrawer per requirement
     set({ routes: mockRoutes });
   },
 
@@ -476,9 +483,83 @@ export const useTransportRouteStore = create<TransportRouteStore>((set, get) => 
     set({ selectedOrder: order, isDrawerOpen: true });
   },
 
-  openRouteDrawer: async (route: TransportRoute) => {
-    // Simulate API call - in real scenario, fetch from backend
-    set({ selectedRoute: route, isRouteDrawerOpen: true });
+  openRouteDrawer: async (tripId: string) => {
+    try {
+      set({ isRouteLoading: true, error: null });
+      const apiParams = { TripId: tripId };
+      const response: any = await tripService.getplantriplevelupdate(apiParams);
+      
+      if (response?.data?.ResponseData) {
+        const parsedResponse = JSON.parse(response.data.ResponseData);
+        console.log('API Response for CO Selection:', parsedResponse);
+        console.log('Is array?', Array.isArray(parsedResponse));
+        console.log('Array length:', Array.isArray(parsedResponse) ? parsedResponse.length : 'Not an array');
+        
+        // Handle array response - get the first object
+        const responseData = Array.isArray(parsedResponse) ? parsedResponse[0] : parsedResponse;
+        console.log('Response data (first object):', responseData);
+        console.log('LegDetails from API:', responseData?.LegDetails);
+        
+        // Ensure LegDetails is an array and has proper structure
+        const legDetails = Array.isArray(responseData?.LegDetails) 
+          ? responseData.LegDetails.map((leg: any, index: number) => ({
+              LegSequence: leg.LegSequence || index + 1,
+              LegID: leg.LegID || '',
+              LegUniqueId: leg.LegUniqueId || `${Date.now()}`,
+              Departure: leg.Departure || '',
+              DepartureDescription: leg.DepartureDescription || '',
+              Arrival: leg.Arrival || '',
+              ArrivalDescription: leg.ArrivalDescription || '',
+              LegBehaviour: leg.LegBehaviour || 'Pick',
+              LegBehaviourDescription: leg.LegBehaviourDescription || 'Pick',
+              TransportMode: leg.TransportMode || 'Rail',
+              LegStatus: leg.LegStatus || null,
+              TripInfo: leg.TripInfo || null,
+              ModeFlag: leg.ModeFlag || 'Nochange',
+              ReasonForUpdate: leg.ReasonForUpdate || null,
+              QCCode1: leg.QCCode1 || null,
+              QCCode1Value: leg.QCCode1Value || null,
+              Remarks: leg.Remarks || null
+            }))
+          : [];
+        
+        // Transform API response to match our TransportRoute interface
+        const apiRoute: TransportRoute = {
+          ExecutionPlanID: responseData?.ExecutionPlanID || '',
+          CustomerOrderID: responseData?.CustomerOrderID || '',
+          CustomerID: responseData?.CustomerID || '',
+          CustomerName: responseData?.CustomerName || '',
+          Service: responseData?.Service || '',
+          ServiceDescription: responseData?.ServiceDescription || '',
+          SubService: responseData?.SubService || '',
+          SubServiceDescription: responseData?.SubServiceDescription || '',
+          CODeparture: responseData?.CODeparture || '',
+          CODepartureDescription: responseData?.CODepartureDescription || '',
+          COArrival: responseData?.COArrival || '',
+          COArrivalDescription: responseData?.COArrivalDescription || '',
+          RouteID: responseData?.RouteID || '',
+          RouteDescription: responseData?.RouteDescription || '',
+          Status: responseData?.Status || '',
+          LegDetails: legDetails,
+          ReasonForUpdate: responseData?.ReasonForUpdate || ""
+        };
+        
+        set({ 
+          selectedRoute: apiRoute, 
+          isRouteDrawerOpen: true,
+          isRouteLoading: false 
+        });
+      } else {
+        set({ isRouteDrawerOpen: true, isRouteLoading: false });
+      }
+    } catch (error) {
+      console.error('Error fetching route details:', error);
+      set({ 
+        error: 'Failed to load route details. Please try again.',
+        isRouteLoading: false,
+        isRouteDrawerOpen: true
+      });
+    }
   },
 
   closeDrawer: () => {
