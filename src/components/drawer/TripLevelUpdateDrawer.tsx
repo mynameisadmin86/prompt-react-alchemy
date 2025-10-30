@@ -304,10 +304,10 @@ export const TripLevelUpdateDrawer: React.FC<TripLevelUpdateDrawerProps> = ({
                   <Badge variant="outline">{selectedLeg.CustomerOrderDetails.length}</Badge>
                 </div>
                 
-                <div className="grid grid-cols-1 gap-3">
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
                   {selectedLeg.CustomerOrderDetails.map((order, idx) => (
-                    <Card key={idx} className="p-4">
-                      <div className="space-y-3">
+                    <Card key={idx} className="p-3">
+                      <div className="space-y-2">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2">
                             <span className="font-semibold text-sm">{order.CustomerOrderNo}</span>
@@ -320,21 +320,18 @@ export const TripLevelUpdateDrawer: React.FC<TripLevelUpdateDrawerProps> = ({
                           </Button>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-2 text-xs">
-                          <div>
-                            <span className="text-muted-foreground">From: </span>
-                            <span className="font-medium">{order.DeparturePointDescription}</span>
-                          </div>
-                          <div>
-                            <span className="text-muted-foreground">To: </span>
-                            <span className="font-medium">{order.ArrivalPointDescription}</span>
+                        <div className="text-xs">
+                          <div className="flex items-center gap-1 text-muted-foreground">
+                            <span>{order.DeparturePointDescription}</span>
+                            <ArrowRight className="h-3 w-3" />
+                            <span>{order.ArrivalPointDescription}</span>
                           </div>
                         </div>
 
                         {order.NextPlan && order.NextPlan.length > 0 && (
                           <div className="border-t pt-2">
-                            <div className="text-xs text-muted-foreground mb-2">Next Trip:</div>
-                            <div className="flex flex-wrap gap-2">
+                            <div className="text-xs text-muted-foreground mb-1">Next Trip:</div>
+                            <div className="flex flex-wrap gap-1">
                               {order.NextPlan.map((plan, planIdx) => (
                                 <Badge
                                   key={planIdx}
