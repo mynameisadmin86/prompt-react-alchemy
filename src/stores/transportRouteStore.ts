@@ -863,8 +863,8 @@ export const useTransportRouteStore = create<TransportRouteStore>((set, get) => 
 
       console.log('Saving trip details:', requestPayload);
       
-      // Call the update API
-      const response: any = await tripService.updateCOSelection(requestPayload);
+      // Call the trip leg level update API
+      const response: any = await tripService.updateTripLegLevel(requestPayload);
       
       if (response?.data) {
         console.log('Trip details saved successfully:', response.data);
