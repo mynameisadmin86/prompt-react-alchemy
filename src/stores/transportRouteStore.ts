@@ -571,114 +571,8 @@ export const useTransportRouteStore = create<TransportRouteStore>((set, get) => 
   },
 
   openTripDrawer: async (tripId: string) => {
-    try {
-      set({ isLoading: true, error: null });
-      const apiParams = { TripId: tripId };
-      const response: any = await tripService.getplantriplevelupdate(apiParams);
-      
-      if (response?.data?.ResponseData) {
-        const parsedResponse = JSON.parse(response.data.ResponseData);
-        console.log('API Response for Trip Level Update:', parsedResponse);
-        
-        // Handle array response - get the first object if it's an array
-        const responseData = Array.isArray(parsedResponse) ? parsedResponse[0] : parsedResponse;
-        console.log('Trip data:', responseData);
-        
-        // Map the API response to TripData structure
-        const tripData: TripData = {
-          Header: {
-            TripID: responseData?.Header?.TripID || '',
-            TripOU: responseData?.Header?.TripOU || 4,
-            TripStatus: responseData?.Header?.TripStatus || '',
-            TripStatusDescription: responseData?.Header?.TripStatusDescription || ''
-          },
-          LegDetails: Array.isArray(responseData?.LegDetails)
-            ? responseData.LegDetails.map((leg: any) => ({
-                LegSeqNo: leg.LegSeqNo || 0,
-                LegBehaviour: leg.LegBehaviour || '',
-                LegBehaviourDescription: leg.LegBehaviourDescription || '',
-                LegID: leg.LegID || '',
-                LegIDDescription: leg.LegIDDescription || '',
-                DeparturePoint: leg.DeparturePoint || '',
-                DeparturePointDescription: leg.DeparturePointDescription || '',
-                DepartureDateTime: leg.DepartureDateTime || '',
-                ArrivalPoint: leg.ArrivalPoint || '',
-                ArrivalPointDescription: leg.ArrivalPointDescription || '',
-                ArrivalDateTime: leg.ArrivalDateTime || '',
-                TransportMode: leg.TransportMode || null,
-                SupplierID: leg.SupplierID || '',
-                SupplierDescription: leg.SupplierDescription || '',
-                CustomerOrderDetails: Array.isArray(leg.CustomerOrderDetails)
-                  ? leg.CustomerOrderDetails.map((order: any) => ({
-                      CustomerOrderNo: order.CustomerOrderNo || '',
-                      ExecutionLegID: order.ExecutionLegID || '',
-                      ExecutionLegSeqNo: order.ExecutionLegSeqNo || 0,
-                      ExecutionPlanID: order.ExecutionPlanID || '',
-                      ExecutionLegBehaviour: order.ExecutionLegBehaviour || '',
-                      ExecutionLegBehaviourDescription: order.ExecutionLegBehaviourDescription || '',
-                      DeparturePoint: order.DeparturePoint || '',
-                      DeparturePointDescription: order.DeparturePointDescription || '',
-                      ArrivalPoint: order.ArrivalPoint || '',
-                      ArrivalPointDescription: order.ArrivalPointDescription || '',
-                      NextPlan: Array.isArray(order.NextPlan)
-                        ? order.NextPlan.map((plan: any) => ({
-                            TripID: plan.TripID || '',
-                            TripStatus: plan.TripStatus || ''
-                          }))
-                        : []
-                    }))
-                  : [],
-                ExecutionLegDetails: Array.isArray(leg.ExecutionLegDetails)
-                  ? leg.ExecutionLegDetails.map((execLeg: any) => ({
-                      LegSequence: execLeg.LegSequence || 0,
-                      LegID: execLeg.LegID || '',
-                      LegIDDescription: execLeg.LegIDDescription || '',
-                      Departure: execLeg.Departure || '',
-                      DepartureDescription: execLeg.DepartureDescription || '',
-                      Arrival: execLeg.Arrival || '',
-                      ArrivalDescription: execLeg.ArrivalDescription || '',
-                      LegBehaviour: execLeg.LegBehaviour || '',
-                      LegBehaviourDescription: execLeg.LegBehaviourDescription || '',
-                      ReasonForUpdate: execLeg.ReasonForUpdate || null,
-                      Remarks: execLeg.Remarks || null,
-                      QuickCode1: execLeg.QuickCode1 || null,
-                      QuickCodeValue1: execLeg.QuickCodeValue1 || null,
-                      ModeFlag: execLeg.ModeFlag || 'NoChange',
-                      WarningMsg: execLeg.WarningMsg || null,
-                      CustomerOrderDetails: Array.isArray(execLeg.CustomerOrderDetails)
-                        ? execLeg.CustomerOrderDetails.map((orderDetail: any) => ({
-                            CustomerOrderNo: orderDetail.CustomerOrderNo || '',
-                            LegUniqueId: orderDetail.LegUniqueId || ''
-                          }))
-                        : []
-                    }))
-                  : []
-              }))
-            : [],
-          WarnningDetails: {
-            HeaderWarningMsg: responseData?.WarnningDetails?.HeaderWarningMsg || null
-          }
-        };
-        
-        set({ 
-          selectedTrip: tripData, 
-          isTripDrawerOpen: true,
-          isLoading: false 
-        });
-      } else {
-        // Fallback to mock data if no response
-        set({ selectedTrip: mockTripData, isTripDrawerOpen: true, isLoading: false });
-      }
-    } catch (error) {
-      console.error('Error fetching trip details:', error);
-      set({ 
-        error: 'Failed to load trip details. Please try again.',
-        isLoading: false,
-        // Still open drawer with mock data on error
-        selectedTrip: mockTripData,
-        isTripDrawerOpen: true
-      });
-    }
+    // Simulate API call - in real scenario, fetch from backend
+    set({ selectedTrip: mockTripData, isTripDrawerOpen: true });
   },
 
   closeTripDrawer: () => {
@@ -851,35 +745,8 @@ export const useTransportRouteStore = create<TransportRouteStore>((set, get) => 
     const { selectedTrip } = get();
     if (!selectedTrip) return;
 
-    try {
-      set({ isLoading: true, error: null });
-      
-      // Format the data for the API
-      const requestPayload = {
-        Header: selectedTrip.Header,
-        LegDetails: selectedTrip.LegDetails,
-        WarnningDetails: selectedTrip.WarnningDetails
-      };
-
-      console.log('Saving trip details:', requestPayload);
-      
-      // Call the trip leg level update API
-      const response: any = await tripService.updateTripLegLevel(requestPayload);
-      
-      if (response?.data) {
-        console.log('Trip details saved successfully:', response.data);
-        set({ isLoading: false });
-      } else {
-        set({ isLoading: false });
-      }
-    } catch (error) {
-      console.error('Error saving trip details:', error);
-      set({ 
-        error: 'Failed to save trip details. Please try again.',
-        isLoading: false 
-      });
-      throw error;
-    }
+    // Simulate API call
+    console.log('Saving trip details:', selectedTrip);
   },
 
   fetchDepartures: async ({ searchTerm, offset, limit }) => {

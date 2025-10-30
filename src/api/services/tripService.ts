@@ -498,6 +498,7 @@ export const tripService = {
   },
 
   getplantriplevelupdate: async (params?: any): Promise<PaginatedResponse<Trip>> => {
+    // const response = await apiClient.get(API_ENDPOINTS.TRIPS.LIST, { params });
     const requestPayload = JSON.stringify({
       context: {
         UserID: "ramcouser",
@@ -515,61 +516,6 @@ export const tripService = {
     };
     const response = await apiClient.post(
       API_ENDPOINTS.TRIPS.TRIP_LEG_LEVEL_UPDATE,
-      requestBody
-    );
-    return response.data;
-  },
-
-  updateTripLegLevel: async (params?: any): Promise<PaginatedResponse<Trip>> => {
-    const requestPayload = JSON.stringify({
-      context: {
-        UserID: "ramcouser",
-        Role: "ramcorole",
-        OUID: 4,
-        MessageID: "12345",
-        MessageType: "Manage Execution Plan-Trip Leg Level Updation",
-      },
-      RequestPayload: params
-    });
-    const requestBody = {
-      RequestData: requestPayload,
-    };
-    const response = await apiClient.post(
-      API_ENDPOINTS.TRIPS.TRIP_LEG_LEVEL_UPDATE,
-      requestBody
-    );
-    return response.data;
-  },
-
-  // Delete trip
-  deleteTrip: async (id: string): Promise<ApiResponse<void>> => {
-    const response = await apiClient.delete(API_ENDPOINTS.TRIPS.DELETE(id));
-    return response.data;
-  },
-
-  // Approve trip
-  approveTrip: async (id: string): Promise<ApiResponse<Trip>> => {
-    const response = await apiClient.post(API_ENDPOINTS.TRIPS.APPROVE(id));
-    return response.data;
-  },
-
-  // Save trip draft
-  saveTripDraft: async (data: any): Promise<ApiResponse<Trip>> => {
-    const requestPayload = JSON.stringify({
-      context: {
-        UserID: "ramcouser",
-        Role: "ramcorole",
-        OUID: 4,
-        MessageID: "12345",
-        MessageType: "TripLog SaveTripDraft",
-      },
-      RequestPayload: data,
-    });
-    const requestBody = {
-      RequestData: requestPayload,
-    };
-    const response = await apiClient.post(
-      API_ENDPOINTS.TRIPS.SAVE_TRIP,
       requestBody
     );
     return response.data;
