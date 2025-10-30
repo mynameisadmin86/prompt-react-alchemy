@@ -3,6 +3,7 @@ import { SmartGrid } from '@/components/SmartGrid';
 import { SideDrawer } from '@/components/ui/side-drawer';
 import { CustomerOrderDetailsDrawer } from '@/components/drawer/CustomerOrderDetailsDrawer';
 import { TransportRouteLegDrawer } from '@/components/drawer/TransportRouteLegDrawer';
+import { TripLevelUpdateDrawer } from '@/components/drawer/TripLevelUpdateDrawer';
 import { useTransportRouteStore } from '@/stores/transportRouteStore';
 import { GridColumnConfig } from '@/types/smartgrid';
 
@@ -11,19 +12,27 @@ const TransportRouteUpdate: React.FC = () => {
     routes,
     selectedOrder,
     selectedRoute,
+    selectedTrip,
     isDrawerOpen,
     isRouteDrawerOpen,
+    isTripDrawerOpen,
     highlightedIndexes,
     fetchRoutes,
     handleCustomerOrderClick,
     openRouteDrawer,
+    openTripDrawer,
     closeDrawer,
     closeRouteDrawer,
+    closeTripDrawer,
     highlightRowIndexes,
     addLegPanel,
     removeLegPanel,
     updateLegData,
+    addExecutionLeg,
+    removeExecutionLeg,
+    updateExecutionLeg,
     saveRouteDetails,
+    saveTripDetails,
     fetchDepartures,
     fetchArrivals
   } = useTransportRouteStore();
@@ -42,7 +51,7 @@ const TransportRouteUpdate: React.FC = () => {
       width: 160,
       sortable: true,
       filterable: true,
-      onClick: (row: any) => openRouteDrawer(row)
+      onClick: (row: any) => openTripDrawer(row.CustomerOrderID)
     },
     {
       key: 'Status',
@@ -152,6 +161,27 @@ const TransportRouteUpdate: React.FC = () => {
             onRemoveLeg={removeLegPanel}
             onUpdateLeg={updateLegData}
             onSave={saveRouteDetails}
+            fetchDepartures={fetchDepartures}
+            fetchArrivals={fetchArrivals}
+          />
+        )}
+      </SideDrawer>
+
+      {/* Trip Level Update Drawer */}
+      <SideDrawer
+        isOpen={isTripDrawerOpen}
+        onClose={closeTripDrawer}
+        title="Trip Level Update"
+        width="100%"
+        showFooter={false}
+      >
+        {selectedTrip && (
+          <TripLevelUpdateDrawer 
+            tripData={selectedTrip}
+            onAddExecutionLeg={addExecutionLeg}
+            onRemoveExecutionLeg={removeExecutionLeg}
+            onUpdateExecutionLeg={updateExecutionLeg}
+            onSave={saveTripDetails}
             fetchDepartures={fetchDepartures}
             fetchArrivals={fetchArrivals}
           />
