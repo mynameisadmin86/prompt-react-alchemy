@@ -851,8 +851,35 @@ export const useTransportRouteStore = create<TransportRouteStore>((set, get) => 
     const { selectedTrip } = get();
     if (!selectedTrip) return;
 
-    // Simulate API call
-    console.log('Saving trip details:', selectedTrip);
+    try {
+      set({ isLoading: true, error: null });
+      
+      // Format the data for the API
+      const requestPayload = {
+        Header: selectedTrip.Header,
+        LegDetails: selectedTrip.LegDetails,
+        WarnningDetails: selectedTrip.WarnningDetails
+      };
+
+      console.log('Saving trip details:', requestPayload);
+      
+      // Call the update API
+      const response: any = await tripService.updateCOSelection(requestPayload);
+      
+      if (response?.data) {
+        console.log('Trip details saved successfully:', response.data);
+        set({ isLoading: false });
+      } else {
+        set({ isLoading: false });
+      }
+    } catch (error) {
+      console.error('Error saving trip details:', error);
+      set({ 
+        error: 'Failed to save trip details. Please try again.',
+        isLoading: false 
+      });
+      throw error;
+    }
   },
 
   fetchDepartures: async ({ searchTerm, offset, limit }) => {

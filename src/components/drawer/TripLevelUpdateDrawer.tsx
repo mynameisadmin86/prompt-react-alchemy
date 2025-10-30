@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { DynamicLazySelect } from '@/components/DynamicPanel/DynamicLazySelect';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { ArrowRight, Plus, ExternalLink, Trash2 } from 'lucide-react';
+import { ArrowRight, Plus, ExternalLink, Trash2, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 
@@ -92,6 +92,7 @@ interface TripLevelUpdateDrawerProps {
   onSave: () => Promise<void>;
   fetchDepartures: (params: { searchTerm: string; offset: number; limit: number }) => Promise<{ label: string; value: string }[]>;
   fetchArrivals: (params: { searchTerm: string; offset: number; limit: number }) => Promise<{ label: string; value: string }[]>;
+  isLoading?: boolean;
 }
 
 export const TripLevelUpdateDrawer: React.FC<TripLevelUpdateDrawerProps> = ({
@@ -102,19 +103,32 @@ export const TripLevelUpdateDrawer: React.FC<TripLevelUpdateDrawerProps> = ({
   onSave,
   fetchDepartures,
   fetchArrivals,
+  isLoading = false,
 }) => {
   const [selectedLegIndex, setSelectedLegIndex] = useState<number>(0);
   const [reasonForUpdate, setReasonForUpdate] = useState<string>('');
+  const [isSaving, setIsSaving] = useState(false);
   const { toast } = useToast();
 
   const selectedLeg = tripData.LegDetails[selectedLegIndex];
 
   const handleSave = async () => {
-    await onSave();
-    toast({
-      title: "Success",
-      description: "Trip details saved successfully",
-    });
+    try {
+      setIsSaving(true);
+      await onSave();
+      toast({
+        title: "Success",
+        description: "Trip details saved successfully",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to save trip details",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const getTripStatusBadgeClass = (status: string) => {
@@ -410,7 +424,10 @@ export const TripLevelUpdateDrawer: React.FC<TripLevelUpdateDrawerProps> = ({
         </div>
 
         <div className="flex justify-end">
-          <Button onClick={handleSave}>Save</Button>
+          <Button onClick={handleSave} disabled={isSaving || isLoading}>
+            {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            Save
+          </Button>
         </div>
       </div>
     </div>
