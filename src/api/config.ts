@@ -37,6 +37,14 @@ export const API_ENDPOINTS = {
     UPDATE_SELECTION: "manageexecution/planhubupdate",
     TRIP_LEG_LEVEL_UPDATE: "manageexecution/plantriplevelupdate"
   },
+  // Order management
+  ORDERS: {
+    LIST: "/orders",
+    CREATE: "/orders",
+    UPDATE: (id: string) => `/orders/${id}`,
+    DELETE: (id: string) => `/orders/${id}`,
+    PROCESS: (id: string) => `/orders/${id}/process`,
+  },
   // Quick Order management
   QUICK_ORDERS: {
     LIST: "/quickorderhub/search",
