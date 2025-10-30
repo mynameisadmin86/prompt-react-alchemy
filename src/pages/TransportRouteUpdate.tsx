@@ -17,6 +17,7 @@ const TransportRouteUpdate: React.FC = () => {
     isRouteDrawerOpen,
     isTripDrawerOpen,
     highlightedIndexes,
+    isLoading,
     fetchRoutes,
     handleCustomerOrderClick,
     openRouteDrawer,
@@ -184,6 +185,7 @@ const TransportRouteUpdate: React.FC = () => {
             onSave={saveTripDetails}
             fetchDepartures={fetchDepartures}
             fetchArrivals={fetchArrivals}
+            isLoading={isLoading}
           />
         )}
       </SideDrawer>

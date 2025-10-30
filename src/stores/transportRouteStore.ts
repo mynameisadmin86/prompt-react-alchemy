@@ -571,8 +571,51 @@ export const useTransportRouteStore = create<TransportRouteStore>((set, get) => 
   },
 
   openTripDrawer: async (tripId: string) => {
-    // Simulate API call - in real scenario, fetch from backend
-    set({ selectedTrip: mockTripData, isTripDrawerOpen: true });
+    try {
+      set({ isLoading: true, error: null });
+      const apiParams = { TripId: tripId };
+      const response: any = await tripService.getplantriplevelupdate(apiParams);
+      
+      if (response?.data?.ResponseData) {
+        const parsedResponse = JSON.parse(response.data.ResponseData);
+        console.log('API Response for Trip Level Update:', parsedResponse);
+        
+        // Transform API response to match TripData interface
+        const tripData: TripData = {
+          Header: parsedResponse.Header || {
+            TripID: tripId,
+            TripOU: 4,
+            TripStatus: "DR",
+            TripStatusDescription: "Draft"
+          },
+          LegDetails: parsedResponse.LegDetails || [],
+          WarnningDetails: parsedResponse.WarnningDetails || {
+            HeaderWarningMsg: null
+          }
+        };
+        
+        set({ 
+          selectedTrip: tripData, 
+          isTripDrawerOpen: true,
+          isLoading: false 
+        });
+      } else {
+        // Fallback to mock data if no response
+        set({ 
+          selectedTrip: mockTripData, 
+          isTripDrawerOpen: true,
+          isLoading: false 
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching trip details:', error);
+      set({ 
+        error: 'Failed to load trip details. Please try again.',
+        isLoading: false,
+        selectedTrip: mockTripData, // Fallback to mock data on error
+        isTripDrawerOpen: true
+      });
+    }
   },
 
   closeTripDrawer: () => {

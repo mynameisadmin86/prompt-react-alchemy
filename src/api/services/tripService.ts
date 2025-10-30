@@ -498,14 +498,13 @@ export const tripService = {
   },
 
   getplantriplevelupdate: async (params?: any): Promise<PaginatedResponse<Trip>> => {
-    // const response = await apiClient.get(API_ENDPOINTS.TRIPS.LIST, { params });
     const requestPayload = JSON.stringify({
       context: {
         UserID: "ramcouser",
         Role: "ramcorole",
         OUID: 4,
         MessageID: "12345",
-        MessageType: "Manage Execution Plan-Trip Leg Level Selection",
+        MessageType: "Manage Execution Plan-Trip Level Update",
       },
       SearchCriteria: {
         TripID: params?.TripId
