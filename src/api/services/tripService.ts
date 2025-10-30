@@ -519,4 +519,38 @@ export const tripService = {
     );
     return response.data;
   },
+
+  // Delete trip (placeholder for compatibility)
+  deleteTrip: async (id: string): Promise<ApiResponse<void>> => {
+    const response = await apiClient.delete(API_ENDPOINTS.TRIPS.DELETE(id));
+    return response.data;
+  },
+
+  // Approve trip (placeholder for compatibility)
+  approveTrip: async (id: string): Promise<ApiResponse<Trip>> => {
+    const response = await apiClient.post(API_ENDPOINTS.TRIPS.APPROVE(id));
+    return response.data;
+  },
+
+  // Save trip draft
+  saveTripDraft: async (tripData: any): Promise<ApiResponse<Trip>> => {
+    const requestPayload = JSON.stringify({
+      context: {
+        UserID: "ramcouser",
+        Role: "ramcorole",
+        OUID: 4,
+        MessageID: "12345",
+        MessageType: "TripLog SaveTrip",
+      },
+      RequestPayload: tripData,
+    });
+    const requestBody = {
+      RequestData: requestPayload,
+    };
+    const response = await apiClient.post(
+      `${API_ENDPOINTS.TRIPS.SAVE_TRIP}`,
+      requestBody
+    );
+    return response.data;
+  },
 };
