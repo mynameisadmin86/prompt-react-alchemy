@@ -364,8 +364,23 @@ export const DraggableSubRow: React.FC<DraggableSubRowProps> = ({
           );
         }
       }
-      // None of the above matched, so
-      return <span className="text-gray-400">-</span>;
+      // None of the above matched, render dash with edit icon if editable
+      const emptyContent = <span className="text-gray-400">-</span>;
+      if (isEditable) {
+        return (
+          <div className="group relative">
+            {emptyContent}
+            <button
+              onClick={() => handleEdit(column.key, column)}
+              className="absolute top-0 right-0 opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-gray-100 rounded"
+              title="Edit"
+            >
+              <Edit2 className="h-3 w-3 text-gray-500" />
+            </button>
+          </div>
+        );
+      }
+      return emptyContent;
     } else if (typeof value === 'object' && value !== null) {
       // Handle object values (excluding Badge type)
       if (column.key == "CustomerOrderDetails" && column.type === 'CustomerCountBadge') {
