@@ -201,6 +201,26 @@ export default function SmartGridPlusDemo() {
     // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 1000));
   };
+  
+  const handleCellChange = (rowIndex: number, columnKey: string, value: any, updatedRow: any) => {
+    console.log('Cell changed:', { rowIndex, columnKey, value, updatedRow });
+    
+    // Example: React to LazySelect changes
+    if (columnKey === 'supplier') {
+      console.log('Supplier changed to:', value);
+      // You can trigger additional logic here, like fetching related data
+    }
+  };
+  
+  const handleNewRowCellChange = (columnKey: string, value: any, allValues: Record<string, any>) => {
+    console.log('New row cell changed:', { columnKey, value, allValues });
+    
+    // Example: React to changes in the add row form
+    if (columnKey === 'supplier') {
+      console.log('New row supplier selected:', value);
+      // You can set default values for other fields based on supplier
+    }
+  };
 
   const defaultRowValues = {
     productName: '',
@@ -299,6 +319,8 @@ export default function SmartGridPlusDemo() {
             onAddRow={handleAddRow}
             onEditRow={handleEditRow}
             onDeleteRow={handleDeleteRow}
+            onCellChange={handleCellChange}
+            onNewRowCellChange={handleNewRowCellChange}
             defaultRowValues={defaultRowValues}
             validationRules={validationRules}
             addRowButtonLabel="Add Product"
