@@ -893,7 +893,13 @@ export function SmartGridPlus({
         <EnhancedCellEditor
           value={editingValue}
           column={column}
-          onChange={(value) => handleEditingCellChange(rowIndex, column.key, value)}
+          onChange={(value) => {
+            handleEditingCellChange(rowIndex, column.key, value);
+            // Call column-specific onChange if provided
+            if (column.onChange) {
+              column.onChange(value, row);
+            }
+          }}
           error={validationErrors[column.key]}
         />
       );
@@ -967,6 +973,10 @@ export function SmartGridPlus({
                         delete newErrors[column.key];
                         return newErrors;
                       });
+                    }
+                    // Call column-specific onChange if provided
+                    if (column.onChange) {
+                      column.onChange(value, newRowValues);
                     }
                   }}
                   error={validationErrors[column.key]}

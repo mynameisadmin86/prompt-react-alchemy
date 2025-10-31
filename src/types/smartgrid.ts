@@ -66,6 +66,7 @@ export interface GridColumnConfig {
   hideSearch?: boolean;
   disableLazyLoading?: boolean;
   returnType?: string;
+  onChange?: (value: any, rowData?: any) => void;
   
   // ActionButton specific properties
   actionButtons?: Array<{

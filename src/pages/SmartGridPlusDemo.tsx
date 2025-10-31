@@ -144,6 +144,9 @@ const columns: GridColumnConfig[] = [
       return filtered
         .slice(offset, offset + limit)
         .map(s => ({ id: s, name: s }));
+    },
+    onChange: (value, rowData) => {
+      console.log('Supplier changed:', value, 'Row data:', rowData);
     }
   },
   {
