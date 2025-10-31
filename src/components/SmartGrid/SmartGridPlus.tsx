@@ -65,8 +65,6 @@ export function SmartGridPlus({
   onAddRow,
   onEditRow,
   onDeleteRow,
-  onCellChange,
-  onNewRowCellChange,
   defaultRowValues = {},
   validationRules = {},
   addRowButtonLabel = "Add Row",
@@ -781,12 +779,10 @@ export function SmartGridPlus({
 
   const handleEditingCellChange = useCallback((rowIndex: number, columnKey: string, value: any) => {
     if (editingRow === rowIndex) {
-      const updatedValues = {
-        ...editingValues,
+      setEditingValues(prev => ({
+        ...prev,
         [columnKey]: value
-      };
-      
-      setEditingValues(updatedValues);
+      }));
       
       // Clear validation error for this field
       if (validationErrors[columnKey]) {
@@ -796,15 +792,8 @@ export function SmartGridPlus({
           return newErrors;
         });
       }
-      
-      // Trigger onCellChange callback with updated row data
-      if (onCellChange) {
-        const currentRow = paginatedData[rowIndex] || {};
-        const updatedRow = { ...currentRow, ...updatedValues };
-        onCellChange(rowIndex, columnKey, value, updatedRow);
-      }
     }
-  }, [editingRow, validationErrors, editingValues, onCellChange, paginatedData]);
+  }, [editingRow, validationErrors]);
 
   // renderCell function
   const renderCell = useCallback((row: any, column: GridColumnConfig, rowIndex: number, columnIndex: number) => {
@@ -967,13 +956,10 @@ export function SmartGridPlus({
                   value={newRowValues[column.key]}
                   column={column}
                   onChange={(value) => {
-                    const updatedValues = {
-                      ...newRowValues,
+                    setNewRowValues(prev => ({
+                      ...prev,
                       [column.key]: value
-                    };
-                    
-                    setNewRowValues(updatedValues);
-                    
+                    }));
                     // Clear validation error for this field
                     if (validationErrors[column.key]) {
                       setValidationErrors(prev => {
@@ -981,11 +967,6 @@ export function SmartGridPlus({
                         delete newErrors[column.key];
                         return newErrors;
                       });
-                    }
-                    
-                    // Trigger onNewRowCellChange callback
-                    if (onNewRowCellChange) {
-                      onNewRowCellChange(column.key, value, updatedValues);
                     }
                   }}
                   error={validationErrors[column.key]}
