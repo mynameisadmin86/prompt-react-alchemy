@@ -14,6 +14,7 @@ const initialData = [
     category: 'Electronics',
     status: 'Active',
     dateAdded: '2024-01-15',
+    deliveryTime: '14:30',
     supplier: 'TechCorp',
     specifications: [
       { spec: 'RAM', value: '16GB DDR4' },
@@ -33,6 +34,7 @@ const initialData = [
     category: 'Furniture',
     status: 'Active',
     dateAdded: '2024-01-10',
+    deliveryTime: '10:00',
     supplier: 'FurniCorp',
     specifications: [
       { spec: 'Material', value: 'Mesh Back' },
@@ -51,6 +53,7 @@ const initialData = [
     category: 'Electronics',
     status: 'Low Stock',
     dateAdded: '2024-01-08',
+    deliveryTime: '16:45',
     supplier: 'MobileTech',
     specifications: [
       { spec: 'Screen', value: '6.5" OLED' },
@@ -122,6 +125,15 @@ const columns: GridColumnConfig[] = [
     filterable: true,
     editable: true,
     width: 120
+  },
+  {
+    key: 'deliveryTime',
+    label: 'Delivery Time',
+    type: 'Time',
+    sortable: true,
+    filterable: true,
+    editable: true,
+    width: 130
   },
   {
     key: 'supplier',
@@ -212,6 +224,7 @@ export default function SmartGridPlusDemo() {
     category: 'Electronics',
     status: 'Active',
     dateAdded: new Date().toISOString().split('T')[0],
+    deliveryTime: '09:00',
     supplier: '',
     specifications: [
       { spec: '', value: '' }
@@ -325,6 +338,7 @@ export default function SmartGridPlusDemo() {
                 <li>• <strong>Select:</strong> Category - Dropdown selection</li>
                 <li>• <strong>LazySelect:</strong> Supplier - Searchable async dropdown</li>
                 <li>• <strong>Date:</strong> Date Added - Date picker</li>
+                <li>• <strong>Time:</strong> Delivery Time - Time picker</li>
                 <li>• <strong>Badge:</strong> Status - Color-coded display</li>
               </ul>
             </div>
