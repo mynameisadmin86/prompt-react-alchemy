@@ -185,6 +185,37 @@ export function SmartGridWithGrouping({
     return displayIndices;
   }, [props.selectedRows, data, displayData, internalGroupBy, groupByField]);
 
+  // Handle selection changes and convert displayData indices back to original data indices
+  const handleSelectionChange = useCallback((selectedDisplayIndices: Set<number>) => {
+    const currentGroupBy = internalGroupBy || groupByField;
+    
+    if (!currentGroupBy || !props.onSelectionChange) {
+      props.onSelectionChange?.(selectedDisplayIndices);
+      return;
+    }
+
+    // Convert displayData indices back to original data indices
+    const originalIndices = new Set<number>();
+    
+    selectedDisplayIndices.forEach(displayIndex => {
+      const displayRow = displayData[displayIndex];
+      
+      // Skip group headers
+      if (displayRow?.__isGroupHeader) {
+        return;
+      }
+      
+      // Find the original index of this row in the data array
+      const originalIndex = data.findIndex(item => item === displayRow);
+      
+      if (originalIndex !== -1) {
+        originalIndices.add(originalIndex);
+      }
+    });
+
+    props.onSelectionChange(originalIndices);
+  }, [data, displayData, internalGroupBy, groupByField, props]);
+
   const handleGroupByChange = useCallback((value: string) => {
     const newGroupBy = value === 'none' ? null : value;
     setInternalGroupBy(newGroupBy);
@@ -294,6 +325,7 @@ export function SmartGridWithGrouping({
         rowClassName={getRowClassName}
         onLinkClick={handleLinkClick}
         selectedRows={mappedSelectedRows}
+        onSelectionChange={handleSelectionChange}
         // Override nested row renderer when grouping is active to prevent sub-row expansion
         nestedRowRenderer={
           (internalGroupBy || groupByField) ? undefined : props.nestedRowRenderer
