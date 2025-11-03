@@ -224,6 +224,13 @@ const Index = () => {
       color: "text-teal-600"
     },
     {
+      title: "SmartGrid Grouping + Selection Demo",
+      description: "SmartGridWithGrouping with pre-selected rows - demonstrates selection with grouping functionality",
+      icon: Layers,
+      path: "/smartgrid-grouping-selection-demo",
+      color: "text-purple-600"
+    },
+    {
       title: "Consignment Details",
       description: "Comprehensive consignment management with leg cards, summary cards, and plan details",
       icon: Workflow,
