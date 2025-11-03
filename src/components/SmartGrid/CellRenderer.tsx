@@ -298,21 +298,9 @@ export const CellRenderer: React.FC<CellRendererProps> = ({
 
   // DateTimeRange renderer
   const renderDateTimeRange = () => {
-    // const [date, time] = String(value).split('\n');
-    // return (
-    //   <div className="text-sm min-w-0">
-    //     <div className="text-Gray-800 font-normal truncate">{date}</div>
-    //     <div className="text-gray-500 text-xs truncate">{time}</div>
-    //   </div>
-    // );
     if (!value) return <div className="text-gray-400">-</div>;
-    try {
-      const date = new Date(value);
-      const formattedDate = dateTimeFormatter(date);
-      return <span className="truncate" title={formattedDate}>{formattedDate}</span>;
-    } catch {
-      return <span className="truncate" title={String(value)}>{value}</span>;
-    }
+    const formattedDate = dateTimeFormatter(value);
+    return <span className="truncate" title={formattedDate}>{formattedDate}</span>;
   };
 
   // TextWithTooltip renderer
