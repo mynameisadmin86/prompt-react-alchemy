@@ -18,7 +18,7 @@ const dateFormatter = (dateStr: any) => {
 
 const dateTimeFormatter = (value: any) => {
   if (!value) return "";
-  return format(new Date(value), "dd-MMM-yyyy HH:mm:ss a");
+  return format(new Date(value), "dd-MMM-yyyy hh:mm:ss a");
 }
 
 // Convert comma-formatted number to dot-formatted number for backend
