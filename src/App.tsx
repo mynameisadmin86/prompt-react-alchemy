@@ -39,6 +39,7 @@ import PlanActuals from "./pages/PlanActuals";
 import SmartGridHighlightDemo from "./pages/SmartGridHighlightDemo";
 import TransportRouteUpdate from "./pages/TransportRouteUpdate";
 import SmartGridSelectionDemo from "./pages/SmartGridSelectionDemo";
+import SmartGridDefaultSelectionDemo from "./pages/SmartGridDefaultSelectionDemo";
 
 const queryClient = new QueryClient();
 
@@ -82,6 +83,7 @@ const App = () => (
           <Route path="/smartgrid-highlight-demo" element={<SmartGridHighlightDemo />} />
           <Route path="/transport-route-update" element={<TransportRouteUpdate />} />
           <Route path="/smartgrid-selection-demo" element={<SmartGridSelectionDemo />} />
+          <Route path="/smartgrid-default-selection-demo" element={<SmartGridDefaultSelectionDemo />} />
           <Route path="/consignment-details" element={<ConsignmentDetailsPage />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
