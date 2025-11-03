@@ -265,7 +265,7 @@ export function SmartGrid({
         return (
           <span className={cn(
             "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium",
-            column.statusMap?.[value] || "bg-muted text-foreground"
+            column.statusMap?.[value] || "bg-gray-100 text-gray-800"
           )}>
             {value}
           </span>
@@ -294,8 +294,8 @@ export function SmartGrid({
         {collapsibleColumns.map((column) => {
           const value = row[column.key];
           return (
-            <div key={column.key} className="p-3 bg-muted/50 rounded-lg">
-              <div className="text-xs text-muted-foreground uppercase tracking-wide mb-1">
+            <div key={column.key} className="p-3 bg-gray-50 rounded-lg">
+              <div className="text-xs text-gray-500 uppercase tracking-wide mb-1">
                 {column.label}
               </div>
               <div className="text-sm text-gray-900 font-medium">
@@ -719,7 +719,7 @@ export function SmartGrid({
             variant="ghost"
             size="sm"
             onClick={() => onRowExpansionOverride ? onRowExpansionOverride(rowIndex) : toggleRowExpansion(rowIndex)}
-            className="h-5 w-5 p-0 hover:bg-muted flex-shrink-0"
+            className="h-5 w-5 p-0 hover:bg-gray-100 flex-shrink-0"
           >
             {isExpanded ? (
               <ChevronDown className="h-3 w-3" />
@@ -969,7 +969,7 @@ export function SmartGrid({
               <TableRow className="hover:bg-transparent">
                 {/* Checkbox header */}
                 {showCheckboxes && (
-                  <TableHead className="bg-muted backdrop-blur-sm font-semibold text-foreground px-3 py-3 border-r border-muted w-[50px] flex-shrink-0">
+                  <TableHead className="bg-gray-100 backdrop-blur-sm font-semibold text-gray-900 px-3 py-3 border-r border-gray-100 w-[50px] flex-shrink-0">
                     <input
                       type="checkbox"
                       className="rounded cursor-pointer w-4 h-4"
@@ -994,10 +994,10 @@ export function SmartGrid({
                     <TableHead
                       key={column.key}
                       className={cn(
-                        "relative group bg-muted backdrop-blur-sm font-semibold text-foreground pl-1 py-0 pr-0 border-r border-muted last:border-r-0 h-9",
+                        "relative group bg-gray-100 backdrop-blur-sm font-semibold text-Gray-800 pl-1 py-0 pr-0 border-r border-gray-100 last:border-r-0 h-9",
                         draggedColumn === column.key && "opacity-50",
-                        dragOverColumn === column.key && "bg-primary/10 border-primary/30",
-                        resizingColumn === column.key && "bg-primary/5",
+                        dragOverColumn === column.key && "bg-blue-100 border-blue-300",
+                        resizingColumn === column.key && "bg-blue-50",
                         !resizingColumn && "cursor-move"
                       )}
                       style={{
@@ -1028,7 +1028,7 @@ export function SmartGrid({
                                   setEditingHeader(null);
                                 }
                               }}
-                              className="h-5 px-1 text-sm font-semibold bg-background border-primary/30 focus:border-primary min-w-0"
+                              className="h-5 px-1 text-sm font-semibold bg-white border-blue-300 focus:border-blue-500 min-w-0"
                               autoFocus
                               onFocus={(e) => e.target.select()}
                               onClick={(e) => e.stopPropagation()}
@@ -1038,7 +1038,7 @@ export function SmartGrid({
                             <div
                               className={cn(
                                 "flex items-center gap-1 rounded px-1 py-0 -mx-1 -my-0.5 transition-colors group/header flex-1 min-w-0",
-                                !resizingColumn && "cursor-pointer hover:bg-muted/50"
+                                !resizingColumn && "cursor-pointer hover:bg-gray-100/50"
                               )}
                               onClick={(e) => {
                                 if (resizingColumn) return;
@@ -1090,7 +1090,7 @@ export function SmartGrid({
 
                       {/* Resize Handle - Modified to only show on hover */}
                       <div
-                        className="absolute top-0 right-0 w-2 h-full cursor-col-resize bg-transparent hover:bg-primary/50 transition-colors flex items-center justify-center group/resize z-30"
+                        className="absolute top-0 right-0 w-2 h-full cursor-col-resize bg-transparent hover:bg-blue-300/50 transition-colors flex items-center justify-center group/resize z-30"
                         onMouseDown={(e) => handleResizeStart(e, column.key)}
                         onMouseEnter={() => setResizeHoverColumn(column.key)}
                         onMouseLeave={() => setResizeHoverColumn(null)}
@@ -1100,14 +1100,14 @@ export function SmartGrid({
                         }}
                         onDragStart={(e) => e.preventDefault()}
                       >
-                        <div className="w-0.5 h-4 bg-border opacity-0 group-hover/resize:opacity-100 transition-opacity" />
+                        <div className="w-0.5 h-4 bg-gray-300 opacity-0 group-hover/resize:opacity-100 transition-opacity" />
                       </div>
                     </TableHead>
                   );
                 })}
                 {/* Plugin row actions header */}
                 {plugins.some(plugin => plugin.rowActions) && (
-                  <TableHead className="bg-muted/80 backdrop-blur-sm font-semibold text-foreground px-3 py-3 text-center w-[100px] flex-shrink-0">
+                  <TableHead className="bg-gray-50/80 backdrop-blur-sm font-semibold text-gray-900 px-3 py-3 text-center w-[100px] flex-shrink-0">
                     Actions
                   </TableHead>
                 )}
@@ -1118,7 +1118,7 @@ export function SmartGrid({
                 <TableRow className="hover:bg-transparent border-b border-gray-200">
                   {/* Checkbox column space */}
                   {showCheckboxes && (
-                    <TableHead className="bg-background px-3 py-2 border-r border-muted w-[50px]">
+                    <TableHead className="bg-gray-25 px-3 py-2 border-r border-gray-100 w-[50px]">
                       {/* Empty space for checkbox column */}
                     </TableHead>
                   )}
@@ -1129,7 +1129,7 @@ export function SmartGrid({
                     return (
                       <TableHead
                         key={`filter-${column.key}`}
-                        className="bg-background px-2 py-2 border-r border-muted last:border-r-0 relative"
+                        className="bg-gray-25 px-2 py-2 border-r border-gray-100 last:border-r-0 relative"
                         style={{
                           width: `${widthPercentage}%`,
                           minWidth: `${Math.max(80, column.width * 0.8)}px`
@@ -1153,7 +1153,7 @@ export function SmartGrid({
                   })}
                   {/* Plugin row actions column space */}
                   {plugins.some(plugin => plugin.rowActions) && (
-                    <TableHead className="bg-background px-3 py-2 text-center w-[100px]">
+                    <TableHead className="bg-gray-25 px-3 py-2 text-center w-[100px]">
                       {/* Empty space for actions column */}
                     </TableHead>
                   )}
@@ -1196,8 +1196,8 @@ export function SmartGrid({
                     <TableRow key={rowIndex}
                       data-row-id={ (gridTitle == 'Trip Plans' ?  row.TripPlanID : gridTitle == 'Planning Equipments' ? (row.EquipmentID || row.VehicleID || row.HandlerID || row.DriverCode || row.VendorID || row.SupplierID) : (gridTitle == 'Trip Customer Orders Multi' ? `${row.CustomerOrderID}-${row.LegBehaviour}` : rowIndex)) || rowIndex}
                       className={cn(
-                        "hover:bg-muted transition-all duration-100 border-muted cursor-pointer",
-                        highlightedRowIndices.includes(`${row.CustomerOrderID}-${row.LegBehaviour}`) && "border-b-[0px] bg-primary/10 border-l-4 border-primary hover:bg-primary/15",
+                        "hover:bg-gray-100 transition-all duration-100 border-gray-100 cursor-pointer",
+                        highlightedRowIndices.includes(`${row.CustomerOrderID}-${row.LegBehaviour}`) && "border-b-[0px] bg-blue-100 border-l-4 border-blue-500 hover:bg-blue-100/80",
                         rowClassName ? rowClassName(row, rowIndex) : ''
                       )}
                       onClick={(e) => {
@@ -1268,12 +1268,12 @@ export function SmartGrid({
                   // Add nested row if expanded
                   if (effectiveNestedRowRenderer && expandedRows.has(rowIndex)) {
                     rows.push(
-                      <TableRow key={`nested-${rowIndex}`} className="bg-muted/30">
+                      <TableRow key={`nested-${rowIndex}`} className="bg-gray-50/30">
                         <TableCell
                           colSpan={orderedColumns.length + (showCheckboxes ? 1 : 0) + (plugins.some(plugin => plugin.rowActions) ? 1 : 0)}
                           className="p-0 border-b border-gray-200"
                         >
-                          <div className="bg-gradient-to-r from-muted/50 to-background border-l-4 border-primary">
+                          <div className="bg-gradient-to-r from-gray-50/50 to-white border-l-4 border-blue-500">
                             <div className="">
                               {effectiveNestedRowRenderer(row, rowIndex)}
                             </div>
@@ -1307,7 +1307,7 @@ export function SmartGrid({
                 <PaginationPrevious
                   onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
                   className={cn(
-                    currentPage === 1 || loading ? 'pointer-events-none opacity-50' : 'cursor-pointer hover:bg-muted'
+                    currentPage === 1 || loading ? 'pointer-events-none opacity-50' : 'cursor-pointer hover:bg-gray-100'
                   )}
                 />
               </PaginationItem>
@@ -1322,7 +1322,7 @@ export function SmartGrid({
                       className={cn(
                         "cursor-pointer transition-colors duration-150",
                         loading && "pointer-events-none opacity-50",
-                        currentPage === pageNum && "bg-primary text-primary-foreground hover:bg-primary/90"
+                        currentPage === pageNum && "bg-blue-600 text-white hover:bg-blue-700"
                       )}
                     >
                       {pageNum}
@@ -1335,7 +1335,7 @@ export function SmartGrid({
                 <PaginationNext
                   onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
                   className={cn(
-                    currentPage === totalPages || loading ? 'pointer-events-none opacity-50' : 'cursor-pointer hover:bg-muted'
+                    currentPage === totalPages || loading ? 'pointer-events-none opacity-50' : 'cursor-pointer hover:bg-gray-100'
                   )}
                 />
               </PaginationItem>
