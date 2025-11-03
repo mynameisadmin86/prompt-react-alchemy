@@ -224,13 +224,6 @@ const Index = () => {
       color: "text-teal-600"
     },
     {
-      title: "SmartGrid Default Selection Demo",
-      description: "Enhanced demo with default row selection, toggle behavior, visual feedback, and clear selection button",
-      icon: Grid3x3,
-      path: "/smartgrid-default-selection-demo",
-      color: "text-blue-600"
-    },
-    {
       title: "Consignment Details",
       description: "Comprehensive consignment management with leg cards, summary cards, and plan details",
       icon: Workflow,
