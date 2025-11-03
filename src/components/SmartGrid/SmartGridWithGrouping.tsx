@@ -12,7 +12,7 @@ interface GroupedData {
   isExpanded: boolean;
 }
 
-interface SmartGridWithGroupingProps extends SmartGridProps {
+interface SmartGridWithGroupingProps extends Omit<SmartGridProps, 'selectedRows' | 'onSelectionChange'> {
   groupByField?: string;
   onGroupByChange?: (field: string | null) => void;
   groupableColumns?: string[];
@@ -28,10 +28,10 @@ interface SmartGridWithGroupingProps extends SmartGridProps {
   gridId?: string;
   userId?: string;
   customPageSize?: number | any;
-  // Enhanced selection props (when defaultSelectedRowIndexes is used)
+  // Selection props - using Set<number> like SmartGrid
+  selectedRows?: Set<number>;
+  onSelectionChange?: (selectedRows: Set<number>) => void;
   defaultSelectedRowIndexes?: number[];
-  onRowSelectionChange?: (selectedRows: any[]) => void;
-  selectable?: boolean;
 }
 
 export function SmartGridWithGrouping({
@@ -51,14 +51,18 @@ export function SmartGridWithGrouping({
   gridId,
   userId,
   customPageSize,
-  defaultSelectedRowIndexes = [],
-  onRowSelectionChange,
-  selectable = true,
+  defaultSelectedRowIndexes,
+  selectedRows,
+  onSelectionChange,
   ...props
 }: SmartGridWithGroupingProps) {
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
   const [internalGroupBy, setInternalGroupBy] = useState<string | null>(groupByField || null);
-  const [selectedRowIndexes, setSelectedRowIndexes] = useState<number[]>(defaultSelectedRowIndexes);
+  const [internalSelectedRows, setInternalSelectedRows] = useState<Set<number>>(new Set());
+
+  // Use external selectedRows if provided, otherwise use internal state
+  const currentSelectedRows = selectedRows !== undefined ? selectedRows : internalSelectedRows;
+  const handleSelectionChange = onSelectionChange || setInternalSelectedRows;
 
   // Determine which columns can be grouped
   const availableGroupColumns = useMemo(() => {
@@ -168,34 +172,31 @@ export function SmartGridWithGrouping({
     });
   }, []);
 
-  // Initialize default selection
+  // Initialize default selection on mount or when defaultSelectedRowIndexes changes
   React.useEffect(() => {
-    if (defaultSelectedRowIndexes?.length) {
-      setSelectedRowIndexes(defaultSelectedRowIndexes);
-      onRowSelectionChange?.(defaultSelectedRowIndexes.map(i => data[i]));
+    if (defaultSelectedRowIndexes && defaultSelectedRowIndexes.length > 0 && selectedRows === undefined) {
+      const defaultSet = new Set(defaultSelectedRowIndexes);
+      setInternalSelectedRows(defaultSet);
     }
-  }, [defaultSelectedRowIndexes, data, onRowSelectionChange]);
+  }, [defaultSelectedRowIndexes, selectedRows]);
 
   // Handle row selection toggle
-  const handleRowSelection = useCallback((rowIndex: number, rowData: any) => {
-    if (!selectable || rowData.__isGroupHeader) return;
+  const handleRowSelection = useCallback((actualDataIndex: number, rowData: any) => {
+    if (rowData.__isGroupHeader) return;
 
-    setSelectedRowIndexes(prev => {
-      const isSelected = prev.includes(rowIndex);
-      const updated = isSelected 
-        ? prev.filter(i => i !== rowIndex)
-        : [...prev, rowIndex];
-      
-      onRowSelectionChange?.(updated.map(i => data[i]));
-      return updated;
-    });
-  }, [selectable, data, onRowSelectionChange]);
+    const newSet = new Set(currentSelectedRows);
+    if (newSet.has(actualDataIndex)) {
+      newSet.delete(actualDataIndex);
+    } else {
+      newSet.add(actualDataIndex);
+    }
+    handleSelectionChange(newSet);
+  }, [currentSelectedRows, handleSelectionChange]);
 
   // Clear all selections
   const handleClearSelection = useCallback(() => {
-    setSelectedRowIndexes([]);
-    onRowSelectionChange?.([]);
-  }, [onRowSelectionChange]);
+    handleSelectionChange(new Set());
+  }, [handleSelectionChange]);
 
   // Handle link click for group headers (using onLinkClick prop)
   const handleLinkClick = useCallback((row: any, columnKey: string, rowIndex: any) => {
@@ -211,30 +212,20 @@ export function SmartGridWithGrouping({
 
   // Handle row click for selection
   const handleEnhancedRowClick = useCallback((row: any, rowIndex: number) => {
-    // Handle selection if enabled
-    if (selectable && !row.__isGroupHeader) {
-      // Find the actual data index (exclude group headers)
-      let actualDataIndex = 0;
-      let displayIndex = 0;
-      for (let i = 0; i < displayData.length; i++) {
-        if (displayData[i].__isGroupHeader) {
-          displayIndex++;
-          continue;
-        }
-        if (displayIndex === rowIndex) {
-          actualDataIndex = data.findIndex(d => d === displayData[i]);
-          break;
-        }
-        displayIndex++;
-      }
-      handleRowSelection(actualDataIndex, row);
-    }
-    
     // Call original onRowClick if provided
     if (props.onRowClick) {
       props.onRowClick(row, rowIndex);
     }
-  }, [selectable, displayData, data, handleRowSelection, props]);
+    
+    // Handle selection if enabled and not a group header
+    if (!row.__isGroupHeader) {
+      // Find the actual data index (exclude group headers from display data)
+      const actualDataIndex = data.findIndex(d => d === row);
+      if (actualDataIndex !== -1) {
+        handleRowSelection(actualDataIndex, row);
+      }
+    }
+  }, [displayData, data, handleRowSelection, props]);
 
   // When grouping is active, override the row expansion to always collapse
   const handleRowExpansionOverride = useCallback((rowIndex: number) => {
@@ -265,9 +256,9 @@ export function SmartGridWithGrouping({
     }
 
     // Check if this row is selected
-    if (selectable && !row.__isGroupHeader) {
+    if (!row.__isGroupHeader) {
       const actualDataIndex = data.findIndex(d => d === row);
-      const isSelected = selectedRowIndexes.includes(actualDataIndex);
+      const isSelected = currentSelectedRows.has(actualDataIndex);
       
       if (isSelected) {
         return cn(
@@ -280,7 +271,7 @@ export function SmartGridWithGrouping({
     }
 
     return baseClassName;
-  }, [props.rowClassName, selectable, data, selectedRowIndexes]);
+  }, [props.rowClassName, data, currentSelectedRows]);
 
   // Modify the first column to handle group header display
   const modifiedColumns = useMemo(() => {
@@ -304,10 +295,10 @@ export function SmartGridWithGrouping({
   return (
     <div className="space-y-2">
       {/* Selection toolbar */}
-      {selectable && selectedRowIndexes.length > 0 && (
+      {currentSelectedRows.size > 0 && (
         <div className="flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-md">
           <span className="text-sm font-medium text-blue-900 dark:text-blue-100">
-            {selectedRowIndexes.length} row{selectedRowIndexes.length !== 1 ? 's' : ''} selected
+            {currentSelectedRows.size} row{currentSelectedRows.size !== 1 ? 's' : ''} selected
           </span>
           <button
             onClick={handleClearSelection}
@@ -325,6 +316,8 @@ export function SmartGridWithGrouping({
         rowClassName={getRowClassName}
         onLinkClick={handleLinkClick}
         onRowClick={handleEnhancedRowClick}
+        selectedRows={currentSelectedRows}
+        onSelectionChange={handleSelectionChange}
         // Override nested row renderer when grouping is active to prevent sub-row expansion
         nestedRowRenderer={
           (internalGroupBy || groupByField) ? undefined : props.nestedRowRenderer
