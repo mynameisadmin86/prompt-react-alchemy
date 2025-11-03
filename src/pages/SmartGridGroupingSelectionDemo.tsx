@@ -56,6 +56,20 @@ const SmartGridGroupingSelectionDemo = () => {
   const selectedProducts = sampleData.filter(product => selectedRowIds.has(product.id));
   const totalValue = selectedProducts.reduce((sum, product) => sum + (product?.price || 0), 0);
 
+  // Handle selection change callback
+  const handleSelectionChange = (newSelectedRows: Set<number>) => {
+    setSelectedRows(newSelectedRows);
+    // Update selectedRowIds based on the new selection
+    const newSelectedRowIds = new Set<number>();
+    newSelectedRows.forEach(index => {
+      const item = sampleData[index];
+      if (item) {
+        newSelectedRowIds.add(item.id);
+      }
+    });
+    setSelectedRowIds(newSelectedRowIds);
+  };
+
   // Handle row click to toggle selection
   const handleRowClick = (row: typeof sampleData[0], index: number) => {
     // Don't allow selection of group headers
@@ -86,6 +100,15 @@ const SmartGridGroupingSelectionDemo = () => {
     
     setSelectedRowIds(newSelectedRowIds);
     setSelectedRows(newSelectedRows);
+  };
+
+  const handleClearAll = () => {
+    setSelectedRows(new Set());
+    setSelectedRowIds(new Set());
+    toast({
+      title: "Selection Cleared",
+      description: "All selections have been cleared",
+    });
   };
 
   const handleProcessOrder = () => {
@@ -150,6 +173,8 @@ const SmartGridGroupingSelectionDemo = () => {
                   <li>Selected rows are highlighted even when grouped</li>
                   <li>Selection persists across different grouping modes</li>
                   <li>Uses <code className="px-1 py-0.5 rounded bg-muted">selectedRows</code> prop with index mapping</li>
+                  <li>Supports <code className="px-1 py-0.5 rounded bg-muted">onSelectionChange</code> callback for updates</li>
+                  <li>All grid features work: editing, search, filters, pagination</li>
                 </ul>
               </div>
               <div className="space-y-2">
@@ -251,15 +276,28 @@ const SmartGridGroupingSelectionDemo = () => {
               groupableColumns={['category', 'status', 'location', 'supplier']}
               showGroupingDropdown={true}
               groupByField="category"
+              editableColumns={['price', 'stock']}
+              paginationMode="pagination"
               selectedRows={selectedRows}
+              onSelectionChange={handleSelectionChange}
               onRowClick={handleRowClick}
-              rowClassName={(row: any) => {
+              hideToolbar={false}
+              onClearAll={handleClearAll}
+              rowClassName={(row: any, index: number) => {
                 return selectedRowIds.has(row.id) ? 'selected' : '';
               }}
-              paginationMode="pagination"
-              showCreateButton={false}
+              showDefaultConfigurableButton={false}
+              gridTitle="Product Inventory (Grouped)"
+              recordCount={sampleData.length}
+              showCreateButton={true}
               searchPlaceholder="Search products..."
               clientSideSearch={true}
+              showSubHeaders={false}
+              hideAdvancedFilter={true}
+              hideCheckboxToggle={true}
+              showFilterTypeDropdown={false}
+              showServersideFilter={false}
+              userId="demo-user"
             />
           </CardContent>
         </Card>
@@ -280,21 +318,29 @@ const [selectedRowIds, setSelectedRowIds] = useState<Set<number>>(
   new Set([1, 3, 7]) // Initial selected product IDs
 );
 
+// Handle selection change callback
+const handleSelectionChange = (newSelectedRows: Set<number>) => {
+  setSelectedRows(newSelectedRows);
+  const newSelectedRowIds = new Set<number>();
+  newSelectedRows.forEach(index => {
+    const item = data[index];
+    if (item) newSelectedRowIds.add(item.id);
+  });
+  setSelectedRowIds(newSelectedRowIds);
+};
+
 // Handle row click to toggle selection
 const handleRowClick = (row: Product, index: number) => {
-  // Don't allow selection of group headers
   if (row.__isGroupHeader) return;
   
   const newSelectedRowIds = new Set(selectedRowIds);
   const newSelectedRows = new Set(selectedRows);
   
   if (newSelectedRowIds.has(row.id)) {
-    // Deselect
     newSelectedRowIds.delete(row.id);
     const originalIndex = data.findIndex(item => item.id === row.id);
     if (originalIndex !== -1) newSelectedRows.delete(originalIndex);
   } else {
-    // Select
     newSelectedRowIds.add(row.id);
     const originalIndex = data.findIndex(item => item.id === row.id);
     if (originalIndex !== -1) newSelectedRows.add(originalIndex);
@@ -304,7 +350,13 @@ const handleRowClick = (row: Product, index: number) => {
   setSelectedRows(newSelectedRows);
 };
 
-// Use in SmartGridWithGrouping
+// Handle clear all
+const handleClearAll = () => {
+  setSelectedRows(new Set());
+  setSelectedRowIds(new Set());
+};
+
+// Use in SmartGridWithGrouping with all props
 <>
   <style>{\`
     \${Array.from(selectedRowIds).map((rowId) => \`
@@ -317,11 +369,29 @@ const handleRowClick = (row: Product, index: number) => {
   <SmartGridWithGrouping
     columns={columns}
     data={data}
-    groupableColumns={['category', 'status', 'location']}
+    groupableColumns={['category', 'status', 'location', 'supplier']}
     showGroupingDropdown={true}
+    groupByField="category"
+    editableColumns={['price', 'stock']}
+    paginationMode="pagination"
     selectedRows={selectedRows}
+    onSelectionChange={handleSelectionChange}
     onRowClick={handleRowClick}
-    rowClassName={(row) => selectedRowIds.has(row.id) ? 'selected' : ''}
+    hideToolbar={false}
+    onClearAll={handleClearAll}
+    rowClassName={(row, index) => selectedRowIds.has(row.id) ? 'selected' : ''}
+    showDefaultConfigurableButton={false}
+    gridTitle="Product Inventory"
+    recordCount={data.length}
+    showCreateButton={true}
+    searchPlaceholder="Search products..."
+    clientSideSearch={true}
+    showSubHeaders={false}
+    hideAdvancedFilter={true}
+    hideCheckboxToggle={true}
+    showFilterTypeDropdown={false}
+    showServersideFilter={false}
+    userId="demo-user"
   />
 </>`}</code>
             </pre>
