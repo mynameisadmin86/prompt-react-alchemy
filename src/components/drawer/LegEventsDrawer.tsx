@@ -31,6 +31,8 @@ interface Leg {
   badge?: string;
   customer: string;
   orderNo: string;
+  activities: Activity[];
+  additionalActivities: Activity[];
 }
 
 interface LegEventsDrawerProps {
@@ -68,6 +70,29 @@ export const LegEventsDrawer: React.FC<LegEventsDrawerProps> = ({
       badge: 'success',
       customer: 'ABC Customer',
       orderNo: 'CO00000001',
+      activities: [
+        {
+          id: '1-1',
+          type: 'Arrived at Destination',
+          status: '1d 2h 45m Delayed',
+          plannedDate: new Date(2025, 2, 10),
+          plannedTime: '10:20 AM',
+        },
+        {
+          id: '1-2',
+          type: 'Departed at Source',
+          plannedDate: new Date(2025, 2, 10),
+          plannedTime: '09:00 AM',
+        },
+      ],
+      additionalActivities: [
+        {
+          id: '1-3',
+          type: 'Loaded',
+          plannedDate: new Date(2025, 2, 10),
+          plannedTime: '10:20 AM',
+        },
+      ],
     },
     {
       id: '2',
@@ -78,6 +103,28 @@ export const LegEventsDrawer: React.FC<LegEventsDrawerProps> = ({
       badge: 'info',
       customer: 'ABC Customer',
       orderNo: 'CO00000001',
+      activities: [
+        {
+          id: '2-1',
+          type: 'Arrived at Destination',
+          plannedDate: new Date(2025, 2, 10),
+          plannedTime: '14:00 PM',
+        },
+        {
+          id: '2-2',
+          type: 'Departed at Source',
+          plannedDate: new Date(2025, 2, 10),
+          plannedTime: '11:00 AM',
+        },
+      ],
+      additionalActivities: [
+        {
+          id: '2-3',
+          type: 'Loaded',
+          plannedDate: new Date(2025, 2, 10),
+          plannedTime: '13:30 PM',
+        },
+      ],
     },
     {
       id: '3',
@@ -88,6 +135,15 @@ export const LegEventsDrawer: React.FC<LegEventsDrawerProps> = ({
       badge: 'secondary',
       customer: 'Multiple',
       orderNo: 'Multiple',
+      activities: [
+        {
+          id: '3-1',
+          type: 'Arrived at Destination',
+          plannedDate: new Date(2025, 2, 11),
+          plannedTime: '08:00 AM',
+        },
+      ],
+      additionalActivities: [],
     },
   ],
   activities = [
@@ -472,7 +528,7 @@ export const LegEventsDrawer: React.FC<LegEventsDrawerProps> = ({
                   <TabsContent value="activities" className="mt-0">
                     <ScrollArea className="h-[300px]">
                       <div className="space-y-3">
-                        {activities.map((activity) => (
+                        {legs[selectedLegIndex]?.activities.map((activity) => (
                           <Card key={activity.id} className="p-4">
                             <div className="space-y-3">
                               <div className="flex items-start justify-between">
@@ -546,9 +602,85 @@ export const LegEventsDrawer: React.FC<LegEventsDrawerProps> = ({
                   </TabsContent>
 
                   <TabsContent value="additional" className="mt-0">
-                    <div className="text-center text-muted-foreground py-8">
-                      No additional activities
-                    </div>
+                    <ScrollArea className="h-[300px]">
+                      {legs[selectedLegIndex]?.additionalActivities.length > 0 ? (
+                        <div className="space-y-3">
+                          {legs[selectedLegIndex]?.additionalActivities.map((activity) => (
+                            <Card key={activity.id} className="p-4">
+                              <div className="space-y-3">
+                                <div className="flex items-start justify-between">
+                                  <div className="flex items-start gap-3">
+                                    <div className="mt-0.5">{getActivityIcon(activity.type)}</div>
+                                    <div>
+                                      <h4 className="font-semibold text-sm">{activity.type}</h4>
+                                      {activity.status && (
+                                        <Badge variant="outline" className="mt-1 text-xs bg-red-50 text-red-700 border-red-200">
+                                          {activity.status}
+                                        </Badge>
+                                      )}
+                                    </div>
+                                  </div>
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-4">
+                                  <div className="space-y-2">
+                                    <Label className="text-xs text-muted-foreground">Planned Date</Label>
+                                    <Popover>
+                                      <PopoverTrigger asChild>
+                                        <Button
+                                          variant="outline"
+                                          size="sm"
+                                          className="w-full justify-start text-left font-normal"
+                                        >
+                                          <CalendarIcon className="mr-2 h-3 w-3" />
+                                          {format(activity.plannedDate, "dd-MMM-yyyy")}
+                                        </Button>
+                                      </PopoverTrigger>
+                                      <PopoverContent className="w-auto p-0" align="start">
+                                        <Calendar
+                                          mode="single"
+                                          selected={activity.plannedDate}
+                                          onSelect={() => {}}
+                                          initialFocus
+                                        />
+                                      </PopoverContent>
+                                    </Popover>
+                                  </div>
+
+                                  <div className="space-y-2">
+                                    <Label className="text-xs text-muted-foreground">Planned Time</Label>
+                                    <Popover>
+                                      <PopoverTrigger asChild>
+                                        <Button
+                                          variant="outline"
+                                          size="sm"
+                                          className="w-full justify-start text-left font-normal"
+                                        >
+                                          <Clock className="mr-2 h-3 w-3" />
+                                          {activity.plannedTime}
+                                        </Button>
+                                      </PopoverTrigger>
+                                      <PopoverContent className="w-auto p-2" align="start">
+                                        <Input
+                                          type="time"
+                                          value={activity.plannedTime}
+                                          onChange={() => {}}
+                                          className="w-full"
+                                        />
+                                      </PopoverContent>
+                                    </Popover>
+                                  </div>
+                                </div>
+                              </div>
+                            </Card>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="text-center text-muted-foreground py-8">
+                          No additional activities
+                        </div>
+                      )}
+                    </ScrollArea>
                   </TabsContent>
                 </Tabs>
               </div>
