@@ -49,8 +49,26 @@ export function SmartGridWithGrouping({
   customPageSize,
   ...props
 }: SmartGridWithGroupingProps) {
-  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
   const [internalGroupBy, setInternalGroupBy] = useState<string | null>(groupByField || null);
+  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(() => {
+    // If grouping is active initially, expand all groups by default
+    if (groupByField && data.length > 0) {
+      const groups: { [key: string]: any[] } = {};
+      data.forEach(item => {
+        let groupValue = item[groupByField];
+        let displayValue = groupValue;
+        if (typeof groupValue === 'object' && groupValue !== null) {
+          displayValue = groupValue.value || groupValue.label || groupValue.name || JSON.stringify(groupValue);
+        }
+        const groupKey = String(displayValue || 'Uncategorized');
+        if (!groups[groupKey]) {
+          groups[groupKey] = [];
+        }
+      });
+      return new Set(Object.keys(groups));
+    }
+    return new Set();
+  });
 
   // Determine which columns can be grouped
   const availableGroupColumns = useMemo(() => {
