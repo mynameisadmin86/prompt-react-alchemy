@@ -1,7 +1,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowRight, Grid3x3, Layout, Search, Workflow, PanelLeft, Layers, Upload, ShoppingCart, CreditCard } from "lucide-react";
+import { ArrowRight, Grid3x3, Layout, Search, Workflow, PanelLeft, Layers, Upload, ShoppingCart, CreditCard, Tag } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const Index = () => {
@@ -229,6 +229,13 @@ const Index = () => {
       icon: Workflow,
       path: "/consignment-details",
       color: "text-blue-600"
+    },
+    {
+      title: "Badges List Demo",
+      description: "Interactive badges list component with remove functionality and multiple variants",
+      icon: Tag,
+      path: "/badges-list-demo",
+      color: "text-pink-500"
     },
   ];
 
