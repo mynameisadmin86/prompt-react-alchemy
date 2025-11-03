@@ -16,6 +16,8 @@ import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { SmartGrid } from '@/components/SmartGrid';
 import type { GridColumnConfig } from '@/types/smartgrid';
+import { SideDrawer } from '@/components/ui/side-drawer';
+import { LegEventsDrawer } from '@/components/drawer/LegEventsDrawer';
 
 const TripPlanning = () => {
   const navigate = useNavigate();
@@ -39,6 +41,7 @@ const TripPlanning = () => {
   const [arrivalLocation, setArrivalLocation] = useState('Frankfurt Station');
   const [selectedOrders, setSelectedOrders] = useState<Set<number>>(new Set());
   const [consolidatedTrip, setConsolidatedTrip] = useState(true);
+  const [isLegEventsDrawerOpen, setIsLegEventsDrawerOpen] = useState(false);
 
   const isWagonContainer = tripType === 'Wagon/Container Movement';
 
@@ -567,7 +570,12 @@ const TripPlanning = () => {
               >
                 Manage Trips
               </Button>
-              <Button variant="ghost" size="icon">
+              <Button 
+                variant="ghost" 
+                size="icon"
+                data-lov-id="src/pages/TripPlanning.tsx:570:14"
+                onClick={() => setIsLegEventsDrawerOpen(true)}
+              >
                 <ExternalLink className="h-4 w-4" />
               </Button>
             </div>
@@ -1079,6 +1087,22 @@ const TripPlanning = () => {
           </>
         )}
       </main>
+
+      {/* Leg Events Drawer */}
+      <SideDrawer
+        isOpen={isLegEventsDrawerOpen}
+        onClose={() => setIsLegEventsDrawerOpen(false)}
+        title="Leg and Events"
+        width="90%"
+        showFooter={false}
+      >
+        <LegEventsDrawer
+          tripId="TRIP00000001"
+          onSave={async () => {
+            console.log('Saving leg and events...');
+          }}
+        />
+      </SideDrawer>
     </div>
   );
 };
