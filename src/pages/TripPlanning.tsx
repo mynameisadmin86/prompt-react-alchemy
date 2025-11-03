@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { LegEventsDrawer } from '@/components/drawer/LegEventsDrawer';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -39,6 +40,7 @@ const TripPlanning = () => {
   const [arrivalLocation, setArrivalLocation] = useState('Frankfurt Station');
   const [selectedOrders, setSelectedOrders] = useState<Set<number>>(new Set());
   const [consolidatedTrip, setConsolidatedTrip] = useState(true);
+  const [isLegEventsDrawerOpen, setIsLegEventsDrawerOpen] = useState(false);
 
   const isWagonContainer = tripType === 'Wagon/Container Movement';
 
@@ -567,7 +569,12 @@ const TripPlanning = () => {
               >
                 Manage Trips
               </Button>
-              <Button variant="ghost" size="icon">
+              <Button 
+                variant="ghost" 
+                size="icon"
+                onClick={() => setIsLegEventsDrawerOpen(true)}
+                data-lov-id="src/pages/TripPlanning.tsx:570:14"
+              >
                 <ExternalLink className="h-4 w-4" />
               </Button>
             </div>
@@ -1079,6 +1086,13 @@ const TripPlanning = () => {
           </>
         )}
       </main>
+
+      {/* Leg Events Drawer */}
+      <LegEventsDrawer
+        isOpen={isLegEventsDrawerOpen}
+        onClose={() => setIsLegEventsDrawerOpen(false)}
+        tripId="TRIP00000001"
+      />
     </div>
   );
 };
