@@ -745,17 +745,13 @@ const GridDemoGrouping = () => {
             </div>
           )}
           <style>{`
-            ${Array.from(selectedRowIds).map((rowId) => {
-              return `
-                tr[data-row-id="${rowId}"] {
-                  background-color: hsl(var(--primary) / 0.1) !important;
-                  border-left: 4px solid hsl(var(--primary)) !important;
-                }
-                tr[data-row-id="${rowId}"]:hover {
-                  background-color: hsl(var(--primary) / 0.15) !important;
-                }
-              `;
-            }).join('\n')}
+            tr.selected-row {
+              background-color: hsl(var(--primary) / 0.1) !important;
+              border-left: 4px solid hsl(var(--primary)) !important;
+            }
+            tr.selected-row:hover {
+              background-color: hsl(var(--primary) / 0.15) !important;
+            }
           `}</style>
           <SmartGridWithGrouping
             key={`grid-${gridState.forceUpdate}`}
@@ -774,7 +770,7 @@ const GridDemoGrouping = () => {
             onFiltersChange={handleFiltersChange}
             onServerFilter={handleSearch}
             rowClassName={(row: any, index: number) => {
-              return selectedRowIds.has(row.id) ? 'selected' : '';
+              return selectedRowIds.has(row.id) ? 'selected-row' : '';
             }}
             nestedRowRenderer={renderSubRow}
             configurableButtons={configurableButtons}
