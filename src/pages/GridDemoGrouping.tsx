@@ -576,6 +576,8 @@ const GridDemoGrouping = () => {
   };
 
   const handleRowSelection = (selectedRowIndices: Set<number>) => {
+    if (loading) return; // Prevent selection during loading
+    
     console.log('Selected rows changed via checkbox:', selectedRowIndices);
     setSelectedRows(selectedRowIndices);
     
@@ -600,6 +602,8 @@ const GridDemoGrouping = () => {
   };
 
   const handleRowClick = (row: SampleData, index: number) => {
+    if (loading) return; // Prevent selection during loading
+    
     console.log('Row clicked:', row, index);
     
     const currentData = gridState.gridData.length > 0 ? gridState.gridData : processedData;
