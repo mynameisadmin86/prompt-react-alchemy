@@ -42,8 +42,8 @@ interface SampleData {
 }
 
 const GridDemoGrouping = () => {
-  const [selectedRows, setSelectedRows] = useState<Set<number>>(new Set());
-  const [selectedRowIds, setSelectedRowIds] = useState<Set<string>>(new Set());
+  const [selectedRows, setSelectedRows] = useState<Set<number>>(new Set([0, 1]));
+  const [selectedRowIds, setSelectedRowIds] = useState<Set<string>>(new Set(['TRIP00000001', 'TRIP00000002']));
   const [selectedRowObjects, setSelectedRowObjects] = useState<SampleData[]>([]);
   const [currentFilters, setCurrentFilters] = useState<Record<string, any>>({});
   const [apiData, setApiData] = useState<SampleData[]>([]);
@@ -499,6 +499,14 @@ const GridDemoGrouping = () => {
     console.log('Initializing columns and data in GridDemoGrouping');
     gridState.setColumns(initialColumns);
     gridState.setGridData(processedData);
+    
+    // Initialize selected row objects
+    if (selectedRowObjects.length === 0 && processedData.length > 0) {
+      const initialSelectedObjects = processedData.filter((row: any) => 
+        row.id === 'TRIP00000001' || row.id === 'TRIP00000002'
+      );
+      setSelectedRowObjects(initialSelectedObjects as any);
+    }
   }, [processedData]);
 
   // Update selected row indices based on current page data to maintain selection state
