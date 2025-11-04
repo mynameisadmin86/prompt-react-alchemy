@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import GridDemo from "./pages/GridDemo";
+import GridDemoGrouping from "./pages/GridDemoGrouping";
 import TripPlansSearchHub from "./pages/TripPlansSearchHub";
 import TripPlansSearchHubAPI from "./pages/TripPlansSearchHubAPI";
 import DynamicPanelDemo from "./pages/DynamicPanelDemo";
@@ -52,6 +53,7 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/grid-demo" element={<GridDemo />} />
+          <Route path="/grid-demo-grouping" element={<GridDemoGrouping />} />
           <Route path="/trip-plans-search-hub" element={<TripPlansSearchHub />} />
           <Route path="/trip-plans-search-hub-api" element={<TripPlansSearchHubAPI />} />
           <Route path="/dynamic-panel-demo" element={<DynamicPanelDemo />} />
