@@ -14,6 +14,13 @@ const Index = () => {
       color: "text-blue-600"
     },
     {
+      title: "Grid Demo Grouping",
+      description: "Interactive data grid with grouping functionality and expandable groups",
+      icon: Layers,
+      path: "/grid-demo-grouping",
+      color: "text-indigo-600"
+    },
+    {
       title: "Trip Plans Search Hub",
       description: "Comprehensive trip management interface with advanced search and filtering",
       icon: Search,
