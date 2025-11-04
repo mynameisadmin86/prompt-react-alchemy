@@ -719,7 +719,7 @@ export function SmartGrid({
             variant="ghost"
             size="sm"
             onClick={() => onRowExpansionOverride ? onRowExpansionOverride(rowIndex) : toggleRowExpansion(rowIndex)}
-            className="h-5 w-5 p-0 hover:bg-muted flex-shrink-0"
+            className="h-5 w-5 p-0 hover:bg-gray-100 flex-shrink-0"
           >
             {isExpanded ? (
               <ChevronDown className="h-3 w-3" />
@@ -996,8 +996,8 @@ export function SmartGrid({
                       className={cn(
                         "relative group bg-gray-100 backdrop-blur-sm font-semibold text-Gray-800 pl-1 py-0 pr-0 border-r border-gray-100 last:border-r-0 h-9",
                         draggedColumn === column.key && "opacity-50",
-                        dragOverColumn === column.key && "bg-primary/10 border-primary/30",
-                        resizingColumn === column.key && "bg-primary/5",
+                        dragOverColumn === column.key && "bg-blue-100 border-blue-300",
+                        resizingColumn === column.key && "bg-blue-50",
                         !resizingColumn && "cursor-move"
                       )}
                       style={{
@@ -1028,7 +1028,7 @@ export function SmartGrid({
                                   setEditingHeader(null);
                                 }
                               }}
-                              className="h-5 px-1 text-sm font-semibold bg-white border-primary/30 focus:border-primary min-w-0"
+                              className="h-5 px-1 text-sm font-semibold bg-white border-blue-300 focus:border-blue-500 min-w-0"
                               autoFocus
                               onFocus={(e) => e.target.select()}
                               onClick={(e) => e.stopPropagation()}
@@ -1038,7 +1038,7 @@ export function SmartGrid({
                             <div
                               className={cn(
                                 "flex items-center gap-1 rounded px-1 py-0 -mx-1 -my-0.5 transition-colors group/header flex-1 min-w-0",
-                                !resizingColumn && "cursor-pointer hover:bg-muted/50"
+                                !resizingColumn && "cursor-pointer hover:bg-gray-100/50"
                               )}
                               onClick={(e) => {
                                 if (resizingColumn) return;
@@ -1196,8 +1196,8 @@ export function SmartGrid({
                     <TableRow key={rowIndex}
                       data-row-id={ (gridTitle == 'Trip Plans' ?  row.TripPlanID : gridTitle == 'Planning Equipments' ? (row.EquipmentID || row.VehicleID || row.HandlerID || row.DriverCode || row.VendorID || row.SupplierID) : (gridTitle == 'Trip Customer Orders Multi' ? `${row.CustomerOrderID}-${row.LegBehaviour}` : rowIndex)) || rowIndex}
                       className={cn(
-                        "hover:bg-muted transition-all duration-100 border-gray-100 cursor-pointer",
-                        highlightedRowIndices.includes(`${row.CustomerOrderID}-${row.LegBehaviour}`) && "border-b-[0px] bg-primary/10 border-l-4 border-primary hover:bg-primary/5",
+                        "hover:bg-gray-100 transition-all duration-100 border-gray-100 cursor-pointer",
+                        highlightedRowIndices.includes(`${row.CustomerOrderID}-${row.LegBehaviour}`) && "border-b-[0px] bg-blue-100 border-l-4 border-blue-500 hover:bg-blue-100/80",
                         rowClassName ? rowClassName(row, rowIndex) : ''
                       )}
                       onClick={(e) => {
@@ -1273,7 +1273,7 @@ export function SmartGrid({
                           colSpan={orderedColumns.length + (showCheckboxes ? 1 : 0) + (plugins.some(plugin => plugin.rowActions) ? 1 : 0)}
                           className="p-0 border-b border-gray-200"
                         >
-                          <div className="bg-gradient-to-r from-gray-50/50 to-white border-l-4 border-primary">
+                          <div className="bg-gradient-to-r from-gray-50/50 to-white border-l-4 border-blue-500">
                             <div className="">
                               {effectiveNestedRowRenderer(row, rowIndex)}
                             </div>
@@ -1307,7 +1307,7 @@ export function SmartGrid({
                 <PaginationPrevious
                   onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
                   className={cn(
-                    currentPage === 1 || loading ? 'pointer-events-none opacity-50' : 'cursor-pointer hover:bg-muted'
+                    currentPage === 1 || loading ? 'pointer-events-none opacity-50' : 'cursor-pointer hover:bg-gray-100'
                   )}
                 />
               </PaginationItem>
@@ -1335,7 +1335,7 @@ export function SmartGrid({
                 <PaginationNext
                   onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
                   className={cn(
-                    currentPage === totalPages || loading ? 'pointer-events-none opacity-50' : 'cursor-pointer hover:bg-muted'
+                    currentPage === totalPages || loading ? 'pointer-events-none opacity-50' : 'cursor-pointer hover:bg-gray-100'
                   )}
                 />
               </PaginationItem>
