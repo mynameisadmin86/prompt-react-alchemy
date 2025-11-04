@@ -745,10 +745,6 @@ const GridDemoGrouping = () => {
             </div>
           )}
           <style>{`
-            tbody tr:not(.selected-row):hover {
-              background-color: hsl(var(--primary) / 0.05) !important;
-              border-left: 2px solid hsl(var(--primary) / 0.3) !important;
-            }
             tr.selected-row {
               background-color: hsl(var(--primary) / 0.1) !important;
               border-left: 4px solid hsl(var(--primary)) !important;
