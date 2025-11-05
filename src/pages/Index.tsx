@@ -244,13 +244,6 @@ const Index = () => {
       path: "/badges-list-demo",
       color: "text-pink-500"
     },
-    {
-      title: "Nested SmartGrid Demo",
-      description: "Reusable wrapper for SmartGrid supporting array-based nested data with expandable sections",
-      icon: Layers,
-      path: "/nested-smartgrid-demo",
-      color: "text-indigo-500"
-    },
   ];
 
   return (
