@@ -5,6 +5,8 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
 import { Info, Package } from 'lucide-react';
 import { GridColumnConfig } from '@/types/smartgrid';
 import { cn } from '@/lib/utils';
@@ -298,13 +300,50 @@ export const CellRenderer: React.FC<CellRendererProps> = ({
 
   // DateTimeRange renderer
   const renderDateTimeRange = () => {
-    // const [date, time] = String(value).split('\n');
-    // return (
-    //   <div className="text-sm min-w-0">
-    //     <div className="text-Gray-800 font-normal truncate">{date}</div>
-    //     <div className="text-gray-500 text-xs truncate">{time}</div>
-    //   </div>
-    // );
+    if (isEditing) {
+      return (
+        <Popover defaultOpen>
+          <PopoverTrigger asChild>
+            <Button
+              variant="outline"
+              className="w-full justify-start text-left font-normal h-8 px-2"
+            >
+              {tempValue ? dateTimeFormatter(new Date(tempValue)) : <span>Pick a date & time</span>}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0" align="start">
+            <Calendar
+              mode="single"
+              selected={tempValue ? new Date(tempValue) : undefined}
+              onSelect={(date) => {
+                if (date) {
+                  setTempValue(date.toISOString());
+                  onEdit(rowIndex, column.key, date.toISOString());
+                }
+              }}
+              initialFocus
+              className="p-3 pointer-events-auto"
+            />
+          </PopoverContent>
+        </Popover>
+      );
+    }
+
+    if (isEditable) {
+      return (
+        <div
+          onClick={() => onEditStart(rowIndex, column.key)}
+          className={cn(
+            "min-h-[20px] p-2 hover:bg-blue-50 cursor-pointer rounded transition-colors duration-150 truncate",
+            loading && "opacity-50 cursor-not-allowed"
+          )}
+          title={value ? dateTimeFormatter(new Date(value)) : ''}
+        >
+          {value ? dateTimeFormatter(new Date(value)) : <span className="text-gray-400">Click to edit</span>}
+        </div>
+      );
+    }
+
     if (!value) return <div className="text-gray-400">-</div>;
     try {
       const date = new Date(value);
@@ -474,6 +513,50 @@ export const CellRenderer: React.FC<CellRendererProps> = ({
 
   // Date renderer
   const renderDate = () => {
+    if (isEditing) {
+      return (
+        <Popover defaultOpen>
+          <PopoverTrigger asChild>
+            <Button
+              variant="outline"
+              className="w-full justify-start text-left font-normal h-8 px-2"
+            >
+              {tempValue ? dateFormatter(new Date(tempValue)) : <span>Pick a date</span>}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0" align="start">
+            <Calendar
+              mode="single"
+              selected={tempValue ? new Date(tempValue) : undefined}
+              onSelect={(date) => {
+                if (date) {
+                  setTempValue(date.toISOString());
+                  onEdit(rowIndex, column.key, date.toISOString());
+                }
+              }}
+              initialFocus
+              className="p-3 pointer-events-auto"
+            />
+          </PopoverContent>
+        </Popover>
+      );
+    }
+
+    if (isEditable) {
+      return (
+        <div
+          onClick={() => onEditStart(rowIndex, column.key)}
+          className={cn(
+            "min-h-[20px] p-2 hover:bg-blue-50 cursor-pointer rounded transition-colors duration-150 truncate",
+            loading && "opacity-50 cursor-not-allowed"
+          )}
+          title={value ? dateFormatter(new Date(value)) : ''}
+        >
+          {value ? dateFormatter(new Date(value)) : <span className="text-gray-400">Click to edit</span>}
+        </div>
+      );
+    }
+
     if (!value) return <span className="text-gray-400">-</span>;
 
     try {
@@ -485,8 +568,70 @@ export const CellRenderer: React.FC<CellRendererProps> = ({
     }
   };
 
-  // Date renderer
+  // Date renderer with custom format
   const renderDateFormat = () => {
+    if (isEditing) {
+      return (
+        <Popover defaultOpen>
+          <PopoverTrigger asChild>
+            <Button
+              variant="outline"
+              className="w-full justify-start text-left font-normal h-8 px-2"
+            >
+              {tempValue ? (() => {
+                const date = new Date(tempValue);
+                const day = String(date.getDate()).padStart(2, '0');
+                const month = monthNames[date.getMonth()];
+                const year = date.getFullYear();
+                return `${day}-${month}-${year}`;
+              })() : <span>Pick a date</span>}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0" align="start">
+            <Calendar
+              mode="single"
+              selected={tempValue ? new Date(tempValue) : undefined}
+              onSelect={(date) => {
+                if (date) {
+                  setTempValue(date.toISOString());
+                  onEdit(rowIndex, column.key, date.toISOString());
+                }
+              }}
+              initialFocus
+              className="p-3 pointer-events-auto"
+            />
+          </PopoverContent>
+        </Popover>
+      );
+    }
+
+    if (isEditable) {
+      return (
+        <div
+          onClick={() => onEditStart(rowIndex, column.key)}
+          className={cn(
+            "min-h-[20px] p-2 hover:bg-blue-50 cursor-pointer rounded transition-colors duration-150 truncate",
+            loading && "opacity-50 cursor-not-allowed"
+          )}
+          title={value ? (() => {
+            const date = new Date(value);
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = monthNames[date.getMonth()];
+            const year = date.getFullYear();
+            return `${day}-${month}-${year}`;
+          })() : ''}
+        >
+          {value ? (() => {
+            const date = new Date(value);
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = monthNames[date.getMonth()];
+            const year = date.getFullYear();
+            return `${day}-${month}-${year}`;
+          })() : <span className="text-gray-400">Click to edit</span>}
+        </div>
+      );
+    }
+
     if (!value) return <span className="text-gray-400">-</span>;
 
     try {
