@@ -172,6 +172,12 @@ export interface SubRowFilter {
   options?: string[];
 }
 
+export interface SubRowConfig {
+  key: string;
+  columns: GridColumnConfig[];
+  expandable?: boolean;
+}
+
 export interface SmartGridProps {
   columns: GridColumnConfig[];
   data: any[];
@@ -236,6 +242,8 @@ export interface SmartGridProps {
   hideAdvancedFilter?: boolean;
   // Control whether to show the checkbox toggle button in toolbar
   hideCheckboxToggle?: boolean;
+  // Sub-row array expansion props
+  subRowConfig?: SubRowConfig;
 }
 
 // Legacy interface for backward compatibility

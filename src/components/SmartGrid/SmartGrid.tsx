@@ -89,7 +89,8 @@ export function SmartGrid({
   customPageSize,
   onSearch,
   onClearAll,
-  exportFilename = `export-${new Date().toISOString().split('T')[0]}`
+  exportFilename = `export-${new Date().toISOString().split('T')[0]}`,
+  subRowConfig
 }: SmartGridProps & { exportFilename?: string }) {
   const {
     gridData,
@@ -118,6 +119,8 @@ export function SmartGrid({
     setError,
     expandedRows,
     setExpandedRows,
+    expandedArrayRows,
+    setExpandedArrayRows,
     internalSelectedRows,
     setInternalSelectedRows,
     showCheckboxes,
@@ -140,7 +143,9 @@ export function SmartGrid({
     handleSubRowToggle,
     handleSubRowEdit,
     handleSubRowEditStart,
-    handleSubRowEditCancel
+    handleSubRowEditCancel,
+    toggleArrayRowExpansion,
+    collapseAllArrayRows
   } = useSmartGridState();
 
   const [pageSize] = useState(customPageSize || 10);
@@ -704,47 +709,139 @@ export function SmartGrid({
     setEditingCell(null);
   }, [setEditingCell]);
 
+  // Check if row has array data for sub-row expansion
+  const hasArrayData = useCallback((row: any) => {
+    if (!subRowConfig) return false;
+    const arrayData = row[subRowConfig.key];
+    return Array.isArray(arrayData) && arrayData.length > 0;
+  }, [subRowConfig]);
+
+  // Render array sub-row content
+  const renderArraySubRow = useCallback((row: any, rowIndex: number) => {
+    if (!subRowConfig || !hasArrayData(row)) return null;
+
+    const arrayData = row[subRowConfig.key];
+    const subColumns = subRowConfig.columns;
+
+    return (
+      <div className="pl-8 py-2 border-l-2 border-primary/20 animate-accordion-down">
+        <Table className="w-full">
+          <TableHeader>
+            <TableRow className="bg-muted/30 hover:bg-muted/30">
+              {subColumns.map((col) => (
+                <TableHead key={col.key} className="text-xs font-semibold py-2 px-3">
+                  {col.label}
+                </TableHead>
+              ))}
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {arrayData.map((subRow: any, subIndex: number) => (
+              <TableRow key={subIndex} className="hover:bg-muted/20 transition-colors duration-200">
+                {subColumns.map((col) => {
+                  const value = subRow[col.key];
+                  return (
+                    <TableCell key={col.key} className="text-sm py-2 px-3">
+                      {col.type === 'Badge' && col.statusMap ? (
+                        <span className={cn(
+                          "inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium",
+                          col.statusMap[value] || "bg-gray-100 text-gray-800"
+                        )}>
+                          {value}
+                        </span>
+                      ) : col.type === 'Date' ? (
+                        new Date(value).toLocaleDateString()
+                      ) : col.type === 'CurrencyWithSymbol' ? (
+                        `${subRow.currencySymbol || '$'}${value}`
+                      ) : (
+                        value ?? '-'
+                      )}
+                    </TableCell>
+                  );
+                })}
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+    );
+  }, [subRowConfig, hasArrayData]);
+
   // renderCell function
   const renderCell = useCallback((row: any, column: GridColumnConfig, rowIndex: number, columnIndex: number) => {
     const value = row[column.key];
     const isEditing = editingCell?.rowIndex === rowIndex && editingCell?.columnKey === column.key;
     const isEditable = isColumnEditable(column, columnIndex);
 
-    // Only show expand/collapse arrow if subRowColumns count > 0 and in first cell of first column
-    if (columnIndex === 0 && (effectiveNestedRowRenderer || hasCollapsibleColumns) && !row.__isGroupHeader) {
-      const isExpanded = expandedRows.has(rowIndex);
-      return (
-        <div className="flex items-center space-x-1 min-w-0">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => onRowExpansionOverride ? onRowExpansionOverride(rowIndex) : toggleRowExpansion(rowIndex)}
-            className="h-5 w-5 p-0 hover:bg-gray-100 flex-shrink-0"
-          >
-            {isExpanded ? (
-              <ChevronDown className="h-3 w-3" />
-            ) : (
-              <ChevronRight className="h-3 w-3" />
+    // Show both array expansion and nested row expansion if applicable
+    if (columnIndex === 0 && !row.__isGroupHeader) {
+      const hasNestedRenderer = effectiveNestedRowRenderer || hasCollapsibleColumns;
+      const hasArraySubRow = hasArrayData(row);
+      
+      if (hasNestedRenderer || hasArraySubRow) {
+        const isNestedExpanded = expandedRows.has(rowIndex);
+        const isArrayExpanded = expandedArrayRows.has(rowIndex);
+        
+        return (
+          <div className="flex items-center space-x-1 min-w-0">
+            {/* Array expansion button */}
+            {hasArraySubRow && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  toggleArrayRowExpansion(rowIndex);
+                }}
+                className="h-5 w-5 p-0 hover:bg-primary/10 flex-shrink-0 transition-transform duration-200"
+                title={isArrayExpanded ? "Collapse sub-rows" : "Expand sub-rows"}
+              >
+                {isArrayExpanded ? (
+                  <ChevronDown className="h-3 w-3 text-primary" />
+                ) : (
+                  <ChevronRight className="h-3 w-3 text-primary" />
+                )}
+              </Button>
             )}
-          </Button>
-          <div className="flex-1 min-w-0 truncate">
-            <CellRenderer
-              value={value}
-              row={row}
-              column={column}
-              rowIndex={rowIndex}
-              columnIndex={columnIndex}
-              isEditing={isEditing}
-              isEditable={isEditable}
-              onEdit={handleCellEdit}
-              onEditStart={handleEditStart}
-              onEditCancel={handleEditCancel}
-              onLinkClick={onLinkClick}
-              loading={loading}
-            />
+            
+            {/* Nested row expansion button (existing functionality) */}
+            {hasNestedRenderer && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onRowExpansionOverride ? onRowExpansionOverride(rowIndex) : toggleRowExpansion(rowIndex);
+                }}
+                className="h-5 w-5 p-0 hover:bg-gray-100 flex-shrink-0"
+              >
+                {isNestedExpanded ? (
+                  <ChevronDown className="h-3 w-3" />
+                ) : (
+                  <ChevronRight className="h-3 w-3" />
+                )}
+              </Button>
+            )}
+            
+            <div className="flex-1 min-w-0 truncate">
+              <CellRenderer
+                value={value}
+                row={row}
+                column={column}
+                rowIndex={rowIndex}
+                columnIndex={columnIndex}
+                isEditing={isEditing}
+                isEditable={isEditable}
+                onEdit={handleCellEdit}
+                onEditStart={handleEditStart}
+                onEditCancel={handleEditCancel}
+                onLinkClick={onLinkClick}
+                loading={loading}
+              />
+            </div>
           </div>
-        </div>
-      );
+        );
+      }
     }
 
     return (
@@ -765,7 +862,7 @@ export function SmartGrid({
         />
       </div>
     );
-  }, [editingCell, isColumnEditable, effectiveNestedRowRenderer, hasCollapsibleColumns, expandedRows, onRowExpansionOverride, toggleRowExpansion, handleCellEdit, handleEditStart, handleEditCancel, onLinkClick, loading]);
+  }, [editingCell, isColumnEditable, effectiveNestedRowRenderer, hasCollapsibleColumns, expandedRows, expandedArrayRows, onRowExpansionOverride, toggleRowExpansion, toggleArrayRowExpansion, handleCellEdit, handleEditStart, handleEditCancel, onLinkClick, loading, hasArrayData]);
 
   // Update grid data when prop data changes (only if not using lazy loading)
   useEffect(() => {
@@ -883,9 +980,13 @@ export function SmartGrid({
         onToggleServersideFilter={onToggleServersideFilter}
         hideCheckboxToggle={hideCheckboxToggle}
         gridId={gridId}
-         // Selection props
+          // Selection props
         selectedRowsCount={currentSelectedRows.size}
         onClearSelection={handleClearSelection}
+        // Array sub-row expansion props
+        hasArraySubRows={!!subRowConfig && paginatedData.some(row => hasArrayData(row))}
+        expandedArrayRowsCount={expandedArrayRows.size}
+        onCollapseAllArrayRows={collapseAllArrayRows}
       />
       )}
 
@@ -1265,7 +1366,21 @@ export function SmartGrid({
                     </TableRow>
                   ];
 
-                  // Add nested row if expanded
+                  // Add array sub-row if expanded
+                  if (subRowConfig && hasArrayData(row) && expandedArrayRows.has(rowIndex)) {
+                    rows.push(
+                      <TableRow key={`array-${rowIndex}`} className="bg-muted/10">
+                        <TableCell
+                          colSpan={orderedColumns.length + (showCheckboxes ? 1 : 0) + (plugins.some(plugin => plugin.rowActions) ? 1 : 0)}
+                          className="p-4 border-b border-gray-200"
+                        >
+                          {renderArraySubRow(row, rowIndex)}
+                        </TableCell>
+                      </TableRow>
+                    );
+                  }
+
+                  // Add nested row if expanded (existing functionality)
                   if (effectiveNestedRowRenderer && expandedRows.has(rowIndex)) {
                     rows.push(
                       <TableRow key={`nested-${rowIndex}`} className="bg-gray-50/30">

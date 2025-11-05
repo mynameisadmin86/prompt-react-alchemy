@@ -78,9 +78,16 @@ interface GridToolbarProps {
   // Selection props
   selectedRowsCount?: number;
   onClearSelection?: () => void;
+  // Array sub-row expansion props
+  hasArraySubRows?: boolean;
+  expandedArrayRowsCount?: number;
+  onCollapseAllArrayRows?: () => void;
 }
 
 export function GridToolbar({
+  hasArraySubRows = false,
+  expandedArrayRowsCount = 0,
+  onCollapseAllArrayRows,
   globalFilter,
   setGlobalFilter,
   showColumnFilters,
@@ -315,6 +322,21 @@ export function GridToolbar({
             </span>
           )}
         </Button>
+
+        {/* Collapse All Array Sub-Rows Button */}
+        {hasArraySubRows && expandedArrayRowsCount > 0 && onCollapseAllArrayRows && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onCollapseAllArrayRows}
+            disabled={loading}
+            title={`Collapse ${expandedArrayRowsCount} expanded row${expandedArrayRowsCount > 1 ? 's' : ''}`}
+            className="h-9 px-3 flex items-center gap-2 rounded-lg hover:bg-gray-100 border border-gray-300 text-sm"
+          >
+            <ChevronDown className="h-3 w-3" />
+            Collapse All ({expandedArrayRowsCount})
+          </Button>
+        )}
 
         {/* Export Dropdown Button */}
         {gridTitle !== "Leg Details" && (
