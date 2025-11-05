@@ -334,16 +334,8 @@ export function SmartGrid({
   // Use sub-row renderer if we have sub-row columns, otherwise use collapsible or custom renderer
   // If we have both sub-row columns AND a custom nestedRowRenderer, combine them
   const effectiveNestedRowRenderer = useMemo(() => {
-    console.log('Computing effectiveNestedRowRenderer:', {
-      hasSubRowColumns,
-      hasCollapsibleColumns,
-      hasCustomNestedRenderer: !!nestedRowRenderer,
-      subRowColumnsCount: subRowColumns.length
-    });
-    
     if (hasSubRowColumns && nestedRowRenderer) {
       // Combine sub-row content with custom nested renderer
-      console.log('Using combined renderer (sub-row + custom)');
       return (row: any, rowIndex: number) => (
         <>
           {renderSubRowContent(row, rowIndex)}
@@ -351,13 +343,10 @@ export function SmartGrid({
         </>
       );
     } else if (hasSubRowColumns) {
-      console.log('Using sub-row renderer only');
       return renderSubRowContent;
     } else if (hasCollapsibleColumns) {
-      console.log('Using collapsible renderer');
       return renderCollapsibleContent;
     } else {
-      console.log('Using custom renderer or none');
       return nestedRowRenderer;
     }
   }, [hasSubRowColumns, hasCollapsibleColumns, nestedRowRenderer, renderSubRowContent, renderCollapsibleContent, subRowColumns.length]);
@@ -803,19 +792,25 @@ export function SmartGrid({
   }, [data, onDataFetch, setGridData]);
 
   // Initialize columns in state when props change
+  // BUT preserve internal modifications like subRow flags
   useEffect(() => {
-    if (columns.length > 0) {
+    if (columns.length > 0 && stateColumns.length === 0) {
+      // Only set columns if stateColumns is empty (initial load)
       setColumns(columns);
     }
-  }, [columns, setColumns]);
+  }, [columns, stateColumns.length, setColumns]);
 
-  // Always sync columns and grid data from props if preferences change or are missing (fix for localStorage clear and hard refresh)
+  // Sync new columns from props but preserve subRow and other internal flags
   useEffect(() => {
-    if (columns.length > 0) {
-      setColumns(columns);
-      setGridData(data); // Ensure data is set after columns are initialized
+    if (columns.length > 0 && stateColumns.length > 0) {
+      // Merge: take new columns but preserve subRow flags from stateColumns
+      const merged = columns.map(col => {
+        const existing = stateColumns.find(sc => sc.key === col.key);
+        return existing ? { ...col, subRow: existing.subRow } : col;
+      });
+      setColumns(merged);
     }
-  }, [columns, preferences, data, setColumns, setGridData]);
+  }, [columns]);
 
   // Initialize plugins
   useEffect(() => {
