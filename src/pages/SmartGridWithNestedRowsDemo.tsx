@@ -1,9 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { SmartGridWithNestedRows } from '@/components/SmartGrid';
 import { GridColumnConfig } from '@/types/smartgrid';
 
 // Mock data for trips with nested legs
-const tripsData = [
+const initialTripsData = [
   {
     tripId: 'TRIP-001',
     vehicleNo: 'MH-12-AB-1234',
@@ -48,7 +48,7 @@ const tripsData = [
 ];
 
 // Mock data for orders with nested items
-const ordersData = [
+const initialOrdersData = [
   {
     orderId: 'ORD-1001',
     customerName: 'Acme Corp',
@@ -85,6 +85,36 @@ const ordersData = [
 ];
 
 export default function SmartGridWithNestedRowsDemo() {
+  // State for trips and orders
+  const [tripsData, setTripsData] = useState(initialTripsData);
+  const [ordersData, setOrdersData] = useState(initialOrdersData);
+
+  // Handler to update nested trip legs
+  const handleTripLegUpdate = (parentRowIndex: number, legIndex: number, updatedLeg: any) => {
+    setTripsData(prevData => {
+      const newData = [...prevData];
+      const trip = { ...newData[parentRowIndex] };
+      const updatedLegs = [...trip.tripLegs];
+      updatedLegs[legIndex] = { ...updatedLegs[legIndex], ...updatedLeg };
+      trip.tripLegs = updatedLegs;
+      newData[parentRowIndex] = trip;
+      return newData;
+    });
+  };
+
+  // Handler to update nested order items
+  const handleOrderItemUpdate = (parentRowIndex: number, itemIndex: number, updatedItem: any) => {
+    setOrdersData(prevData => {
+      const newData = [...prevData];
+      const order = { ...newData[parentRowIndex] };
+      const updatedItems = [...order.orderItems];
+      updatedItems[itemIndex] = { ...updatedItems[itemIndex], ...updatedItem };
+      order.orderItems = updatedItems;
+      newData[parentRowIndex] = order;
+      return newData;
+    });
+  };
+
   // Column config for trips
   const tripColumns: GridColumnConfig[] = [
     { key: 'tripId', label: 'Trip ID', type: 'Text', width: 120 },
@@ -183,8 +213,8 @@ export default function SmartGridWithNestedRowsDemo() {
             initiallyExpanded: false,
             showNestedRowCount: true,
             editableColumns: true,
-            onInlineEdit: (rowIndex, updatedRow) => {
-              console.log('Nested row edited:', rowIndex, updatedRow);
+            onInlineEdit: (parentRowIndex, legIndex, updatedLeg) => {
+              handleTripLegUpdate(parentRowIndex, legIndex, updatedLeg);
             },
           }}
           editableColumns={true}
@@ -212,8 +242,8 @@ export default function SmartGridWithNestedRowsDemo() {
             initiallyExpanded: false,
             showNestedRowCount: true,
             editableColumns: ['productName', 'quantity', 'unitPrice'],
-            onInlineEdit: (rowIndex, updatedRow) => {
-              console.log('Nested order item edited:', rowIndex, updatedRow);
+            onInlineEdit: (parentRowIndex, itemIndex, updatedItem) => {
+              handleOrderItemUpdate(parentRowIndex, itemIndex, updatedItem);
             },
           }}
           editableColumns={true}
