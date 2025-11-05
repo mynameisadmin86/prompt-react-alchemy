@@ -319,6 +319,7 @@ export const CellRenderer: React.FC<CellRendererProps> = ({
                 if (date) {
                   setTempValue(date.toISOString());
                   onEdit(rowIndex, column.key, date.toISOString());
+                  onEditCancel();
                 }
               }}
               initialFocus
@@ -532,6 +533,7 @@ export const CellRenderer: React.FC<CellRendererProps> = ({
                 if (date) {
                   setTempValue(date.toISOString());
                   onEdit(rowIndex, column.key, date.toISOString());
+                  onEditCancel();
                 }
               }}
               initialFocus
@@ -595,6 +597,7 @@ export const CellRenderer: React.FC<CellRendererProps> = ({
                 if (date) {
                   setTempValue(date.toISOString());
                   onEdit(rowIndex, column.key, date.toISOString());
+                  onEditCancel();
                 }
               }}
               initialFocus
