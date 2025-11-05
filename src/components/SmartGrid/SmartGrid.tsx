@@ -710,7 +710,15 @@ export function SmartGrid({
 
   // Check if row has array data for sub-row rendering
   const hasArrayData = useCallback((row: any) => {
-    return subRowConfig && row[subRowConfig.key] && Array.isArray(row[subRowConfig.key]) && row[subRowConfig.key].length > 0;
+    const hasData = subRowConfig && row[subRowConfig.key] && Array.isArray(row[subRowConfig.key]) && row[subRowConfig.key].length > 0;
+    console.log('hasArrayData check:', { 
+      hasSubRowConfig: !!subRowConfig, 
+      key: subRowConfig?.key, 
+      rowData: row[subRowConfig?.key || ''], 
+      isArray: Array.isArray(row[subRowConfig?.key || '']),
+      hasData 
+    });
+    return hasData;
   }, [subRowConfig]);
 
   // Render array sub-row table
@@ -761,7 +769,11 @@ export function SmartGrid({
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => toggleArrayRowExpansion(rowIndex)}
+            onClick={() => {
+              console.log('Expand button clicked for row:', rowIndex);
+              console.log('Current expandedArrayRows:', Array.from(expandedArrayRows));
+              toggleArrayRowExpansion(rowIndex);
+            }}
             className="h-5 w-5 p-0 hover:bg-gray-100 flex-shrink-0 transition-transform duration-200"
           >
             {isExpanded ? (
@@ -1351,6 +1363,7 @@ export function SmartGrid({
 
                   // Add array sub-row if expanded and has array data
                   if (hasArrayData(row) && expandedArrayRows.has(rowIndex)) {
+                    console.log('Rendering array sub-row for rowIndex:', rowIndex);
                     rows.push(
                       <TableRow key={`array-subrow-${rowIndex}`} className="bg-gray-50/30">
                         <TableCell
