@@ -111,7 +111,7 @@ export default function SmartGridWithNestedRowsDemo() {
     { key: 'from', label: 'From', type: 'Text', width: 160, editable: true },
     { key: 'to', label: 'To', type: 'Text', width: 160, editable: true },
     { key: 'distance', label: 'Distance (KM)', type: 'Text', width: 120, editable: true },
-    { key: 'eta', label: 'ETA', type: 'Text', width: 160, editable: true },
+    { key: 'eta', label: 'ETA', type: 'Date', width: 180, editable: true },
     {
       key: 'status',
       label: 'Status',
