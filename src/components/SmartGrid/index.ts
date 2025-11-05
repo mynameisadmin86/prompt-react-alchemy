@@ -1,3 +1,4 @@
+
 export { SmartGrid } from './SmartGrid';
 export { SmartGridPlus } from './SmartGridPlus';
 export { SmartGridWithGrouping } from './SmartGridWithGrouping';
@@ -25,4 +26,3 @@ export * from '@/utils/gridExport';
 export * from '@/utils/gridDataProcessing';
 export * from '@/utils/columnWidthCalculations';
 export { downloadJsonPlugin } from '@/plugins/downloadJsonPlugin';
-export type { SubRowConfig } from '@/types/smartgrid';

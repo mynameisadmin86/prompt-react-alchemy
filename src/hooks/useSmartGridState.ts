@@ -15,7 +15,6 @@ export function useSmartGridState() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [expandedRows, setExpandedRows] = useState<Set<number>>(new Set());
-  const [expandedArrayRows, setExpandedArrayRows] = useState<Set<number>>(new Set());
   const [internalSelectedRows, setInternalSelectedRows] = useState<Set<number>>(new Set());
   const [showCheckboxes, setShowCheckboxes] = useState(false);
   const [viewMode, setViewMode] = useState<'table' | 'card'>('table');
@@ -153,27 +152,6 @@ export function useSmartGridState() {
     setForceUpdate(prev => prev + 1);
   }, []);
 
-  const toggleArrayRowExpansion = useCallback((rowIndex: number) => {
-    console.log('Toggling array row expansion for row:', rowIndex);
-    setExpandedArrayRows(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(rowIndex)) {
-        newSet.delete(rowIndex);
-        console.log('Array row collapsed:', rowIndex);
-      } else {
-        newSet.add(rowIndex);
-        console.log('Array row expanded:', rowIndex);
-      }
-      console.log('Updated expanded array rows:', Array.from(newSet));
-      return newSet;
-    });
-  }, []);
-
-  const collapseAllArrayRows = useCallback(() => {
-    console.log('Collapsing all array rows');
-    setExpandedArrayRows(new Set());
-  }, []);
-
   return {
     // State
     gridData,
@@ -202,8 +180,6 @@ export function useSmartGridState() {
     setError,
     expandedRows,
     setExpandedRows,
-    expandedArrayRows,
-    setExpandedArrayRows,
     internalSelectedRows,
     setInternalSelectedRows,
     showCheckboxes,
@@ -231,8 +207,6 @@ export function useSmartGridState() {
     handleSubRowEdit,
     handleSubRowEditStart,
     handleSubRowEditCancel,
-    handleReorderSubRowColumns,
-    toggleArrayRowExpansion,
-    collapseAllArrayRows
+    handleReorderSubRowColumns
   };
 }
