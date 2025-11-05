@@ -116,18 +116,10 @@ export function SmartGridWithNestedRows({
     ? enhancedNestedRowRenderer
     : smartGridProps.nestedRowRenderer;
 
-  // Override onRowExpansionOverride to ensure rows can expand
-  const handleRowExpansion = (rowIndex: number) => {
-    if (smartGridProps.onRowExpansionOverride) {
-      smartGridProps.onRowExpansionOverride(rowIndex);
-    }
-  };
-
   return (
     <SmartGrid
       {...smartGridProps}
       nestedRowRenderer={finalNestedRowRenderer}
-      onRowExpansionOverride={handleRowExpansion}
     />
   );
 }
