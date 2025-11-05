@@ -13,6 +13,7 @@ export interface NestedSectionConfig {
   editableColumns?: boolean | string[];
   onInlineEdit?: (parentRowIndex: number, nestedRowIndex: number, updatedRow: any) => void;
   onUpdate?: (parentRowIndex: number, nestedRowIndex: number, updatedRow: any) => Promise<void>;
+  onServerUpdate?: (parentRow: any, nestedRow: any, updatedData: any) => Promise<void>;
 }
 
 export interface SmartGridWithNestedRowsProps extends SmartGridProps {
@@ -108,7 +109,13 @@ export function SmartGridWithNestedRows({
                     customPageSize={rowCount}
                     editableColumns={nestedSectionConfig.editableColumns}
                     onInlineEdit={nestedSectionConfig.onInlineEdit 
-                      ? (nestedRowIndex, updatedRow) => nestedSectionConfig.onInlineEdit!(rowIndex, nestedRowIndex, updatedRow)
+                      ? async (nestedRowIndex, updatedRow) => {
+                          nestedSectionConfig.onInlineEdit!(rowIndex, nestedRowIndex, updatedRow);
+                          // Trigger server callback if provided
+                          if (nestedSectionConfig.onServerUpdate) {
+                            await nestedSectionConfig.onServerUpdate(row, nestedData[nestedRowIndex], updatedRow);
+                          }
+                        }
                       : undefined}
                     onUpdate={nestedSectionConfig.onUpdate
                       ? (updatedRow) => nestedSectionConfig.onUpdate!(rowIndex, nestedData.findIndex((item: any) => item === updatedRow), updatedRow)

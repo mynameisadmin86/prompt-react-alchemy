@@ -115,6 +115,58 @@ export default function SmartGridWithNestedRowsDemo() {
     });
   };
 
+  // Server callback for trip leg updates
+  const handleTripLegServerUpdate = async (parentRow: any, nestedRow: any, updatedData: any) => {
+    try {
+      console.log('Sending trip leg update to server:', {
+        tripId: parentRow.tripId,
+        legNo: nestedRow.legNo,
+        updatedData
+      });
+      
+      // Replace with your actual API call
+      // const response = await fetch('YOUR_API_ENDPOINT', {
+      //   method: 'POST',
+      //   headers: { 'Content-Type': 'application/json' },
+      //   body: JSON.stringify({
+      //     tripId: parentRow.tripId,
+      //     legNo: nestedRow.legNo,
+      //     ...updatedData
+      //   })
+      // });
+      // 
+      // if (!response.ok) throw new Error('Failed to update');
+    } catch (error) {
+      console.error('Failed to update server:', error);
+    }
+  };
+
+  // Server callback for order item updates
+  const handleOrderItemServerUpdate = async (parentRow: any, nestedRow: any, updatedData: any) => {
+    try {
+      console.log('Sending order item update to server:', {
+        orderId: parentRow.orderId,
+        itemNo: nestedRow.itemNo,
+        updatedData
+      });
+      
+      // Replace with your actual API call
+      // const response = await fetch('YOUR_API_ENDPOINT', {
+      //   method: 'POST',
+      //   headers: { 'Content-Type': 'application/json' },
+      //   body: JSON.stringify({
+      //     orderId: parentRow.orderId,
+      //     itemNo: nestedRow.itemNo,
+      //     ...updatedData
+      //   })
+      // });
+      // 
+      // if (!response.ok) throw new Error('Failed to update');
+    } catch (error) {
+      console.error('Failed to update server:', error);
+    }
+  };
+
   // Column config for trips
   const tripColumns: GridColumnConfig[] = [
     { key: 'tripId', label: 'Trip ID', type: 'Text', width: 120 },
@@ -216,6 +268,7 @@ export default function SmartGridWithNestedRowsDemo() {
             onInlineEdit: (parentRowIndex, legIndex, updatedLeg) => {
               handleTripLegUpdate(parentRowIndex, legIndex, updatedLeg);
             },
+            onServerUpdate: handleTripLegServerUpdate,
           }}
           editableColumns={true}
           paginationMode="pagination"
@@ -245,6 +298,7 @@ export default function SmartGridWithNestedRowsDemo() {
             onInlineEdit: (parentRowIndex, itemIndex, updatedItem) => {
               handleOrderItemUpdate(parentRowIndex, itemIndex, updatedItem);
             },
+            onServerUpdate: handleOrderItemServerUpdate,
           }}
           editableColumns={true}
           paginationMode="pagination"
