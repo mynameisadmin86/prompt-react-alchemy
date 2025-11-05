@@ -2,6 +2,7 @@
 export { SmartGrid } from './SmartGrid';
 export { SmartGridPlus } from './SmartGridPlus';
 export { SmartGridWithGrouping } from './SmartGridWithGrouping';
+export { SmartGridWithNestedRows } from './SmartGridWithNestedRows';
 export { ServersideFilter } from './ServersideFilter';
 export { CellEditor } from './CellEditor';
 export { ColumnManager } from './ColumnManager';

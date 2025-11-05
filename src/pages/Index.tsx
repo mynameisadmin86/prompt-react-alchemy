@@ -244,6 +244,13 @@ const Index = () => {
       path: "/badges-list-demo",
       color: "text-pink-500"
     },
+    {
+      title: "SmartGrid with Nested Rows",
+      description: "Extended SmartGrid with collapsible nested array sections for hierarchical data",
+      icon: Layers,
+      path: "/smartgrid-nested-rows-demo",
+      color: "text-cyan-500"
+    },
   ];
 
   return (
