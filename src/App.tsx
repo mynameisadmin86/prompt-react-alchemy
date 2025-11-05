@@ -41,6 +41,7 @@ import SmartGridHighlightDemo from "./pages/SmartGridHighlightDemo";
 import TransportRouteUpdate from "./pages/TransportRouteUpdate";
 import SmartGridSelectionDemo from "./pages/SmartGridSelectionDemo";
 import BadgesListDemo from "./pages/BadgesListDemo";
+import NestedSmartGridDemo from "./pages/NestedSmartGridDemo";
 
 const queryClient = new QueryClient();
 
@@ -87,6 +88,7 @@ const App = () => (
           <Route path="/smartgrid-selection-demo" element={<SmartGridSelectionDemo />} />
           <Route path="/consignment-details" element={<ConsignmentDetailsPage />} />
           <Route path="/badges-list-demo" element={<BadgesListDemo />} />
+          <Route path="/nested-smartgrid-demo" element={<NestedSmartGridDemo />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
