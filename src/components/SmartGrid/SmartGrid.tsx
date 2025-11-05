@@ -332,7 +332,24 @@ export function SmartGrid({
   }, [hasSubRowColumns, subRowColumns, preferences, updateSubRowColumnOrder, handleSubRowEdit, handleSubRowEditStart, handleSubRowEditCancel, renderCollapsibleContent]);
 
   // Use sub-row renderer if we have sub-row columns, otherwise use collapsible or custom renderer
-  const effectiveNestedRowRenderer = hasSubRowColumns ? renderSubRowContent : (hasCollapsibleColumns ? renderCollapsibleContent : nestedRowRenderer);
+  // If we have both sub-row columns AND a custom nestedRowRenderer, combine them
+  const effectiveNestedRowRenderer = useMemo(() => {
+    if (hasSubRowColumns && nestedRowRenderer) {
+      // Combine sub-row content with custom nested renderer
+      return (row: any, rowIndex: number) => (
+        <>
+          {renderSubRowContent(row, rowIndex)}
+          {nestedRowRenderer(row, rowIndex)}
+        </>
+      );
+    } else if (hasSubRowColumns) {
+      return renderSubRowContent;
+    } else if (hasCollapsibleColumns) {
+      return renderCollapsibleContent;
+    } else {
+      return nestedRowRenderer;
+    }
+  }, [hasSubRowColumns, hasCollapsibleColumns, nestedRowRenderer, renderSubRowContent, renderCollapsibleContent]);
 
   // Process data with sorting and filtering (only if not using lazy loading)
   const processedData = useMemo(() => {

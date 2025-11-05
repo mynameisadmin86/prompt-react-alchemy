@@ -37,10 +37,12 @@ export function SmartGridWithNestedRows({
   };
 
   // Create a nested row renderer that includes both the original nested content
-  // and the new nested section
+  // (sub-row columns) and the new nested section (nested array data)
   const enhancedNestedRowRenderer = (row: any, rowIndex: number) => {
+    // Get the original nested content (sub-row columns functionality)
     const originalNestedContent = smartGridProps.nestedRowRenderer?.(row, rowIndex);
     
+    // If no nested section config, just return original content
     if (!nestedSectionConfig) {
       return originalNestedContent;
     }
@@ -51,14 +53,14 @@ export function SmartGridWithNestedRows({
 
     return (
       <div className="space-y-0">
-        {/* Original nested content from parent SmartGrid */}
+        {/* Original nested content from parent SmartGrid (sub-row columns) */}
         {originalNestedContent && (
-          <div className="border-b border-gray-200">
+          <div className="border-b border-border/30">
             {originalNestedContent}
           </div>
         )}
 
-        {/* New nested section */}
+        {/* New nested section for array data */}
         <div className="bg-background">
           {/* Nested section header */}
           <div
