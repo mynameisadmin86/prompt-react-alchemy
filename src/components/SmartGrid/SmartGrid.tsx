@@ -51,7 +51,6 @@ export function SmartGrid({
   paginationMode = 'pagination',
   nestedRowRenderer,
   onRowExpansionOverride,
-  subRowConfig,
   plugins = [],
   selectedRows,
   onSelectionChange,
@@ -134,7 +133,6 @@ export function SmartGrid({
     columnWidths,
     setColumnWidths,
     resizeStartRef,
-    expandedArrayRows,
     handleColumnFilterChange,
     handleClearColumnFilter,
     handleSort,
@@ -142,9 +140,7 @@ export function SmartGrid({
     handleSubRowToggle,
     handleSubRowEdit,
     handleSubRowEditStart,
-    handleSubRowEditCancel,
-    toggleArrayRowExpansion,
-    collapseAllArrayRows
+    handleSubRowEditCancel
   } = useSmartGridState();
 
   const [pageSize] = useState(customPageSize || 10);
@@ -708,102 +704,14 @@ export function SmartGrid({
     setEditingCell(null);
   }, [setEditingCell]);
 
-  // Check if row has array data for sub-row rendering
-  const hasArrayData = useCallback((row: any) => {
-    const hasData = subRowConfig && row[subRowConfig.key] && Array.isArray(row[subRowConfig.key]) && row[subRowConfig.key].length > 0;
-    console.log('hasArrayData check:', { 
-      hasSubRowConfig: !!subRowConfig, 
-      key: subRowConfig?.key, 
-      rowData: row[subRowConfig?.key || ''], 
-      isArray: Array.isArray(row[subRowConfig?.key || '']),
-      hasData 
-    });
-    return hasData;
-  }, [subRowConfig]);
-
-  // Render array sub-row table
-  const renderArraySubRow = useCallback((row: any, rowIndex: number) => {
-    if (!subRowConfig || !hasArrayData(row)) return null;
-    
-    const arrayData = row[subRowConfig.key];
-    
-    return (
-      <div className="pl-8 border-l-2 border-gray-200 bg-gray-50/50 py-2 transition-all duration-200 ease-in-out animate-fade-in">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              {subRowConfig.columns.map((col) => (
-                <TableHead key={col.key} className="bg-gray-100 font-semibold text-gray-700 text-xs">
-                  {col.label}
-                </TableHead>
-              ))}
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {arrayData.map((subRow: any, subIndex: number) => (
-              <TableRow key={subIndex} className="hover:bg-gray-100/50">
-                {subRowConfig.columns.map((col) => (
-                  <TableCell key={col.key} className="text-xs py-1">
-                    {subRow[col.key] ?? '-'}
-                  </TableCell>
-                ))}
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
-    );
-  }, [subRowConfig, hasArrayData]);
-
   // renderCell function
   const renderCell = useCallback((row: any, column: GridColumnConfig, rowIndex: number, columnIndex: number) => {
     const value = row[column.key];
     const isEditing = editingCell?.rowIndex === rowIndex && editingCell?.columnKey === column.key;
     const isEditable = isColumnEditable(column, columnIndex);
 
-    // Show array sub-row expand icon in first column if subRowConfig exists and row has array data
-    if (columnIndex === 0 && hasArrayData(row) && !row.__isGroupHeader) {
-      const isExpanded = expandedArrayRows.has(rowIndex);
-      return (
-        <div className="flex items-center space-x-1 min-w-0">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => {
-              console.log('Expand button clicked for row:', rowIndex);
-              console.log('Current expandedArrayRows:', Array.from(expandedArrayRows));
-              toggleArrayRowExpansion(rowIndex);
-            }}
-            className="h-5 w-5 p-0 hover:bg-gray-100 flex-shrink-0 transition-transform duration-200"
-          >
-            {isExpanded ? (
-              <ChevronDown className="h-3 w-3 transition-transform" />
-            ) : (
-              <ChevronRight className="h-3 w-3 transition-transform" />
-            )}
-          </Button>
-          <div className="flex-1 min-w-0 truncate">
-            <CellRenderer
-              value={value}
-              row={row}
-              column={column}
-              rowIndex={rowIndex}
-              columnIndex={columnIndex}
-              isEditing={isEditing}
-              isEditable={isEditable}
-              onEdit={handleCellEdit}
-              onEditStart={handleEditStart}
-              onEditCancel={handleEditCancel}
-              onLinkClick={onLinkClick}
-              loading={loading}
-            />
-          </div>
-        </div>
-      );
-    }
-
     // Only show expand/collapse arrow if subRowColumns count > 0 and in first cell of first column
-    if (columnIndex === 0 && (effectiveNestedRowRenderer || hasCollapsibleColumns) && !row.__isGroupHeader && !hasArrayData(row)) {
+    if (columnIndex === 0 && (effectiveNestedRowRenderer || hasCollapsibleColumns) && !row.__isGroupHeader) {
       const isExpanded = expandedRows.has(rowIndex);
       return (
         <div className="flex items-center space-x-1 min-w-0">
@@ -857,7 +765,7 @@ export function SmartGrid({
         />
       </div>
     );
-  }, [editingCell, isColumnEditable, effectiveNestedRowRenderer, hasCollapsibleColumns, expandedRows, expandedArrayRows, hasArrayData, onRowExpansionOverride, toggleRowExpansion, toggleArrayRowExpansion, handleCellEdit, handleEditStart, handleEditCancel, onLinkClick, loading]);
+  }, [editingCell, isColumnEditable, effectiveNestedRowRenderer, hasCollapsibleColumns, expandedRows, onRowExpansionOverride, toggleRowExpansion, handleCellEdit, handleEditStart, handleEditCancel, onLinkClick, loading]);
 
   // Update grid data when prop data changes (only if not using lazy loading)
   useEffect(() => {
@@ -970,7 +878,7 @@ export function SmartGrid({
         onGroupByChange={onGroupByChange}
         groupableColumns={groupableColumns}
         showGroupingDropdown={showGroupingDropdown}
-         // Server-side filter props
+        // Server-side filter props
         showServersideFilter={showServersideFilter}
         onToggleServersideFilter={onToggleServersideFilter}
         hideCheckboxToggle={hideCheckboxToggle}
@@ -978,10 +886,6 @@ export function SmartGrid({
          // Selection props
         selectedRowsCount={currentSelectedRows.size}
         onClearSelection={handleClearSelection}
-        // Array sub-row props
-        hasArraySubRows={!!subRowConfig}
-        expandedArrayRowsCount={expandedArrayRows.size}
-        onCollapseAllArrayRows={collapseAllArrayRows}
       />
       )}
 
@@ -1360,21 +1264,6 @@ export function SmartGrid({
                       )}
                     </TableRow>
                   ];
-
-                  // Add array sub-row if expanded and has array data
-                  if (hasArrayData(row) && expandedArrayRows.has(rowIndex)) {
-                    console.log('Rendering array sub-row for rowIndex:', rowIndex);
-                    rows.push(
-                      <TableRow key={`array-subrow-${rowIndex}`} className="bg-gray-50/30">
-                        <TableCell
-                          colSpan={orderedColumns.length + (showCheckboxes ? 1 : 0) + (plugins.some(plugin => plugin.rowActions) ? 1 : 0)}
-                          className="p-0 border-b border-gray-200"
-                        >
-                          {renderArraySubRow(row, rowIndex)}
-                        </TableCell>
-                      </TableRow>
-                    );
-                  }
 
                   // Add nested row if expanded
                   if (effectiveNestedRowRenderer && expandedRows.has(rowIndex)) {

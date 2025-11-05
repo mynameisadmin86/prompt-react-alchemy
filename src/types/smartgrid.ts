@@ -30,13 +30,6 @@ export type GridColumnType =
   | 'ActionButton'         // Action button column
   | 'LegLocationFormat';   // Location format for legs
 
-// Sub-row configuration for array data
-export interface SubRowConfig {
-  key: string; // Key to access array data from parent row
-  columns: GridColumnConfig[]; // Columns to display in sub-row table
-  expandable?: boolean; // Whether sub-rows can be expanded/collapsed
-}
-
 export interface GridColumnConfig {
   key: string;
   label: string;
@@ -196,7 +189,6 @@ export interface SmartGridProps {
   paginationMode?: 'pagination' | 'infinite';
   nestedRowRenderer?(row: any, rowIndex: number): React.ReactNode;
   onRowExpansionOverride?(rowIndex: number): void;
-  subRowConfig?: SubRowConfig; // Configuration for array sub-rows
   plugins?: GridPlugin[];
   selectedRows?: Set<number>;
   defaultSelectedRows?: Set<number>;

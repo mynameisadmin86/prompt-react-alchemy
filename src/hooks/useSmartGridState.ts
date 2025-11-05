@@ -24,7 +24,6 @@ export function useSmartGridState() {
   const [columnWidths, setColumnWidths] = useState<Record<string, number>>({});
   const [forceUpdate, setForceUpdate] = useState(0);
   const [subRowColumnOrder, setSubRowColumnOrder] = useState<string[]>([]);
-  const [expandedArrayRows, setExpandedArrayRows] = useState<Set<number>>(new Set());
   const resizeStartRef = useRef<{ x: number; width: number } | null>(null);
 
   const handleColumnFilterChange = useCallback((filter: FilterConfig | null, column?: any, onServerFilter?: (filters: FilterConfig[]) => Promise<void>) => {
@@ -153,22 +152,6 @@ export function useSmartGridState() {
     setForceUpdate(prev => prev + 1);
   }, []);
 
-  const toggleArrayRowExpansion = useCallback((rowIndex: number) => {
-    setExpandedArrayRows(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(rowIndex)) {
-        newSet.delete(rowIndex);
-      } else {
-        newSet.add(rowIndex);
-      }
-      return newSet;
-    });
-  }, []);
-
-  const collapseAllArrayRows = useCallback(() => {
-    setExpandedArrayRows(new Set());
-  }, []);
-
   return {
     // State
     gridData,
@@ -214,7 +197,6 @@ export function useSmartGridState() {
     resizeStartRef,
     forceUpdate,
     subRowColumnOrder,
-    expandedArrayRows,
     
     // Actions
     handleColumnFilterChange,
@@ -225,8 +207,6 @@ export function useSmartGridState() {
     handleSubRowEdit,
     handleSubRowEditStart,
     handleSubRowEditCancel,
-    handleReorderSubRowColumns,
-    toggleArrayRowExpansion,
-    collapseAllArrayRows
+    handleReorderSubRowColumns
   };
 }

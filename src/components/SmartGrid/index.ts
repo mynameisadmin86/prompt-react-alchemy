@@ -19,7 +19,6 @@ export { FilterSetDropdown } from './FilterSetDropdown';
 export { FilterFieldSettings } from './FilterFieldSettings';
 export { EnhancedCellEditor } from './EnhancedCellEditor';
 export * from '@/types/smartgrid';
-export { type SubRowConfig } from '@/types/smartgrid';
 export * from '@/hooks/useSmartGridData';
 export * from '@/hooks/useGridPreferences';
 export * from '@/hooks/useSmartGridState';
