@@ -244,6 +244,13 @@ const Index = () => {
       path: "/badges-list-demo",
       color: "text-pink-500"
     },
+    {
+      title: "SmartGrid Array Sub-Row Demo",
+      description: "Expandable sub-rows displaying nested array data with collapse all functionality",
+      icon: Layers,
+      path: "/smartgrid-array-subrow-demo",
+      color: "text-cyan-600"
+    },
   ];
 
   return (
