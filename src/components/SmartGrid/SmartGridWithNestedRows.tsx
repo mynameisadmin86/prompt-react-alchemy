@@ -10,6 +10,9 @@ export interface NestedSectionConfig {
   title?: string;
   initiallyExpanded?: boolean;
   showNestedRowCount?: boolean;
+  editableColumns?: boolean | string[];
+  onInlineEdit?: (rowIndex: number, updatedRow: any) => void;
+  onUpdate?: (updatedRow: any) => Promise<void>;
 }
 
 export interface SmartGridWithNestedRowsProps extends SmartGridProps {
@@ -103,6 +106,9 @@ export function SmartGridWithNestedRows({
                     paginationMode="infinite"
                     hideToolbar={true}
                     customPageSize={rowCount}
+                    editableColumns={nestedSectionConfig.editableColumns}
+                    onInlineEdit={nestedSectionConfig.onInlineEdit}
+                    onUpdate={nestedSectionConfig.onUpdate}
                   />
                 </div>
               )}

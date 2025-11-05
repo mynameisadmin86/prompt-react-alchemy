@@ -108,15 +108,16 @@ export default function SmartGridWithNestedRowsDemo() {
   // Column config for trip legs (nested)
   const tripLegColumns: GridColumnConfig[] = [
     { key: 'legNo', label: 'Leg No', type: 'Text', width: 80 },
-    { key: 'from', label: 'From', type: 'Text', width: 160 },
-    { key: 'to', label: 'To', type: 'Text', width: 160 },
-    { key: 'distance', label: 'Distance (KM)', type: 'Text', width: 120 },
-    { key: 'eta', label: 'ETA', type: 'Text', width: 160 },
+    { key: 'from', label: 'From', type: 'Text', width: 160, editable: true },
+    { key: 'to', label: 'To', type: 'Text', width: 160, editable: true },
+    { key: 'distance', label: 'Distance (KM)', type: 'Text', width: 120, editable: true },
+    { key: 'eta', label: 'ETA', type: 'Text', width: 160, editable: true },
     {
       key: 'status',
       label: 'Status',
       type: 'Badge',
       width: 120,
+      editable: true,
       statusMap: {
         'Completed': 'Completed',
         'In Progress': 'In Progress',
@@ -147,9 +148,9 @@ export default function SmartGridWithNestedRowsDemo() {
   // Column config for order items (nested)
   const orderItemColumns: GridColumnConfig[] = [
     { key: 'itemNo', label: 'Item No', type: 'Text', width: 80 },
-    { key: 'productName', label: 'Product Name', type: 'Text', width: 200 },
-    { key: 'quantity', label: 'Quantity', type: 'Text', width: 100 },
-    { key: 'unitPrice', label: 'Unit Price', type: 'Text', width: 120 },
+    { key: 'productName', label: 'Product Name', type: 'Text', width: 200, editable: true },
+    { key: 'quantity', label: 'Quantity', type: 'Text', width: 100, editable: true },
+    { key: 'unitPrice', label: 'Unit Price', type: 'Text', width: 120, editable: true },
     { key: 'total', label: 'Total', type: 'Text', width: 120 },
   ];
 
@@ -181,6 +182,10 @@ export default function SmartGridWithNestedRowsDemo() {
             title: 'Trip Legs',
             initiallyExpanded: false,
             showNestedRowCount: true,
+            editableColumns: true,
+            onInlineEdit: (rowIndex, updatedRow) => {
+              console.log('Nested row edited:', rowIndex, updatedRow);
+            },
           }}
           editableColumns={true}
           paginationMode="pagination"
@@ -206,6 +211,10 @@ export default function SmartGridWithNestedRowsDemo() {
             title: 'Order Line Items',
             initiallyExpanded: false,
             showNestedRowCount: true,
+            editableColumns: ['productName', 'quantity', 'unitPrice'],
+            onInlineEdit: (rowIndex, updatedRow) => {
+              console.log('Nested order item edited:', rowIndex, updatedRow);
+            },
           }}
           editableColumns={true}
           paginationMode="pagination"
