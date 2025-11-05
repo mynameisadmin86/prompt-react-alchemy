@@ -78,6 +78,10 @@ interface GridToolbarProps {
   // Selection props
   selectedRowsCount?: number;
   onClearSelection?: () => void;
+  // Array sub-row props
+  hasArraySubRows?: boolean;
+  expandedArrayRowsCount?: number;
+  onCollapseAllArrayRows?: () => void;
 }
 
 export function GridToolbar({
@@ -120,7 +124,10 @@ export function GridToolbar({
   gridId,
   hideCheckboxToggle = false,
   selectedRowsCount = 0,
-  onClearSelection
+  onClearSelection,
+  hasArraySubRows = false,
+  expandedArrayRowsCount = 0,
+  onCollapseAllArrayRows
 }: GridToolbarProps) {
   // Default configurable button configuration
   const defaultConfigurableButton: ConfigurableButtonConfig = {
@@ -421,6 +428,21 @@ export function GridToolbar({
             onResetToDefaults={onResetToDefaults}
             onSubRowToggle={onSubRowToggle}
           />
+        )}
+
+        {/* Collapse All Array Rows Button - Only show when there are expanded array rows */}
+        {hasArraySubRows && expandedArrayRowsCount > 0 && onCollapseAllArrayRows && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onCollapseAllArrayRows}
+            disabled={loading}
+            title="Collapse All Expanded Rows"
+            className="px-3 h-9 flex items-center justify-center rounded-lg hover:bg-gray-100 border border-gray-300"
+          >
+            <ChevronDown className="h-4 w-4 mr-1.5 text-gray-600" />
+            <span className="text-sm text-gray-600">Collapse All</span>
+          </Button>
         )}
 
         {(gridTitle !== 'Plan List' && gridTitle !== 'Actual List' && gridTitle !== 'Leg Details') && (
