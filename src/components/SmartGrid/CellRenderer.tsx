@@ -473,7 +473,7 @@ export const CellRenderer: React.FC<CellRendererProps> = ({
             loading && "opacity-50 cursor-not-allowed",
             "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
           )}
-          title={String(value || '')}
+          title={String(value)}
           tabIndex={0}
           role="button"
           onKeyDown={(e) => {
@@ -488,7 +488,6 @@ export const CellRenderer: React.FC<CellRendererProps> = ({
       );
     }
 
-    if (!value) return <span className="text-gray-400">-</span>;
     return <span className="truncate" title={String(value)}>{value}</span>;
   };
 
@@ -509,8 +508,6 @@ export const CellRenderer: React.FC<CellRendererProps> = ({
         </select>
       );
     }
-    
-    if (!value) return <span className="text-gray-400">-</span>;
     return <span className="truncate" title={String(value)}>{value}</span>;
   };
 
