@@ -304,16 +304,15 @@ export const CellRenderer: React.FC<CellRendererProps> = ({
 
   // DateTimeRange renderer
   const renderDateTimeRange = () => {
-    // const [date, time] = String(value).split('\n');
-    // return (
-    //   <div className="text-sm min-w-0">
-    //     <div className="text-Gray-800 font-normal truncate">{date}</div>
-    //     <div className="text-gray-500 text-xs truncate">{time}</div>
-    //   </div>
-    // );
+    const [open, setOpen] = React.useState(isEditing);
+
+    React.useEffect(() => {
+      setOpen(isEditing);
+    }, [isEditing]);
+
     if (isEditing) {
       return (
-        <Popover defaultOpen>
+        <Popover open={open} onOpenChange={setOpen}>
           <PopoverTrigger asChild>
             <Button
               variant="outline"
@@ -328,8 +327,10 @@ export const CellRenderer: React.FC<CellRendererProps> = ({
               selected={tempValue ? new Date(tempValue) : undefined}
               onSelect={(date) => {
                 if (date) {
-                  setTempValue(date.toLocaleDateString('en-CA'));
-                  onEdit(rowIndex, column.key, date.toLocaleDateString('en-CA'));
+                  const formattedDate = date.toLocaleDateString('en-CA');
+                  setTempValue(formattedDate);
+                  onEdit(rowIndex, column.key, formattedDate);
+                  setOpen(false);
                 }
               }}
               initialFocus
@@ -528,9 +529,15 @@ export const CellRenderer: React.FC<CellRendererProps> = ({
 
   // Date renderer
   const renderDate = () => {
+    const [open, setOpen] = React.useState(isEditing);
+
+    React.useEffect(() => {
+      setOpen(isEditing);
+    }, [isEditing]);
+
     if (isEditing) {
       return (
-        <Popover defaultOpen>
+        <Popover open={open} onOpenChange={setOpen}>
           <PopoverTrigger asChild>
             <Button
               variant="outline"
@@ -545,8 +552,10 @@ export const CellRenderer: React.FC<CellRendererProps> = ({
               selected={tempValue ? new Date(tempValue) : undefined}
               onSelect={(date) => {
                 if (date) {
-                  setTempValue(date.toLocaleDateString('en-CA'));
-                  onEdit(rowIndex, column.key, date.toLocaleDateString('en-CA'));
+                  const formattedDate = date.toLocaleDateString('en-CA');
+                  setTempValue(formattedDate);
+                  onEdit(rowIndex, column.key, formattedDate);
+                  setOpen(false);
                 }
               }}
               initialFocus
@@ -584,9 +593,15 @@ export const CellRenderer: React.FC<CellRendererProps> = ({
 
   // Date renderer
   const renderDateFormat = () => {
+    const [open, setOpen] = React.useState(isEditing);
+
+    React.useEffect(() => {
+      setOpen(isEditing);
+    }, [isEditing]);
+
     if (isEditing) {
       return (
-        <Popover defaultOpen>
+        <Popover open={open} onOpenChange={setOpen}>
           <PopoverTrigger asChild>
             <Button
               variant="outline"
@@ -607,8 +622,10 @@ export const CellRenderer: React.FC<CellRendererProps> = ({
               selected={tempValue ? new Date(tempValue) : undefined}
               onSelect={(date) => {
                 if (date) {
-                  setTempValue(date.toLocaleDateString('en-CA'));
-                  onEdit(rowIndex, column.key, date.toLocaleDateString('en-CA'));
+                  const formattedDate = date.toLocaleDateString('en-CA');
+                  setTempValue(formattedDate);
+                  onEdit(rowIndex, column.key, formattedDate);
+                  setOpen(false);
                 }
               }}
               initialFocus
