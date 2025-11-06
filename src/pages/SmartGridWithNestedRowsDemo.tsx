@@ -11,9 +11,9 @@ const initialTripsData = [
     status: 'In Transit',
     distance: 450,
     tripLegs: [
-      { legNo: 1, from: 'Mumbai', to: 'Pune', distance: 150, eta: '2024-01-15 10:00', status: 'Completed' },
-      { legNo: 2, from: 'Pune', to: 'Nashik', distance: 210, eta: '2024-01-15 14:30', status: 'In Progress' },
-      { legNo: 3, from: 'Nashik', to: 'Aurangabad', distance: 90, eta: '2024-01-15 17:00', status: 'Pending' },
+      { legNo: 1, from: 'Mumbai', to: 'Pune', distance: 150, eta: '2024-01-15 10:00', departureTime: '08:00', status: 'Completed' },
+      { legNo: 2, from: 'Pune', to: 'Nashik', distance: 210, eta: '2024-01-15 14:30', departureTime: '12:00', status: 'In Progress' },
+      { legNo: 3, from: 'Nashik', to: 'Aurangabad', distance: 90, eta: '2024-01-15 17:00', departureTime: '15:30', status: 'Pending' },
     ],
   },
   {
@@ -23,8 +23,8 @@ const initialTripsData = [
     status: 'Pending',
     distance: 320,
     tripLegs: [
-      { legNo: 1, from: 'Delhi', to: 'Jaipur', distance: 280, eta: '2024-01-16 09:00', status: 'Pending' },
-      { legNo: 2, from: 'Jaipur', to: 'Ajmer', distance: 40, eta: '2024-01-16 12:00', status: 'Pending' },
+      { legNo: 1, from: 'Delhi', to: 'Jaipur', distance: 280, eta: '2024-01-16 09:00', departureTime: '06:30', status: 'Pending' },
+      { legNo: 2, from: 'Jaipur', to: 'Ajmer', distance: 40, eta: '2024-01-16 12:00', departureTime: '10:00', status: 'Pending' },
     ],
   },
   {
@@ -34,7 +34,7 @@ const initialTripsData = [
     status: 'Completed',
     distance: 180,
     tripLegs: [
-      { legNo: 1, from: 'Bangalore', to: 'Mysore', distance: 180, eta: '2024-01-14 11:00', status: 'Completed' },
+      { legNo: 1, from: 'Bangalore', to: 'Mysore', distance: 180, eta: '2024-01-14 11:00', departureTime: '08:30', status: 'Completed' },
     ],
   },
   {
@@ -193,6 +193,7 @@ export default function SmartGridWithNestedRowsDemo() {
     { key: 'from', label: 'From', type: 'Text', width: 160, editable: true },
     { key: 'to', label: 'To', type: 'Text', width: 160, editable: true },
     { key: 'distance', label: 'Distance (KM)', type: 'Text', width: 120, editable: true },
+    { key: 'departureTime', label: 'Departure Time', type: 'Time', width: 140, editable: true },
     { key: 'eta', label: 'ETA', type: 'Date', width: 180, editable: true },
     {
       key: 'status',

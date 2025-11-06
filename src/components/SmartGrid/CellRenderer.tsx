@@ -698,6 +698,45 @@ export const CellRenderer: React.FC<CellRendererProps> = ({
     );
   };
 
+  // Time renderer
+  const renderTime = () => {
+    if (isEditing) {
+      return (
+        <Input
+          type="time"
+          value={tempValue || ''}
+          onChange={(e) => setTempValue(e.target.value)}
+          onBlur={() => {
+            onEdit(rowIndex, column.key, tempValue);
+          }}
+          onKeyDown={handleKeyDown}
+          className="w-full h-8 px-2"
+          autoFocus
+          disabled={loading}
+        />
+      );
+    }
+
+    if (isEditable) {
+      return (
+        <div
+          onClick={() => onEditStart(rowIndex, column.key)}
+          className={cn(
+            "min-h-[20px] p-2 hover:bg-blue-50 cursor-pointer rounded transition-colors duration-150 truncate",
+            loading && "opacity-50 cursor-not-allowed"
+          )}
+          title={value || ''}
+        >
+          {value || <span className="text-gray-400">Click to edit</span>}
+        </div>
+      );
+    }
+
+    if (!value) return <span className="text-gray-400">-</span>;
+
+    return <span className="truncate" title={String(value)}>{value}</span>;
+  };
+
   // CustomerCountBadge renderer
   const renderCustomerCountBadge = () => {
     // Use customer data from row only
@@ -775,6 +814,8 @@ export const CellRenderer: React.FC<CellRendererProps> = ({
         return renderDate();
       case 'DateFormat':
         return renderDateFormat();
+      case 'Time':
+        return renderTime();
       case 'CurrencyWithSymbol':
         return renderCurrencySymbol();
       case 'ActionButton':
