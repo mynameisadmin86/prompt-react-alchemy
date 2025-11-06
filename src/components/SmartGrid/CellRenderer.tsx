@@ -49,7 +49,6 @@ export const CellRenderer: React.FC<CellRendererProps> = ({
   const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
   const [tempValue, setTempValue] = React.useState(value);
 
-  // Sync tempValue with value prop when it changes
   React.useEffect(() => {
     setTempValue(value);
   }, [value]);
@@ -305,6 +304,13 @@ export const CellRenderer: React.FC<CellRendererProps> = ({
 
   // DateTimeRange renderer
   const renderDateTimeRange = () => {
+    // const [date, time] = String(value).split('\n');
+    // return (
+    //   <div className="text-sm min-w-0">
+    //     <div className="text-Gray-800 font-normal truncate">{date}</div>
+    //     <div className="text-gray-500 text-xs truncate">{time}</div>
+    //   </div>
+    // );
     if (isEditing) {
       return (
         <Popover defaultOpen>
@@ -322,8 +328,8 @@ export const CellRenderer: React.FC<CellRendererProps> = ({
               selected={tempValue ? new Date(tempValue) : undefined}
               onSelect={(date) => {
                 if (date) {
-                  setTempValue(date.toISOString());
-                  onEdit(rowIndex, column.key, date.toISOString());
+                  setTempValue(date.toLocaleDateString('en-CA'));
+                  onEdit(rowIndex, column.key, date.toLocaleDateString('en-CA'));
                 }
               }}
               initialFocus
@@ -348,7 +354,6 @@ export const CellRenderer: React.FC<CellRendererProps> = ({
         </div>
       );
     }
-
     if (!value) return <div className="text-gray-400">-</div>;
     try {
       const date = new Date(value);
@@ -393,17 +398,20 @@ export const CellRenderer: React.FC<CellRendererProps> = ({
 
   // LegLocationFormat renderer
   const renderLegLocationFormat = () => {
+    // const [showLocationDetails, setShowLocationDetails] = useState(false);
     if (column.key === "ArrivalPoint" && column.type === "LegLocationFormat") {
       return (
         <div className="relative text-sm min-w-0 flex items-center">
           <div className="text-Gray-800 font-normal truncate">{row?.DeparturePointDescription} - {row?.ArrivalPointDescription}</div>
+          {/* <LocationDetailsTooltip row={row} type="LegLocationFormat" value={value} propKey={column.key} /> */}
         </div>
       );
     }
     if(column.key === "PlannedActual" && column.type === "LegLocationFormat") {
       return (
         <div className="relative text-sm flex items-center w-full">
-          <div className="text-Gray-800 font-normal truncate">{value}</div>
+          {/* <div className="text-Gray-800 font-normal truncate">{value} - {row?.DeparturePoint}</div> */}
+          {/* <LocationDetailsTooltip row={row} type="LegLocationFormat" value={value} propKey={column.key} /> */}
         </div>
       );
     }
@@ -492,7 +500,6 @@ export const CellRenderer: React.FC<CellRendererProps> = ({
         </div>
       );
     }
-
     if (!value) return <span className="text-gray-400">-</span>;
     return <span className="truncate" title={String(value)}>{value}</span>;
   };
@@ -514,7 +521,7 @@ export const CellRenderer: React.FC<CellRendererProps> = ({
         </select>
       );
     }
-    
+
     if (!value) return <span className="text-gray-400">-</span>;
     return <span className="truncate" title={String(value)}>{value}</span>;
   };
@@ -538,8 +545,8 @@ export const CellRenderer: React.FC<CellRendererProps> = ({
               selected={tempValue ? new Date(tempValue) : undefined}
               onSelect={(date) => {
                 if (date) {
-                  setTempValue(date.toISOString());
-                  onEdit(rowIndex, column.key, date.toISOString());
+                  setTempValue(date.toLocaleDateString('en-CA'));
+                  onEdit(rowIndex, column.key, date.toLocaleDateString('en-CA'));
                 }
               }}
               initialFocus
@@ -564,7 +571,6 @@ export const CellRenderer: React.FC<CellRendererProps> = ({
         </div>
       );
     }
-
     if (!value) return <span className="text-gray-400">-</span>;
 
     try {
@@ -576,7 +582,7 @@ export const CellRenderer: React.FC<CellRendererProps> = ({
     }
   };
 
-  // Date renderer with custom format
+  // Date renderer
   const renderDateFormat = () => {
     if (isEditing) {
       return (
@@ -601,8 +607,8 @@ export const CellRenderer: React.FC<CellRendererProps> = ({
               selected={tempValue ? new Date(tempValue) : undefined}
               onSelect={(date) => {
                 if (date) {
-                  setTempValue(date.toISOString());
-                  onEdit(rowIndex, column.key, date.toISOString());
+                  setTempValue(date.toLocaleDateString('en-CA'));
+                  onEdit(rowIndex, column.key, date.toLocaleDateString('en-CA'));
                 }
               }}
               initialFocus
@@ -659,6 +665,42 @@ export const CellRenderer: React.FC<CellRendererProps> = ({
     return <span className="font-bold">&euro; {formattedAmount(value)}</span>
   }
 
+  // Time renderer
+  const renderTime = () => {
+    if (isEditing) {
+      return (
+        <Input
+          type="time"
+          value={tempValue || ''}
+          onChange={(e) => setTempValue(e.target.value)}
+          onBlur={() => {
+            onEdit(rowIndex, column.key, tempValue);
+          }}
+          onKeyDown={handleKeyDown}
+          className="w-full h-8 px-2"
+          autoFocus
+          disabled={loading}
+        />
+      );
+    }
+    if (isEditable) {
+      return (
+        <div
+          onClick={() => onEditStart(rowIndex, column.key)}
+          className={cn(
+            "min-h-[20px] p-2 hover:bg-blue-50 cursor-pointer rounded transition-colors duration-150 truncate",
+            loading && "opacity-50 cursor-not-allowed"
+          )}
+          title={value || ''}
+        >
+          {value || <span className="text-gray-400">Click to edit</span>}
+        </div>
+      );
+    }
+    if (!value) return <span className="text-gray-400">-</span>;
+    return <span className="truncate" title={String(value)}>{value}</span>;
+  };
+
   // Action button renderer
   const renderActionButton = () => {
     if (!column.actionButtons || column.actionButtons.length === 0) {
@@ -704,45 +746,6 @@ export const CellRenderer: React.FC<CellRendererProps> = ({
         })}
       </>
     );
-  };
-
-  // Time renderer
-  const renderTime = () => {
-    if (isEditing) {
-      return (
-        <Input
-          type="time"
-          value={tempValue || ''}
-          onChange={(e) => setTempValue(e.target.value)}
-          onBlur={() => {
-            onEdit(rowIndex, column.key, tempValue);
-          }}
-          onKeyDown={handleKeyDown}
-          className="w-full h-8 px-2"
-          autoFocus
-          disabled={loading}
-        />
-      );
-    }
-
-    if (isEditable) {
-      return (
-        <div
-          onClick={() => onEditStart(rowIndex, column.key)}
-          className={cn(
-            "min-h-[20px] p-2 hover:bg-blue-50 cursor-pointer rounded transition-colors duration-150 truncate",
-            loading && "opacity-50 cursor-not-allowed"
-          )}
-          title={value || ''}
-        >
-          {value || <span className="text-gray-400">Click to edit</span>}
-        </div>
-      );
-    }
-
-    if (!value) return <span className="text-gray-400">-</span>;
-
-    return <span className="truncate" title={String(value)}>{value}</span>;
   };
 
   // CustomerCountBadge renderer
