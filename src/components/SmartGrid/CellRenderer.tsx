@@ -49,6 +49,11 @@ export const CellRenderer: React.FC<CellRendererProps> = ({
   const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
   const [tempValue, setTempValue] = React.useState(value);
 
+  // Sync tempValue with value prop when it changes
+  React.useEffect(() => {
+    setTempValue(value);
+  }, [value]);
+
   const handleSave = () => {
     onEdit(rowIndex, column.key, tempValue);
   };
