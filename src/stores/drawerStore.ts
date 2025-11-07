@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-type DrawerType = 'resources' | 'vas' | 'incidents' | 'customer-orders' | 'supplier-billing' | 'trip-execution-create' | 'linked-transactions' | 'train-parameters' | null;
+type DrawerType = 'resources' | 'vas' | 'incidents' | 'customer-orders' | 'supplier-billing' | 'trip-execution-create' | 'linked-transactions' | 'train-parameters' | 'vendor-feedback' | null;
 
 interface DrawerStore {
   drawerType: DrawerType;

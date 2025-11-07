@@ -12,7 +12,8 @@ import {
   AlarmClockPlus,
   FileUp,
   Link,
-  TramFront
+  TramFront,
+  Star
 } from 'lucide-react';
 import { MoreInfoPanel } from './MoreInfo';
 import { useDrawerStore } from '@/stores/drawerStore';
@@ -50,6 +51,10 @@ export const ActionIconBar = () => {
       <Button onClick={() => openDrawer('train-parameters')} variant="ghost" size="sm" className="flex-col h-auto rounded-lg p-2.5 border border-[#D0D5DD]">
         <TramFront size={16} strokeWidth={1.2} />
         {/* <span className="text-xs">Print</span> */}
+      </Button>
+      <Button onClick={() => openDrawer('vendor-feedback')} variant="ghost" size="sm" className="flex-col h-auto rounded-lg p-2.5 border border-[#D0D5DD]">
+        <Star size={16} strokeWidth={1.2} />
+        {/* <span className="text-xs">Vendor Feedback</span> */}
       </Button>
 
       {/* <SideDrawer

@@ -16,6 +16,7 @@ import { SupplierBillingDrawerScreen } from '@/components/drawer/SupplierBilling
 import { TripExecutionCreateDrawerScreen } from '@/components/drawer/TripExecutionCreateDrawerScreen';
 import { LinkedTransactionsDrawerScreen } from '@/components/drawer/LinkedTransactionsDrawerScreen';
 import { TrainParametersDrawerScreen } from '@/components/drawer/TrainParametersDrawerScreen';
+import { VendorPerformanceFeedbackDrawer } from '@/components/drawer/VendorPerformanceFeedbackDrawer';
 import { GlobalFooter } from '@/components/GlobalFooter';
 
 const ManageTripExecution = () => {
@@ -171,7 +172,7 @@ const ManageTripExecution = () => {
         isOpen={isOpen}
         onClose={closeDrawer}
         onBack={drawerType === 'incidents' || drawerType === 'customer-orders' || drawerType === 'supplier-billing' ? closeDrawer : undefined}
-        title={drawerType === 'resources' ? 'Resources' : drawerType === 'vas' ? 'VAS' : drawerType === 'incidents' ? 'Incident' : drawerType === 'customer-orders' ? 'Customer Order' : drawerType === 'supplier-billing' ? 'Supplier Billing' : drawerType === 'trip-execution-create' ? 'Activities & Consignment' : drawerType === 'linked-transactions' ? 'Linked Transactions' : drawerType === 'train-parameters' ? 'Train Parameters' : ''}
+        title={drawerType === 'resources' ? 'Resources' : drawerType === 'vas' ? 'VAS' : drawerType === 'incidents' ? 'Incident' : drawerType === 'customer-orders' ? 'Customer Order' : drawerType === 'supplier-billing' ? 'Supplier Billing' : drawerType === 'trip-execution-create' ? 'Activities & Consignment' : drawerType === 'linked-transactions' ? 'Linked Transactions' : drawerType === 'train-parameters' ? 'Train Parameters' : drawerType === 'vendor-feedback' ? 'Vendor Performance Feedback' : ''}
         titleBadge={drawerType === 'vas' || drawerType === 'incidents' || drawerType === 'customer-orders' || drawerType === 'supplier-billing' || drawerType === 'trip-execution-create' ? tripUniqueID || 'TRIP0000000001' : undefined}
         slideDirection="right"
         width={drawerType === 'incidents' || drawerType === 'customer-orders' || drawerType === 'supplier-billing' || drawerType === 'trip-execution-create' || drawerType === 'linked-transactions' || drawerType === 'train-parameters' ? '100%' : '75%'}
@@ -187,6 +188,7 @@ const ManageTripExecution = () => {
         {drawerType === 'trip-execution-create' && <TripExecutionCreateDrawerScreen onClose={closeDrawer} tripId={tripUniqueID || undefined} />}
         {drawerType === 'linked-transactions' && <LinkedTransactionsDrawerScreen onClose={closeDrawer} tripId={tripUniqueID || undefined} />}
         {drawerType === 'train-parameters' && <TrainParametersDrawerScreen onClose={closeDrawer} tripId={tripUniqueID || undefined} />}
+        {drawerType === 'vendor-feedback' && <VendorPerformanceFeedbackDrawer onClose={closeDrawer} tripId={tripUniqueID || undefined} />}
       </SideDrawer>
 
       {/* Global Footer */}
