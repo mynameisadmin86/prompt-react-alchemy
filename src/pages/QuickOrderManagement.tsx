@@ -68,7 +68,7 @@ const QuickOrderManagement: React.FC = () => {
       label: 'Quick Order Date',
       type: 'Date',
       sortable: true,
-      editable: false,
+      editable: true,
       subRow: false
     },
     {
