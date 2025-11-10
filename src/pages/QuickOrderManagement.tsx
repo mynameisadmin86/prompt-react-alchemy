@@ -48,7 +48,7 @@ const QuickOrderManagement: React.FC = () => {
   const [apiStatus, setApiStatus] = useState<'loading' | 'success' | 'error'>('loading');
   const [resourceGroups, setResourceGroups] = useState<any[]>([]);
   const [cardData, setCardData] = useState<any[]>([]);
-  const [showServersideFilter, setShowServersideFilter] = useState<boolean>(false);
+  const [showServersideFilter, setShowServersideFilter] = useState<boolean>(true);
   const [groupLevelModalOpen, setGroupLevelModalOpen] = useState(false);
   const { toast } = useToast();
   const gridState = useSmartGridState();

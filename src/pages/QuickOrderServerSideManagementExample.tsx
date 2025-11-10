@@ -111,7 +111,7 @@ const mockFetchCustomers = async ({
 export function QuickOrderServerSideManagementExample() {
   const [selectedRows, setSelectedRows] = useState<Set<number>>(new Set());
   const [currentFilters, setCurrentFilters] = useState<Record<string, FilterValue>>({});
-  const [showServersideFilter, setShowServersideFilter] = useState(true);
+  const [showServersideFilter, setShowServersideFilter] = useState<boolean>(true);
 
   const {
     gridData,
