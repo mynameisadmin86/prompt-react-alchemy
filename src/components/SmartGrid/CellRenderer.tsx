@@ -304,40 +304,53 @@ export const CellRenderer: React.FC<CellRendererProps> = ({
 
   // DateTimeRange renderer
   const renderDateTimeRange = () => {
-    const [open, setOpen] = React.useState(isEditing);
-
-    React.useEffect(() => {
-      setOpen(isEditing);
-    }, [isEditing]);
+    const [open, setOpen] = React.useState(false);
 
     if (isEditing) {
       return (
-        <Popover open={open} onOpenChange={setOpen}>
-          <PopoverTrigger asChild>
-            <Button
-              variant="outline"
-              className="w-full justify-start text-left font-normal h-8 px-2"
-            >
-              {tempValue ? dateTimeFormatter(new Date(tempValue)) : <span>Pick a date & time</span>}
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-auto p-0" align="start">
-            <Calendar
-              mode="single"
-              selected={tempValue ? new Date(tempValue) : undefined}
-              onSelect={(date) => {
-                if (date) {
-                  const formattedDate = date.toLocaleDateString('en-CA');
-                  setTempValue(formattedDate);
-                  onEdit(rowIndex, column.key, formattedDate);
-                  setOpen(false);
-                }
-              }}
-              initialFocus
-              className="p-3 pointer-events-auto"
-            />
-          </PopoverContent>
-        </Popover>
+        <div className="flex items-center gap-1">
+          <Input
+            type="date"
+            value={tempValue || ''}
+            onChange={(e) => setTempValue(e.target.value)}
+            onBlur={handleSave}
+            onKeyDown={handleKeyDown}
+            className="w-full h-8 px-2 focus:ring-2 focus:ring-blue-500"
+            autoFocus
+            disabled={loading}
+          />
+          <Popover open={open} onOpenChange={setOpen}>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-8 px-2"
+                type="button"
+              >
+                📅
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+              <Calendar
+                mode="single"
+                selected={tempValue ? new Date(tempValue) : undefined}
+                onSelect={(date) => {
+                  if (date) {
+                    const formattedDate = date.toLocaleDateString('en-CA');
+                    setTempValue(formattedDate);
+                    onEdit(rowIndex, column.key, formattedDate);
+                    setOpen(false);
+                  }
+                }}
+                initialFocus
+                captionLayout="dropdown-buttons"
+                fromYear={1900}
+                toYear={2100}
+                className="p-3 pointer-events-auto"
+              />
+            </PopoverContent>
+          </Popover>
+        </div>
       );
     }
 
@@ -529,40 +542,53 @@ export const CellRenderer: React.FC<CellRendererProps> = ({
 
   // Date renderer
   const renderDate = () => {
-    const [open, setOpen] = React.useState(isEditing);
-
-    React.useEffect(() => {
-      setOpen(isEditing);
-    }, [isEditing]);
+    const [open, setOpen] = React.useState(false);
 
     if (isEditing) {
       return (
-        <Popover open={open} onOpenChange={setOpen}>
-          <PopoverTrigger asChild>
-            <Button
-              variant="outline"
-              className="w-full justify-start text-left font-normal h-8 px-2"
-            >
-              {tempValue ? dateFormatter(new Date(tempValue)) : <span>Pick a date</span>}
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-auto p-0" align="start">
-            <Calendar
-              mode="single"
-              selected={tempValue ? new Date(tempValue) : undefined}
-              onSelect={(date) => {
-                if (date) {
-                  const formattedDate = date.toLocaleDateString('en-CA');
-                  setTempValue(formattedDate);
-                  onEdit(rowIndex, column.key, formattedDate);
-                  setOpen(false);
-                }
-              }}
-              initialFocus
-              className="p-3 pointer-events-auto"
-            />
-          </PopoverContent>
-        </Popover>
+        <div className="flex items-center gap-1">
+          <Input
+            type="date"
+            value={tempValue || ''}
+            onChange={(e) => setTempValue(e.target.value)}
+            onBlur={handleSave}
+            onKeyDown={handleKeyDown}
+            className="w-full h-8 px-2 focus:ring-2 focus:ring-blue-500"
+            autoFocus
+            disabled={loading}
+          />
+          <Popover open={open} onOpenChange={setOpen}>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-8 px-2"
+                type="button"
+              >
+                📅
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+              <Calendar
+                mode="single"
+                selected={tempValue ? new Date(tempValue) : undefined}
+                onSelect={(date) => {
+                  if (date) {
+                    const formattedDate = date.toLocaleDateString('en-CA');
+                    setTempValue(formattedDate);
+                    onEdit(rowIndex, column.key, formattedDate);
+                    setOpen(false);
+                  }
+                }}
+                initialFocus
+                captionLayout="dropdown-buttons"
+                fromYear={1900}
+                toYear={2100}
+                className="p-3 pointer-events-auto"
+              />
+            </PopoverContent>
+          </Popover>
+        </div>
       );
     }
 
@@ -593,46 +619,53 @@ export const CellRenderer: React.FC<CellRendererProps> = ({
 
   // Date renderer
   const renderDateFormat = () => {
-    const [open, setOpen] = React.useState(isEditing);
-
-    React.useEffect(() => {
-      setOpen(isEditing);
-    }, [isEditing]);
+    const [open, setOpen] = React.useState(false);
 
     if (isEditing) {
       return (
-        <Popover open={open} onOpenChange={setOpen}>
-          <PopoverTrigger asChild>
-            <Button
-              variant="outline"
-              className="w-full justify-start text-left font-normal h-8 px-2"
-            >
-              {tempValue ? (() => {
-                const date = new Date(tempValue);
-                const day = String(date.getDate()).padStart(2, '0');
-                const month = monthNames[date.getMonth()];
-                const year = date.getFullYear();
-                return `${day}-${month}-${year}`;
-              })() : <span>Pick a date</span>}
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-auto p-0" align="start">
-            <Calendar
-              mode="single"
-              selected={tempValue ? new Date(tempValue) : undefined}
-              onSelect={(date) => {
-                if (date) {
-                  const formattedDate = date.toLocaleDateString('en-CA');
-                  setTempValue(formattedDate);
-                  onEdit(rowIndex, column.key, formattedDate);
-                  setOpen(false);
-                }
-              }}
-              initialFocus
-              className="p-3 pointer-events-auto"
-            />
-          </PopoverContent>
-        </Popover>
+        <div className="flex items-center gap-1">
+          <Input
+            type="date"
+            value={tempValue || ''}
+            onChange={(e) => setTempValue(e.target.value)}
+            onBlur={handleSave}
+            onKeyDown={handleKeyDown}
+            className="w-full h-8 px-2 focus:ring-2 focus:ring-blue-500"
+            autoFocus
+            disabled={loading}
+          />
+          <Popover open={open} onOpenChange={setOpen}>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-8 px-2"
+                type="button"
+              >
+                📅
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+              <Calendar
+                mode="single"
+                selected={tempValue ? new Date(tempValue) : undefined}
+                onSelect={(date) => {
+                  if (date) {
+                    const formattedDate = date.toLocaleDateString('en-CA');
+                    setTempValue(formattedDate);
+                    onEdit(rowIndex, column.key, formattedDate);
+                    setOpen(false);
+                  }
+                }}
+                initialFocus
+                captionLayout="dropdown-buttons"
+                fromYear={1900}
+                toYear={2100}
+                className="p-3 pointer-events-auto"
+              />
+            </PopoverContent>
+          </Popover>
+        </div>
       );
     }
 
