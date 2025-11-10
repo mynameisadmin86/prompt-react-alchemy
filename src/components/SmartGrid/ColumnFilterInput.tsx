@@ -444,74 +444,83 @@ export function ColumnFilterInput({
       case 'DateRange':
         return (
           <div className="flex items-center gap-1">
-            <Popover open={showFromPicker} onOpenChange={setShowFromPicker}>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  className={cn(
-                    "h-7 text-xs justify-start text-left font-normal flex-1",
-                    !localValue?.from && "text-muted-foreground"
-                  )}
-                >
-                  <CalendarIcon className="mr-2 h-3 w-3" />
-                  {localValue?.from
-                    ? format(new Date(localValue.from), "dd/MM/yyyy")
-                    : "From date"
-                  }
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0 bg-white border shadow-lg z-[100]" align="start">
-                <Calendar
-                  mode="single"
-                  selected={localValue?.from ? new Date(localValue.from) : undefined}
-                  onSelect={(date) => {
-                    // // handleDateRangeChange('from', date ? date.toISOString() : '');
-                    // handleDateRangeChange('from', date ? date.toLocaleDateString('en-CA') : '');
-                    // setShowFromPicker(false);
-                    const newDate = date ? date.toLocaleDateString('en-CA') : '';
-                    const updated = handleDateRangeChange('from', newDate);
-                    if (updated) {
-                      setShowFromPicker(false); // close only when accepted
-                    }
-                  }}
-                  initialFocus
-                  className={cn("p-3 pointer-events-auto")}
-                />
-              </PopoverContent>
-            </Popover>
+            <div className="flex items-center gap-1 flex-1">
+              <Input
+                type="date"
+                value={localValue?.from || ''}
+                onChange={(e) => handleDateRangeChange('from', e.target.value)}
+                className="h-7 text-xs flex-1"
+                placeholder="From date"
+              />
+              <Popover open={showFromPicker} onOpenChange={setShowFromPicker}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-7 px-2"
+                    type="button"
+                  >
+                    <CalendarIcon className="h-3 w-3" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0 bg-white border shadow-lg z-[100]" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={localValue?.from ? new Date(localValue.from) : undefined}
+                    onSelect={(date) => {
+                      const newDate = date ? date.toLocaleDateString('en-CA') : '';
+                      const updated = handleDateRangeChange('from', newDate);
+                      if (updated) {
+                        setShowFromPicker(false);
+                      }
+                    }}
+                    initialFocus
+                    captionLayout="dropdown-buttons"
+                    fromYear={1900}
+                    toYear={2100}
+                    className={cn("p-3 pointer-events-auto")}
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
             <span className="text-xs text-muted-foreground">to</span>
-            <Popover open={showToPicker} onOpenChange={setShowToPicker}>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  className={cn(
-                    "h-7 text-xs justify-start text-left font-normal flex-1",
-                    !localValue?.to && "text-muted-foreground"
-                  )}
-                >
-                  <CalendarIcon className="mr-2 h-3 w-3" />
-                  {localValue?.to
-                    ? format(new Date(localValue.to), "dd/MM/yyyy")
-                    : "To date"
-                  }
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0 bg-white border shadow-lg z-[100]" align="start">
-                <Calendar
-                  mode="single"
-                  selected={localValue?.to ? new Date(localValue.to) : undefined}
-                  onSelect={(date) => {
-                    // handleDateRangeChange('to', date ? date.toLocaleDateString('en-CA') : '');
-                    // setShowToPicker(false);
-                    const newDate = date ? date.toLocaleDateString('en-CA') : '';
-                    const updated = handleDateRangeChange('to', newDate);
-                    if (updated) setShowToPicker(false); // close only if valid
-                  }}
-                  initialFocus
-                  className={cn("p-3 pointer-events-auto")}
-                />
-              </PopoverContent>
-            </Popover>
+            <div className="flex items-center gap-1 flex-1">
+              <Input
+                type="date"
+                value={localValue?.to || ''}
+                onChange={(e) => handleDateRangeChange('to', e.target.value)}
+                className="h-7 text-xs flex-1"
+                placeholder="To date"
+              />
+              <Popover open={showToPicker} onOpenChange={setShowToPicker}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-7 px-2"
+                    type="button"
+                  >
+                    <CalendarIcon className="h-3 w-3" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0 bg-white border shadow-lg z-[100]" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={localValue?.to ? new Date(localValue.to) : undefined}
+                    onSelect={(date) => {
+                      const newDate = date ? date.toLocaleDateString('en-CA') : '';
+                      const updated = handleDateRangeChange('to', newDate);
+                      if (updated) setShowToPicker(false);
+                    }}
+                    initialFocus
+                    captionLayout="dropdown-buttons"
+                    fromYear={1900}
+                    toYear={2100}
+                    className={cn("p-3 pointer-events-auto")}
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
           </div>
         );
 
