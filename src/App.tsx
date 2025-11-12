@@ -42,7 +42,6 @@ import TransportRouteUpdate from "./pages/TransportRouteUpdate";
 import SmartGridSelectionDemo from "./pages/SmartGridSelectionDemo";
 import BadgesListDemo from "./pages/BadgesListDemo";
 import SmartGridWithNestedRowsDemo from "./pages/SmartGridWithNestedRowsDemo";
-import TripExecutionWizard from "./pages/TripExecutionWizard";
 
 const queryClient = new QueryClient();
 
@@ -90,7 +89,6 @@ const App = () => (
           <Route path="/consignment-details" element={<ConsignmentDetailsPage />} />
           <Route path="/badges-list-demo" element={<BadgesListDemo />} />
           <Route path="/smartgrid-nested-rows-demo" element={<SmartGridWithNestedRowsDemo />} />
-          <Route path="/trip-execution-wizard" element={<TripExecutionWizard />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

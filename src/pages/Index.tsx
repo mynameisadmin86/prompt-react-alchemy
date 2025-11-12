@@ -251,13 +251,6 @@ const Index = () => {
       path: "/smartgrid-nested-rows-demo",
       color: "text-cyan-500"
     },
-    {
-      title: "Trip Execution Wizard",
-      description: "4-step wizard for trip execution with save prompts and step-by-step navigation",
-      icon: Workflow,
-      path: "/trip-execution-wizard",
-      color: "text-green-600"
-    },
   ];
 
   return (
