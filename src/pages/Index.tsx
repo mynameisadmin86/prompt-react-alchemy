@@ -140,6 +140,13 @@ const Index = () => {
       color: "text-teal-600"
     },
     {
+      title: "Trip Execution Wizard (Multi-Tab)", 
+      description: "4-step trip creation wizard opening in separate browser tabs",
+      icon: Workflow,
+      path: "/trip-execution-step1",
+      color: "text-amber-600"
+    },
+    {
       title: "Side Drawer Demo",
       description: "Configurable side drawer with various width options and content",
       icon: PanelLeft,
