@@ -18,6 +18,16 @@ import { SmartGrid } from '@/components/SmartGrid';
 import type { GridColumnConfig } from '@/types/smartgrid';
 import { SideDrawer } from '@/components/ui/side-drawer';
 import { LegEventsDrawer } from '@/components/drawer/LegEventsDrawer';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 const TripPlanning = () => {
   const navigate = useNavigate();
@@ -42,6 +52,7 @@ const TripPlanning = () => {
   const [selectedOrders, setSelectedOrders] = useState<Set<number>>(new Set());
   const [consolidatedTrip, setConsolidatedTrip] = useState(true);
   const [isLegEventsDrawerOpen, setIsLegEventsDrawerOpen] = useState(false);
+  const [showTripExecutionDialog, setShowTripExecutionDialog] = useState(false);
 
   const isWagonContainer = tripType === 'Wagon/Container Movement';
 
@@ -935,7 +946,10 @@ const TripPlanning = () => {
                       {consolidatedTrip ? 'Switch off' : 'Switch on'}
                     </span>
                   </div>
-                  <Button className="bg-primary hover:bg-primary/90">
+                  <Button 
+                    className="bg-primary hover:bg-primary/90"
+                    onClick={() => setShowTripExecutionDialog(true)}
+                  >
                     Create Trip
                   </Button>
                 </div>
@@ -1103,6 +1117,29 @@ const TripPlanning = () => {
           }}
         />
       </SideDrawer>
+
+      {/* Trip Execution Dialog */}
+      <AlertDialog open={showTripExecutionDialog} onOpenChange={setShowTripExecutionDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Open Trip Execution</AlertDialogTitle>
+            <AlertDialogDescription>
+              Would you like to open the trip execution page in a new tab?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Save and Close</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                window.open('/trip-execution-page', '_blank');
+                setShowTripExecutionDialog(false);
+              }}
+            >
+              Open in New Tab
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
