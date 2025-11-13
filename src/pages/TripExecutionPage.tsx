@@ -175,20 +175,18 @@ const TripExecutionPage = () => {
 
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
       if (hasUnsavedChanges) {
-        // Prevent closing and show browser's native blocking dialog
+        // Browser's native blocking dialog (most reliable)
         e.preventDefault();
-        e.returnValue = '';
-        return '';
+        e.returnValue = 'You have unsaved changes. Data will be lost if you close this tab.';
+        return e.returnValue;
       }
     };
 
     const handleVisibilityChange = () => {
       if (document.hidden && hasUnsavedChanges) {
-        // Note: visibilitychange cannot prevent tab switching, but we can warn
+        // Show blocking alert when switching tabs
         setTimeout(() => {
-          if (hasUnsavedChanges) {
-            alert('Warning: You have unsaved changes in this tab. Please return and save your data to prevent loss.');
-          }
+          alert('Warning: You have unsaved changes. Data may be lost if you leave this tab.');
         }, 100);
       }
     };
