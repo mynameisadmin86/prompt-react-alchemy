@@ -169,15 +169,17 @@ const TripExecutionPage = () => {
     }
   }, [error]);
 
-  // Add beforeunload warning if tabFlag is true
+  // Add beforeunload and visibilitychange warnings if tabFlag is true
   useEffect(() => {
     if (!tabFlag) return;
 
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
       if (hasUnsavedChanges) {
         e.preventDefault();
-        e.returnValue = 'You have unsaved changes. Are you sure you want to leave?';
-        return e.returnValue;
+        // Modern browsers ignore custom messages, but we still need to set returnValue
+        const message = 'You have unsaved changes. Data may be lost if you close this tab.';
+        e.returnValue = message;
+        return message;
       }
     };
 
@@ -189,6 +191,7 @@ const TripExecutionPage = () => {
       }
     };
 
+    // Add both event listeners
     window.addEventListener('beforeunload', handleBeforeUnload);
     document.addEventListener('visibilitychange', handleVisibilityChange);
 
