@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useSearchParams } from 'react-router-dom';
 import { FlexGridLayout } from '@/components/FlexGridLayout';
 import { LayoutConfig } from '@/components/FlexGridLayout/types';
 import { 
@@ -15,12 +15,16 @@ import { toast } from 'sonner';
 
 const TripExecutionPage = () => {
   const { tripId } = useParams<{ tripId: string }>();
+  const [searchParams] = useSearchParams();
+  const tabFlag = searchParams.get('tabflag') === 'true';
   const { selectedTrip, loading, error, loadTripById, saveTrip, updateField, reset } = useTripStore();
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   
   // Handle save draft
   const handleSaveDraft = async () => {
     if (selectedTrip) {
       await saveTrip(selectedTrip, selectedTrip.id);
+      setHasUnsavedChanges(false);
       toast.success('Trip saved as draft');
     }
   };
@@ -29,8 +33,15 @@ const TripExecutionPage = () => {
   const handleConfirmTrip = async () => {
     if (selectedTrip) {
       await saveTrip({ ...selectedTrip, status: 'approved' }, selectedTrip.id);
+      setHasUnsavedChanges(false);
       toast.success('Trip confirmed successfully');
     }
+  };
+
+  // Track field changes
+  const handleFieldChange = (field: any, value: any) => {
+    setHasUnsavedChanges(true);
+    updateField(field, value);
   };
   
   const [layoutConfig, setLayoutConfig] = useState<LayoutConfig>({
@@ -62,7 +73,7 @@ const TripExecutionPage = () => {
                   <TripStatusBadge status={selectedTrip?.status} />
                   <TripDetailsForm 
                     tripData={selectedTrip} 
-                    onFieldChange={updateField}
+                    onFieldChange={handleFieldChange}
                   />
                 </div>
                 <ActionIconBar />
@@ -157,6 +168,35 @@ const TripExecutionPage = () => {
       toast.error(error);
     }
   }, [error]);
+
+  // Add beforeunload warning if tabFlag is true
+  useEffect(() => {
+    if (!tabFlag) return;
+
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (hasUnsavedChanges) {
+        e.preventDefault();
+        e.returnValue = 'You have unsaved changes. Are you sure you want to leave?';
+        return e.returnValue;
+      }
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.hidden && hasUnsavedChanges) {
+        toast.warning('You have unsaved changes that may be lost if you navigate away', {
+          duration: 5000,
+        });
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [tabFlag, hasUnsavedChanges]);
 
   return (
     <div className="h-screen bg-muted/10">

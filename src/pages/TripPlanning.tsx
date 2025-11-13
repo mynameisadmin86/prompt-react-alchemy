@@ -1131,7 +1131,7 @@ const TripPlanning = () => {
             <AlertDialogCancel>Save and Close</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => {
-                window.open('/trip-execution-page', '_blank');
+                window.open('/trip-execution-page?tabflag=true', '_blank');
                 setShowTripExecutionDialog(false);
               }}
             >
