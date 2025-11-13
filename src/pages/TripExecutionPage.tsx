@@ -169,35 +169,33 @@ const TripExecutionPage = () => {
     }
   }, [error]);
 
-  // Add beforeunload and visibilitychange warnings if tabFlag is true
+  // Add beforeunload (close/refresh) and blur (tab switch) warnings if tabFlag is true
   useEffect(() => {
     if (!tabFlag) return;
 
+    // Handle tab close / refresh - shows browser's blocking dialog
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
       if (hasUnsavedChanges) {
-        // Browser's native blocking dialog (most reliable)
         e.preventDefault();
         e.returnValue = 'You have unsaved changes. Data will be lost if you close this tab.';
         return e.returnValue;
       }
     };
 
-    const handleVisibilityChange = () => {
-      if (document.hidden && hasUnsavedChanges) {
-        // Show blocking alert when switching tabs
-        setTimeout(() => {
-          alert('Warning: You have unsaved changes. Data may be lost if you leave this tab.');
-        }, 100);
+    // Handle tab blur / switching away - shows alert
+    const handleBlur = () => {
+      if (hasUnsavedChanges) {
+        alert('Warning: You have unsaved changes. Data may be lost if you leave this tab.');
       }
     };
 
-    // Add both event listeners
+    // Add event listeners
     window.addEventListener('beforeunload', handleBeforeUnload);
-    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('blur', handleBlur);
 
     return () => {
       window.removeEventListener('beforeunload', handleBeforeUnload);
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('blur', handleBlur);
     };
   }, [tabFlag, hasUnsavedChanges]);
 
