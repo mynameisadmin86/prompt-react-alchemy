@@ -176,7 +176,8 @@ const TripExecutionPage = () => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
       if (hasUnsavedChanges) {
         e.preventDefault();
-        // Modern browsers ignore custom messages, but we still need to set returnValue
+        // Show blocking alert before the browser's confirmation dialog
+        alert('Warning: You have unsaved changes. Data may be lost if you close this tab.');
         const message = 'You have unsaved changes. Data may be lost if you close this tab.';
         e.returnValue = message;
         return message;
@@ -185,9 +186,8 @@ const TripExecutionPage = () => {
 
     const handleVisibilityChange = () => {
       if (document.hidden && hasUnsavedChanges) {
-        toast.warning('You have unsaved changes that may be lost if you navigate away', {
-          duration: 5000,
-        });
+        // Show blocking alert when tab loses focus
+        alert('Warning: You have unsaved changes. Data may be lost if you navigate away from this tab.');
       }
     };
 
