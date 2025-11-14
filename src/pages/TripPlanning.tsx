@@ -1124,7 +1124,7 @@ const TripPlanning = () => {
           <AlertDialogHeader>
             <AlertDialogTitle>Open Trip Execution</AlertDialogTitle>
             <AlertDialogDescription>
-              Would you like to open the trip execution page in a new tab?
+              Would you like to open the trip execution page of the created trip?
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
