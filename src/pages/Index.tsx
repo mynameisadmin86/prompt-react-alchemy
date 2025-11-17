@@ -1,7 +1,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowRight, Grid3x3, Layout, Search, Workflow, PanelLeft, Layers, Upload, ShoppingCart, CreditCard, Tag, Calendar } from "lucide-react";
+import { ArrowRight, Grid3x3, Layout, Search, Workflow, PanelLeft, Layers, Upload, ShoppingCart, CreditCard, Tag } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const Index = () => {
@@ -250,13 +250,6 @@ const Index = () => {
       icon: Layers,
       path: "/smartgrid-nested-rows-demo",
       color: "text-cyan-500"
-    },
-    {
-      title: "Calendar Demo",
-      description: "Equipment scheduling calendar with timeline view and resource management",
-      icon: Calendar,
-      path: "/calendar-demo",
-      color: "text-lime-600"
     },
   ];
 
