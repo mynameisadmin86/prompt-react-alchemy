@@ -222,7 +222,7 @@ export const EquipmentCalendarView = ({
                 >
                   {selectedView === 'month'
                     ? format(time, 'dd')
-                    : format(time, 'h A')}
+                    : format(time, 'h a')}
                 </div>
               ))}
             </div>
