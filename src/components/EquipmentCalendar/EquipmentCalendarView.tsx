@@ -36,7 +36,8 @@ export const EquipmentCalendarView = ({
 
   const ROW_HEIGHT = 60;
   const HOUR_WIDTH = 60; // pixels per hour for day view
-  const DAY_WIDTH = 120; // pixels per day for week and month views
+  const DAY_WIDTH = 120; // pixels per day for week view
+  const MONTH_DAY_WIDTH = 40; // pixels per day for month view (smaller to fit 31 days)
 
   // Calculate timeline dimensions based on view
   const getTimelineDimensions = () => {
@@ -58,9 +59,9 @@ export const EquipmentCalendarView = ({
       case 'month':
         return {
           columns: 31,
-          width: 31 * DAY_WIDTH,
+          width: 31 * MONTH_DAY_WIDTH,
           unit: 'day',
-          columnWidth: DAY_WIDTH,
+          columnWidth: MONTH_DAY_WIDTH,
         };
       default:
         return {
@@ -125,8 +126,8 @@ export const EquipmentCalendarView = ({
       const daysFromStart = differenceInDays(startOfDay(eventStart), monthStart);
       const duration = differenceInDays(startOfDay(eventEnd), startOfDay(eventStart)) || 1;
       
-      left = Math.max(0, daysFromStart * DAY_WIDTH);
-      width = duration * DAY_WIDTH;
+      left = Math.max(0, daysFromStart * MONTH_DAY_WIDTH);
+      width = duration * MONTH_DAY_WIDTH;
     } else if (view === 'week') {
       // week view (day-based)
       const viewStart = startOfDay(startDate);
