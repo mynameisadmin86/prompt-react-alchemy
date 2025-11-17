@@ -56,15 +56,11 @@ export const EquipmentCalendarView = ({
           columnWidth: DAY_WIDTH,
         };
       case 'month':
-        const monthStart = startOfMonth(startDate);
-        const monthEnd = endOfMonth(startDate);
-        const days = eachDayOfInterval({ start: monthStart, end: monthEnd });
         return {
-          columns: days.length,
-          width: days.length * DAY_WIDTH,
+          columns: 31,
+          width: 31 * DAY_WIDTH,
           unit: 'day',
           columnWidth: DAY_WIDTH,
-          days,
         };
       default:
         return {
@@ -82,11 +78,15 @@ export const EquipmentCalendarView = ({
   const getTimelineLabels = () => {
     const labels = [];
     
-    if (view === 'month' && dimensions.days) {
-      return dimensions.days.map(day => ({
-        label: format(day, 'd'),
-        fullLabel: format(day, 'MMM d'),
-      }));
+    if (view === 'month') {
+      for (let i = 0; i < 31; i++) {
+        const day = addDays(startOfMonth(startDate), i);
+        labels.push({
+          label: format(day, 'd'),
+          fullLabel: format(day, 'MMM d'),
+        });
+      }
+      return labels;
     }
     
     if (view === 'day') {
