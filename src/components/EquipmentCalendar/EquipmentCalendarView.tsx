@@ -35,7 +35,8 @@ export const EquipmentCalendarView = ({
   const leftPanelRef = useRef<HTMLDivElement>(null);
 
   const ROW_HEIGHT = 60;
-  const HOUR_WIDTH = 60; // pixels per hour for day/week view
+  const HOUR_WIDTH = 60; // pixels per hour for day view
+  const WEEK_HOUR_WIDTH = 30; // pixels per hour for week view (smaller for better overview)
   const DAY_WIDTH = 120; // pixels per day for month view
 
   // Calculate timeline dimensions based on view
@@ -51,9 +52,9 @@ export const EquipmentCalendarView = ({
       case 'week':
         return {
           columns: 7 * 24,
-          width: 7 * 24 * HOUR_WIDTH,
+          width: 7 * 24 * WEEK_HOUR_WIDTH,
           unit: 'hour',
-          columnWidth: HOUR_WIDTH,
+          columnWidth: WEEK_HOUR_WIDTH,
         };
       case 'month':
         const monthStart = startOfMonth(startDate);
@@ -102,8 +103,10 @@ export const EquipmentCalendarView = ({
         const day = addDays(startOfDay(startDate), d);
         for (let h = 0; h < 24; h++) {
           const hour = addHours(day, h);
+          // Show day name and date at midnight, then show hours at 6-hour intervals
+          const showLabel = h === 0 || h % 6 === 0;
           labels.push({
-            label: h === 0 ? format(day, 'EEE d') : format(hour, 'HH'),
+            label: h === 0 ? format(day, 'EEE d') : (showLabel ? format(hour, 'HH') : ''),
             fullLabel: format(hour, 'MMM d, HH:00'),
             isDayStart: h === 0,
           });
@@ -137,7 +140,8 @@ export const EquipmentCalendarView = ({
       const minutesFromStart = differenceInMinutes(eventStart, viewStart);
       const duration = differenceInMinutes(eventEnd, eventStart);
       
-      const pixelsPerMinute = HOUR_WIDTH / 60;
+      const hourWidth = view === 'week' ? WEEK_HOUR_WIDTH : HOUR_WIDTH;
+      const pixelsPerMinute = hourWidth / 60;
       left = minutesFromStart * pixelsPerMinute;
       width = duration * pixelsPerMinute;
     }
@@ -238,7 +242,8 @@ export const EquipmentCalendarView = ({
                   key={idx}
                   className={cn(
                     "flex-shrink-0 text-center py-2 text-xs font-medium border-r",
-                    (label as any).isDayStart && "border-l-2 border-l-primary/30 bg-muted/50"
+                    (label as any).isDayStart && view === 'week' && "border-l-2 border-l-primary/50 bg-muted/70 font-semibold",
+                    (label as any).isDayStart && view !== 'week' && "border-l-2 border-l-primary/30 bg-muted/50"
                   )}
                   style={{ width: dimensions.columnWidth }}
                   title={label.fullLabel}
