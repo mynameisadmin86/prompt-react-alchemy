@@ -913,20 +913,18 @@ export function SmartGrid({
       )}
 
       {/* Server-side Filter */}
-      {showServersideFilter && (
-        <ServersideFilter
-          serverFilters={serverFilters}
-          showFilterTypeDropdown={showFilterTypeDropdown}
-          visible={showServersideFilter}
-          onToggle={onToggleServersideFilter || (() => { })}
-          onFiltersChange={onFiltersChange || (() => { })}
-          onSearch={onSearch || (() => { })}
-          onClearAll={onClearAll || (() => { })}
-          gridId={gridId || gridTitle || 'default'}
-          userId={userId || 'default-user'}
-          api={api}
-        />
-      )}
+      <ServersideFilter
+        serverFilters={serverFilters}
+        showFilterTypeDropdown={showFilterTypeDropdown}
+        visible={showServersideFilter}
+        onToggle={onToggleServersideFilter || (() => { })}
+        onFiltersChange={onFiltersChange || (() => { })}
+        onSearch={onSearch || (() => { })}
+        onClearAll={onClearAll || (() => { })}
+        gridId={gridId || gridTitle || 'default'}
+        userId={userId || 'default-user'}
+        api={api}
+      />
 
       {/* Advanced Filter System */}
       {/* <AdvancedFilter
