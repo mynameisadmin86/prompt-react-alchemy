@@ -3,7 +3,7 @@ import { EquipmentCalendarView } from '@/components/EquipmentCalendar';
 import { EquipmentItem, EquipmentCalendarEvent } from '@/types/equipmentCalendar';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { addDays, addMonths, subDays, subMonths, startOfWeek, startOfMonth } from 'date-fns';
+import { addDays, addMonths, subDays, subMonths, addWeeks, subWeeks, startOfWeek, startOfMonth } from 'date-fns';
 import { toast } from 'sonner';
 
 const EquipmentCalendarDemo = () => {
@@ -112,7 +112,7 @@ const EquipmentCalendarDemo = () => {
         setStartDate(subDays(startDate, 1));
         break;
       case 'week':
-        setStartDate(startOfWeek(subDays(startDate, 7), { weekStartsOn: 0 }));
+        setStartDate(subWeeks(startDate, 1));
         break;
       case 'month':
         setStartDate(startOfMonth(subMonths(startDate, 1)));
@@ -126,7 +126,7 @@ const EquipmentCalendarDemo = () => {
         setStartDate(addDays(startDate, 1));
         break;
       case 'week':
-        setStartDate(startOfWeek(addDays(startDate, 7), { weekStartsOn: 0 }));
+        setStartDate(addWeeks(startDate, 1));
         break;
       case 'month':
         setStartDate(startOfMonth(addMonths(startDate, 1)));
