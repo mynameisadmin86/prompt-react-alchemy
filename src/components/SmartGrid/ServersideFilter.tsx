@@ -52,37 +52,35 @@ export function ServersideFilter({
   // Get current grid's active filters
   const currentActiveFilters = activeFilters[gridId] || {};
   
-  // Initialize pending filters from active filters OR default values when component mounts
+  // Sync pending filters with active filters when component becomes visible or active filters change
   useEffect(() => {
-    if (Object.keys(pendingFilters).length === 0) {
-      if (Object.keys(currentActiveFilters).length > 0) {
-        // Use existing active filters
-        setPendingFilters(currentActiveFilters);
-      } else {
-        // Initialize with default values from serverFilters
-        const defaultFilters: Record<string, FilterValue> = {};
-        serverFilters.forEach(filter => {
-          if (filter.defaultValue !== undefined && filter.defaultValue !== null && filter.defaultValue !== '') {
-            defaultFilters[filter.key] = {
-              value: filter.defaultValue,
-              operator: 'equals'
-            };
-          }
-        });
-        
-        if (Object.keys(defaultFilters).length > 0) {
-          setPendingFilters(defaultFilters);
-          setActiveFilters(gridId, defaultFilters);
-          onFiltersChange(defaultFilters);
-          
-          // Trigger initial search with default values
-          setTimeout(() => {
-            onSearch();
-          }, 100);
+    if (visible && Object.keys(currentActiveFilters).length > 0) {
+      // Always sync with persisted active filters when visible
+      setPendingFilters(currentActiveFilters);
+    } else if (Object.keys(pendingFilters).length === 0) {
+      // Initialize with default values from serverFilters only if no pending filters exist
+      const defaultFilters: Record<string, FilterValue> = {};
+      serverFilters.forEach(filter => {
+        if (filter.defaultValue !== undefined && filter.defaultValue !== null && filter.defaultValue !== '') {
+          defaultFilters[filter.key] = {
+            value: filter.defaultValue,
+            operator: 'equals'
+          };
         }
+      });
+      
+      if (Object.keys(defaultFilters).length > 0) {
+        setPendingFilters(defaultFilters);
+        setActiveFilters(gridId, defaultFilters);
+        onFiltersChange(defaultFilters);
+        
+        // Trigger initial search with default values
+        setTimeout(() => {
+          onSearch();
+        }, 100);
       }
     }
-  }, [currentActiveFilters, serverFilters, gridId]);
+  }, [visible, currentActiveFilters, serverFilters, gridId]);
   
   // Initialize field visibility and order
   useEffect(() => {
