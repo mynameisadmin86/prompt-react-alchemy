@@ -112,10 +112,10 @@ const EquipmentCalendarDemo = () => {
         setStartDate(subDays(startDate, 1));
         break;
       case 'week':
-        setStartDate(subDays(startDate, 7));
+        setStartDate(startOfWeek(subDays(startDate, 7), { weekStartsOn: 0 }));
         break;
       case 'month':
-        setStartDate(subMonths(startDate, 1));
+        setStartDate(startOfMonth(subMonths(startDate, 1)));
         break;
     }
   };
@@ -126,10 +126,10 @@ const EquipmentCalendarDemo = () => {
         setStartDate(addDays(startDate, 1));
         break;
       case 'week':
-        setStartDate(addDays(startDate, 7));
+        setStartDate(startOfWeek(addDays(startDate, 7), { weekStartsOn: 0 }));
         break;
       case 'month':
-        setStartDate(addMonths(startDate, 1));
+        setStartDate(startOfMonth(addMonths(startDate, 1)));
         break;
     }
   };
