@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { SmartGridWithGrouping } from '@/components/SmartGrid';
-import { GridColumnConfig } from '@/types/smartgrid';
+import { GridColumnConfig, ServerFilter } from '@/types/smartgrid';
 import { Button } from '@/components/ui/button';
 import { Printer, MoreHorizontal, User, Train, UserCheck, Container, Plus, Upload } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -8,6 +8,8 @@ import { useSmartGridState } from '@/hooks/useSmartGridState';
 import { DraggableSubRow } from '@/components/SmartGrid/DraggableSubRow';
 import { ConfigurableButtonConfig } from '@/components/ui/configurable-button';
 import { tripService } from '@/api/services/tripService';
+import { filterService } from '@/api/services/filterService';
+import { FilterValue } from '@/types/filterSystem';
 import {
   Breadcrumb,
   BreadcrumbList,
@@ -45,9 +47,10 @@ const GridDemo = () => {
   const [selectedRows, setSelectedRows] = useState<Set<number>>(new Set());
   const [selectedRowIds, setSelectedRowIds] = useState<Set<string>>(new Set());
   const [selectedRowObjects, setSelectedRowObjects] = useState<SampleData[]>([]);
-  const [currentFilters, setCurrentFilters] = useState<Record<string, any>>({});
+  const [currentFilters, setCurrentFilters] = useState<Record<string, FilterValue>>({});
   const [apiData, setApiData] = useState<SampleData[]>([]);
   const [loading, setLoading] = useState(false);
+  const [showServersideFilter, setShowServersideFilter] = useState<boolean>(true);
   const gridState = useSmartGridState();
   
   const initialColumns: GridColumnConfig[] = [
@@ -164,6 +167,44 @@ const GridDemo = () => {
           ))}
         </div>
       )
+    }
+  ];
+
+  // Server-side filters configuration
+  const serverFilters: ServerFilter[] = [
+    {
+      key: 'id',
+      label: 'Trip Plan No',
+      type: 'text'
+    },
+    {
+      key: 'status',
+      label: 'Status',
+      type: 'select',
+      options: ['Planned', 'Under Execution', 'Completed', 'Cancelled', 'Released'],
+      multiSelect: true
+    },
+    {
+      key: 'tripBillingStatus',
+      label: 'Trip Billing Status',
+      type: 'select',
+      options: ['Revenue Leakage', 'Billed', 'Not Billed', 'Pending', 'Draft Bill Raised', 'Not Eligible'],
+      multiSelect: true
+    },
+    {
+      key: 'departurePoint',
+      label: 'Departure Point',
+      type: 'text'
+    },
+    {
+      key: 'arrivalPoint',
+      label: 'Arrival Point',
+      type: 'text'
+    },
+    {
+      key: 'customer',
+      label: 'Customer',
+      type: 'text'
     }
   ];
 
@@ -771,7 +812,7 @@ const GridDemo = () => {
             selectedRows={selectedRows}
             onSelectionChange={handleRowSelection}
             onRowClick={handleRowClick}
-            onFiltersChange={handleFiltersChange}
+            onFiltersChange={setCurrentFilters}
             onServerFilter={handleSearch}
             rowClassName={(row: any, index: number) => {
               return selectedRowIds.has(row.id) ? 'selected' : '';
@@ -784,6 +825,13 @@ const GridDemo = () => {
             showCreateButton={true}
             searchPlaceholder="Search all columns..."
             clientSideSearch={false}
+            serverFilters={serverFilters}
+            showServersideFilter={showServersideFilter}
+            onToggleServersideFilter={() => setShowServersideFilter(!showServersideFilter)}
+            onSearch={handleSearch}
+            gridId="trip-plans-grid-demo"
+            userId="demo-user"
+            api={filterService}
             extraFilters={[
               {
                 key: 'priority',
