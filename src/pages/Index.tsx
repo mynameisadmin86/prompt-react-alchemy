@@ -251,13 +251,6 @@ const Index = () => {
       path: "/smartgrid-nested-rows-demo",
       color: "text-cyan-500"
     },
-    {
-      title: "Equipment Calendar",
-      description: "Interactive equipment scheduling calendar with timeline view and resource allocation",
-      icon: Layout,
-      path: "/equipment-calendar-demo",
-      color: "text-emerald-600"
-    },
   ];
 
   return (
