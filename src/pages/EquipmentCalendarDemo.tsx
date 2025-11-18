@@ -215,6 +215,7 @@ const EquipmentCalendarDemo = () => {
               onViewChange={setView}
               onBarClick={handleBarClick}
               onEquipmentClick={handleEquipmentClick}
+              onAddToCO={handleAddToCO}
               enableDrag={false}
             />
           </div>

@@ -3,6 +3,8 @@ export interface EquipmentItem {
   title: string;
   supplier: string;
   status: 'owned' | 'leased' | 'maintenance';
+  type?: string;
+  capacity?: string;
 }
 
 export interface EquipmentCalendarEvent {
@@ -23,6 +25,7 @@ export interface EquipmentCalendarViewProps {
   onViewChange: (view: 'day' | 'week' | 'month') => void;
   onBarClick?: (event: EquipmentCalendarEvent) => void;
   onEquipmentClick?: (equipment: EquipmentItem) => void;
+  onAddToCO?: (selectedEquipment: EquipmentItem[]) => void;
   scrollSyncKey?: string;
   enableDrag?: boolean;
 }
