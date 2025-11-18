@@ -2,11 +2,13 @@ import { useState } from 'react';
 import { EquipmentCalendarView } from '@/components/EquipmentCalendar';
 import { EquipmentItem, EquipmentCalendarEvent } from '@/types/equipmentCalendar';
 import { Button } from '@/components/ui/button';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Calendar } from 'lucide-react';
 import { addDays, addMonths, subDays, subMonths, addWeeks, subWeeks, startOfWeek, startOfMonth } from 'date-fns';
 import { toast } from 'sonner';
+import { SideDrawer } from '@/components/SideDrawer';
 
 const EquipmentCalendarDemo = () => {
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [view, setView] = useState<'day' | 'week' | 'month'>('week');
   const [startDate, setStartDate] = useState(new Date('2025-11-17'));
 
@@ -162,38 +164,63 @@ const EquipmentCalendarDemo = () => {
   };
 
   return (
-    <div className="h-screen w-full bg-background p-4 flex flex-col gap-4">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">Equipment Calendar</h1>
-          <p className="text-sm text-muted-foreground">Schedule and track equipment assignments</p>
+    <>
+      <div className="h-screen w-full bg-background p-4 flex flex-col gap-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold">Equipment Calendar Demo</h1>
+            <p className="text-sm text-muted-foreground">Schedule and track equipment assignments</p>
+          </div>
+          <Button onClick={() => setIsDrawerOpen(true)}>
+            <Calendar className="h-4 w-4 mr-2" />
+            Open Calendar
+          </Button>
         </div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={handleToday}>
-            Today
-          </Button>
-          <Button variant="outline" size="icon" onClick={handlePrevious}>
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-          <Button variant="outline" size="icon" onClick={handleNext}>
-            <ChevronRight className="h-4 w-4" />
-          </Button>
+
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-center">
+            <p className="text-muted-foreground mb-4">Click the button above to open the equipment calendar</p>
+          </div>
         </div>
       </div>
 
-      <div className="flex-1 overflow-hidden">
-        <EquipmentCalendarView
-          equipments={equipments}
-          events={events}
-          view={view}
-          startDate={startDate}
-          onViewChange={setView}
-          onBarClick={handleBarClick}
-          onEquipmentClick={handleEquipmentClick}
-          enableDrag={false}
-        />
-      </div>
-    </div>
+      <SideDrawer
+        isOpen={isDrawerOpen}
+        onClose={() => setIsDrawerOpen(false)}
+        title="Equipment Calendar"
+        width="95%"
+        slideDirection="right"
+        showCloseButton={true}
+        closeOnOutsideClick={true}
+      >
+        <div className="h-full flex flex-col gap-4 p-4">
+          <div className="flex items-center justify-end gap-2">
+            <Button variant="outline" size="sm" onClick={handleToday}>
+              Today
+            </Button>
+            <Button variant="outline" size="icon" onClick={handlePrevious}>
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            <Button variant="outline" size="icon" onClick={handleNext}>
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+
+          <div className="flex-1 overflow-hidden">
+            <EquipmentCalendarView
+              equipments={equipments}
+              events={events}
+              view={view}
+              startDate={startDate}
+              onViewChange={setView}
+              onBarClick={handleBarClick}
+              onEquipmentClick={handleEquipmentClick}
+              enableDrag={false}
+            />
+          </div>
+        </div>
+      </SideDrawer>
+    </>
   );
 };
 
