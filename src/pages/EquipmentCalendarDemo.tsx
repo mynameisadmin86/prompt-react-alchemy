@@ -11,17 +11,20 @@ const EquipmentCalendarDemo = () => {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [view, setView] = useState<'day' | 'week' | 'month'>('week');
   const [startDate, setStartDate] = useState(new Date('2025-11-17'));
+  const [showHourView, setShowHourView] = useState(false);
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [selectedEquipments, setSelectedEquipments] = useState<string[]>([]);
 
   // Sample equipment data
   const equipments: EquipmentItem[] = [
-    { id: 'eq1', title: 'Truck A-101', supplier: 'ABC Logistics', status: 'owned' },
-    { id: 'eq2', title: 'Truck B-202', supplier: 'XYZ Transport', status: 'leased' },
-    { id: 'eq3', title: 'Truck C-303', supplier: 'ABC Logistics', status: 'owned' },
-    { id: 'eq4', title: 'Truck D-404', supplier: 'Delta Movers', status: 'maintenance' },
-    { id: 'eq5', title: 'Truck E-505', supplier: 'XYZ Transport', status: 'leased' },
-    { id: 'eq6', title: 'Truck F-606', supplier: 'ABC Logistics', status: 'owned' },
-    { id: 'eq7', title: 'Truck G-707', supplier: 'Gamma Fleet', status: 'owned' },
-    { id: 'eq8', title: 'Truck H-808', supplier: 'Delta Movers', status: 'maintenance' },
+    { id: 'eq1', title: 'W001', supplier: 'ABC Logistics', status: 'available', type: 'Freight', capacity: '50T' },
+    { id: 'eq2', title: 'W002', supplier: 'XYZ Transport', status: 'available', type: 'Passenger', capacity: '80 seats' },
+    { id: 'eq3', title: 'W003', supplier: 'ABC Logistics', status: 'occupied', type: 'Tank', capacity: '40T' },
+    { id: 'eq4', title: 'W004', supplier: 'Delta Movers', status: 'available', type: 'Freight', capacity: '50T' },
+    { id: 'eq5', title: 'W005', supplier: 'XYZ Transport', status: 'occupied', type: 'Freight', capacity: '55T' },
+    { id: 'eq6', title: 'W006', supplier: 'ABC Logistics', status: 'workshop', type: 'Tank', capacity: '45T' },
+    { id: 'eq7', title: 'W007', supplier: 'Gamma Fleet', status: 'available', type: 'Freight', capacity: '50T' },
+    { id: 'eq8', title: 'W008', supplier: 'Delta Movers', status: 'workshop', type: 'Passenger', capacity: '75 seats' },
   ];
 
   // Sample events
@@ -163,6 +166,13 @@ const EquipmentCalendarDemo = () => {
     });
   };
 
+  const handleAddToTrip = (selectedIds: string[]) => {
+    toast.success(`Adding ${selectedIds.length} wagon(s) to CO/Trip`, {
+      description: `Wagons: ${selectedIds.join(', ')}`,
+    });
+    setSelectedEquipments([]);
+  };
+
   return (
     <>
       <div className="h-screen w-full bg-background p-4 flex flex-col gap-4">
@@ -212,7 +222,14 @@ const EquipmentCalendarDemo = () => {
               events={events}
               view={view}
               startDate={startDate}
+              showHourView={showHourView}
+              statusFilter={statusFilter}
+              selectedEquipments={selectedEquipments}
               onViewChange={setView}
+              onShowHourViewChange={setShowHourView}
+              onStatusFilterChange={setStatusFilter}
+              onSelectionChange={setSelectedEquipments}
+              onAddToTrip={handleAddToTrip}
               onBarClick={handleBarClick}
               onEquipmentClick={handleEquipmentClick}
               enableDrag={false}

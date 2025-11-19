@@ -4,14 +4,17 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Filter } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { EquipmentCalendarViewProps, EquipmentItem, EquipmentCalendarEvent } from '@/types/equipmentCalendar';
 import { format, addHours, addDays, startOfDay, endOfDay, differenceInMinutes, differenceInDays, startOfMonth, endOfMonth, eachDayOfInterval } from 'date-fns';
 
 const statusColors = {
-  owned: 'bg-green-100 text-green-800 border-green-200',
-  leased: 'bg-blue-100 text-blue-800 border-blue-200',
-  maintenance: 'bg-orange-100 text-orange-800 border-orange-200',
+  available: 'bg-green-100 text-green-800 border-green-200',
+  occupied: 'bg-blue-100 text-blue-800 border-blue-200',
+  workshop: 'bg-orange-100 text-orange-800 border-orange-200',
 };
 
 const eventTypeColors = {
@@ -25,7 +28,14 @@ export const EquipmentCalendarView = ({
   events,
   view,
   startDate,
+  showHourView,
+  statusFilter,
+  selectedEquipments,
   onViewChange,
+  onShowHourViewChange,
+  onStatusFilterChange,
+  onSelectionChange,
+  onAddToTrip,
   onBarClick,
   onEquipmentClick,
   enableDrag = false,
@@ -33,6 +43,11 @@ export const EquipmentCalendarView = ({
   const [selectedEquipmentId, setSelectedEquipmentId] = useState<string | null>(null);
   const timelineRef = useRef<HTMLDivElement>(null);
   const leftPanelRef = useRef<HTMLDivElement>(null);
+
+  // Filter equipments by status
+  const filteredEquipments = statusFilter === 'all' 
+    ? equipments 
+    : equipments.filter(eq => eq.status === statusFilter);
 
   const ROW_HEIGHT = 60;
   const HOUR_WIDTH = 60; // pixels per hour for day view
@@ -161,6 +176,22 @@ export const EquipmentCalendarView = ({
     onEquipmentClick?.(equipment);
   };
 
+  const handleSelectEquipment = (equipmentId: string, checked: boolean) => {
+    if (checked) {
+      onSelectionChange([...selectedEquipments, equipmentId]);
+    } else {
+      onSelectionChange(selectedEquipments.filter(id => id !== equipmentId));
+    }
+  };
+
+  const handleSelectAll = (checked: boolean) => {
+    if (checked) {
+      onSelectionChange(filteredEquipments.map(eq => eq.id));
+    } else {
+      onSelectionChange([]);
+    }
+  };
+
   const handleBarClick = (event: EquipmentCalendarEvent, e: React.MouseEvent) => {
     e.stopPropagation();
     onBarClick?.(event);
@@ -185,49 +216,147 @@ export const EquipmentCalendarView = ({
   return (
     <Card className="w-full h-full flex flex-col overflow-hidden">
       {/* Header with view controls */}
-      <div className="border-b bg-background p-4 flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <h2 className="text-lg font-semibold">Equipment Calendar</h2>
+      <div className="border-b bg-background p-4 space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <h2 className="text-lg font-semibold">Rail Fleet Calendar</h2>
+            <span className="text-sm text-muted-foreground">
+              Manage wagon availability and trip scheduling
+            </span>
+          </div>
+          <Tabs value={view} onValueChange={(v) => onViewChange(v as any)}>
+            <TabsList>
+              <TabsTrigger value="day">Day</TabsTrigger>
+              <TabsTrigger value="week">Week</TabsTrigger>
+              <TabsTrigger value="month">Month</TabsTrigger>
+            </TabsList>
+          </Tabs>
+        </div>
+        
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-6">
+            <div className="flex items-center gap-2">
+              <Checkbox 
+                id="show-hour-view" 
+                checked={showHourView}
+                onCheckedChange={(checked) => onShowHourViewChange(checked as boolean)}
+              />
+              <label htmlFor="show-hour-view" className="text-sm cursor-pointer">
+                Show Hour View
+              </label>
+            </div>
+            
+            <div className="flex items-center gap-2">
+              <Filter className="h-4 w-4 text-muted-foreground" />
+              <Select value={statusFilter} onValueChange={onStatusFilterChange}>
+                <SelectTrigger className="w-[140px] h-9">
+                  <SelectValue placeholder="All Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Status</SelectItem>
+                  <SelectItem value="available">Available</SelectItem>
+                  <SelectItem value="occupied">Occupied</SelectItem>
+                  <SelectItem value="workshop">In Workshop</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="flex items-center gap-3 text-xs">
+              <div className="flex items-center gap-1">
+                <div className="w-3 h-3 rounded bg-green-100 border border-green-200" />
+                <span>Available</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <div className="w-3 h-3 rounded bg-blue-100 border border-blue-200" />
+                <span>Occupied</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <div className="w-3 h-3 rounded bg-orange-100 border border-orange-200" />
+                <span>In Workshop</span>
+              </div>
+            </div>
+          </div>
+
           <span className="text-sm text-muted-foreground">
-            {format(startDate, view === 'month' ? 'MMMM yyyy' : 'MMM d, yyyy')}
+            {format(startDate, 'MMMM yyyy')}
           </span>
         </div>
-        <Tabs value={view} onValueChange={(v) => onViewChange(v as any)}>
-          <TabsList>
-            <TabsTrigger value="day">Day</TabsTrigger>
-            <TabsTrigger value="week">Week</TabsTrigger>
-            <TabsTrigger value="month">Month</TabsTrigger>
-          </TabsList>
-        </Tabs>
       </div>
+
+      {/* Selection bar */}
+      {selectedEquipments.length > 0 && (
+        <div className="bg-primary/10 border-b px-4 py-3 flex items-center justify-between">
+          <span className="text-sm font-medium text-primary">
+            {selectedEquipments.length} Wagon{selectedEquipments.length > 1 ? 's' : ''} Selected
+            <span className="ml-2 text-muted-foreground">
+              {selectedEquipments.map(id => filteredEquipments.find(eq => eq.id === id)?.title).join(', ')}
+            </span>
+          </span>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" onClick={() => onSelectionChange([])}>
+              Clear Selection
+            </Button>
+            <Button size="sm" onClick={() => onAddToTrip(selectedEquipments)}>
+              Add to CO/Trip
+            </Button>
+          </div>
+        </div>
+      )}
 
       {/* Main content */}
       <div className="flex-1 flex overflow-hidden">
         {/* Left Panel - Equipment List */}
-        <div className="w-80 border-r bg-background flex flex-col">
-          <div className="border-b p-3 bg-muted/50 font-medium text-sm">
-            Equipment
+        <div className={cn("border-r bg-background flex flex-col", showHourView ? "w-48" : "flex-none")}>
+          <div className="border-b p-3 bg-muted/50 font-medium text-sm flex items-center gap-3">
+            <Checkbox 
+              checked={selectedEquipments.length === filteredEquipments.length && filteredEquipments.length > 0}
+              onCheckedChange={(checked) => handleSelectAll(checked as boolean)}
+            />
+            <span className="flex-1">Wagon ID</span>
+            {!showHourView && (
+              <>
+                <span className="w-24">Type</span>
+                <span className="w-24">Capacity</span>
+              </>
+            )}
           </div>
           <ScrollArea className="flex-1" ref={leftPanelRef}>
             <div>
-              {equipments.map((equipment) => (
+              {filteredEquipments.map((equipment) => (
                 <div
                   key={equipment.id}
-                  onClick={() => handleEquipmentClick(equipment)}
                   className={cn(
-                    "flex items-center justify-between px-4 py-3 border-b cursor-pointer transition-colors",
+                    "flex items-center gap-3 px-3 py-3 border-b transition-colors",
                     "hover:bg-accent/50",
                     selectedEquipmentId === equipment.id && "bg-accent"
                   )}
                   style={{ height: ROW_HEIGHT }}
                 >
-                  <div className="flex-1 min-w-0">
+                  <Checkbox 
+                    checked={selectedEquipments.includes(equipment.id)}
+                    onCheckedChange={(checked) => handleSelectEquipment(equipment.id, checked as boolean)}
+                    onClick={(e) => e.stopPropagation()}
+                  />
+                  <div 
+                    className="flex-1 min-w-0 cursor-pointer" 
+                    onClick={() => handleEquipmentClick(equipment)}
+                  >
                     <div className="font-medium text-sm truncate">{equipment.title}</div>
-                    <div className="text-xs text-muted-foreground truncate">{equipment.supplier}</div>
+                    {showHourView && (
+                      <div className="text-xs text-muted-foreground truncate">{equipment.supplier}</div>
+                    )}
                   </div>
-                  <Badge variant="outline" className={cn("ml-2", statusColors[equipment.status])}>
-                    {equipment.status}
-                  </Badge>
+                  {!showHourView && (
+                    <>
+                      <span className="w-24 text-sm truncate">{equipment.type || '-'}</span>
+                      <span className="w-24 text-sm truncate">{equipment.capacity || '-'}</span>
+                    </>
+                  )}
+                  {showHourView && (
+                    <Badge variant="outline" className={cn("ml-2", statusColors[equipment.status])}>
+                      {equipment.status}
+                    </Badge>
+                  )}
                 </div>
               ))}
             </div>
@@ -266,7 +395,7 @@ export const EquipmentCalendarView = ({
           {/* Timeline Body */}
           <ScrollArea className="flex-1" ref={timelineRef}>
             <div className={cn("relative", dimensions.useFlex ? "w-full" : "")} 
-                 style={dimensions.useFlex ? { minHeight: equipments.length * ROW_HEIGHT } : { width: dimensions.width, minHeight: equipments.length * ROW_HEIGHT }}>
+                 style={dimensions.useFlex ? { minHeight: filteredEquipments.length * ROW_HEIGHT } : { width: dimensions.width, minHeight: filteredEquipments.length * ROW_HEIGHT }}>
               {/* Grid lines */}
               {!dimensions.useFlex && (
                 <div className="absolute inset-0 pointer-events-none">
@@ -277,7 +406,7 @@ export const EquipmentCalendarView = ({
                       style={{ left: idx * dimensions.columnWidth }}
                     />
                   ))}
-                  {equipments.map((_, idx) => (
+                  {filteredEquipments.map((_, idx) => (
                     <div
                       key={idx}
                       className="absolute left-0 right-0 border-b border-border/30"
@@ -298,7 +427,7 @@ export const EquipmentCalendarView = ({
                   ))}
                 </div>
               )}
-              {dimensions.useFlex && equipments.map((_, idx) => (
+              {dimensions.useFlex && filteredEquipments.map((_, idx) => (
                 <div
                   key={idx}
                   className="absolute left-0 right-0 border-b border-border/30"
@@ -307,7 +436,7 @@ export const EquipmentCalendarView = ({
               ))}
 
               {/* Event bars */}
-              {equipments.map((equipment, equipmentIdx) => {
+              {filteredEquipments.map((equipment, equipmentIdx) => {
                 const equipmentEvents = getEventsForEquipment(equipment.id);
                 
                 return equipmentEvents.map((event) => {
@@ -322,7 +451,7 @@ export const EquipmentCalendarView = ({
                       key={event.id}
                       onClick={(e) => handleBarClick(event, e)}
                       className={cn(
-                        "absolute rounded-md text-xs text-white px-2 flex items-center shadow-sm cursor-pointer transition-all hover:shadow-md hover:brightness-110",
+                        "absolute rounded text-xs text-white px-2 flex flex-col justify-center shadow-sm cursor-pointer transition-all hover:shadow-md hover:brightness-110",
                         event.color || eventTypeColors[event.type],
                         enableDrag && "cursor-move"
                       )}
@@ -334,7 +463,12 @@ export const EquipmentCalendarView = ({
                       }}
                       title={`${event.label}\n${format(new Date(event.start), 'MMM d, HH:mm')} - ${format(new Date(event.end), 'MMM d, HH:mm')}`}
                     >
-                      <span className="truncate font-medium">{event.label}</span>
+                      <div className="truncate font-semibold leading-tight">{event.label}</div>
+                      {showHourView && (
+                        <div className="truncate text-[10px] opacity-90">
+                          {format(new Date(event.start), 'HH:mm')} - {format(new Date(event.end), 'HH:mm')}
+                        </div>
+                      )}
                     </div>
                   );
                 });
