@@ -73,6 +73,8 @@ export const API_ENDPOINTS = {
       `/users/${userId}/preferences/${gridId}`,
     SAVE: (userId: string, gridId: string) =>
       `/users/${userId}/preferences/${gridId}`,
+    UPDATE: (userId: string, gridId: string) =>
+      `/users/${userId}/preferences/${gridId}`,
   },
   // Order management
   ORDERS: {

@@ -60,7 +60,7 @@ export const filterService = {
     console.log('Applying filters:', filters);
   },
 
-  // Save filter field visibility preferences
+  // Save or update filter field visibility preferences
   saveFilterFieldPreferences: async (
     userId: string, 
     gridId: string, 
@@ -73,8 +73,18 @@ export const filterService = {
     };
     
     try {
-      await apiClient.post(API_ENDPOINTS.PREFERENCES.SAVE(userId, gridId), preferenceData);
-      console.log('Filter field preferences saved to server');
+      // Check if preferences exist
+      const existing = await filterService.getFilterFieldPreferences(userId, gridId);
+      
+      if (existing) {
+        // Update existing preferences
+        await apiClient.put(API_ENDPOINTS.PREFERENCES.UPDATE(userId, gridId), preferenceData);
+        console.log('Filter field preferences updated on server');
+      } else {
+        // Create new preferences
+        await apiClient.post(API_ENDPOINTS.PREFERENCES.SAVE(userId, gridId), preferenceData);
+        console.log('Filter field preferences saved to server');
+      }
     } catch (error) {
       console.warn('Failed to save filter field preferences to server, using localStorage fallback:', error);
       // Fallback to localStorage
