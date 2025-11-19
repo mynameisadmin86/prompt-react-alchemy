@@ -306,19 +306,15 @@ export const EquipmentCalendarView = ({
       {/* Main content */}
       <div className="flex-1 flex overflow-hidden">
         {/* Left Panel - Equipment List */}
-        <div className={cn("border-r bg-background flex flex-col", showHourView ? "w-48" : "flex-none")}>
+        <div className="border-r bg-background flex flex-col w-80">
           <div className="border-b p-3 bg-muted/50 font-medium text-sm flex items-center gap-3">
             <Checkbox 
               checked={selectedEquipments.length === filteredEquipments.length && filteredEquipments.length > 0}
               onCheckedChange={(checked) => handleSelectAll(checked as boolean)}
             />
             <span className="flex-1">Wagon ID</span>
-            {!showHourView && (
-              <>
-                <span className="w-24">Type</span>
-                <span className="w-24">Capacity</span>
-              </>
-            )}
+            <span className="w-24">Type</span>
+            <span className="w-24">Capacity</span>
           </div>
           <ScrollArea className="flex-1" ref={leftPanelRef}>
             <div>
@@ -342,21 +338,13 @@ export const EquipmentCalendarView = ({
                     onClick={() => handleEquipmentClick(equipment)}
                   >
                     <div className="font-medium text-sm truncate">{equipment.title}</div>
-                    {showHourView && (
-                      <div className="text-xs text-muted-foreground truncate">{equipment.supplier}</div>
-                    )}
+                    <div className="text-xs text-muted-foreground truncate">{equipment.supplier}</div>
                   </div>
-                  {!showHourView && (
-                    <>
-                      <span className="w-24 text-sm truncate">{equipment.type || '-'}</span>
-                      <span className="w-24 text-sm truncate">{equipment.capacity || '-'}</span>
-                    </>
-                  )}
-                  {showHourView && (
-                    <Badge variant="outline" className={cn("ml-2", statusColors[equipment.status])}>
-                      {equipment.status}
-                    </Badge>
-                  )}
+                  <span className="w-24 text-sm truncate">{equipment.type || '-'}</span>
+                  <span className="w-24 text-sm truncate">{equipment.capacity || '-'}</span>
+                  <Badge variant="outline" className={cn("ml-2", statusColors[equipment.status])}>
+                    {equipment.status}
+                  </Badge>
                 </div>
               ))}
             </div>
