@@ -59,6 +59,46 @@ export const filterService = {
     // This is typically handled by the grid component's query parameters
     console.log('Applying filters:', filters);
   },
+
+  // Save filter field visibility preferences
+  saveFilterFieldPreferences: async (
+    userId: string, 
+    gridId: string, 
+    visibleFields: string[], 
+    fieldOrder: string[]
+  ): Promise<void> => {
+    const preferenceData = {
+      filterFieldVisibility: visibleFields,
+      filterFieldOrder: fieldOrder,
+    };
+    
+    try {
+      await apiClient.post(API_ENDPOINTS.PREFERENCES.SAVE(userId, gridId), preferenceData);
+      console.log('Filter field preferences saved to server');
+    } catch (error) {
+      console.warn('Failed to save filter field preferences to server, using localStorage fallback:', error);
+      // Fallback to localStorage
+      const key = `filterFieldPrefs_${userId}_${gridId}`;
+      localStorage.setItem(key, JSON.stringify(preferenceData));
+    }
+  },
+
+  // Get filter field visibility preferences
+  getFilterFieldPreferences: async (
+    userId: string, 
+    gridId: string
+  ): Promise<{ filterFieldVisibility: string[]; filterFieldOrder: string[] } | null> => {
+    try {
+      const response = await apiClient.get(API_ENDPOINTS.PREFERENCES.GET(userId, gridId));
+      return response.data.data;
+    } catch (error) {
+      console.warn('Failed to fetch filter field preferences from server, using localStorage fallback:', error);
+      // Fallback to localStorage
+      const key = `filterFieldPrefs_${userId}_${gridId}`;
+      const stored = localStorage.getItem(key);
+      return stored ? JSON.parse(stored) : null;
+    }
+  },
 };
 
 // LocalStorage fallback functions

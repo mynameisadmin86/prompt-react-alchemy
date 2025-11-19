@@ -295,9 +295,26 @@ export function ServersideFilter({
 
   const activeFilterCount = Object.keys(pendingFilters).length;
 
-  const handleFieldVisibilitySave = (newVisibleFields: string[], newFieldOrder: string[]) => {
+  const handleFieldVisibilitySave = async (newVisibleFields: string[], newFieldOrder: string[]) => {
     setVisibleFields(newVisibleFields);
     setFieldOrder(newFieldOrder);
+    
+    // Save to API
+    try {
+      const { filterService } = await import('@/api/services/filterService');
+      await filterService.saveFilterFieldPreferences(userId, gridId, newVisibleFields, newFieldOrder);
+      toast({
+        title: "Preferences saved",
+        description: "Filter field preferences have been saved successfully",
+      });
+    } catch (error) {
+      console.error('Failed to save filter field preferences:', error);
+      toast({
+        title: "Error",
+        description: "Failed to save filter field preferences",
+        variant: "destructive",
+      });
+    }
   };
 
   // Helper function to render filter inputs
