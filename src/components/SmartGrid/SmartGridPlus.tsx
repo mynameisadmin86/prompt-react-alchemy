@@ -133,6 +133,7 @@ export function SmartGridPlus({
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
   const [isAddingRow, setIsAddingRow] = useState(false);
   const [newRowValues, setNewRowValues] = useState<Record<string, any>>(defaultRowValues);
+  const [focusedColumn, setFocusedColumn] = useState<string | null>(null);
 
   // Use external selectedRows if provided, otherwise use internal state
   const currentSelectedRows = selectedRows || internalSelectedRows;
@@ -706,6 +707,7 @@ export function SmartGridPlus({
     setEditingRow(rowIndex);
     setEditingValues({ ...row });
     setValidationErrors({});
+    setFocusedColumn(null);
   }, []);
 
   const handleSaveEditRow = useCallback(async (rowIndex: number) => {
@@ -727,6 +729,7 @@ export function SmartGridPlus({
       setEditingRow(null);
       setEditingValues({});
       setValidationErrors({});
+      setFocusedColumn(null);
       
       toast({
         title: "Row Updated",
@@ -745,6 +748,7 @@ export function SmartGridPlus({
     setEditingRow(null);
     setEditingValues({});
     setValidationErrors({});
+    setFocusedColumn(null);
   }, []);
 
   const handleDeleteRowAction = useCallback(async (rowIndex: number, row: any) => {
@@ -872,18 +876,20 @@ export function SmartGridPlus({
     if (isRowEditing && inlineRowEditing && column.key !== 'actions') {
       const editingValue = editingValues[column.key];
       return (
-        <EnhancedCellEditor
-          value={editingValue}
-          column={column}
-          onChange={(value) => {
-            handleEditingCellChange(rowIndex, column.key, value);
-            // Call column-specific onChange if provided
-            if (column.onChange) {
-              column.onChange(value, row);
-            }
-          }}
-          error={validationErrors[column.key]}
-        />
+        <div onFocus={() => setFocusedColumn(column.key)}>
+          <EnhancedCellEditor
+            value={editingValue}
+            column={column}
+            onChange={(value) => {
+              handleEditingCellChange(rowIndex, column.key, value);
+              // Call column-specific onChange if provided
+              if (column.onChange) {
+                column.onChange(value, row);
+              }
+            }}
+            error={validationErrors[column.key]}
+          />
+        </div>
       );
     }
 
@@ -1373,28 +1379,39 @@ export function SmartGridPlus({
                         {/* Floating action buttons for editing row */}
                         {isRowEditing && (
                           <TableRow className="border-0">
-                            <TableCell 
-                              colSpan={orderedColumns.length + (showCheckboxes ? 1 : 0) + (plugins.some(plugin => plugin.rowActions) ? 1 : 0)}
-                              className="p-0 border-0 relative"
-                            >
-                              <div className="flex items-center gap-2 px-2 py-2 animate-scale-in">
-                                <Button
-                                  size="sm"
-                                  onClick={() => handleSaveEditRow(actualIndex)}
-                                  className="h-9 w-9 rounded-lg shadow-lg bg-primary hover:bg-primary/90 text-primary-foreground p-0"
+                            {showCheckboxes && <TableCell className="p-0 border-0" />}
+                            {orderedColumns.map((column, colIdx) => {
+                              const isActiveColumn = focusedColumn === column.key || (!focusedColumn && colIdx === 0);
+                              return (
+                                <TableCell 
+                                  key={column.key}
+                                  className="p-0 border-0 relative"
                                 >
-                                  <Check className="h-4 w-4" />
-                                </Button>
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  onClick={handleCancelEditRow}
-                                  className="h-9 w-9 rounded-lg shadow-lg bg-background hover:bg-muted p-0"
-                                >
-                                  <X className="h-4 w-4" />
-                                </Button>
-                              </div>
-                            </TableCell>
+                                  {isActiveColumn && (
+                                    <div className="flex items-center gap-2 px-2 py-2 animate-scale-in">
+                                      <Button
+                                        size="sm"
+                                        onClick={() => handleSaveEditRow(actualIndex)}
+                                        className="h-9 w-9 rounded-lg shadow-lg bg-primary hover:bg-primary/90 text-primary-foreground p-0"
+                                      >
+                                        <Check className="h-4 w-4" />
+                                      </Button>
+                                      <Button
+                                        size="sm"
+                                        variant="outline"
+                                        onClick={handleCancelEditRow}
+                                        className="h-9 w-9 rounded-lg shadow-lg bg-background hover:bg-muted p-0"
+                                      >
+                                        <X className="h-4 w-4" />
+                                      </Button>
+                                    </div>
+                                  )}
+                                </TableCell>
+                              );
+                            })}
+                            {plugins.some(plugin => plugin.rowActions) && (
+                              <TableCell className="p-0 border-0" />
+                            )}
                           </TableRow>
                         )}
                         
