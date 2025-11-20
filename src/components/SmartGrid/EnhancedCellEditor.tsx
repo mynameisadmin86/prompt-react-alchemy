@@ -18,7 +18,7 @@ export function EnhancedCellEditor({ value, column, onChange, onSave, error, sho
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (shouldAutoFocus && inputRef.current && !['LazySelect', 'Select'].includes(column.type)) {
+    if (shouldAutoFocus && inputRef.current && !['LazySelect', 'MultiselectLazySelect', 'Select'].includes(column.type)) {
       inputRef.current.focus();
     }
   }, [column.type, shouldAutoFocus]);
@@ -62,6 +62,28 @@ export function EnhancedCellEditor({ value, column, onChange, onSave, error, sho
           onChange={handleChange}
           placeholder="Select..."
           multiSelect={column.multiSelect}
+          hideSearch={column.hideSearch}
+          disableLazyLoading={column.disableLazyLoading}
+        />
+        {error && (
+          <div className="mt-1 text-xs text-destructive">
+            {error}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // MultiselectLazySelect renderer
+  if (column.type === 'MultiselectLazySelect' && column.fetchOptions) {
+    return (
+      <div className="w-full">
+        <DynamicLazySelect
+          fetchOptions={column.fetchOptions}
+          value={editValue}
+          onChange={handleChange}
+          placeholder="Select multiple..."
+          multiSelect={true}
           hideSearch={column.hideSearch}
           disableLazyLoading={column.disableLazyLoading}
         />
