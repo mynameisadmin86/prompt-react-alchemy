@@ -672,7 +672,7 @@ export function SmartGridPlus({
         ...newRowValues
       };
 
-      const updatedData = [newRow, ...gridData];
+      const updatedData = [...gridData, newRow];
       setGridData(updatedData);
       
       if (onAddRow) {
