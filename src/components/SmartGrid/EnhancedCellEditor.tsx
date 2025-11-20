@@ -10,17 +10,18 @@ interface EnhancedCellEditorProps {
   onChange: (value: any) => void;
   onSave?: () => void;
   error?: string;
+  shouldAutoFocus?: boolean;
 }
 
-export function EnhancedCellEditor({ value, column, onChange, onSave, error }: EnhancedCellEditorProps) {
+export function EnhancedCellEditor({ value, column, onChange, onSave, error, shouldAutoFocus = false }: EnhancedCellEditorProps) {
   const [editValue, setEditValue] = useState(value ?? '');
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (inputRef.current && !['LazySelect', 'Select'].includes(column.type)) {
+    if (shouldAutoFocus && inputRef.current && !['LazySelect', 'Select'].includes(column.type)) {
       inputRef.current.focus();
     }
-  }, [column.type]);
+  }, [column.type, shouldAutoFocus]);
 
   const handleChange = (newValue: any) => {
     setEditValue(newValue);
@@ -85,7 +86,7 @@ export function EnhancedCellEditor({ value, column, onChange, onSave, error }: E
             "w-full px-3 py-2 text-sm border rounded-md bg-background",
             error && 'border-destructive focus-visible:ring-destructive'
           )}
-          autoFocus
+          autoFocus={shouldAutoFocus}
         >
           <option value="">Select...</option>
           {column.options.map((option) => (

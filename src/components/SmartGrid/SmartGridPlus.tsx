@@ -129,6 +129,7 @@ export function SmartGridPlus({
 
   // SmartGridPlus specific state
   const [editingRow, setEditingRow] = useState<number | null>(null);
+  const [focusedColumn, setFocusedColumn] = useState<string | null>(null);
   const [editingValues, setEditingValues] = useState<Record<string, any>>({});
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
   const [isAddingRow, setIsAddingRow] = useState(false);
@@ -702,10 +703,11 @@ export function SmartGridPlus({
   }, [defaultRowValues]);
 
   // Edit Row functionality
-  const handleStartEditRow = useCallback((rowIndex: number, row: any) => {
+  const handleStartEditRow = useCallback((rowIndex: number, row: any, columnKey?: string) => {
     setEditingRow(rowIndex);
     setEditingValues({ ...row });
     setValidationErrors({});
+    setFocusedColumn(columnKey || null);
   }, []);
 
   const handleSaveEditRow = useCallback(async (rowIndex: number) => {
@@ -727,6 +729,7 @@ export function SmartGridPlus({
       setEditingRow(null);
       setEditingValues({});
       setValidationErrors({});
+      setFocusedColumn(null);
       
       toast({
         title: "Row Updated",
@@ -745,6 +748,7 @@ export function SmartGridPlus({
     setEditingRow(null);
     setEditingValues({});
     setValidationErrors({});
+    setFocusedColumn(null);
   }, []);
 
   const handleDeleteRowAction = useCallback(async (rowIndex: number, row: any) => {
@@ -867,6 +871,7 @@ export function SmartGridPlus({
     // Handle inline row editing for SmartGridPlus
     if (isRowEditing && inlineRowEditing && column.key !== 'actions') {
       const editingValue = editingValues[column.key];
+      const shouldAutoFocus = focusedColumn === column.key;
       return (
         <EnhancedCellEditor
           value={editingValue}
@@ -880,6 +885,7 @@ export function SmartGridPlus({
           }}
           onSave={() => handleSaveEditRow(rowIndex)}
           error={validationErrors[column.key]}
+          shouldAutoFocus={shouldAutoFocus}
         />
       );
     }
@@ -1338,13 +1344,18 @@ export function SmartGridPlus({
                             const widthPercentage = (column.width / orderedColumns.reduce((total, col) => total + col.width, 0)) * 100;
                             
                             return (
-                              <TableCell 
+                               <TableCell 
                                 key={column.key}
-                                className="px-2 py-2 border-r border-gray-100 last:border-r-0"
+                                className="px-2 py-2 border-r border-gray-100 last:border-r-0 cursor-pointer"
                                 style={{ 
                                   width: `${widthPercentage}%`,
                                   minWidth: `${Math.max(80, column.width * 0.8)}px`,
                                   maxWidth: `${column.width * 1.5}px`
+                                }}
+                                onClick={() => {
+                                  if (inlineRowEditing && !isRowEditing && column.key !== 'actions') {
+                                    handleStartEditRow(actualIndex, row, column.key);
+                                  }
                                 }}
                               >
                                 {renderCell(row, column, actualIndex, columnIndex)}
