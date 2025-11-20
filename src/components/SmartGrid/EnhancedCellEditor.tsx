@@ -8,10 +8,11 @@ interface EnhancedCellEditorProps {
   value: any;
   column: GridColumnConfig;
   onChange: (value: any) => void;
+  onSave?: () => void;
   error?: string;
 }
 
-export function EnhancedCellEditor({ value, column, onChange, error }: EnhancedCellEditorProps) {
+export function EnhancedCellEditor({ value, column, onChange, onSave, error }: EnhancedCellEditorProps) {
   const [editValue, setEditValue] = useState(value ?? '');
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -43,6 +44,13 @@ export function EnhancedCellEditor({ value, column, onChange, error }: EnhancedC
     onChange(finalValue);
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && onSave) {
+      e.preventDefault();
+      onSave();
+    }
+  };
+
   // LazySelect renderer
   if (column.type === 'LazySelect' && column.fetchOptions) {
     return (
@@ -72,6 +80,7 @@ export function EnhancedCellEditor({ value, column, onChange, error }: EnhancedC
         <select
           value={editValue}
           onChange={(e) => handleChange(e.target.value)}
+          onKeyDown={handleKeyDown}
           className={cn(
             "w-full px-3 py-2 text-sm border rounded-md bg-background",
             error && 'border-destructive focus-visible:ring-destructive'
@@ -118,6 +127,7 @@ export function EnhancedCellEditor({ value, column, onChange, error }: EnhancedC
         type={inputType}
         value={editValue}
         onChange={(e) => handleChange(e.target.value)}
+        onKeyDown={handleKeyDown}
         className={cn(
           'w-full',
           error && 'border-destructive focus-visible:ring-destructive'

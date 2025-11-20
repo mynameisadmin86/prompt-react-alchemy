@@ -842,46 +842,24 @@ export function SmartGridPlus({
     if (column.key === 'actions') {
       return (
         <div className="flex items-center gap-1">
-          {isRowEditing ? (
-            <>
-              <Button
-                size="sm"
-                onClick={() => handleSaveEditRow(rowIndex)}
-                className="h-8 w-8 p-0"
-              >
-                <Check className="h-4 w-4" />
-              </Button>
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={handleCancelEditRow}
-                className="h-8 w-8 p-0"
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </>
-          ) : (
-            <>
-              {inlineRowEditing && (
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => handleStartEditRow(rowIndex, row)}
-                  className="h-8 w-8 p-0"
-                >
-                  <Edit2 className="h-4 w-4" />
-                </Button>
-              )}
-              <Button
-                size="sm"
-                variant="ghost"
-                onClick={() => handleDeleteRowAction(rowIndex, row)}
-                className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            </>
+          {inlineRowEditing && !isRowEditing && (
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => handleStartEditRow(rowIndex, row)}
+              className="h-8 w-8 p-0"
+            >
+              <Edit2 className="h-4 w-4" />
+            </Button>
           )}
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={() => handleDeleteRowAction(rowIndex, row)}
+            className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
         </div>
       );
     }
@@ -900,6 +878,7 @@ export function SmartGridPlus({
               column.onChange(value, row);
             }
           }}
+          onSave={() => handleSaveEditRow(rowIndex)}
           error={validationErrors[column.key]}
         />
       );
