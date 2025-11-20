@@ -50,6 +50,16 @@ const tripExecutionPanelConfig: PanelConfig = {
       { label: '10000408', value: '10000408' }
     ]
   },
+  'accepted-by-forwardis': {
+    id: 'accepted-by-forwardis',
+    label: 'Accepted By Forwardis',
+    fieldType: 'switch',
+    value: false,
+    mandatory: false,
+    visible: true,
+    editable: true,
+    order: 3.5
+  },
   'supplier-ref-no': {
     id: 'supplier-ref-no',
     label: 'Supplier Ref. No.',
