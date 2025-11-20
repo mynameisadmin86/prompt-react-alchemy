@@ -1281,9 +1281,6 @@ export function SmartGridPlus({
               </TableHeader>
               
               <TableBody>
-                {/* Add Row Form */}
-                {renderAddRowForm()}
-                
                 {loading && !onDataFetch ? (
                   <TableRow>
                     <TableCell colSpan={orderedColumns.length + (showCheckboxes ? 1 : 0) + (plugins.some(plugin => plugin.rowActions) ? 1 : 0)} className="text-center py-8">
@@ -1385,6 +1382,9 @@ export function SmartGridPlus({
                     );
                   })
                 )}
+                
+                {/* Add Row Form */}
+                {renderAddRowForm()}
               </TableBody>
             </Table>
           </div>
