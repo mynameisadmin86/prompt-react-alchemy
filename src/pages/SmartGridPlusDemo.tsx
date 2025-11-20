@@ -17,9 +17,9 @@ const initialData = [
     deliveryTime: "14:30",
     supplier: "TechCorp",
     specifications: [
-      { spec: "RAM", value: "16GB DDR4" },
-      { spec: "Storage", value: "512GB SSD" },
-      { spec: "Processor", value: "Intel i7" },
+      { id: "RAM-16GB", name: "RAM: 16GB DDR4" },
+      { id: "Storage-512GB", name: "Storage: 512GB SSD" },
+      { id: "Processor-i7", name: "Processor: Intel i7" },
     ],
     reviews: [
       { reviewer: "John D.", rating: 5, comment: "Excellent performance" },
@@ -37,9 +37,9 @@ const initialData = [
     deliveryTime: "10:00",
     supplier: "FurniCorp",
     specifications: [
-      { spec: "Material", value: "Mesh Back" },
-      { spec: "Height", value: "Adjustable" },
-      { spec: "Wheels", value: "Caster Wheels" },
+      { id: "Material-Mesh", name: "Material: Mesh Back" },
+      { id: "Height-Adj", name: "Height: Adjustable" },
+      { id: "Wheels-Caster", name: "Wheels: Caster Wheels" },
     ],
     reviews: [{ reviewer: "Mike R.", rating: 4, comment: "Very comfortable" }],
   },
@@ -54,9 +54,9 @@ const initialData = [
     deliveryTime: "16:45",
     supplier: "MobileTech",
     specifications: [
-      { spec: "Screen", value: '6.5" OLED' },
-      { spec: "Camera", value: "108MP Triple" },
-      { spec: "Battery", value: "4500mAh" },
+      { id: "Screen-6.5", name: 'Screen: 6.5" OLED' },
+      { id: "Camera-108MP", name: "Camera: 108MP Triple" },
+      { id: "Battery-4500", name: "Battery: 4500mAh" },
     ],
     reviews: [{ reviewer: "Sarah T.", rating: 5, comment: "Amazing camera quality" }],
   },
@@ -162,14 +162,38 @@ const columns: GridColumnConfig[] = [
   {
     key: "specifications",
     label: "Specifications",
-    type: "SubRow",
+    type: "MultiselectLazySelect",
     sortable: false,
     filterable: false,
-    width: 150,
-    subRowColumns: [
-      { key: "spec", label: "Spec", type: "Text", width: 80 },
-      { key: "value", label: "Value", type: "Text", width: 120 },
-    ],
+    editable: true,
+    width: 200,
+    fetchOptions: async ({ searchTerm, offset, limit }) => {
+      // Mock async data fetching for specifications
+      await new Promise((resolve) => setTimeout(resolve, 300));
+      const allSpecs = [
+        { id: "RAM-16GB", name: "RAM: 16GB DDR4" },
+        { id: "RAM-32GB", name: "RAM: 32GB DDR4" },
+        { id: "Storage-512GB", name: "Storage: 512GB SSD" },
+        { id: "Storage-1TB", name: "Storage: 1TB SSD" },
+        { id: "Processor-i7", name: "Processor: Intel i7" },
+        { id: "Processor-i9", name: "Processor: Intel i9" },
+        { id: "Screen-6.5", name: 'Screen: 6.5" OLED' },
+        { id: "Screen-7", name: 'Screen: 7" AMOLED' },
+        { id: "Camera-108MP", name: "Camera: 108MP Triple" },
+        { id: "Camera-200MP", name: "Camera: 200MP Quad" },
+        { id: "Battery-4500", name: "Battery: 4500mAh" },
+        { id: "Battery-5000", name: "Battery: 5000mAh" },
+        { id: "Material-Mesh", name: "Material: Mesh Back" },
+        { id: "Material-Leather", name: "Material: Leather" },
+        { id: "Height-Adj", name: "Height: Adjustable" },
+        { id: "Wheels-Caster", name: "Wheels: Caster Wheels" },
+      ];
+      const filtered = allSpecs.filter((s) => s.name.toLowerCase().includes(searchTerm.toLowerCase()));
+      return filtered.slice(offset, offset + limit);
+    },
+    onChange: (value, rowData) => {
+      console.log("Specifications changed:", value, "Row data:", rowData);
+    },
   },
   {
     key: "reviews",
@@ -224,7 +248,7 @@ export default function SmartGridPlusDemo() {
     dateAdded: new Date().toISOString().split("T")[0],
     deliveryTime: "09:00",
     supplier: "",
-    specifications: [{ spec: "", value: "" }],
+    specifications: [],
     reviews: [{ reviewer: "", rating: 5, comment: "" }],
   };
 
