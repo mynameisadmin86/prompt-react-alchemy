@@ -1375,26 +1375,24 @@ export function SmartGridPlus({
                           <TableRow className="border-0">
                             <TableCell 
                               colSpan={orderedColumns.length + (showCheckboxes ? 1 : 0) + (plugins.some(plugin => plugin.rowActions) ? 1 : 0)}
-                              className="p-0 border-0"
+                              className="p-0 border-0 relative"
                             >
-                              <div className="relative h-0">
-                                <div className="absolute left-4 top-2 flex items-center gap-2 animate-scale-in z-10">
-                                  <Button
-                                    size="sm"
-                                    onClick={() => handleSaveEditRow(actualIndex)}
-                                    className="h-10 w-10 rounded-full shadow-lg bg-primary hover:bg-primary/90 text-primary-foreground p-0"
-                                  >
-                                    <Check className="h-5 w-5" />
-                                  </Button>
-                                  <Button
-                                    size="sm"
-                                    variant="outline"
-                                    onClick={handleCancelEditRow}
-                                    className="h-10 w-10 rounded-full shadow-lg bg-background hover:bg-muted p-0"
-                                  >
-                                    <X className="h-5 w-5" />
-                                  </Button>
-                                </div>
+                              <div className="flex items-center gap-2 px-2 py-2 animate-scale-in">
+                                <Button
+                                  size="sm"
+                                  onClick={() => handleSaveEditRow(actualIndex)}
+                                  className="h-9 w-9 rounded-lg shadow-lg bg-primary hover:bg-primary/90 text-primary-foreground p-0"
+                                >
+                                  <Check className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={handleCancelEditRow}
+                                  className="h-9 w-9 rounded-lg shadow-lg bg-background hover:bg-muted p-0"
+                                >
+                                  <X className="h-4 w-4" />
+                                </Button>
                               </div>
                             </TableCell>
                           </TableRow>
