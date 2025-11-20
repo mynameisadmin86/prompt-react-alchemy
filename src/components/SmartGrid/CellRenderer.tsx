@@ -896,6 +896,20 @@ export const CellRenderer: React.FC<CellRendererProps> = ({
       case 'LazySelect':
         // For these types, just render the value as text
         return <span className="truncate" title={String(value || '')}>{value !== null && value !== undefined ? String(value) : ''}</span>;
+      case 'MultiselectLazySelect':
+        // For multiselect, handle arrays of values
+        if (Array.isArray(value)) {
+          return (
+            <div className="flex flex-wrap gap-1">
+              {value.map((item, idx) => (
+                <Badge key={idx} variant="secondary" className="text-xs">
+                  {typeof item === 'object' ? (item.label || item.name || item.value || String(item)) : String(item)}
+                </Badge>
+              ))}
+            </div>
+          );
+        }
+        return <span className="truncate" title={String(value || '')}>{value !== null && value !== undefined ? String(value) : ''}</span>;
       case 'SubRow':
         // For SubRow type with array data, show count or first item
         if (Array.isArray(value)) {
