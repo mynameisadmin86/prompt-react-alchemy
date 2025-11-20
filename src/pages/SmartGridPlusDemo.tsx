@@ -25,6 +25,9 @@ const initialData = [
       { reviewer: "John D.", rating: 5, comment: "Excellent performance" },
       { reviewer: "Jane S.", rating: 4, comment: "Great value for money" },
     ],
+    notes: "Premium product with extended warranty",
+    internalCode: "TECH-LAP-001",
+    warehouse: "Warehouse A",
   },
   {
     id: "2",
@@ -42,6 +45,9 @@ const initialData = [
       { id: "Wheels-Caster", name: "Wheels: Caster Wheels" },
     ],
     reviews: [{ reviewer: "Mike R.", rating: 4, comment: "Very comfortable" }],
+    notes: "Ergonomic design, suitable for long hours",
+    internalCode: "FURN-CHR-002",
+    warehouse: "Warehouse B",
   },
   {
     id: "3",
@@ -59,6 +65,9 @@ const initialData = [
       { id: "Battery-4500", name: "Battery: 4500mAh" },
     ],
     reviews: [{ reviewer: "Sarah T.", rating: 5, comment: "Amazing camera quality" }],
+    notes: "Latest model with 5G connectivity",
+    internalCode: "MOB-PHN-003",
+    warehouse: "Warehouse A",
   },
 ];
 
@@ -208,6 +217,38 @@ const columns: GridColumnConfig[] = [
       { key: "comment", label: "Comment", type: "Text", width: 150 },
     ],
   },
+  // Subrow columns (collapsed by default)
+  {
+    key: "notes",
+    label: "Notes",
+    type: "Text",
+    sortable: false,
+    filterable: false,
+    editable: true,
+    width: 200,
+    subRow: true,
+  },
+  {
+    key: "internalCode",
+    label: "Internal Code",
+    type: "String",
+    sortable: false,
+    filterable: false,
+    editable: true,
+    width: 150,
+    subRow: true,
+  },
+  {
+    key: "warehouse",
+    label: "Warehouse",
+    type: "Select",
+    sortable: false,
+    filterable: false,
+    editable: true,
+    width: 150,
+    subRow: true,
+    options: ["Warehouse A", "Warehouse B", "Warehouse C", "Warehouse D"],
+  },
   {
     key: "actions",
     label: "Actions",
@@ -250,6 +291,9 @@ export default function SmartGridPlusDemo() {
     supplier: "",
     specifications: [],
     reviews: [{ reviewer: "", rating: 5, comment: "" }],
+    notes: "",
+    internalCode: "",
+    warehouse: "Warehouse A",
   };
 
   const validationRules = {
