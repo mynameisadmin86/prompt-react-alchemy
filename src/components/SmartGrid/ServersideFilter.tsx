@@ -11,6 +11,8 @@ import { useToast } from '@/hooks/use-toast';
 import { useFilterStore } from '@/stores/filterStore';
 import { cn } from '@/lib/utils';
 import { LazySelect } from './LazySelect';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Label } from '@/components/ui/label';
 
 interface ServersideFilterProps {
   serverFilters: ServerFilter[];
@@ -309,6 +311,51 @@ export function ServersideFilter({
         filter !== undefined && visibleFields.includes(filter.key)
       );
     return orderedVisibleFilters.map((filter) => {
+      // Handle radio type specially
+      if (filter.type === 'radio' && filter.options) {
+        return (
+          <div key={filter.key} className="space-y-1">
+            <div className="text-xs font-medium text-gray-600 truncate">
+              {filter.label}
+            </div>
+            <RadioGroup
+              value={pendingFilters[filter.key]?.value?.toString() || ''}
+              onValueChange={(value) => {
+                handleFilterChange(filter.key, {
+                  value: value,
+                  operator: 'equals',
+                  type: 'text'
+                });
+              }}
+              className="flex flex-col space-y-1"
+            >
+              {filter.options.map((option) => (
+                <div key={option} className="flex items-center space-x-2">
+                  <RadioGroupItem value={option} id={`${filter.key}-${option}`} />
+                  <Label
+                    htmlFor={`${filter.key}-${option}`}
+                    className="text-sm font-normal cursor-pointer"
+                  >
+                    {option}
+                  </Label>
+                </div>
+              ))}
+            </RadioGroup>
+            {pendingFilters[filter.key] && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => handleFilterChange(filter.key, undefined)}
+                className="mt-1 h-6 text-xs px-2"
+              >
+                <X className="h-3 w-3 mr-1" />
+                Clear
+              </Button>
+            )}
+          </div>
+        );
+      }
+      
       // Handle lazyselect type specially
       if (filter.type === 'lazyselect' && filter.fetchOptions) {
         return (
