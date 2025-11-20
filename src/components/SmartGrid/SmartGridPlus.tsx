@@ -842,24 +842,28 @@ export function SmartGridPlus({
     if (column.key === 'actions') {
       return (
         <div className="flex items-center gap-1">
-          {inlineRowEditing && !isRowEditing && (
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={() => handleStartEditRow(rowIndex, row)}
-              className="h-8 w-8 p-0"
-            >
-              <Edit2 className="h-4 w-4" />
-            </Button>
+          {!isRowEditing && (
+            <>
+              {inlineRowEditing && (
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => handleStartEditRow(rowIndex, row)}
+                  className="h-8 w-8 p-0"
+                >
+                  <Edit2 className="h-4 w-4" />
+                </Button>
+              )}
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => handleDeleteRowAction(rowIndex, row)}
+                className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </>
           )}
-          <Button
-            size="sm"
-            variant="ghost"
-            onClick={() => handleDeleteRowAction(rowIndex, row)}
-            className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
         </div>
       );
     }
@@ -878,7 +882,6 @@ export function SmartGridPlus({
               column.onChange(value, row);
             }
           }}
-          onSave={() => handleSaveEditRow(rowIndex)}
           error={validationErrors[column.key]}
         />
       );
@@ -1366,6 +1369,36 @@ export function SmartGridPlus({
                             </TableCell>
                           )}
                         </TableRow>
+                        
+                        {/* Floating action buttons for editing row */}
+                        {isRowEditing && (
+                          <TableRow className="border-0">
+                            <TableCell 
+                              colSpan={orderedColumns.length + (showCheckboxes ? 1 : 0) + (plugins.some(plugin => plugin.rowActions) ? 1 : 0)}
+                              className="p-0 border-0"
+                            >
+                              <div className="relative h-0">
+                                <div className="absolute left-4 top-2 flex items-center gap-2 animate-scale-in z-10">
+                                  <Button
+                                    size="sm"
+                                    onClick={() => handleSaveEditRow(actualIndex)}
+                                    className="h-10 w-10 rounded-full shadow-lg bg-primary hover:bg-primary/90 text-primary-foreground p-0"
+                                  >
+                                    <Check className="h-5 w-5" />
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={handleCancelEditRow}
+                                    className="h-10 w-10 rounded-full shadow-lg bg-background hover:bg-muted p-0"
+                                  >
+                                    <X className="h-5 w-5" />
+                                  </Button>
+                                </div>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        )}
                         
                         {/* Expanded row content */}
                         {isExpanded && effectiveNestedRowRenderer && (
