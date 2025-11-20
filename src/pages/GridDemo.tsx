@@ -205,6 +205,11 @@ const GridDemo = () => {
       key: 'customer',
       label: 'Customer',
       type: 'text'
+    },
+    {
+      key: 'acceptedByForwardis',
+      label: 'Accepted By Forwardis',
+      type: 'switch'
     }
   ];
 
