@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Star, X, Search, Settings } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
 import { ColumnFilterInput } from './ColumnFilterInput';
 import { FilterSetModal } from './FilterSetModal';
 import { FilterSetDropdown } from './FilterSetDropdown';
@@ -309,6 +310,25 @@ export function ServersideFilter({
         filter !== undefined && visibleFields.includes(filter.key)
       );
     return orderedVisibleFilters.map((filter) => {
+      // Handle switch type
+      if (filter.type === 'switch') {
+        return (
+          <div key={filter.key} className="flex items-center space-x-2">
+            <Switch
+              checked={!!pendingFilters[filter.key]?.value}
+              onCheckedChange={(checked) => {
+                handleFilterChange(filter.key, {
+                  value: checked,
+                  operator: 'equals',
+                  type: 'switch'
+                });
+              }}
+            />
+            <span className="text-sm font-medium text-foreground">{filter.label}</span>
+          </div>
+        );
+      }
+
       // Handle lazyselect type specially
       if (filter.type === 'lazyselect' && filter.fetchOptions) {
         return (
