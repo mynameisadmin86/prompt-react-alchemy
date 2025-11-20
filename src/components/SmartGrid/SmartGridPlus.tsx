@@ -915,68 +915,116 @@ export function SmartGridPlus({
     if (!isAddingRow) return null;
 
     return (
-      <TableRow className="bg-blue-50 border-2 border-blue-200">
-        {showCheckboxes && (
-          <TableCell className="p-2">
-            {/* Empty space for checkbox column */}
-          </TableCell>
-        )}
-        {orderedColumns.map((column) => (
-          <TableCell key={column.key} className="p-2">
-            {column.key === 'actions' ? (
-              <div className="flex items-center gap-1">
-                <Button
-                  size="sm"
-                  onClick={handleSaveNewRow}
-                  className="h-8 w-8 p-0"
-                >
-                  <Check className="h-4 w-4" />
-                </Button>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={handleCancelNewRow}
-                  className="h-8 w-8 p-0"
-                >
-                  <X className="h-4 w-4" />
-                </Button>
+      <>
+        <TableRow className="bg-blue-50 border-2 border-blue-200">
+          {showCheckboxes && (
+            <TableCell className="p-2">
+              {/* Empty space for checkbox column */}
+            </TableCell>
+          )}
+          {orderedColumns.map((column) => (
+            <TableCell key={column.key} className="p-2">
+              {column.key === 'actions' ? (
+                <div className="flex items-center gap-1">
+                  <Button
+                    size="sm"
+                    onClick={handleSaveNewRow}
+                    className="h-8 w-8 p-0"
+                  >
+                    <Check className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={handleCancelNewRow}
+                    className="h-8 w-8 p-0"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              ) : (
+                <div className="space-y-1">
+                  <EnhancedCellEditor
+                    value={newRowValues[column.key]}
+                    column={column}
+                    onChange={(value) => {
+                      setNewRowValues(prev => ({
+                        ...prev,
+                        [column.key]: value
+                      }));
+                      // Clear validation error for this field
+                      if (validationErrors[column.key]) {
+                        setValidationErrors(prev => {
+                          const newErrors = { ...prev };
+                          delete newErrors[column.key];
+                          return newErrors;
+                        });
+                      }
+                      // Call column-specific onChange if provided
+                      if (column.onChange) {
+                        column.onChange(value, newRowValues);
+                      }
+                    }}
+                    error={validationErrors[column.key]}
+                  />
+                </div>
+              )}
+            </TableCell>
+          ))}
+          {/* Plugin row actions column */}
+          {plugins.some(plugin => plugin.rowActions) && (
+            <TableCell className="p-2">
+              {/* Empty space for plugin actions */}
+            </TableCell>
+          )}
+        </TableRow>
+        
+        {/* Render subrow columns if they exist */}
+        {hasSubRowColumns && subRowColumns.length > 0 && (
+          <TableRow className="bg-blue-50/50 border-x-2 border-b-2 border-blue-200">
+            <TableCell 
+              colSpan={orderedColumns.length + (showCheckboxes ? 1 : 0) + (plugins.some(plugin => plugin.rowActions) ? 1 : 0)}
+              className="p-4"
+            >
+              <div className="space-y-2">
+                <div className="text-sm font-medium text-gray-700 mb-2">Additional Details</div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {subRowColumns.map((column) => (
+                    <div key={column.key} className="space-y-1">
+                      <label className="text-xs font-medium text-gray-600">
+                        {column.label}
+                      </label>
+                      <EnhancedCellEditor
+                        value={newRowValues[column.key]}
+                        column={column}
+                        onChange={(value) => {
+                          setNewRowValues(prev => ({
+                            ...prev,
+                            [column.key]: value
+                          }));
+                          // Clear validation error for this field
+                          if (validationErrors[column.key]) {
+                            setValidationErrors(prev => {
+                              const newErrors = { ...prev };
+                              delete newErrors[column.key];
+                              return newErrors;
+                            });
+                          }
+                          // Call column-specific onChange if provided
+                          if (column.onChange) {
+                            column.onChange(value, newRowValues);
+                          }
+                        }}
+                        error={validationErrors[column.key]}
+                      />
+                    </div>
+                  ))}
+                </div>
               </div>
-            ) : (
-              <div className="space-y-1">
-                <EnhancedCellEditor
-                  value={newRowValues[column.key]}
-                  column={column}
-                  onChange={(value) => {
-                    setNewRowValues(prev => ({
-                      ...prev,
-                      [column.key]: value
-                    }));
-                    // Clear validation error for this field
-                    if (validationErrors[column.key]) {
-                      setValidationErrors(prev => {
-                        const newErrors = { ...prev };
-                        delete newErrors[column.key];
-                        return newErrors;
-                      });
-                    }
-                    // Call column-specific onChange if provided
-                    if (column.onChange) {
-                      column.onChange(value, newRowValues);
-                    }
-                  }}
-                  error={validationErrors[column.key]}
-                />
-              </div>
-            )}
-          </TableCell>
-        ))}
-        {/* Plugin row actions column */}
-        {plugins.some(plugin => plugin.rowActions) && (
-          <TableCell className="p-2">
-            {/* Empty space for plugin actions */}
-          </TableCell>
+            </TableCell>
+          </TableRow>
         )}
-      </TableRow>
+      </>
     );
   };
 
