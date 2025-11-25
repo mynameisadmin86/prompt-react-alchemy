@@ -85,23 +85,27 @@ export const SmartEquipmentCalendar = ({
 
   // Navigation handlers
   const handlePrevious = () => {
+    let newDate: Date;
     if (view === 'day') {
-      setStartDate(addDays(startDate, -1));
+      newDate = addDays(startDate, -1);
     } else if (view === 'week') {
-      setStartDate(addDays(startDate, -7));
+      newDate = addDays(startDate, -7);
     } else {
-      setStartDate(subMonths(startDate, 1));
+      newDate = addMonths(startOfMonth(startDate), -1);
     }
+    setStartDate(newDate);
   };
 
   const handleNext = () => {
+    let newDate: Date;
     if (view === 'day') {
-      setStartDate(addDays(startDate, 1));
+      newDate = addDays(startDate, 1);
     } else if (view === 'week') {
-      setStartDate(addDays(startDate, 7));
+      newDate = addDays(startDate, 7);
     } else {
-      setStartDate(addMonths(startDate, 1));
+      newDate = addMonths(startOfMonth(startDate), 1);
     }
+    setStartDate(newDate);
   };
 
   const handleToday = () => {
