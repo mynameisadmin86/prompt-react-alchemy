@@ -157,6 +157,9 @@ export function SmartGridPlus({
     toggleColumnVisibility,
     updateColumnHeader,
     updateSubRowColumnOrder,
+    toggleSubRowColumnVisibility,
+    updateSubRowColumnHeader,
+    updateSubRowColumnWidth,
     savePreferences
   } = useGridPreferences(
     preferencesColumns,
@@ -198,10 +201,32 @@ export function SmartGridPlus({
     }));
   }, [currentColumns, preferences, calculateColumnWidthsCallback]);
 
-  // Get sub-row columns (columns marked with subRow: true)
+  // Get sub-row columns (columns marked with subRow: true) with preferences applied
   const subRowColumns = useMemo(() => {
-    return currentColumns.filter(col => col.subRow === true);
-  }, [currentColumns]);
+    const columnMap = new Map(currentColumns.map(col => [col.key, col]));
+
+    // Get columns that are marked as sub-row columns
+    const allSubRowColumns = currentColumns.filter(col => col.subRow === true);
+    
+    // Apply ordering if subRowColumnOrder exists and has values
+    const orderedSubRowColumns = preferences.subRowColumnOrder.length > 0
+      ? preferences.subRowColumnOrder
+          .map(id => allSubRowColumns.find(col => col.key === id))
+          .filter((col): col is GridColumnConfig => col !== undefined)
+          .concat(allSubRowColumns.filter(col => !preferences.subRowColumnOrder.includes(col.key)))
+      : allSubRowColumns;
+
+    // Filter out hidden sub-row columns and apply custom headers and widths
+    const visibleSubRowColumns = orderedSubRowColumns
+      .filter(col => !preferences.hiddenSubRowColumns.includes(col.key))
+      .map(col => ({
+        ...col,
+        label: preferences.subRowColumnHeaders[col.key] || col.label, // Apply custom sub-row headers
+        width: preferences.subRowColumnWidths[col.key] || col.width || 100 // Apply custom sub-row widths
+      }));
+
+    return visibleSubRowColumns;
+  }, [currentColumns, preferences]);
 
   // Check if any column has subRow set to true
   const hasSubRowColumns = useMemo(() => {
@@ -371,6 +396,9 @@ export function SmartGridPlus({
       columnHeaders: {},
       subRowColumns: [],
       subRowColumnOrder: [], // Reset sub-row column order
+      hiddenSubRowColumns: [],
+      subRowColumnHeaders: {},
+      subRowColumnWidths: {},
       filters: []
     };
     
