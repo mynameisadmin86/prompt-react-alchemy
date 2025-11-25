@@ -156,7 +156,6 @@ export function SmartGridPlus({
     updateColumnOrder,
     toggleColumnVisibility,
     updateColumnHeader,
-    toggleSubRow,
     updateSubRowColumnOrder,
     savePreferences
   } = useGridPreferences(
@@ -226,14 +225,11 @@ export function SmartGridPlus({
     // Call the hook's toggle function
     handleSubRowToggle(columnKey);
     
-    // Persist to preferences
-    toggleSubRow(columnKey);
-    
     // Also call the external handler if provided
     if (onSubRowToggle) {
       onSubRowToggle(columnKey);
     }
-  }, [handleSubRowToggle, toggleSubRow, onSubRowToggle]);
+  }, [handleSubRowToggle, onSubRowToggle]);
 
   // Helper function to render collapsible cell values
   const renderCollapsibleCellValue = useCallback((value: any, column: GridColumnConfig) => {
@@ -301,14 +297,13 @@ export function SmartGridPlus({
           onSubRowEdit={handleSubRowEdit}
           onSubRowEditStart={handleSubRowEditStart}
           onSubRowEditCancel={handleSubRowEditCancel}
-          preferences={preferences}
         />
       );
     }
 
     // Fallback to collapsible content if no sub-row columns
     return renderCollapsibleContent(row);
-  }, [hasSubRowColumns, subRowColumns, preferences, updateSubRowColumnOrder, handleSubRowEdit, handleSubRowEditStart, handleSubRowEditCancel, renderCollapsibleContent]);
+  }, [hasSubRowColumns, subRowColumns, preferences.subRowColumnOrder, editingCell, updateSubRowColumnOrder, handleSubRowEdit, handleSubRowEditStart, handleSubRowEditCancel, renderCollapsibleContent]);
 
   // Use sub-row renderer if we have sub-row columns, otherwise use collapsible or custom renderer
   const effectiveNestedRowRenderer = hasSubRowColumns ? renderSubRowContent : (hasCollapsibleColumns ? renderCollapsibleContent : nestedRowRenderer);
@@ -1041,30 +1036,11 @@ export function SmartGridPlus({
   }, [data, onDataFetch, setGridData]);
 
   // Initialize columns in state when props change
-  // Apply subRow flags from preferences on initial load
   useEffect(() => {
-    if (columns.length > 0 && stateColumns.length === 0 && preferences.subRowColumns) {
-      // Apply subRow flags from preferences
-      const columnsWithSubRowPrefs = columns.map(col => ({
-        ...col,
-        subRow: preferences.subRowColumns.includes(col.key) ? true : col.subRow
-      }));
-      setColumns(columnsWithSubRowPrefs);
-    } else if (columns.length > 0 && stateColumns.length === 0) {
+    if (columns.length > 0) {
       setColumns(columns);
     }
-  }, [columns, stateColumns.length, preferences.subRowColumns, setColumns]);
-
-  // Sync new columns from props but preserve subRow flags
-  useEffect(() => {
-    if (columns.length > 0 && stateColumns.length > 0) {
-      const merged = columns.map(col => {
-        const existing = stateColumns.find(sc => sc.key === col.key);
-        return existing ? { ...col, subRow: existing.subRow } : col;
-      });
-      setColumns(merged);
-    }
-  }, [columns]);
+  }, [columns, setColumns]);
 
   // Initialize plugins
   useEffect(() => {

@@ -170,7 +170,6 @@ export function SmartGrid({
     updateColumnOrder,
     toggleColumnVisibility,
     updateColumnHeader,
-    toggleSubRow,
     updateSubRowColumnOrder,
     savePreferences
   } = useGridPreferences(
@@ -251,14 +250,11 @@ export function SmartGrid({
     // Call the hook's toggle function
     handleSubRowToggle(columnKey);
 
-    // Persist to preferences
-    toggleSubRow(columnKey);
-
     // Also call the external handler if provided
     if (onSubRowToggle) {
       onSubRowToggle(columnKey);
     }
-  }, [handleSubRowToggle, toggleSubRow, onSubRowToggle]);
+  }, [handleSubRowToggle, onSubRowToggle]);
 
   // Helper function to render collapsible cell values
   const renderCollapsibleCellValue = useCallback((value: any, column: GridColumnConfig) => {
@@ -796,17 +792,13 @@ export function SmartGrid({
   }, [data, onDataFetch, setGridData]);
 
   // Initialize columns in state when props change
-  // Apply subRow flags from preferences on initial load
+  // BUT preserve internal modifications like subRow flags
   useEffect(() => {
-    if (columns.length > 0 && stateColumns.length === 0 && preferences.subRowColumns) {
-      // Apply subRow flags from preferences
-      const columnsWithSubRowPrefs = columns.map(col => ({
-        ...col,
-        subRow: preferences.subRowColumns.includes(col.key) ? true : col.subRow
-      }));
-      setColumns(columnsWithSubRowPrefs);
+    if (columns.length > 0 && stateColumns.length === 0) {
+      // Only set columns if stateColumns is empty (initial load)
+      setColumns(columns);
     }
-  }, [columns, stateColumns.length, preferences.subRowColumns, setColumns]);
+  }, [columns, stateColumns.length, setColumns]);
 
   // Sync new columns from props but preserve subRow and other internal flags
   useEffect(() => {
