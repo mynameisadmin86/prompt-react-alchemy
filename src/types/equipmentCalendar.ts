@@ -15,6 +15,7 @@ export interface EquipmentCalendarEvent {
   start: string; // ISO timestamp
   end: string; // ISO timestamp
   color?: string; // CSS color
+  coId?: string; // Customer Order ID for trip events
 }
 
 export interface EquipmentCalendarViewProps {
