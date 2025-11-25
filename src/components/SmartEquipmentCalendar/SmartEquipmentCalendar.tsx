@@ -192,11 +192,13 @@ export const SmartEquipmentCalendar = ({
     
     if (view === 'month') {
       const monthStart = startOfMonth(startDate);
+      const monthEnd = endOfMonth(startDate);
+      const daysInMonth = differenceInDays(monthEnd, monthStart) + 1;
       const daysFromStart = differenceInDays(startOfDay(eventStart), monthStart);
-      const duration = differenceInDays(endOfDay(eventEnd), startOfDay(eventStart));
+      const duration = Math.max(1, differenceInDays(startOfDay(eventEnd), startOfDay(eventStart)) + 1);
       
-      const leftPercent = (daysFromStart / timelineLabels.length) * 100;
-      const widthPercent = (duration / timelineLabels.length) * 100;
+      const leftPercent = (daysFromStart / daysInMonth) * 100;
+      const widthPercent = (duration / daysInMonth) * 100;
       return { leftPercent: Math.max(0, leftPercent), widthPercent: Math.max(2, widthPercent) };
     } else if (view === 'week') {
       if (showHourView) {
