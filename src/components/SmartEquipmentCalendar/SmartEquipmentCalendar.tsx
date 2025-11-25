@@ -48,6 +48,10 @@ export const SmartEquipmentCalendar = ({
     : equipments.filter(eq => eq.status === statusFilter);
 
   const ROW_HEIGHT = 60;
+  
+  // Consistent slot widths across all views
+  const SLOT_WIDTH_HOUR = 80; // Width for each hour slot (in pixels)
+  const SLOT_WIDTH_DAY = 120; // Width for each day slot (in pixels)
 
   // Calculate statistics
   const totalWagons = equipments.length;
@@ -444,13 +448,11 @@ export const SmartEquipmentCalendar = ({
                   key={idx}
                   className={cn(
                     "text-center py-2 px-2 text-xs font-medium border-r flex-shrink-0",
-                    label.isDayStart && "border-l-2 border-l-primary bg-muted/70 font-semibold",
-                    view === 'month' && "w-12",
-                    view === 'week' && !showHourView && "w-32",
-                    view === 'week' && showHourView && "w-8",
-                    view === 'day' && showHourView && "w-16",
-                    view === 'day' && !showHourView && "min-w-full"
+                    label.isDayStart && "border-l-2 border-l-primary bg-muted/70 font-semibold"
                   )}
+                  style={{
+                    width: showHourView ? `${SLOT_WIDTH_HOUR}px` : `${SLOT_WIDTH_DAY}px`
+                  }}
                   title={label.fullLabel}
                 >
                   <div className="whitespace-pre-line">{label.label}</div>
@@ -469,13 +471,11 @@ export const SmartEquipmentCalendar = ({
                     key={idx}
                     className={cn(
                       "border-r border-border/30 flex-shrink-0",
-                      view === 'month' && "w-12",
-                      view === 'week' && !showHourView && "w-32",
-                      view === 'week' && showHourView && "w-8",
-                      view === 'day' && showHourView && "w-16",
-                      view === 'day' && !showHourView && "min-w-full",
                       label.isDayStart && "border-l-2 border-l-primary/30"
                     )}
+                    style={{
+                      width: showHourView ? `${SLOT_WIDTH_HOUR}px` : `${SLOT_WIDTH_DAY}px`
+                    }}
                   />
                 ))}
               </div>
