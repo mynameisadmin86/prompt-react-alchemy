@@ -16,6 +16,9 @@ export function useGridPreferences<T>(
     columnHeaders: {},
     subRowColumns: [], // Initialize empty sub-row columns array
     subRowColumnOrder: [], // Initialize empty sub-row column order array
+    hiddenSubRowColumns: [], // Initialize empty hidden sub-row columns array
+    subRowColumnHeaders: {}, // Initialize empty sub-row column headers
+    subRowColumnWidths: {}, // Initialize empty sub-row column widths
     filters: []
   };
 
@@ -62,7 +65,10 @@ export function useGridPreferences<T>(
             ...columns.filter(col => !loadedPreferences.columnOrder.includes(col.id)).map(col => col.id)
           ],
           subRowColumns: loadedPreferences.subRowColumns || [], // Ensure subRowColumns is initialized
-          subRowColumnOrder: loadedPreferences.subRowColumnOrder || [] // Ensure subRowColumnOrder is initialized
+          subRowColumnOrder: loadedPreferences.subRowColumnOrder || [], // Ensure subRowColumnOrder is initialized
+          hiddenSubRowColumns: loadedPreferences.hiddenSubRowColumns || [], // Ensure hiddenSubRowColumns is initialized
+          subRowColumnHeaders: loadedPreferences.subRowColumnHeaders || {}, // Ensure subRowColumnHeaders is initialized
+          subRowColumnWidths: loadedPreferences.subRowColumnWidths || {} // Ensure subRowColumnWidths is initialized
         };
         setPreferences(mergedPreferences);
       }
@@ -123,6 +129,34 @@ export function useGridPreferences<T>(
     savePreferences(newPreferences);
   }, [preferences, savePreferences]);
 
+  const toggleSubRowColumnVisibility = useCallback((columnId: string) => {
+    const column = columns.find(col => col.id === columnId);
+    if (column?.mandatory) return; // Can't hide mandatory columns
+
+    const hiddenSubRowColumns = preferences.hiddenSubRowColumns.includes(columnId)
+      ? preferences.hiddenSubRowColumns.filter(id => id !== columnId)
+      : [...preferences.hiddenSubRowColumns, columnId];
+    
+    const newPreferences = { ...preferences, hiddenSubRowColumns };
+    savePreferences(newPreferences);
+  }, [preferences, savePreferences, columns]);
+
+  const updateSubRowColumnHeader = useCallback((columnId: string, header: string) => {
+    const newPreferences = {
+      ...preferences,
+      subRowColumnHeaders: { ...preferences.subRowColumnHeaders, [columnId]: header }
+    };
+    savePreferences(newPreferences);
+  }, [preferences, savePreferences]);
+
+  const updateSubRowColumnWidth = useCallback((columnId: string, width: number) => {
+    const newPreferences = {
+      ...preferences,
+      subRowColumnWidths: { ...preferences.subRowColumnWidths, [columnId]: width }
+    };
+    savePreferences(newPreferences);
+  }, [preferences, savePreferences]);
+
   return {
     preferences,
     updateColumnOrder,
@@ -131,6 +165,9 @@ export function useGridPreferences<T>(
     updateColumnHeader,
     toggleSubRow, // Function for toggling sub-row at column level
     updateSubRowColumnOrder, // New function for updating sub-row column order
+    toggleSubRowColumnVisibility, // Function for toggling sub-row column visibility
+    updateSubRowColumnHeader, // Function for updating sub-row column headers
+    updateSubRowColumnWidth, // Function for updating sub-row column widths
     savePreferences
   };
 }

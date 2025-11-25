@@ -114,6 +114,9 @@ export interface GridPreferences {
   columnHeaders: Record<string, string>;
   subRowColumns: string[]; // Existing property for tracking sub-row columns
   subRowColumnOrder: string[]; // New property for sub-row column ordering
+  hiddenSubRowColumns: string[]; // Hidden sub-row columns
+  subRowColumnHeaders: Record<string, string>; // Custom headers for sub-row columns
+  subRowColumnWidths: Record<string, number>; // Custom widths for sub-row columns
   enableSubRowConfig?: boolean; // New property for enabling/disabling sub-row configuration
   sort?: SortConfig;
   filters: FilterConfig[];
