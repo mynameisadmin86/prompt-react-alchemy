@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { EquipmentCalendarView } from '@/components/EquipmentCalendar';
+import { SmartEquipmentCalendar } from '@/components/SmartEquipmentCalendar';
 import { EquipmentItem, EquipmentCalendarEvent } from '@/types/equipmentCalendar';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft, ChevronRight, Calendar } from 'lucide-react';
@@ -217,7 +217,7 @@ const EquipmentCalendarDemo = () => {
           </div>
 
           <div className="flex-1 overflow-hidden">
-            <EquipmentCalendarView
+            <SmartEquipmentCalendar
               equipments={equipments}
               events={events}
               view={view}
