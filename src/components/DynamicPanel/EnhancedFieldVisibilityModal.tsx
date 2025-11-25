@@ -130,12 +130,14 @@ export const EnhancedFieldVisibilityModal: React.FC<EnhancedFieldVisibilityModal
   };
 
   const handleSave = () => {
-    const updatedConfig: PanelConfig = { ...panelConfig };
+    const updatedConfig: PanelConfig = {};
     
+    // Preserve all original field properties and only update the ones modified in the modal
     fieldConfigs.forEach(fieldConfig => {
-      if (updatedConfig[fieldConfig.fieldId]) {
+      const originalConfig = panelConfig[fieldConfig.fieldId];
+      if (originalConfig) {
         updatedConfig[fieldConfig.fieldId] = {
-          ...updatedConfig[fieldConfig.fieldId],
+          ...originalConfig, // Preserve all original properties including fetchOptions, events, etc.
           visible: fieldConfig.visible,
           order: fieldConfig.order,
           label: fieldConfig.label,
