@@ -301,13 +301,14 @@ export function SmartGridPlus({
           onSubRowEdit={handleSubRowEdit}
           onSubRowEditStart={handleSubRowEditStart}
           onSubRowEditCancel={handleSubRowEditCancel}
+          preferences={preferences}
         />
       );
     }
 
     // Fallback to collapsible content if no sub-row columns
     return renderCollapsibleContent(row);
-  }, [hasSubRowColumns, subRowColumns, preferences.subRowColumnOrder, editingCell, updateSubRowColumnOrder, handleSubRowEdit, handleSubRowEditStart, handleSubRowEditCancel, renderCollapsibleContent]);
+  }, [hasSubRowColumns, subRowColumns, preferences, updateSubRowColumnOrder, handleSubRowEdit, handleSubRowEditStart, handleSubRowEditCancel, renderCollapsibleContent]);
 
   // Use sub-row renderer if we have sub-row columns, otherwise use collapsible or custom renderer
   const effectiveNestedRowRenderer = hasSubRowColumns ? renderSubRowContent : (hasCollapsibleColumns ? renderCollapsibleContent : nestedRowRenderer);
