@@ -59,7 +59,7 @@ export function useGridPreferences<T>(
       }
 
       if (loadedPreferences) {
-        // Merge with defaults to handle new columns and properties
+        // Always prioritize local storage values over props
         const mergedPreferences: GridPreferences = {
           ...defaultPreferences,
           ...loadedPreferences,
@@ -67,11 +67,11 @@ export function useGridPreferences<T>(
             ...loadedPreferences.columnOrder.filter(id => columns.some(col => col.id === id)),
             ...columns.filter(col => !loadedPreferences.columnOrder.includes(col.id)).map(col => col.id)
           ],
-          // Use loaded preferences for sub-rows if available, otherwise fall back to defaults from props
-          subRowColumns: loadedPreferences.subRowColumns && loadedPreferences.subRowColumns.length > 0 
+          // Always use local storage values when they exist
+          subRowColumns: loadedPreferences.subRowColumns !== undefined 
             ? loadedPreferences.subRowColumns.filter(id => columns.some(col => col.id === id))
             : initialSubRowColumns,
-          subRowColumnOrder: loadedPreferences.subRowColumnOrder && loadedPreferences.subRowColumnOrder.length > 0
+          subRowColumnOrder: loadedPreferences.subRowColumnOrder !== undefined
             ? loadedPreferences.subRowColumnOrder.filter(id => columns.some(col => col.id === id))
             : initialSubRowColumns
         };
