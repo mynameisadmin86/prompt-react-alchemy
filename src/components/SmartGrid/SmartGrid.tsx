@@ -171,9 +171,6 @@ export function SmartGrid({
     toggleColumnVisibility,
     updateColumnHeader,
     updateSubRowColumnOrder,
-    toggleSubRowColumnVisibility,
-    updateSubRowColumnHeader,
-    updateSubRowColumnWidth,
     savePreferences
   } = useGridPreferences(
     preferencesColumns,
@@ -219,24 +216,13 @@ export function SmartGrid({
   const subRowColumns = useMemo(() => {
     const columnMap = new Map(currentColumns.map(col => [col.key, col]));
 
-    // Get columns that are marked as sub-row columns
-    const allSubRowColumns = currentColumns.filter(col => col.subRow === true);
-    
-    // Apply ordering if subRowColumnOrder exists and has values
-    const orderedSubRowColumns = preferences.subRowColumnOrder.length > 0
-      ? preferences.subRowColumnOrder
-          .map(id => allSubRowColumns.find(col => col.key === id))
-          .filter((col): col is GridColumnConfig => col !== undefined)
-          .concat(allSubRowColumns.filter(col => !preferences.subRowColumnOrder.includes(col.key)))
-      : allSubRowColumns;
-
-    // Filter out hidden sub-row columns and apply custom headers and widths
-    const visibleSubRowColumns = orderedSubRowColumns
-      .filter(col => !preferences.hiddenSubRowColumns.includes(col.key))
+    // Get columns that are marked as sub-row columns AND not hidden
+    const visibleSubRowColumns = currentColumns
+      .filter(col => col.subRow === true)
+      .filter(col => !preferences.hiddenColumns.includes(col.key))
       .map(col => ({
         ...col,
-        label: preferences.subRowColumnHeaders[col.key] || col.label, // Apply custom sub-row headers
-        width: preferences.subRowColumnWidths[col.key] || col.width || 100 // Apply custom sub-row widths
+        label: preferences.columnHeaders[col.key] || col.label // Apply custom headers
       }));
 
     return visibleSubRowColumns;
@@ -472,9 +458,6 @@ export function SmartGrid({
       columnHeaders: {},
       subRowColumns: [],
       subRowColumnOrder: [], // Reset sub-row column order
-      hiddenSubRowColumns: [],
-      subRowColumnHeaders: {},
-      subRowColumnWidths: {},
       filters: []
     };
 
@@ -857,9 +840,6 @@ export function SmartGrid({
         columnHeaders: {},
         subRowColumns: [],
         subRowColumnOrder: [],
-        hiddenSubRowColumns: [],
-        subRowColumnHeaders: {},
-        subRowColumnWidths: {},
         filters: []
       };
       savePreferences(defaultPreferences);
