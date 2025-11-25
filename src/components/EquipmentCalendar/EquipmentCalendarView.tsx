@@ -66,6 +66,16 @@ export const EquipmentCalendarView = ({
           useFlex: true,
         };
       case 'week':
+        // If showHourView is true, show 7 days * 24 hours = 168 columns
+        if (showHourView) {
+          return {
+            columns: 7 * 24,
+            width: 7 * 24 * 50, // 50px per hour column
+            unit: 'hour',
+            columnWidth: 50,
+            useFlex: false,
+          };
+        }
         return {
           columns: 7,
           width: 0, // Will use full width via flex
@@ -74,9 +84,13 @@ export const EquipmentCalendarView = ({
           useFlex: true,
         };
       case 'month':
+        const daysInMonth = eachDayOfInterval({ 
+          start: startOfMonth(startDate), 
+          end: endOfMonth(startDate) 
+        }).length;
         return {
-          columns: 31,
-          width: 31 * MONTH_DAY_WIDTH,
+          columns: daysInMonth,
+          width: daysInMonth * MONTH_DAY_WIDTH,
           unit: 'day',
           columnWidth: MONTH_DAY_WIDTH,
           useFlex: false,
@@ -99,11 +113,15 @@ export const EquipmentCalendarView = ({
     const labels = [];
     
     if (view === 'month') {
-      for (let i = 0; i < 31; i++) {
-        const day = addDays(startOfMonth(startDate), i);
+      const days = eachDayOfInterval({ 
+        start: startOfMonth(startDate), 
+        end: endOfMonth(startDate) 
+      });
+      for (const day of days) {
         labels.push({
           label: format(day, 'd'),
           fullLabel: format(day, 'MMM d'),
+          date: day,
         });
       }
       return labels;
@@ -113,17 +131,34 @@ export const EquipmentCalendarView = ({
       for (let i = 0; i < 24; i++) {
         const hour = addHours(startOfDay(startDate), i);
         labels.push({
-          label: format(hour, 'HH:00'),
+          label: format(hour, 'ha'),
           fullLabel: format(hour, 'HH:00'),
         });
       }
     } else if (view === 'week') {
-      for (let d = 0; d < 7; d++) {
-        const day = addDays(startOfDay(startDate), d);
-        labels.push({
-          label: format(day, 'EEE d'),
-          fullLabel: format(day, 'EEEE, MMM d'),
-        });
+      if (showHourView) {
+        // Show 7 days with 24 hour columns each
+        for (let d = 0; d < 7; d++) {
+          const day = addDays(startOfDay(startDate), d);
+          for (let h = 0; h < 24; h++) {
+            const hour = addHours(day, h);
+            labels.push({
+              label: h === 0 ? format(day, 'EEE\nMMM d') : format(hour, 'ha'),
+              fullLabel: format(hour, 'EEEE, MMM d, HH:00'),
+              isDayStart: h === 0,
+              date: hour,
+            });
+          }
+        }
+      } else {
+        for (let d = 0; d < 7; d++) {
+          const day = addDays(startOfDay(startDate), d);
+          labels.push({
+            label: format(day, 'EEE\nMMM d'),
+            fullLabel: format(day, 'EEEE, MMM d'),
+            date: day,
+          });
+        }
       }
     }
     
@@ -146,14 +181,26 @@ export const EquipmentCalendarView = ({
       const width = duration * MONTH_DAY_WIDTH;
       return { left: Math.max(0, left), width: Math.max(20, width) };
     } else if (view === 'week') {
-      // week view (percentage-based for flex layout)
       const viewStart = startOfDay(startDate);
-      const daysFromStart = differenceInDays(startOfDay(eventStart), viewStart);
-      const duration = differenceInDays(startOfDay(eventEnd), startOfDay(eventStart)) || 1;
       
-      const leftPercent = (daysFromStart / 7) * 100;
-      const widthPercent = (duration / 7) * 100;
-      return { leftPercent: Math.max(0, leftPercent), widthPercent: Math.max(2, widthPercent) };
+      if (showHourView) {
+        // week view with hourly columns (pixel-based)
+        const minutesFromStart = differenceInMinutes(eventStart, viewStart);
+        const duration = differenceInMinutes(eventEnd, eventStart);
+        const hourWidth = 50; // pixels per hour
+        
+        const left = (minutesFromStart / 60) * hourWidth;
+        const width = (duration / 60) * hourWidth;
+        return { left: Math.max(0, left), width: Math.max(20, width) };
+      } else {
+        // week view (percentage-based for flex layout)
+        const daysFromStart = differenceInDays(startOfDay(eventStart), viewStart);
+        const duration = differenceInDays(startOfDay(eventEnd), startOfDay(eventStart)) || 1;
+        
+        const leftPercent = (daysFromStart / 7) * 100;
+        const widthPercent = (duration / 7) * 100;
+        return { leftPercent: Math.max(0, leftPercent), widthPercent: Math.max(2, widthPercent) };
+      }
     } else {
       // day view (percentage-based for flex layout)
       const viewStart = startOfDay(startDate);
@@ -378,10 +425,9 @@ export const EquipmentCalendarView = ({
                 <div
                   key={idx}
                   className={cn(
-                    "text-center py-2 text-xs font-medium border-r",
+                    "text-center py-2 text-xs font-medium border-r whitespace-pre-line",
                     dimensions.useFlex ? "flex-1" : "flex-shrink-0",
-                    (label as any).isDayStart && view === 'week' && "border-l-2 border-l-primary/50 bg-muted/70 font-semibold",
-                    (label as any).isDayStart && view !== 'week' && "border-l-2 border-l-primary/30 bg-muted/50"
+                    (label as any).isDayStart && "border-l-2 border-l-primary/50 bg-primary/10 font-semibold"
                   )}
                   style={dimensions.useFlex ? {} : { width: dimensions.columnWidth }}
                   title={label.fullLabel}
@@ -463,18 +509,49 @@ export const EquipmentCalendarView = ({
                       }}
                       title={`${event.label}\n${format(new Date(event.start), 'MMM d, HH:mm')} - ${format(new Date(event.end), 'MMM d, HH:mm')}`}
                     >
-                      <div className="truncate font-semibold leading-tight">{event.label}</div>
-                      {showHourView && (
+                      <div className="truncate font-semibold text-[11px] leading-tight">{event.label}</div>
+                      {event.type === 'trip' && (event as any).coId && (
                         <div className="truncate text-[10px] opacity-90">
-                          {format(new Date(event.start), 'HH:mm')} - {format(new Date(event.end), 'HH:mm')}
+                          {(event as any).coId}
                         </div>
                       )}
+                      <div className="truncate text-[10px] opacity-90">
+                        {format(new Date(event.start), 'ha')}-{format(new Date(event.end), 'ha')}
+                      </div>
                     </div>
                   );
                 });
               })}
             </div>
           </ScrollArea>
+        </div>
+      </div>
+
+      {/* Summary Statistics */}
+      <div className="border-t bg-muted/30 p-4">
+        <div className="flex items-center justify-around gap-4">
+          <div className="text-center">
+            <div className="text-2xl font-bold text-foreground">{equipments.length}</div>
+            <div className="text-xs text-muted-foreground">Total Wagons</div>
+          </div>
+          <div className="text-center">
+            <div className="text-2xl font-bold text-green-600">
+              {equipments.filter(eq => eq.status === 'available').length}
+            </div>
+            <div className="text-xs text-muted-foreground">Available Now</div>
+          </div>
+          <div className="text-center">
+            <div className="text-2xl font-bold text-blue-600">
+              {equipments.filter(eq => eq.status === 'occupied').length}
+            </div>
+            <div className="text-xs text-muted-foreground">Active Trips</div>
+          </div>
+          <div className="text-center">
+            <div className="text-2xl font-bold text-orange-600">
+              {equipments.filter(eq => eq.status === 'workshop').length}
+            </div>
+            <div className="text-xs text-muted-foreground">In Workshop</div>
+          </div>
         </div>
       </div>
     </Card>
