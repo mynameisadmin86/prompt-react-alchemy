@@ -451,7 +451,7 @@ export const SmartEquipmentCalendar = ({
                     label.isDayStart && "border-l-2 border-l-primary bg-muted/70 font-semibold"
                   )}
                   style={{
-                    width: view === 'month' ? `${SLOT_WIDTH_DAY}px` : (showHourView ? `${SLOT_WIDTH_HOUR}px` : `${SLOT_WIDTH_DAY}px`)
+                    width: showHourView ? `${SLOT_WIDTH_HOUR}px` : `${SLOT_WIDTH_DAY}px`
                   }}
                   title={label.fullLabel}
                 >
@@ -474,7 +474,7 @@ export const SmartEquipmentCalendar = ({
                       label.isDayStart && "border-l-2 border-l-primary/30"
                     )}
                     style={{
-                      width: view === 'month' ? `${SLOT_WIDTH_DAY}px` : (showHourView ? `${SLOT_WIDTH_HOUR}px` : `${SLOT_WIDTH_DAY}px`)
+                      width: showHourView ? `${SLOT_WIDTH_HOUR}px` : `${SLOT_WIDTH_DAY}px`
                     }}
                   />
                 ))}
