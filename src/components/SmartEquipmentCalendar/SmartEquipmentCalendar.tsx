@@ -278,7 +278,7 @@ export const SmartEquipmentCalendar = ({
 
   // Sync vertical scroll between left panel and timeline, and horizontal scroll between header and timeline
   useEffect(() => {
-    const handleScroll = () => {
+    const handleTimelineScroll = () => {
       if (timelineRef.current && leftPanelRef.current) {
         leftPanelRef.current.scrollTop = timelineRef.current.scrollTop;
       }
@@ -287,11 +287,21 @@ export const SmartEquipmentCalendar = ({
       }
     };
 
+    const handleHeaderScroll = () => {
+      if (headerRef.current && timelineRef.current) {
+        timelineRef.current.scrollLeft = headerRef.current.scrollLeft;
+      }
+    };
+
     const timeline = timelineRef.current;
-    timeline?.addEventListener('scroll', handleScroll);
+    const header = headerRef.current;
+    
+    timeline?.addEventListener('scroll', handleTimelineScroll);
+    header?.addEventListener('scroll', handleHeaderScroll);
 
     return () => {
-      timeline?.removeEventListener('scroll', handleScroll);
+      timeline?.removeEventListener('scroll', handleTimelineScroll);
+      header?.removeEventListener('scroll', handleHeaderScroll);
     };
   }, []);
 
@@ -427,7 +437,7 @@ export const SmartEquipmentCalendar = ({
         {/* Right Panel - Timeline */}
         <div className="flex-1 flex flex-col overflow-hidden">
           {/* Timeline Header */}
-          <div ref={headerRef} className="border-b bg-muted/30 overflow-x-auto scrollbar-thin">
+          <div ref={headerRef} className="border-b bg-muted/30 overflow-x-scroll scrollbar-thin" style={{ scrollbarWidth: 'thin' }}>
             <div className="flex min-w-max">
               {timelineLabels.map((label, idx) => (
                 <div
@@ -450,7 +460,7 @@ export const SmartEquipmentCalendar = ({
           </div>
 
           {/* Timeline Body */}
-          <ScrollArea className="flex-1" ref={timelineRef}>
+          <div className="flex-1 overflow-auto scrollbar-thin" ref={timelineRef} style={{ scrollbarWidth: 'thin' }}>
             <div className="relative min-w-max" style={{ minHeight: filteredEquipments.length * ROW_HEIGHT }}>
               {/* Grid lines */}
               <div className="absolute inset-0 pointer-events-none flex">
@@ -516,7 +526,7 @@ export const SmartEquipmentCalendar = ({
                 });
               })}
             </div>
-          </ScrollArea>
+          </div>
         </div>
       </div>
 
