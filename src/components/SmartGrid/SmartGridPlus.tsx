@@ -150,6 +150,12 @@ export function SmartGridPlus({
     mandatory: col.mandatory
   })), [currentColumns]);
 
+  // Generate unique preferences key based on gridTitle or a default
+  const preferencesKey = useMemo(() => {
+    if (gridTitle) return `smartgridplus-preferences-${gridTitle.toLowerCase().replace(/\s+/g, '-')}`;
+    return 'smartgridplus-preferences-default';
+  }, [gridTitle]);
+
   // Initialize preferences hook with proper async handling
   const {
     preferences,
@@ -161,7 +167,7 @@ export function SmartGridPlus({
   } = useGridPreferences(
     preferencesColumns,
     true, // persistPreferences
-    'smartgridplus-preferences',
+    preferencesKey,
     onPreferenceSave ? async (preferences) => {
       try {
         await Promise.resolve(onPreferenceSave(preferences));
