@@ -69,8 +69,7 @@ export function ColumnVisibilityManager({
   };
 
   const isColumnInSubRow = (columnId: string) => {
-    const column = columns.find(col => col.key === columnId);
-    return column?.subRow === true;
+    return preferences.subRowColumns?.includes(columnId) || false;
   };
 
   const getColumnHeader = (columnId: string) => {
