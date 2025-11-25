@@ -40,6 +40,7 @@ export const SmartEquipmentCalendar = ({
   
   const timelineRef = useRef<HTMLDivElement>(null);
   const leftPanelRef = useRef<HTMLDivElement>(null);
+  const headerRef = useRef<HTMLDivElement>(null);
 
   // Filter equipments by status
   const filteredEquipments = statusFilter === 'all' 
@@ -275,11 +276,14 @@ export const SmartEquipmentCalendar = ({
     onBarClick?.(event);
   };
 
-  // Sync vertical scroll between left panel and timeline
+  // Sync vertical scroll between left panel and timeline, and horizontal scroll between header and timeline
   useEffect(() => {
     const handleScroll = () => {
       if (timelineRef.current && leftPanelRef.current) {
         leftPanelRef.current.scrollTop = timelineRef.current.scrollTop;
+      }
+      if (timelineRef.current && headerRef.current) {
+        headerRef.current.scrollLeft = timelineRef.current.scrollLeft;
       }
     };
 
@@ -423,7 +427,7 @@ export const SmartEquipmentCalendar = ({
         {/* Right Panel - Timeline */}
         <div className="flex-1 flex flex-col overflow-hidden">
           {/* Timeline Header */}
-          <div className="border-b bg-muted/30 overflow-x-auto scrollbar-thin">
+          <div ref={headerRef} className="border-b bg-muted/30 overflow-x-auto scrollbar-thin">
             <div className="flex min-w-max">
               {timelineLabels.map((label, idx) => (
                 <div
