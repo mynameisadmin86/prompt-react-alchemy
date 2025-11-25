@@ -156,6 +156,7 @@ export function SmartGridPlus({
     updateColumnOrder,
     toggleColumnVisibility,
     updateColumnHeader,
+    toggleSubRow,
     updateSubRowColumnOrder,
     savePreferences
   } = useGridPreferences(
@@ -185,7 +186,7 @@ export function SmartGridPlus({
       .map(id => columnMap.get(id))
       .filter((col): col is GridColumnConfig => col !== undefined)
       .filter(col => !preferences.hiddenColumns.includes(col.key))
-      .filter(col => !col.subRow); // Filter out sub-row columns from main table
+      .filter(col => !preferences.subRowColumns.includes(col.key)); // Filter out sub-row columns using preferences
     
     const calculatedWidths = calculateColumnWidthsCallback(visibleColumns);
     
@@ -198,10 +199,15 @@ export function SmartGridPlus({
     }));
   }, [currentColumns, preferences, calculateColumnWidthsCallback]);
 
-  // Get sub-row columns (columns marked with subRow: true)
+  // Get sub-row columns from preferences (primary source)
   const subRowColumns = useMemo(() => {
-    return currentColumns.filter(col => col.subRow === true);
-  }, [currentColumns]);
+    const columnMap = new Map(currentColumns.map(col => [col.key, col]));
+    return preferences.subRowColumns
+      .map(key => columnMap.get(key))
+      .filter((col): col is GridColumnConfig => col !== undefined)
+      .filter(col => !preferences.hiddenColumns.includes(col.key))
+      .map(col => ({ ...col, subRow: true }));
+  }, [currentColumns, preferences]);
 
   // Check if any column has subRow set to true
   const hasSubRowColumns = useMemo(() => {
@@ -210,26 +216,32 @@ export function SmartGridPlus({
 
   // Check if any column has collapsibleChild set to true
   const hasCollapsibleColumns = useMemo(() => {
-    return currentColumns.some(col => col.subRow === true);
-  }, [currentColumns]);
+    return preferences.subRowColumns.length > 0;
+  }, [preferences.subRowColumns]);
 
-  // Get collapsible columns
+  // Get collapsible columns from preferences
   const collapsibleColumns = useMemo(() => {
-    return currentColumns.filter(col => col.subRow === true);
-  }, [currentColumns]);
+    const columnMap = new Map(currentColumns.map(col => [col.key, col]));
+    return preferences.subRowColumns
+      .map(key => columnMap.get(key))
+      .filter((col): col is GridColumnConfig => col !== undefined);
+  }, [currentColumns, preferences.subRowColumns]);
 
   // Handle sub-row toggle with proper column updates
   const handleSubRowToggleInternal = useCallback((columnKey: string) => {
     console.log('Internal sub-row toggle for column:', columnKey);
     
-    // Call the hook's toggle function
+    // Call the hook's toggle function to update columns state
     handleSubRowToggle(columnKey);
+    
+    // Save to preferences
+    toggleSubRow(columnKey);
     
     // Also call the external handler if provided
     if (onSubRowToggle) {
       onSubRowToggle(columnKey);
     }
-  }, [handleSubRowToggle, onSubRowToggle]);
+  }, [handleSubRowToggle, toggleSubRow, onSubRowToggle]);
 
   // Helper function to render collapsible cell values
   const renderCollapsibleCellValue = useCallback((value: any, column: GridColumnConfig) => {
