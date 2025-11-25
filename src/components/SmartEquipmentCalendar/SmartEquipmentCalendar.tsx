@@ -227,9 +227,36 @@ export const SmartEquipmentCalendar = ({
     }
   };
 
-  // Get events for a specific equipment
+  // Get current view date range
+  const getViewDateRange = () => {
+    const viewStart = startOfDay(startDate);
+    let viewEnd: Date;
+    
+    if (view === 'day') {
+      viewEnd = endOfDay(startDate);
+    } else if (view === 'week') {
+      viewEnd = endOfDay(addDays(startDate, 6));
+    } else {
+      // month
+      viewEnd = endOfMonth(startDate);
+    }
+    
+    return { viewStart, viewEnd };
+  };
+
+  // Get events for a specific equipment that fall within the current view
   const getEventsForEquipment = (equipmentId: string) => {
-    return events.filter(e => e.equipmentId === equipmentId);
+    const { viewStart, viewEnd } = getViewDateRange();
+    
+    return events.filter(e => {
+      if (e.equipmentId !== equipmentId) return false;
+      
+      const eventStart = new Date(e.start);
+      const eventEnd = new Date(e.end);
+      
+      // Check if event overlaps with current view
+      return eventStart <= viewEnd && eventEnd >= viewStart;
+    });
   };
 
   const handleEquipmentSelect = (equipmentId: string, checked: boolean) => {
