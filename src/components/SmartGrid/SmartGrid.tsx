@@ -164,14 +164,6 @@ export function SmartGrid({
     mandatory: col.mandatory
   })), [currentColumns]);
 
-  // Generate unique preferences key based on gridId, parentPage, or gridTitle
-  const preferencesKey = useMemo(() => {
-    if (gridId) return `smartgrid-preferences-${gridId}`;
-    if (parentPage) return `smartgrid-preferences-${parentPage}`;
-    if (gridTitle) return `smartgrid-preferences-${gridTitle.toLowerCase().replace(/\s+/g, '-')}`;
-    return 'smartgrid-preferences-default';
-  }, [gridId, parentPage, gridTitle]);
-
   // Initialize preferences hook with proper async handling
   const {
     preferences,
@@ -183,7 +175,7 @@ export function SmartGrid({
   } = useGridPreferences(
     preferencesColumns,
     true, // persistPreferences
-    preferencesKey,
+    'smartgrid-preferences',
     onPreferenceSave ? async (preferences) => {
       try {
         await Promise.resolve(onPreferenceSave(preferences));

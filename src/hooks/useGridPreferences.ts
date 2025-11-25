@@ -1,5 +1,5 @@
 
-import { useState, useCallback, useEffect, useMemo } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { GridPreferences, Column } from '@/types/smartgrid';
 
 export function useGridPreferences<T>(
@@ -9,19 +9,13 @@ export function useGridPreferences<T>(
   onPreferenceSave?: (preferences: GridPreferences) => Promise<void>,
   onPreferenceLoad?: () => Promise<GridPreferences | null>
 ) {
-  // Get initial sub-row columns from props (columns marked with subRow: true)
-  const initialSubRowColumns = useMemo(() => 
-    columns.filter((col: any) => col.subRow === true).map(col => col.id),
-    [columns]
-  );
-
   const defaultPreferences: GridPreferences = {
     columnOrder: columns.map(col => col.id),
     hiddenColumns: [],
     columnWidths: {},
     columnHeaders: {},
-    subRowColumns: initialSubRowColumns, // Initialize from columns with subRow: true
-    subRowColumnOrder: initialSubRowColumns, // Initialize from columns with subRow: true
+    subRowColumns: [], // Initialize empty sub-row columns array
+    subRowColumnOrder: [], // Initialize empty sub-row column order array
     filters: []
   };
 
@@ -59,7 +53,7 @@ export function useGridPreferences<T>(
       }
 
       if (loadedPreferences) {
-        // Always prioritize local storage values over props
+        // Merge with defaults to handle new columns and properties
         const mergedPreferences: GridPreferences = {
           ...defaultPreferences,
           ...loadedPreferences,
@@ -67,24 +61,16 @@ export function useGridPreferences<T>(
             ...loadedPreferences.columnOrder.filter(id => columns.some(col => col.id === id)),
             ...columns.filter(col => !loadedPreferences.columnOrder.includes(col.id)).map(col => col.id)
           ],
-          // Always use local storage values when they exist
-          subRowColumns: loadedPreferences.subRowColumns !== undefined 
-            ? loadedPreferences.subRowColumns.filter(id => columns.some(col => col.id === id))
-            : initialSubRowColumns,
-          subRowColumnOrder: loadedPreferences.subRowColumnOrder !== undefined
-            ? loadedPreferences.subRowColumnOrder.filter(id => columns.some(col => col.id === id))
-            : initialSubRowColumns
+          subRowColumns: loadedPreferences.subRowColumns || [], // Ensure subRowColumns is initialized
+          subRowColumnOrder: loadedPreferences.subRowColumnOrder || [] // Ensure subRowColumnOrder is initialized
         };
         setPreferences(mergedPreferences);
-      } else {
-        // No stored preferences - use defaults from props
-        setPreferences(defaultPreferences);
       }
     } catch (error) {
       console.error('Failed to load preferences:', error);
       setPreferences(defaultPreferences);
     }
-  }, [onPreferenceLoad, persistPreferences, preferencesKey, columns, defaultPreferences, initialSubRowColumns]);
+  }, [onPreferenceLoad, persistPreferences, preferencesKey, columns, defaultPreferences]);
 
   useEffect(() => {
     loadPreferences();
