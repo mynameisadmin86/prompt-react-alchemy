@@ -333,6 +333,7 @@ export const CellRenderer: React.FC<CellRendererProps> = ({
             <PopoverContent className="w-auto p-0" align="start">
               <Calendar
                 mode="single"
+                weekStartsOn={1}
                 selected={tempValue ? new Date(tempValue) : undefined}
                 onSelect={(date) => {
                   if (date) {
@@ -571,6 +572,7 @@ export const CellRenderer: React.FC<CellRendererProps> = ({
             <PopoverContent className="w-auto p-0" align="start">
               <Calendar
                 mode="single"
+                weekStartsOn={1}
                 selected={tempValue ? new Date(tempValue) : undefined}
                 onSelect={(date) => {
                   if (date) {
@@ -648,6 +650,7 @@ export const CellRenderer: React.FC<CellRendererProps> = ({
             <PopoverContent className="w-auto p-0" align="start">
               <Calendar
                 mode="single"
+                weekStartsOn={1}
                 selected={tempValue ? new Date(tempValue) : undefined}
                 onSelect={(date) => {
                   if (date) {
