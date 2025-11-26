@@ -2,6 +2,11 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Input } from '@/components/ui/input';
 import { GridColumnConfig } from '@/types/smartgrid';
 import { DynamicLazySelect } from '@/components/DynamicPanel/DynamicLazySelect';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Button } from '@/components/ui/button';
+import { CalendarIcon } from 'lucide-react';
+import { format, parse } from 'date-fns';
 import { cn } from '@/lib/utils';
 
 interface EnhancedCellEditorProps {
@@ -126,14 +131,65 @@ export function EnhancedCellEditor({ value, column, onChange, onSave, error, sho
     );
   }
 
-  // Input type determination
+  // Date picker with hybrid input
+  if (column.type === 'Date') {
+    const dateValue = editValue ? (typeof editValue === 'string' ? parse(editValue, 'yyyy-MM-dd', new Date()) : new Date(editValue)) : undefined;
+    
+    return (
+      <div className="w-full flex gap-1">
+        <Input
+          ref={inputRef}
+          type="date"
+          value={editValue}
+          onChange={(e) => handleChange(e.target.value)}
+          onKeyDown={handleKeyDown}
+          className={cn(
+            'flex-1',
+            error && 'border-destructive focus-visible:ring-destructive'
+          )}
+        />
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button
+              variant="outline"
+              size="icon"
+              className={cn(
+                "shrink-0",
+                error && 'border-destructive'
+              )}
+            >
+              <CalendarIcon className="h-4 w-4" />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0 bg-popover z-50" align="start">
+            <Calendar
+              mode="single"
+              selected={dateValue}
+              onSelect={(date) => {
+                if (date) {
+                  handleChange(format(date, 'yyyy-MM-dd'));
+                }
+              }}
+              initialFocus
+              weekStartsOn={1}
+              className="pointer-events-auto"
+            />
+          </PopoverContent>
+        </Popover>
+        {error && (
+          <div className="mt-1 text-xs text-destructive w-full">
+            {error}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // Input type determination for other types
   let inputType = 'text';
   switch (column.type) {
     case 'Integer':
       inputType = 'number';
-      break;
-    case 'Date':
-      inputType = 'date';
       break;
     case 'Time':
       inputType = 'time';
