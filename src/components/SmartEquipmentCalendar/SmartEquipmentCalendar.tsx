@@ -236,21 +236,23 @@ export const SmartEquipmentCalendar = ({
 
   // Get current view date range
   const getViewDateRange = () => {
-    const viewStart = startOfDay(startDate);
+    let viewStart: Date;
     let viewEnd: Date;
     
     if (view === 'day') {
+      viewStart = startOfDay(startDate);
       viewEnd = endOfDay(startDate);
     } else if (view === 'week') {
+      viewStart = startOfDay(startDate);
       viewEnd = endOfDay(addDays(startDate, 6));
     } else {
-      // month
+      // month - always use the full month containing startDate
+      viewStart = startOfMonth(startDate);
       viewEnd = endOfMonth(startDate);
     }
     
     return { viewStart, viewEnd };
   };
-
   // Get events for a specific equipment that fall within the current view
   const getEventsForEquipment = (equipmentId: string) => {
     const { viewStart, viewEnd } = getViewDateRange();
