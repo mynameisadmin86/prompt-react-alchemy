@@ -142,9 +142,10 @@ export const SmartEquipmentCalendar = ({
         for (let i = 0; i < 24; i++) {
           const hour = addHours(startOfDay(startDate), i);
           labels.push({
-            label: format(hour, 'ha').toLowerCase(),
+            label: i === 0 ? format(startDate, 'EEE d') : format(hour, 'ha').toLowerCase(),
             fullLabel: format(hour, 'HH:00'),
             date: hour,
+            isDayStart: i === 0,
           });
         }
       } else {
