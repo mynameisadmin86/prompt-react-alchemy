@@ -192,13 +192,11 @@ export const SmartEquipmentCalendar = ({
     
     if (view === 'month') {
       const monthStart = startOfMonth(startDate);
-      const monthEnd = endOfMonth(startDate);
-      const daysInMonth = differenceInDays(monthEnd, monthStart) + 1;
       const daysFromStart = differenceInDays(startOfDay(eventStart), monthStart);
-      const duration = Math.max(1, differenceInDays(startOfDay(eventEnd), startOfDay(eventStart)) + 1);
+      const duration = differenceInDays(endOfDay(eventEnd), startOfDay(eventStart));
       
-      const leftPercent = (daysFromStart / daysInMonth) * 100;
-      const widthPercent = (duration / daysInMonth) * 100;
+      const leftPercent = (daysFromStart / timelineLabels.length) * 100;
+      const widthPercent = (duration / timelineLabels.length) * 100;
       return { leftPercent: Math.max(0, leftPercent), widthPercent: Math.max(2, widthPercent) };
     } else if (view === 'week') {
       if (showHourView) {
@@ -236,23 +234,21 @@ export const SmartEquipmentCalendar = ({
 
   // Get current view date range
   const getViewDateRange = () => {
-    let viewStart: Date;
+    const viewStart = startOfDay(startDate);
     let viewEnd: Date;
     
     if (view === 'day') {
-      viewStart = startOfDay(startDate);
       viewEnd = endOfDay(startDate);
     } else if (view === 'week') {
-      viewStart = startOfDay(startDate);
       viewEnd = endOfDay(addDays(startDate, 6));
     } else {
-      // month - always use the full month containing startDate
-      viewStart = startOfMonth(startDate);
+      // month
       viewEnd = endOfMonth(startDate);
     }
     
     return { viewStart, viewEnd };
   };
+
   // Get events for a specific equipment that fall within the current view
   const getEventsForEquipment = (equipmentId: string) => {
     const { viewStart, viewEnd } = getViewDateRange();
