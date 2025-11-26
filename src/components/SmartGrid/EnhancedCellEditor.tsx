@@ -1,9 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { format } from 'date-fns';
 import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Calendar } from '@/components/ui/calendar';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { GridColumnConfig } from '@/types/smartgrid';
 import { DynamicLazySelect } from '@/components/DynamicPanel/DynamicLazySelect';
 import { cn } from '@/lib/utils';
@@ -130,51 +126,14 @@ export function EnhancedCellEditor({ value, column, onChange, onSave, error, sho
     );
   }
 
-  // Date picker renderer
-  if (column.type === 'Date') {
-    const dateValue = editValue ? new Date(editValue) : undefined;
-    return (
-      <div className="w-full">
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button
-              variant="outline"
-              className={cn(
-                "w-full justify-start text-left font-normal",
-                !editValue && "text-muted-foreground",
-                error && 'border-destructive'
-              )}
-            >
-              {editValue ? format(dateValue!, 'PPP') : <span>Pick a date</span>}
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-auto p-0" align="start">
-            <Calendar
-              mode="single"
-              weekStartsOn={1}
-              selected={dateValue}
-              onSelect={(date) => {
-                const dateString = date ? format(date, 'yyyy-MM-dd') : '';
-                handleChange(dateString);
-              }}
-              initialFocus
-            />
-          </PopoverContent>
-        </Popover>
-        {error && (
-          <div className="mt-1 text-xs text-destructive">
-            {error}
-          </div>
-        )}
-      </div>
-    );
-  }
-
   // Input type determination
   let inputType = 'text';
   switch (column.type) {
     case 'Integer':
       inputType = 'number';
+      break;
+    case 'Date':
+      inputType = 'date';
       break;
     case 'Time':
       inputType = 'time';
