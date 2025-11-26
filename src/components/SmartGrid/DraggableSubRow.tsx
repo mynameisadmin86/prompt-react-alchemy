@@ -228,6 +228,7 @@ export const DraggableSubRow: React.FC<DraggableSubRowProps> = ({
             <PopoverContent className="w-auto p-0" align="start">
               <Calendar
                 mode="single"
+                weekStartsOn={1}
                 selected={dateValue}
                 onSelect={(date) => {
                   const dateString = date ? format(date, 'yyyy-MM-dd') : '';
