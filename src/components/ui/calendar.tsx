@@ -26,11 +26,11 @@ function Calendar({
       fromYear={1900}
       toYear={2100}
       defaultMonth={defaultMonth}
-      className={cn("p-3 [&_.rdp-caption_label]:hidden", className)}
+      className={cn("p-3", className)}
       classNames={{
-        dropdown_month: "px-2 py-1 text-sm border border-border rounded-md bg-background z-50",
-        dropdown_year: "px-2 py-1 text-sm border border-border rounded-md bg-background z-50",
-        dropdown_icon: "hidden",
+        dropdown_month: "px-2 py-1 text-sm border border-border rounded-md bg-background",
+        dropdown_year: "px-2 py-1 text-sm border border-border rounded-md bg-background",
+        dropdown_icon: "ml-1",
         caption_dropdowns: "flex gap-2",
         months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
         month: "space-y-4",
