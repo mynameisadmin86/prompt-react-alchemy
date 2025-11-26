@@ -196,10 +196,11 @@ export const SmartEquipmentCalendar = ({
       const daysInMonth = differenceInDays(monthEnd, monthStart) + 1;
       const daysFromStart = differenceInDays(startOfDay(eventStart), monthStart);
       const duration = Math.max(1, differenceInDays(startOfDay(eventEnd), startOfDay(eventStart)) + 1);
-      
-      const leftPercent = (daysFromStart / daysInMonth) * 100;
-      const widthPercent = (duration / daysInMonth) * 100;
-      return { leftPercent: Math.max(0, leftPercent), widthPercent: Math.max(2, widthPercent) };
+
+      // Use fixed pixel-based positions so bars align exactly with day slots
+      const left = Math.max(0, daysFromStart) * SLOT_WIDTH_DAY;
+      const width = Math.max(1, duration) * SLOT_WIDTH_DAY;
+      return { left, width, usePixels: true };
     } else if (view === 'week') {
       if (showHourView) {
         const viewStart = startOfDay(startDate);
@@ -208,7 +209,7 @@ export const SmartEquipmentCalendar = ({
         
         const leftPercent = (hoursFromStart / (7 * 24)) * 100;
         const widthPercent = (duration / (7 * 24)) * 100;
-        return { leftPercent: Math.max(0, leftPercent), widthPercent: Math.max(0.5, widthPercent) };
+        return { leftPercent: Math.max(0, leftPercent), widthPercent: Math.max(0.5, widthPercent), usePixels: false };
       } else {
         const viewStart = startOfDay(startDate);
         const daysFromStart = differenceInDays(startOfDay(eventStart), viewStart);
@@ -216,7 +217,7 @@ export const SmartEquipmentCalendar = ({
         
         const leftPercent = (daysFromStart / 7) * 100;
         const widthPercent = (duration / 7) * 100;
-        return { leftPercent: Math.max(0, leftPercent), widthPercent: Math.max(2, widthPercent) };
+        return { leftPercent: Math.max(0, leftPercent), widthPercent: Math.max(2, widthPercent), usePixels: false };
       }
     } else {
       // day view
@@ -227,9 +228,9 @@ export const SmartEquipmentCalendar = ({
         
         const leftPercent = (minutesFromStart / (24 * 60)) * 100;
         const widthPercent = (duration / (24 * 60)) * 100;
-        return { leftPercent: Math.max(0, leftPercent), widthPercent: Math.max(1, widthPercent) };
+        return { leftPercent: Math.max(0, leftPercent), widthPercent: Math.max(1, widthPercent), usePixels: false };
       } else {
-        return { leftPercent: 0, widthPercent: 100 };
+        return { leftPercent: 0, widthPercent: 100, usePixels: false };
       }
     }
   };
@@ -498,6 +499,16 @@ export const SmartEquipmentCalendar = ({
                   const top = equipmentIdx * ROW_HEIGHT + 8;
                   const height = ROW_HEIGHT - 16;
 
+                  const positionStyle = position.usePixels
+                    ? {
+                        left: `${position.left}px`,
+                        width: `${position.width}px`,
+                      }
+                    : {
+                        left: `${position.leftPercent}%`,
+                        width: `${position.widthPercent}%`,
+                      };
+
                   return (
                     <div
                       key={event.id}
@@ -507,9 +518,8 @@ export const SmartEquipmentCalendar = ({
                         eventTypeColors[event.type]
                       )}
                       style={{
-                        left: `${position.leftPercent}%`,
+                        ...positionStyle,
                         top: `${top}px`,
-                        width: `${position.widthPercent}%`,
                         height: `${height}px`,
                       }}
                       title={`${event.label}\n${format(new Date(event.start), 'MMM d, HH:mm')} - ${format(new Date(event.end), 'MMM d, HH:mm')}`}
