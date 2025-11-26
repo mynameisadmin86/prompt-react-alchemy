@@ -13,6 +13,11 @@ function Calendar({
   showOutsideDays = true,
   ...props
 }: CalendarProps) {
+  // Set defaultMonth to the selected date if available
+  const defaultMonth = props.selected 
+    ? (props.selected instanceof Date ? props.selected : undefined)
+    : undefined;
+
   return (
     <DayPicker
       showOutsideDays={showOutsideDays}
@@ -20,6 +25,7 @@ function Calendar({
       captionLayout="dropdown-buttons"
       fromYear={1900}
       toYear={2100}
+      defaultMonth={defaultMonth}
       className={cn("p-3", className)}
       classNames={{
         dropdown_month: "px-2 py-1 text-sm border border-border rounded-md bg-background",
