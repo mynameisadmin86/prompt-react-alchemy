@@ -135,6 +135,8 @@ export function SmartGridPlus({
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
   const [isAddingRow, setIsAddingRow] = useState(false);
   const [newRowValues, setNewRowValues] = useState<Record<string, any>>(defaultRowValues);
+  const [isEditingEmptyRow, setIsEditingEmptyRow] = useState(false);
+  const [emptyRowValues, setEmptyRowValues] = useState<Record<string, any>>(defaultRowValues);
 
   // Use external selectedRows if provided, otherwise use internal state
   const currentSelectedRows = selectedRows || internalSelectedRows;
@@ -1457,7 +1459,18 @@ export function SmartGridPlus({
                 
                 {/* Empty Row */}
                 {showEmptyRow && !loading && (
-                  <TableRow className="bg-blue-50/30 border-b-2 border-blue-200 hover:bg-blue-50/50">
+                  <TableRow 
+                    className={cn(
+                      "bg-blue-50/30 border-b-2 border-blue-200 hover:bg-blue-50/50 transition-all duration-300",
+                      isEditingEmptyRow && "bg-yellow-50"
+                    )}
+                    onDoubleClick={() => {
+                      if (!isEditingEmptyRow) {
+                        setIsEditingEmptyRow(true);
+                        setEmptyRowValues(defaultRowValues);
+                      }
+                    }}
+                  >
                     {/* Checkbox column */}
                     {showCheckboxes && (
                       <TableCell className="px-3 py-2 w-[50px]">
@@ -1466,7 +1479,7 @@ export function SmartGridPlus({
                     )}
                     {orderedColumns.map((column) => {
                       const widthPercentage = (column.width / orderedColumns.reduce((total, col) => total + col.width, 0)) * 100;
-                      const value = defaultRowValues[column.key];
+                      const value = isEditingEmptyRow ? emptyRowValues[column.key] : defaultRowValues[column.key];
                       
                       return (
                         <TableCell 
@@ -1478,17 +1491,114 @@ export function SmartGridPlus({
                             maxWidth: `${column.width * 1.5}px`
                           }}
                         >
-                          <span className="text-muted-foreground">
-                            {value != null && value !== '' ? String(value) : '-'}
-                          </span>
+                          {isEditingEmptyRow && column.editable && column.key !== 'actions' ? (
+                            <EnhancedCellEditor
+                              value={value ?? ''}
+                              column={column}
+                              onChange={(newValue) => {
+                                setEmptyRowValues(prev => ({
+                                  ...prev,
+                                  [column.key]: newValue
+                                }));
+                                // Clear validation error for this field
+                                if (validationErrors[column.key]) {
+                                  setValidationErrors(prev => {
+                                    const newErrors = { ...prev };
+                                    delete newErrors[column.key];
+                                    return newErrors;
+                                  });
+                                }
+                                // Call column-specific onChange if provided
+                                if (column.onChange) {
+                                  column.onChange(newValue, emptyRowValues);
+                                }
+                              }}
+                              error={validationErrors[column.key]}
+                            />
+                          ) : (
+                            <span className="text-muted-foreground">
+                              {value != null && value !== '' ? String(value) : '-'}
+                            </span>
+                          )}
                         </TableCell>
                       );
                     })}
                     
-                    {/* Plugin row actions */}
+                    {/* Actions column for save/cancel */}
                     {plugins.some(plugin => plugin.rowActions) && (
                       <TableCell className="px-3 py-2 text-center w-[100px]">
-                        {/* Empty actions cell */}
+                        {isEditingEmptyRow && (
+                          <div className="flex items-center justify-center gap-1">
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={async () => {
+                                // Validate
+                                const errors: Record<string, string> = {};
+                                
+                                // Required fields validation
+                                if (validationRules.requiredFields) {
+                                  validationRules.requiredFields.forEach(field => {
+                                    if (!emptyRowValues[field] || emptyRowValues[field] === '') {
+                                      errors[field] = 'This field is required';
+                                    }
+                                  });
+                                }
+                                
+                                // Custom validation
+                                if (validationRules.customValidationFn) {
+                                  const customErrors = validationRules.customValidationFn(emptyRowValues);
+                                  Object.assign(errors, customErrors);
+                                }
+                                
+                                if (Object.keys(errors).length > 0) {
+                                  setValidationErrors(errors);
+                                  toast({
+                                    title: "Validation Error",
+                                    description: "Please fix the errors before saving",
+                                    variant: "destructive"
+                                  });
+                                  return;
+                                }
+                                
+                                // Save
+                                if (onAddRow) {
+                                  try {
+                                    await Promise.resolve(onAddRow(emptyRowValues));
+                                    toast({
+                                      title: "Success",
+                                      description: "Row added successfully"
+                                    });
+                                    setIsEditingEmptyRow(false);
+                                    setEmptyRowValues(defaultRowValues);
+                                    setValidationErrors({});
+                                  } catch (error) {
+                                    toast({
+                                      title: "Error",
+                                      description: "Failed to add row",
+                                      variant: "destructive"
+                                    });
+                                  }
+                                }
+                              }}
+                              className="h-7 w-7 p-0"
+                            >
+                              <Check className="h-4 w-4 text-green-600" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => {
+                                setIsEditingEmptyRow(false);
+                                setEmptyRowValues(defaultRowValues);
+                                setValidationErrors({});
+                              }}
+                              className="h-7 w-7 p-0"
+                            >
+                              <X className="h-4 w-4 text-red-600" />
+                            </Button>
+                          </div>
+                        )}
                       </TableCell>
                     )}
                   </TableRow>
