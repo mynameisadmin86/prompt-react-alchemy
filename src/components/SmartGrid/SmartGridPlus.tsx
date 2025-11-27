@@ -1527,7 +1527,14 @@ export function SmartGridPlus({
                                 </div>
                               ) : (
                                 <div className="text-gray-400 text-sm truncate">
-                                  {defaultRowValues[column.key] || '-'}
+                                  {(() => {
+                                    const value = defaultRowValues[column.key];
+                                    if (value === null || value === undefined) return '-';
+                                    if (typeof value === 'object') {
+                                      return JSON.stringify(value);
+                                    }
+                                    return value;
+                                  })()}
                                 </div>
                               )}
                             </TableCell>
