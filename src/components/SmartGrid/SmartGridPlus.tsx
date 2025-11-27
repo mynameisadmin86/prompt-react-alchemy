@@ -1363,272 +1363,95 @@ export function SmartGridPlus({
                     </TableCell>
                   </TableRow>
                 ) : (
-                  <>
-                    {paginatedData.map((row, index) => {
-                      const isExpanded = expandedRows.has(index);
-                      const actualIndex = onDataFetch ? index : (currentPage - 1) * pageSize + index;
-                      const isSelected = currentSelectedRows.has(index);
-                      const isRowEditing = editingRow === actualIndex;
-                      
-                      return (
-                        <>
-                          <TableRow 
-                            key={row.id || actualIndex}
-                            className={cn(
-                              "hover:bg-gray-50 border-b border-gray-100 transition-all duration-300",
-                              isSelected && "bg-blue-50",
-                              isRowEditing && "bg-yellow-50",
-                              highlightedRowIndices.includes(index) && "bg-yellow-100 border-l-4 border-yellow-500 hover:bg-yellow-100/80",
-                              rowClassName?.(row, actualIndex)
-                            )}
-                            onDoubleClick={() => handleCellDoubleClick(actualIndex, row)}
-                          >
-                            {/* Checkbox column */}
-                            {showCheckboxes && (
-                              <TableCell className="px-3 py-2 w-[50px]">
-                                <input 
-                                  type="checkbox" 
-                                  className="rounded" 
-                                  checked={isSelected}
-                                  onChange={(e) => {
-                                    const newSet = new Set(currentSelectedRows);
-                                    if (e.target.checked) {
-                                      newSet.add(index);
-                                    } else {
-                                      newSet.delete(index);
-                                    }
-                                    handleSelectionChange(newSet);
-                                  }}
-                                />
-                              </TableCell>
-                            )}
-                            {orderedColumns.map((column, columnIndex) => {
-                              const widthPercentage = (column.width / orderedColumns.reduce((total, col) => total + col.width, 0)) * 100;
-                              
-                              return (
-                                 <TableCell 
-                                  key={column.key}
-                                  className="px-2 py-2 border-r border-gray-100 last:border-r-0 cursor-pointer"
-                                  style={{ 
-                                    width: `${widthPercentage}%`,
-                                    minWidth: `${Math.max(80, column.width * 0.8)}px`,
-                                    maxWidth: `${column.width * 1.5}px`
-                                  }}
-                                  onClick={() => {
-                                    if (inlineRowEditing && !isRowEditing && column.key !== 'actions') {
-                                      handleStartEditRow(actualIndex, row, column.key);
-                                    }
-                                  }}
-                                >
-                                  {renderCell(row, column, actualIndex, columnIndex)}
-                                </TableCell>
-                              );
-                            })}
-                            
-                            {/* Plugin row actions */}
-                            {plugins.some(plugin => plugin.rowActions) && (
-                              <TableCell className="px-3 py-2 text-center w-[100px]">
-                                <div className="flex items-center justify-center space-x-1">
-                                  <PluginRowActions 
-                                    plugins={plugins}
-                                    row={row}
-                                    rowIndex={actualIndex}
-                                    gridAPI={gridAPI}
-                                  />
-                                </div>
-                              </TableCell>
-                            )}
-                          </TableRow>
-                          
-                          {/* Expanded row content */}
-                          {isExpanded && effectiveNestedRowRenderer && (
-                            <TableRow key={`expanded-${row.id || actualIndex}`} className="hover:bg-transparent border-b border-gray-200">
-                              <TableCell 
-                                colSpan={orderedColumns.length + (showCheckboxes ? 1 : 0) + (plugins.some(plugin => plugin.rowActions) ? 1 : 0)}
-                                className="p-4 bg-gray-50/50"
-                              >
-                                {effectiveNestedRowRenderer(row, actualIndex)}
-                              </TableCell>
-                            </TableRow>
+                  paginatedData.map((row, index) => {
+                    const isExpanded = expandedRows.has(index);
+                    const actualIndex = onDataFetch ? index : (currentPage - 1) * pageSize + index;
+                    const isSelected = currentSelectedRows.has(index);
+                    const isRowEditing = editingRow === actualIndex;
+                    
+                    return (
+                      <React.Fragment key={row.id || actualIndex}>
+                        <TableRow 
+                          className={cn(
+                            "hover:bg-gray-50 border-b border-gray-100 transition-all duration-300",
+                            isSelected && "bg-blue-50",
+                            isRowEditing && "bg-yellow-50",
+                            highlightedRowIndices.includes(index) && "bg-yellow-100 border-l-4 border-yellow-500 hover:bg-yellow-100/80",
+                            rowClassName?.(row, actualIndex)
                           )}
-                        </>
-                      );
-                    })}
-                  </>
-                )}
-                
-                {/* Empty row at the end - Editable */}
-                {!loading && paginatedData.length > 0 && !isAddingRow && (
-                  <TableRow 
-                    className="hover:bg-blue-50/30 border-b border-gray-100 bg-gray-50/20 cursor-pointer transition-colors"
-                  >
-                    {/* Checkbox column */}
-                    {showCheckboxes && (
-                      <TableCell className="px-3 py-2 w-[50px] h-10">
-                        <div className="h-5">&nbsp;</div>
-                      </TableCell>
-                    )}
-                    {orderedColumns.map((column) => {
-                      const widthPercentage = (column.width / orderedColumns.reduce((total, col) => total + col.width, 0)) * 100;
-                      
-                      return (
-                        <TableCell 
-                          key={`empty-${column.key}`}
-                          className="px-2 py-2 border-r border-gray-100 last:border-r-0 text-gray-400 italic h-10 hover:bg-blue-50/50"
-                          style={{ 
-                            width: `${widthPercentage}%`,
-                            minWidth: `${Math.max(80, column.width * 0.8)}px`,
-                            maxWidth: `${column.width * 1.5}px`
-                          }}
-                          onClick={() => {
-                            setIsAddingRow(true);
-                            setFocusedColumn(column.key);
-                            setNewRowValues({ ...defaultRowValues });
-                          }}
+                          onDoubleClick={() => handleCellDoubleClick(actualIndex, row)}
                         >
-                          <div className="h-5 text-xs">Click to add...</div>
-                        </TableCell>
-                      );
-                    })}
-                    
-                    {/* Plugin row actions */}
-                    {plugins.some(plugin => plugin.rowActions) && (
-                      <TableCell className="px-3 py-2 text-center w-[100px] h-10">
-                        <div className="h-5">&nbsp;</div>
-                      </TableCell>
-                    )}
-                  </TableRow>
-                )}
-                
-                {/* Inline Add Row Form */}
-                {isAddingRow && (
-                  <TableRow className="bg-blue-50/30 border-b-2 border-blue-300">
-                    {showCheckboxes && (
-                      <TableCell className="px-3 py-2 w-[50px]">
-                        <div className="h-5">&nbsp;</div>
-                      </TableCell>
-                    )}
-                    {orderedColumns.map((column) => {
-                      const widthPercentage = (column.width / orderedColumns.reduce((total, col) => total + col.width, 0)) * 100;
-                      const isFocused = focusedColumn === column.key;
-                      
-                      return (
-                        <TableCell 
-                          key={`add-${column.key}`}
-                          className="px-2 py-2 border-r border-gray-100 last:border-r-0"
-                          style={{ 
-                            width: `${widthPercentage}%`,
-                            minWidth: `${Math.max(80, column.width * 0.8)}px`,
-                            maxWidth: `${column.width * 1.5}px`
-                          }}
-                          onKeyDown={(e) => {
-                            if (e.key === 'Escape') {
-                              setIsAddingRow(false);
-                              setNewRowValues(defaultRowValues);
-                              setValidationErrors({});
-                              setFocusedColumn(null);
-                            }
-                          }}
-                        >
-                          <EnhancedCellEditor
-                            column={column}
-                            value={newRowValues[column.key] ?? ''}
-                            onChange={(value) => {
-                              setNewRowValues(prev => ({ ...prev, [column.key]: value }));
-                              setValidationErrors(prev => ({ ...prev, [column.key]: '' }));
-                            }}
-                            onSave={() => {
-                              // Move to next column or save
-                              const currentIndex = orderedColumns.findIndex(col => col.key === column.key);
-                              if (currentIndex < orderedColumns.length - 1) {
-                                setFocusedColumn(orderedColumns[currentIndex + 1].key);
-                              }
-                            }}
-                            shouldAutoFocus={isFocused}
-                            error={validationErrors[column.key]}
-                          />
-                        </TableCell>
-                      );
-                    })}
-                    
-                    {/* Action buttons */}
-                    {plugins.some(plugin => plugin.rowActions) && (
-                      <TableCell className="px-3 py-2 text-center w-[100px]">
-                        <div className="flex items-center justify-center gap-1">
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            className="h-7 w-7 p-0 hover:bg-green-100"
-                            onClick={async () => {
-                              // Validate
-                              const errors: Record<string, string> = {};
-                              orderedColumns.forEach(col => {
-                                const rule = validationRules[col.key];
-                                const value = newRowValues[col.key];
-                                
-                                if (rule?.required && !value) {
-                                  errors[col.key] = `${col.label} is required`;
-                                }
-                                if (rule?.maxLength && value?.length > rule.maxLength) {
-                                  errors[col.key] = `Max length is ${rule.maxLength}`;
-                                }
-                                if (rule?.validate) {
-                                  const error = rule.validate(value, newRowValues);
-                                  if (error) errors[col.key] = error;
-                                }
-                              });
-                              
-                              if (Object.keys(errors).length > 0) {
-                                setValidationErrors(errors);
-                                toast({
-                                  title: "Validation Error",
-                                  description: "Please fix the errors before saving",
-                                  variant: "destructive"
-                                });
-                                return;
-                              }
-                              
-                              // Save
-                              if (onAddRow) {
-                                try {
-                                  await onAddRow(newRowValues);
-                                  setIsAddingRow(false);
-                                  setNewRowValues(defaultRowValues);
-                                  setValidationErrors({});
-                                  setFocusedColumn(null);
-                                  toast({
-                                    title: "Success",
-                                    description: "Row added successfully"
-                                  });
-                                } catch (error) {
-                                  toast({
-                                    title: "Error",
-                                    description: "Failed to add row",
-                                    variant: "destructive"
-                                  });
-                                }
-                              }
-                            }}
-                          >
-                            <Check className="h-4 w-4 text-green-600" />
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            className="h-7 w-7 p-0 hover:bg-red-100"
-                            onClick={() => {
-                              setIsAddingRow(false);
-                              setNewRowValues(defaultRowValues);
-                              setValidationErrors({});
-                              setFocusedColumn(null);
-                            }}
-                          >
-                            <X className="h-4 w-4 text-red-600" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    )}
-                  </TableRow>
+                          {/* Checkbox column */}
+                          {showCheckboxes && (
+                            <TableCell className="px-3 py-2 w-[50px]">
+                              <input 
+                                type="checkbox" 
+                                className="rounded" 
+                                checked={isSelected}
+                                onChange={(e) => {
+                                  const newSet = new Set(currentSelectedRows);
+                                  if (e.target.checked) {
+                                    newSet.add(index);
+                                  } else {
+                                    newSet.delete(index);
+                                  }
+                                  handleSelectionChange(newSet);
+                                }}
+                              />
+                            </TableCell>
+                          )}
+                          {orderedColumns.map((column, columnIndex) => {
+                            const widthPercentage = (column.width / orderedColumns.reduce((total, col) => total + col.width, 0)) * 100;
+                            
+                            return (
+                               <TableCell 
+                                key={column.key}
+                                className="px-2 py-2 border-r border-gray-100 last:border-r-0 cursor-pointer"
+                                style={{ 
+                                  width: `${widthPercentage}%`,
+                                  minWidth: `${Math.max(80, column.width * 0.8)}px`,
+                                  maxWidth: `${column.width * 1.5}px`
+                                }}
+                                onClick={() => {
+                                  if (inlineRowEditing && !isRowEditing && column.key !== 'actions') {
+                                    handleStartEditRow(actualIndex, row, column.key);
+                                  }
+                                }}
+                              >
+                                {renderCell(row, column, actualIndex, columnIndex)}
+                              </TableCell>
+                            );
+                          })}
+                          
+                          {/* Plugin row actions */}
+                          {plugins.some(plugin => plugin.rowActions) && (
+                            <TableCell className="px-3 py-2 text-center w-[100px]">
+                              <div className="flex items-center justify-center space-x-1">
+                                <PluginRowActions 
+                                  plugins={plugins}
+                                  row={row}
+                                  rowIndex={actualIndex}
+                                  gridAPI={gridAPI}
+                                />
+                              </div>
+                            </TableCell>
+                          )}
+                        </TableRow>
+                        
+                        {/* Expanded row content */}
+                        {isExpanded && effectiveNestedRowRenderer && (
+                          <TableRow className="hover:bg-transparent border-b border-gray-200">
+                            <TableCell 
+                              colSpan={orderedColumns.length + (showCheckboxes ? 1 : 0) + (plugins.some(plugin => plugin.rowActions) ? 1 : 0)}
+                              className="p-4 bg-gray-50/50"
+                            >
+                              {effectiveNestedRowRenderer(row, actualIndex)}
+                            </TableCell>
+                          </TableRow>
+                        )}
+                      </React.Fragment>
+                    );
+                  })
                 )}
                 
                 {/* Add Row Form */}
