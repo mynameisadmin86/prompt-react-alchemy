@@ -1454,6 +1454,44 @@ export function SmartGridPlus({
                   })
                 )}
                 
+                {/* Empty row at the end */}
+                {!loading && paginatedData.length > 0 && (
+                  <TableRow 
+                    className="hover:bg-gray-50/50 border-b border-gray-100 bg-gray-50/20"
+                  >
+                    {/* Checkbox column */}
+                    {showCheckboxes && (
+                      <TableCell className="px-3 py-2 w-[50px]">
+                        {/* Empty checkbox cell */}
+                      </TableCell>
+                    )}
+                    {orderedColumns.map((column) => {
+                      const widthPercentage = (column.width / orderedColumns.reduce((total, col) => total + col.width, 0)) * 100;
+                      
+                      return (
+                        <TableCell 
+                          key={`empty-${column.key}`}
+                          className="px-2 py-2 border-r border-gray-100 last:border-r-0 text-gray-400 italic"
+                          style={{ 
+                            width: `${widthPercentage}%`,
+                            minWidth: `${Math.max(80, column.width * 0.8)}px`,
+                            maxWidth: `${column.width * 1.5}px`
+                          }}
+                        >
+                          {/* Empty cell */}
+                        </TableCell>
+                      );
+                    })}
+                    
+                    {/* Plugin row actions */}
+                    {plugins.some(plugin => plugin.rowActions) && (
+                      <TableCell className="px-3 py-2 text-center w-[100px]">
+                        {/* Empty actions cell */}
+                      </TableCell>
+                    )}
+                  </TableRow>
+                )}
+                
                 {/* Add Row Form */}
                 {renderAddRowForm()}
               </TableBody>
