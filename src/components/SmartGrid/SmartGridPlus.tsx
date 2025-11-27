@@ -816,6 +816,66 @@ export function SmartGridPlus({
     const isEditable = isColumnEditable(column, columnIndex);
     const isRowEditing = editingRow === rowIndex;
 
+    // Handle inline row editing for SmartGridPlus first (before any special column rendering)
+    if (isRowEditing && inlineRowEditing && column.key !== 'actions') {
+      const editingValue = editingValues[column.key];
+      const shouldAutoFocus = focusedColumn === column.key;
+      
+      // For first column with expand/collapse, show button + editor
+      if (columnIndex === 0 && (effectiveNestedRowRenderer || hasCollapsibleColumns)) {
+        const isExpanded = expandedRows.has(rowIndex);
+        return (
+          <div className="flex items-center space-x-1 min-w-0">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => toggleRowExpansion(rowIndex)}
+              className="h-5 w-5 p-0 hover:bg-gray-100 flex-shrink-0"
+            >
+              {isExpanded ? (
+                <ChevronDown className="h-3 w-3" />
+              ) : (
+                <ChevronRight className="h-3 w-3" />
+              )}
+            </Button>
+            <div className="flex-1 min-w-0">
+              <EnhancedCellEditor
+                value={editingValue}
+                column={column}
+                onChange={(value) => {
+                  handleEditingCellChange(rowIndex, column.key, value);
+                  if (column.onChange) {
+                    column.onChange(value, row);
+                  }
+                }}
+                onSave={() => handleSaveEditRow(rowIndex)}
+                error={validationErrors[column.key]}
+                shouldAutoFocus={shouldAutoFocus}
+              />
+            </div>
+          </div>
+        );
+      }
+      
+      // Regular editing for other columns
+      return (
+        <EnhancedCellEditor
+          value={editingValue}
+          column={column}
+          onChange={(value) => {
+            handleEditingCellChange(rowIndex, column.key, value);
+            if (column.onChange) {
+              column.onChange(value, row);
+            }
+          }}
+          onSave={() => handleSaveEditRow(rowIndex)}
+          error={validationErrors[column.key]}
+          shouldAutoFocus={shouldAutoFocus}
+        />
+      );
+    }
+
+    // First column with expand/collapse (non-editing mode)
     if (columnIndex === 0 && (effectiveNestedRowRenderer || hasCollapsibleColumns)) {
       const isExpanded = expandedRows.has(rowIndex);
       return (
@@ -875,28 +935,6 @@ export function SmartGridPlus({
             <Trash2 className="h-4 w-4" />
           </Button>
         </div>
-      );
-    }
-
-    // Handle inline row editing for SmartGridPlus
-    if (isRowEditing && inlineRowEditing && column.key !== 'actions') {
-      const editingValue = editingValues[column.key];
-      const shouldAutoFocus = focusedColumn === column.key;
-      return (
-        <EnhancedCellEditor
-          value={editingValue}
-          column={column}
-          onChange={(value) => {
-            handleEditingCellChange(rowIndex, column.key, value);
-            // Call column-specific onChange if provided
-            if (column.onChange) {
-              column.onChange(value, row);
-            }
-          }}
-          onSave={() => handleSaveEditRow(rowIndex)}
-          error={validationErrors[column.key]}
-          shouldAutoFocus={shouldAutoFocus}
-        />
       );
     }
 
