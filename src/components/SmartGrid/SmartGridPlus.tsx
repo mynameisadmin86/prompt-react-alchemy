@@ -829,7 +829,10 @@ export function SmartGridPlus({
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => toggleRowExpansion(rowIndex)}
+              onClick={(e) => {
+                e.stopPropagation();
+                toggleRowExpansion(rowIndex);
+              }}
               className="h-5 w-5 p-0 hover:bg-gray-100 flex-shrink-0"
             >
               {isExpanded ? (
@@ -883,7 +886,10 @@ export function SmartGridPlus({
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => toggleRowExpansion(rowIndex)}
+            onClick={(e) => {
+              e.stopPropagation();
+              toggleRowExpansion(rowIndex);
+            }}
             className="h-5 w-5 p-0 hover:bg-gray-100 flex-shrink-0"
           >
             {isExpanded ? (
