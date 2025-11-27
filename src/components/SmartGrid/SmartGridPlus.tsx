@@ -1474,8 +1474,10 @@ export function SmartGridPlus({
                             {/* Empty checkbox column */}
                           </TableCell>
                         )}
-                        {orderedColumns.map((column) => {
+                        {orderedColumns.map((column, columnIndex) => {
                           const widthPercentage = (column.width / orderedColumns.reduce((total, col) => total + col.width, 0)) * 100;
+                          const isFirstColumn = columnIndex === 0;
+                          const hasExpandButton = isFirstColumn && (effectiveNestedRowRenderer || hasCollapsibleColumns);
                           
                           return (
                             <TableCell 
@@ -1513,39 +1515,49 @@ export function SmartGridPlus({
                                   <div className="text-gray-400 text-sm">-</div>
                                 )
                               ) : isAddingRow ? (
-                                <div className="space-y-1">
-                                  <EnhancedCellEditor
-                                    value={newRowValues[column.key]}
-                                    column={column}
-                                    onChange={(value) => {
-                                      setNewRowValues(prev => ({
-                                        ...prev,
-                                        [column.key]: value
-                                      }));
-                                      if (validationErrors[column.key]) {
-                                        setValidationErrors(prev => {
-                                          const newErrors = { ...prev };
-                                          delete newErrors[column.key];
-                                          return newErrors;
-                                        });
-                                      }
-                                      if (column.onChange) {
-                                        column.onChange(value, newRowValues);
-                                      }
-                                    }}
-                                    error={validationErrors[column.key]}
-                                  />
+                                <div className={cn("space-y-1", hasExpandButton && "flex items-center space-x-1")}>
+                                  {hasExpandButton && (
+                                    <div className="w-5 h-5 flex-shrink-0" />
+                                  )}
+                                  <div className="flex-1 min-w-0">
+                                    <EnhancedCellEditor
+                                      value={newRowValues[column.key]}
+                                      column={column}
+                                      onChange={(value) => {
+                                        setNewRowValues(prev => ({
+                                          ...prev,
+                                          [column.key]: value
+                                        }));
+                                        if (validationErrors[column.key]) {
+                                          setValidationErrors(prev => {
+                                            const newErrors = { ...prev };
+                                            delete newErrors[column.key];
+                                            return newErrors;
+                                          });
+                                        }
+                                        if (column.onChange) {
+                                          column.onChange(value, newRowValues);
+                                        }
+                                      }}
+                                      error={validationErrors[column.key]}
+                                    />
+                                  </div>
                                 </div>
                               ) : (
-                                <div className="text-gray-400 text-sm truncate">
-                                  {(() => {
-                                    const value = defaultRowValues[column.key];
-                                    if (value === null || value === undefined) return '-';
-                                    if (typeof value === 'object') {
-                                      return JSON.stringify(value);
-                                    }
-                                    return value;
-                                  })()}
+                                <div className={cn("text-gray-400 text-sm truncate", hasExpandButton && "flex items-center space-x-1")}>
+                                  {hasExpandButton && (
+                                    <div className="w-5 h-5 flex-shrink-0" />
+                                  )}
+                                  <div className="flex-1 min-w-0 truncate">
+                                    {(() => {
+                                      const value = defaultRowValues[column.key];
+                                      if (value === null || value === undefined) return '-';
+                                      if (typeof value === 'object') {
+                                        return JSON.stringify(value);
+                                      }
+                                      return value;
+                                    })()}
+                                  </div>
                                 </div>
                               )}
                             </TableCell>
