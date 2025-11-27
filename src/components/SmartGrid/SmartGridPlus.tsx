@@ -1455,7 +1455,7 @@ export function SmartGridPlus({
                   })
                 )}
                 
-                {/* Empty Editable Row */}
+                {/* Empty Row */}
                 {showEmptyRow && !loading && (
                   <TableRow className="bg-blue-50/30 border-b-2 border-blue-200 hover:bg-blue-50/50">
                     {/* Checkbox column */}
@@ -1466,6 +1466,7 @@ export function SmartGridPlus({
                     )}
                     {orderedColumns.map((column) => {
                       const widthPercentage = (column.width / orderedColumns.reduce((total, col) => total + col.width, 0)) * 100;
+                      const value = defaultRowValues[column.key];
                       
                       return (
                         <TableCell 
@@ -1477,39 +1478,9 @@ export function SmartGridPlus({
                             maxWidth: `${column.width * 1.5}px`
                           }}
                         >
-                          {column.editable && column.key !== 'actions' ? (
-                            <EnhancedCellEditor
-                              value={defaultRowValues[column.key] ?? ''}
-                              column={column}
-                              onChange={(value) => {
-                                // Update default values when user edits the empty row
-                                const updatedRow = { ...defaultRowValues, [column.key]: value };
-                                // Check if all required fields are filled
-                                const requiredFields = validationRules.requiredFields || [];
-                                const allRequiredFilled = requiredFields.every(field => 
-                                  updatedRow[field] !== undefined && updatedRow[field] !== ''
-                                );
-                                
-                                // If all required fields are filled, trigger add row
-                                if (allRequiredFilled && onAddRow) {
-                                  Promise.resolve(onAddRow(updatedRow)).then(() => {
-                                    toast({
-                                      title: "Success",
-                                      description: "Row added successfully"
-                                    });
-                                  }).catch((error) => {
-                                    toast({
-                                      title: "Error",
-                                      description: "Failed to add row",
-                                      variant: "destructive"
-                                    });
-                                  });
-                                }
-                              }}
-                            />
-                          ) : (
-                            <span className="text-muted-foreground">-</span>
-                          )}
+                          <span className="text-muted-foreground">
+                            {value != null && value !== '' ? String(value) : '-'}
+                          </span>
                         </TableCell>
                       );
                     })}
