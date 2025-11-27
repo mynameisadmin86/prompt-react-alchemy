@@ -1464,8 +1464,8 @@ export function SmartGridPlus({
                   >
                     {/* Checkbox column */}
                     {showCheckboxes && (
-                      <TableCell className="px-3 py-2 w-[50px]">
-                        {/* Empty checkbox cell */}
+                      <TableCell className="px-3 py-2 w-[50px] h-10">
+                        <div className="h-5">&nbsp;</div>
                       </TableCell>
                     )}
                     {orderedColumns.map((column) => {
@@ -1474,22 +1474,22 @@ export function SmartGridPlus({
                       return (
                         <TableCell 
                           key={`empty-${column.key}`}
-                          className="px-2 py-2 border-r border-gray-100 last:border-r-0 text-gray-400 italic"
+                          className="px-2 py-2 border-r border-gray-100 last:border-r-0 text-gray-400 italic h-10"
                           style={{ 
                             width: `${widthPercentage}%`,
                             minWidth: `${Math.max(80, column.width * 0.8)}px`,
                             maxWidth: `${column.width * 1.5}px`
                           }}
                         >
-                          {/* Empty cell */}
+                          <div className="h-5">&nbsp;</div>
                         </TableCell>
                       );
                     })}
                     
                     {/* Plugin row actions */}
                     {plugins.some(plugin => plugin.rowActions) && (
-                      <TableCell className="px-3 py-2 text-center w-[100px]">
-                        {/* Empty actions cell */}
+                      <TableCell className="px-3 py-2 text-center w-[100px] h-10">
+                        <div className="h-5">&nbsp;</div>
                       </TableCell>
                     )}
                   </TableRow>
