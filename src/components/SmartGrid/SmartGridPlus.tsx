@@ -575,8 +575,6 @@ export function SmartGridPlus({
 
   // Determine if a column is editable
   const isColumnEditable = useCallback((column: GridColumnConfig, columnIndex: number) => {
-    if (columnIndex === 0) return false;
-    
     if (Array.isArray(editableColumns)) {
       return editableColumns.includes(column.key);
     }
