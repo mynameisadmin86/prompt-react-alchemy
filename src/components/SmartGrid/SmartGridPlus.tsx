@@ -1457,6 +1457,17 @@ export function SmartGridPlus({
                         )}
                         onDoubleClick={!isAddingRow ? handleAddRowClick : undefined}
                         onClick={!isAddingRow ? handleAddRowClick : undefined}
+                        onKeyDown={(e) => {
+                          if (isAddingRow) {
+                            if (e.key === 'Enter') {
+                              e.preventDefault();
+                              handleSaveNewRow();
+                            } else if (e.key === 'Escape') {
+                              e.preventDefault();
+                              handleCancelNewRow();
+                            }
+                          }
+                        }}
                       >
                         {showCheckboxes && (
                           <TableCell className="px-3 py-2 w-[50px]">
