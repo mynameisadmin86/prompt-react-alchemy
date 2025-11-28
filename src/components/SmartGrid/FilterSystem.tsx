@@ -66,18 +66,43 @@ export function FilterSystem({
     }
   }, [api, userId, gridId, loadFilterSets]);
 
-  // Listen for localStorage changes
+  // Listen for localStorage changes (cross-tab and same-tab)
   useEffect(() => {
+    const key = `filterSets_${userId}_${gridId}`;
+    let lastValue = localStorage.getItem(key);
+
+    // Handle cross-tab storage changes
     const handleStorageChange = (e: StorageEvent) => {
-      const key = `filterSets_${userId}_${gridId}`;
       if (e.key === key || e.key === null) {
-        // Reload filter sets when the relevant localStorage key changes
         loadFilterSets();
       }
     };
 
+    // Poll for same-tab changes (storage event doesn't fire for same tab)
+    const checkForChanges = () => {
+      const currentValue = localStorage.getItem(key);
+      if (currentValue !== lastValue) {
+        lastValue = currentValue;
+        loadFilterSets();
+      }
+    };
+
+    // Check on window focus (when user returns to tab)
+    const handleFocus = () => {
+      checkForChanges();
+    };
+
+    // Poll every 500ms for changes
+    const pollInterval = setInterval(checkForChanges, 500);
+
     window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
+    window.addEventListener('focus', handleFocus);
+
+    return () => {
+      clearInterval(pollInterval);
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('focus', handleFocus);
+    };
   }, [userId, gridId, loadFilterSets]);
 
   // Apply default filter set on load
