@@ -40,30 +40,7 @@ export function FilterSystem({
 
   const { toast } = useToast();
 
-  // Load saved filter sets on mount
-  useEffect(() => {
-    if (api && userId) {
-      loadFilterSets();
-    }
-  }, [api, userId, gridId]);
-
-  // Apply default filter set on load
-  useEffect(() => {
-    const defaultSet = filterSets.find(set => set.isDefault);
-    if (defaultSet && Object.keys(activeFilters).length === 0) {
-      applyFilterSet(defaultSet);
-    }
-  }, [filterSets]);
-
-  // Auto-apply filters when activeFilters changes
-  useEffect(() => {
-    onFiltersChange(activeFilters);
-    if (api) {
-      api.applyGridFilters(activeFilters);
-    }
-  }, [activeFilters, onFiltersChange, api]);
-
-  const loadFilterSets = async () => {
+  const loadFilterSets = useCallback(async () => {
     if (!api) return;
 
     try {
@@ -80,7 +57,44 @@ export function FilterSystem({
     } finally {
       setLoading(false);
     }
-  };
+  }, [api, userId, gridId, toast]);
+
+  // Load saved filter sets on mount
+  useEffect(() => {
+    if (api && userId) {
+      loadFilterSets();
+    }
+  }, [api, userId, gridId, loadFilterSets]);
+
+  // Listen for localStorage changes
+  useEffect(() => {
+    const handleStorageChange = (e: StorageEvent) => {
+      const key = `filterSets_${userId}_${gridId}`;
+      if (e.key === key || e.key === null) {
+        // Reload filter sets when the relevant localStorage key changes
+        loadFilterSets();
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, [userId, gridId, loadFilterSets]);
+
+  // Apply default filter set on load
+  useEffect(() => {
+    const defaultSet = filterSets.find(set => set.isDefault);
+    if (defaultSet && Object.keys(activeFilters).length === 0) {
+      applyFilterSet(defaultSet);
+    }
+  }, [filterSets]);
+
+  // Auto-apply filters when activeFilters changes
+  useEffect(() => {
+    onFiltersChange(activeFilters);
+    if (api) {
+      api.applyGridFilters(activeFilters);
+    }
+  }, [activeFilters, onFiltersChange, api]);
 
   const handleFilterChange = useCallback((columnKey: string, value: FilterValue | undefined) => {
     setActiveFilters(prev => {
