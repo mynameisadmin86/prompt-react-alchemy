@@ -66,18 +66,33 @@ export function FilterSystem({
     }
   }, [api, userId, gridId, loadFilterSets]);
 
-  // Listen for localStorage changes
+  // Listen for localStorage changes (storage event only fires from other tabs)
   useEffect(() => {
     const handleStorageChange = (e: StorageEvent) => {
       const key = `filterSets_${userId}_${gridId}`;
       if (e.key === key || e.key === null) {
-        // Reload filter sets when the relevant localStorage key changes
         loadFilterSets();
       }
     };
 
     window.addEventListener('storage', handleStorageChange);
     return () => window.removeEventListener('storage', handleStorageChange);
+  }, [userId, gridId, loadFilterSets]);
+
+  // Poll localStorage to detect changes in the same tab (e.g., manual DevTools edits)
+  useEffect(() => {
+    const key = `filterSets_${userId}_${gridId}`;
+    let lastValue = localStorage.getItem(key);
+
+    const pollInterval = setInterval(() => {
+      const currentValue = localStorage.getItem(key);
+      if (currentValue !== lastValue) {
+        lastValue = currentValue;
+        loadFilterSets();
+      }
+    }, 1000); // Check every second
+
+    return () => clearInterval(pollInterval);
   }, [userId, gridId, loadFilterSets]);
 
   // Apply default filter set on load
