@@ -92,27 +92,7 @@ export function ServersideFilter({
     }
   }, [serverFilters]);
 
-  // Load saved filter sets on mount
-  useEffect(() => {
-    if (api && userId) {
-      loadFilterSets();
-    }
-  }, [api, userId, gridId]);
-
-  // Apply default filter set on load
-  useEffect(() => {
-    const defaultSet = filterSets.find(set => set.isDefault);
-    if (defaultSet && Object.keys(currentActiveFilters).length === 0) {
-      applyFilterSet(defaultSet);
-    }
-  }, [filterSets, currentActiveFilters]);
-
-  // Only notify parent of filter changes when filters are actually applied
-  useEffect(() => {
-    onFiltersChange(currentActiveFilters);
-  }, [currentActiveFilters, onFiltersChange]);
-
-  const loadFilterSets = async () => {
+  const loadFilterSets = useCallback(async () => {
     if (!api) return;
     
     try {
@@ -129,7 +109,56 @@ export function ServersideFilter({
     } finally {
       setLoading(false);
     }
-  };
+  }, [api, userId, gridId, toast]);
+
+  // Load saved filter sets on mount
+  useEffect(() => {
+    if (api && userId) {
+      loadFilterSets();
+    }
+  }, [api, userId, gridId, loadFilterSets]);
+
+  // Apply default filter set on load
+  useEffect(() => {
+    const defaultSet = filterSets.find(set => set.isDefault);
+    if (defaultSet && Object.keys(currentActiveFilters).length === 0) {
+      applyFilterSet(defaultSet);
+    }
+  }, [filterSets, currentActiveFilters]);
+
+  // Only notify parent of filter changes when filters are actually applied
+  useEffect(() => {
+    onFiltersChange(currentActiveFilters);
+  }, [currentActiveFilters, onFiltersChange]);
+
+  // Listen for localStorage changes (storage event only fires from other tabs)
+  useEffect(() => {
+    const handleStorageChange = (e: StorageEvent) => {
+      const key = `filterSets_${userId}_${gridId}`;
+      if (e.key === key || e.key === null) {
+        loadFilterSets();
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, [userId, gridId, loadFilterSets]);
+
+  // Poll localStorage to detect changes in the same tab (e.g., manual DevTools edits)
+  useEffect(() => {
+    const key = `filterSets_${userId}_${gridId}`;
+    let lastValue = localStorage.getItem(key);
+
+    const pollInterval = setInterval(() => {
+      const currentValue = localStorage.getItem(key);
+      if (currentValue !== lastValue) {
+        lastValue = currentValue;
+        loadFilterSets();
+      }
+    }, 1000); // Check every second
+
+    return () => clearInterval(pollInterval);
+  }, [userId, gridId, loadFilterSets]);
 
   const handleFilterChange = useCallback((columnKey: string, value: FilterValue | undefined) => {
     setPendingFilters(prev => {
