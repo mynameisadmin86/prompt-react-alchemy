@@ -24,12 +24,13 @@ export function SmartGridWithNestedRows({
   nestedSectionConfig,
   ...smartGridProps
 }: SmartGridWithNestedRowsProps) {
-  const [expandedNestedSections, setExpandedNestedSections] = useState<Set<number>>(
-    new Set(nestedSectionConfig?.initiallyExpanded ? [] : [])
+  // Track collapsed sections instead of expanded ones (default to expanded)
+  const [collapsedNestedSections, setCollapsedNestedSections] = useState<Set<number>>(
+    new Set()
   );
 
   const toggleNestedSection = (rowIndex: number) => {
-    setExpandedNestedSections((prev) => {
+    setCollapsedNestedSections((prev) => {
       const newSet = new Set(prev);
       if (newSet.has(rowIndex)) {
         newSet.delete(rowIndex);
@@ -52,7 +53,7 @@ export function SmartGridWithNestedRows({
     }
 
     const nestedData = row[nestedSectionConfig.nestedDataKey] || [];
-    const isExpanded = expandedNestedSections.has(rowIndex);
+    const isExpanded = !collapsedNestedSections.has(rowIndex); // Expanded by default
     const rowCount = Array.isArray(nestedData) ? nestedData.length : 0;
 
     return (
