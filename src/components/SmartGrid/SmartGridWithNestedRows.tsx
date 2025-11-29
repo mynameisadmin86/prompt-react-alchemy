@@ -69,6 +69,7 @@ export function SmartGridWithNestedRows({
         <div className="bg-background">
           {/* Nested section header */}
           <div
+            style={{ display: 'none' }}
             className={cn(
               "flex items-center justify-between px-4 py-2.5 cursor-pointer",
               "bg-muted/30 hover:bg-muted/50 transition-colors",
