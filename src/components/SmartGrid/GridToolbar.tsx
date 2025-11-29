@@ -11,7 +11,6 @@ import {
   List,
   Plus,
   ChevronDown,
-  ChevronRight,
   Group,
   Zap,
   EllipsisVertical,
@@ -79,10 +78,6 @@ interface GridToolbarProps {
   // Selection props
   selectedRowsCount?: number;
   onClearSelection?: () => void;
-  // Nested rows toggle props
-  showNestedRowsToggle?: boolean;
-  allNestedRowsExpanded?: boolean;
-  onToggleAllNestedRows?: () => void;
 }
 
 export function GridToolbar({
@@ -125,10 +120,7 @@ export function GridToolbar({
   gridId,
   hideCheckboxToggle = false,
   selectedRowsCount = 0,
-  onClearSelection,
-  showNestedRowsToggle = false,
-  allNestedRowsExpanded = true,
-  onToggleAllNestedRows
+  onClearSelection
 }: GridToolbarProps) {
   // Default configurable button configuration
   const defaultConfigurableButton: ConfigurableButtonConfig = {
@@ -396,27 +388,6 @@ export function GridToolbar({
               </defs>
             </svg>
             {/* <CheckSquare className="h-4 w-4 text-gray-600" /> */}
-          </Button>
-        )}
-
-        {/* Nested Rows Expand/Collapse Toggle */}
-        {showNestedRowsToggle && onToggleAllNestedRows && (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onToggleAllNestedRows}
-            disabled={loading}
-            title={allNestedRowsExpanded ? "Collapse All Nested Rows" : "Expand All Nested Rows"}
-            className={cn(
-              "w-9 h-9 flex items-center justify-center rounded-lg hover:bg-gray-100 p-0 border border-gray-300",
-              allNestedRowsExpanded && "bg-blue-100 text-blue-600"
-            )}
-          >
-            {allNestedRowsExpanded ? (
-              <ChevronDown className="h-4 w-4" />
-            ) : (
-              <ChevronRight className="h-4 w-4" />
-            )}
           </Button>
         )}
 

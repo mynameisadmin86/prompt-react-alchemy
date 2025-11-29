@@ -89,10 +89,7 @@ export function SmartGrid({
   customPageSize,
   onSearch,
   onClearAll,
-  exportFilename = `export-${new Date().toISOString().split('T')[0]}`,
-  showNestedRowsToggle = false,
-  allNestedRowsExpanded = true,
-  onToggleAllNestedRows
+  exportFilename = `export-${new Date().toISOString().split('T')[0]}`
 }: SmartGridProps & { exportFilename?: string }) {
   const {
     gridData,
@@ -913,7 +910,7 @@ export function SmartGrid({
         onGroupByChange={onGroupByChange}
         groupableColumns={groupableColumns}
         showGroupingDropdown={showGroupingDropdown}
-         // Server-side filter props
+        // Server-side filter props
         showServersideFilter={showServersideFilter}
         onToggleServersideFilter={onToggleServersideFilter}
         hideCheckboxToggle={hideCheckboxToggle}
@@ -921,10 +918,6 @@ export function SmartGrid({
          // Selection props
         selectedRowsCount={currentSelectedRows.size}
         onClearSelection={handleClearSelection}
-        // Nested rows toggle props
-        showNestedRowsToggle={showNestedRowsToggle}
-        allNestedRowsExpanded={allNestedRowsExpanded}
-        onToggleAllNestedRows={onToggleAllNestedRows}
       />
       )}
 

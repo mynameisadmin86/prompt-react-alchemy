@@ -28,9 +28,6 @@ export function SmartGridWithNestedRows({
   const [collapsedNestedSections, setCollapsedNestedSections] = useState<Set<number>>(
     new Set()
   );
-  
-  // Track expand all state
-  const [allExpanded, setAllExpanded] = useState(true);
 
   const toggleNestedSection = (rowIndex: number) => {
     setCollapsedNestedSections((prev) => {
@@ -40,24 +37,8 @@ export function SmartGridWithNestedRows({
       } else {
         newSet.add(rowIndex);
       }
-      // Update allExpanded based on whether any rows are collapsed
-      setAllExpanded(newSet.size === 0);
       return newSet;
     });
-  };
-
-  // Handle expand/collapse all
-  const handleToggleAll = () => {
-    if (allExpanded) {
-      // Collapse all - add all row indices to collapsed set
-      const allIndices = smartGridProps.data.map((_, index) => index);
-      setCollapsedNestedSections(new Set(allIndices));
-      setAllExpanded(false);
-    } else {
-      // Expand all - clear collapsed set
-      setCollapsedNestedSections(new Set());
-      setAllExpanded(true);
-    }
   };
 
   // Create a nested row renderer that includes both the original nested content
@@ -160,9 +141,6 @@ export function SmartGridWithNestedRows({
     <SmartGrid
       {...smartGridProps}
       nestedRowRenderer={finalNestedRowRenderer}
-      showNestedRowsToggle={!!nestedSectionConfig}
-      allNestedRowsExpanded={allExpanded}
-      onToggleAllNestedRows={handleToggleAll}
     />
   );
 }

@@ -237,10 +237,6 @@ export interface SmartGridProps {
   hideAdvancedFilter?: boolean;
   // Control whether to show the checkbox toggle button in toolbar
   hideCheckboxToggle?: boolean;
-  // Nested rows expand/collapse toggle
-  showNestedRowsToggle?: boolean;
-  allNestedRowsExpanded?: boolean;
-  onToggleAllNestedRows?: () => void;
 }
 
 // Legacy interface for backward compatibility
