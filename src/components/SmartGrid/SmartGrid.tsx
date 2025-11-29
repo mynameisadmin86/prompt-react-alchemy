@@ -89,8 +89,10 @@ export function SmartGrid({
   customPageSize,
   onSearch,
   onClearAll,
-  exportFilename = `export-${new Date().toISOString().split('T')[0]}`
-}: SmartGridProps & { exportFilename?: string }) {
+  exportFilename = `export-${new Date().toISOString().split('T')[0]}`,
+  onExpandCollapseAll,
+  allRowsExpanded
+}: SmartGridProps & { exportFilename?: string; onExpandCollapseAll?: () => void; allRowsExpanded?: boolean }) {
   const {
     gridData,
     setGridData,
@@ -913,13 +915,16 @@ export function SmartGrid({
         // Server-side filter props
         showServersideFilter={showServersideFilter}
         onToggleServersideFilter={onToggleServersideFilter}
-        hideCheckboxToggle={hideCheckboxToggle}
-        gridId={gridId}
-         // Selection props
-        selectedRowsCount={currentSelectedRows.size}
-        onClearSelection={handleClearSelection}
-      />
-      )}
+         hideCheckboxToggle={hideCheckboxToggle}
+         gridId={gridId}
+          // Selection props
+         selectedRowsCount={currentSelectedRows.size}
+         onClearSelection={handleClearSelection}
+         // Expand/Collapse all props
+         onExpandCollapseAll={onExpandCollapseAll}
+         allRowsExpanded={allRowsExpanded}
+       />
+       )}
 
       {/* Server-side Filter */}
       <ServersideFilter

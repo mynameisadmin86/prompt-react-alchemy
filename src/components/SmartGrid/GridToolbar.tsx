@@ -78,6 +78,9 @@ interface GridToolbarProps {
   // Selection props
   selectedRowsCount?: number;
   onClearSelection?: () => void;
+  // Expand/Collapse all props
+  onExpandCollapseAll?: () => void;
+  allRowsExpanded?: boolean;
 }
 
 export function GridToolbar({
@@ -120,7 +123,9 @@ export function GridToolbar({
   gridId,
   hideCheckboxToggle = false,
   selectedRowsCount = 0,
-  onClearSelection
+  onClearSelection,
+  onExpandCollapseAll,
+  allRowsExpanded
 }: GridToolbarProps) {
   // Default configurable button configuration
   const defaultConfigurableButton: ConfigurableButtonConfig = {
@@ -365,6 +370,30 @@ export function GridToolbar({
             </span>
           </Button>
         )} */}
+
+        {/* Expand/Collapse All Button */}
+        {onExpandCollapseAll && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onExpandCollapseAll}
+            disabled={loading}
+            title={allRowsExpanded ? "Collapse All Rows" : "Expand All Rows"}
+            className={cn(
+              "w-9 h-9 flex items-center justify-center rounded-lg hover:bg-gray-100 p-0 border border-gray-300"
+            )}
+          >
+            {allRowsExpanded ? (
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M8 10.6667L4 6.66667M8 10.6667L12 6.66667M8 10.6667V2" stroke="#475467" strokeWidth="1.33333" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            ) : (
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M8 5.33333L12 9.33333M8 5.33333L4 9.33333M8 5.33333V14" stroke="#475467" strokeWidth="1.33333" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            )}
+          </Button>
+        )}
 
         { !hideCheckboxToggle && (<Button
             variant="ghost"
