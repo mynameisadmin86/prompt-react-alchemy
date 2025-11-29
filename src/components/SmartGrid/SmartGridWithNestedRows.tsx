@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { SmartGrid } from './SmartGrid';
 import { SmartGridProps, GridColumnConfig } from '@/types/smartgrid';
 import { ChevronDown, ChevronRight } from 'lucide-react';
@@ -28,6 +28,22 @@ export function SmartGridWithNestedRows({
   const [collapsedNestedSections, setCollapsedNestedSections] = useState<Set<number>>(
     new Set()
   );
+  
+  // State for expand/collapse all toggle
+  const [expandAll, setExpandAll] = useState(true);
+
+  // Effect to handle expand/collapse all
+  useEffect(() => {
+    if (expandAll) {
+      // Expand all - clear the collapsed set
+      setCollapsedNestedSections(new Set());
+    } else {
+      // Collapse all - add all row indices to collapsed set
+      const allIndices = new Set<number>();
+      smartGridProps.data?.forEach((_, index) => allIndices.add(index));
+      setCollapsedNestedSections(allIndices);
+    }
+  }, [expandAll, smartGridProps.data]);
 
   const toggleNestedSection = (rowIndex: number) => {
     setCollapsedNestedSections((prev) => {
@@ -141,6 +157,8 @@ export function SmartGridWithNestedRows({
     <SmartGrid
       {...smartGridProps}
       nestedRowRenderer={finalNestedRowRenderer}
+      expandAllNestedRows={expandAll}
+      onExpandAllNestedRowsChange={setExpandAll}
     />
   );
 }

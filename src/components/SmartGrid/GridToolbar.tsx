@@ -1,6 +1,8 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
 import {
   Search,
   Filter,
@@ -78,6 +80,9 @@ interface GridToolbarProps {
   // Selection props
   selectedRowsCount?: number;
   onClearSelection?: () => void;
+  // Nested rows expand/collapse props
+  expandAllNestedRows?: boolean;
+  onExpandAllNestedRowsChange?: (expand: boolean) => void;
 }
 
 export function GridToolbar({
@@ -120,7 +125,9 @@ export function GridToolbar({
   gridId,
   hideCheckboxToggle = false,
   selectedRowsCount = 0,
-  onClearSelection
+  onClearSelection,
+  expandAllNestedRows,
+  onExpandAllNestedRowsChange
 }: GridToolbarProps) {
   // Default configurable button configuration
   const defaultConfigurableButton: ConfigurableButtonConfig = {
@@ -217,6 +224,19 @@ export function GridToolbar({
 
       {/* Right side - Controls */}
       <div className="flex items-center space-x-3">
+        {/* Expand/Collapse All Toggle for Nested Rows */}
+        {onExpandAllNestedRowsChange && (
+          <div className="flex items-center space-x-2 px-3 py-1.5 border border-border rounded-lg bg-background">
+            <Label htmlFor="expand-all-toggle" className="text-sm cursor-pointer">
+              {expandAllNestedRows ? 'Collapse All' : 'Expand All'}
+            </Label>
+            <Switch
+              id="expand-all-toggle"
+              checked={expandAllNestedRows}
+              onCheckedChange={onExpandAllNestedRowsChange}
+            />
+          </div>
+        )}
         {/* Search box - only show if clientSideSearch is enabled */}
         <div className="relative">
           <Input
