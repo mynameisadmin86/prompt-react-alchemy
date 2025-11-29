@@ -89,6 +89,8 @@ export function SmartGrid({
   customPageSize,
   onSearch,
   onClearAll,
+  expandAllNestedRows,
+  onExpandAllNestedRowsChange,
   exportFilename = `export-${new Date().toISOString().split('T')[0]}`
 }: SmartGridProps & { exportFilename?: string }) {
   const {
@@ -918,6 +920,9 @@ export function SmartGrid({
          // Selection props
         selectedRowsCount={currentSelectedRows.size}
         onClearSelection={handleClearSelection}
+        // Nested rows expand/collapse props
+        expandAllNestedRows={expandAllNestedRows}
+        onExpandAllNestedRowsChange={onExpandAllNestedRowsChange}
       />
       )}
 
