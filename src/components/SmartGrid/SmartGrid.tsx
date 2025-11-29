@@ -91,8 +91,7 @@ export function SmartGrid({
   onClearAll,
   exportFilename = `export-${new Date().toISOString().split('T')[0]}`,
   onExpandCollapseAll,
-  allRowsExpanded
-}: SmartGridProps & { exportFilename?: string; onExpandCollapseAll?: () => void; allRowsExpanded?: boolean }) {
+}: SmartGridProps & { exportFilename?: string; onExpandCollapseAll?: () => void }) {
   const {
     gridData,
     setGridData,
@@ -188,6 +187,40 @@ export function SmartGrid({
       }
     } : undefined
   );
+
+  // Expand/Collapse all rows functionality
+  const [allRowsExpanded, setAllRowsExpanded] = useState(false);
+
+  const expandAllRows = useCallback(() => {
+    const allIndices = new Set(gridData.map((_, index) => index));
+    setExpandedRows(allIndices);
+    setAllRowsExpanded(true);
+  }, [gridData, setExpandedRows]);
+
+  const collapseAllRows = useCallback(() => {
+    setExpandedRows(new Set());
+    setAllRowsExpanded(false);
+  }, [setExpandedRows]);
+
+  const toggleExpandCollapseAll = useCallback(() => {
+    if (allRowsExpanded) {
+      collapseAllRows();
+    } else {
+      expandAllRows();
+    }
+  }, [allRowsExpanded, collapseAllRows, expandAllRows]);
+
+  // Update allRowsExpanded state when individual rows are toggled
+  useEffect(() => {
+    const totalRows = gridData.length;
+    const expandedCount = expandedRows.size;
+    
+    if (expandedCount === 0) {
+      setAllRowsExpanded(false);
+    } else if (expandedCount === totalRows && totalRows > 0) {
+      setAllRowsExpanded(true);
+    }
+  }, [expandedRows, gridData]);
 
   // Calculate responsive column widths based on content type and available space
   const calculateColumnWidthsCallback = useCallback((visibleColumns: GridColumnConfig[]) => {
@@ -921,7 +954,7 @@ export function SmartGrid({
          selectedRowsCount={currentSelectedRows.size}
          onClearSelection={handleClearSelection}
          // Expand/Collapse all props
-         onExpandCollapseAll={onExpandCollapseAll}
+         onExpandCollapseAll={hasCollapsibleColumns || nestedRowRenderer ? toggleExpandCollapseAll : undefined}
          allRowsExpanded={allRowsExpanded}
        />
        )}
