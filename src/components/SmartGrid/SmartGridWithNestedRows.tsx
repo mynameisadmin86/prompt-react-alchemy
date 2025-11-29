@@ -28,6 +28,7 @@ export function SmartGridWithNestedRows({
   const [collapsedNestedSections, setCollapsedNestedSections] = useState<Set<number>>(
     new Set()
   );
+  const [allExpanded, setAllExpanded] = useState(true);
 
   const toggleNestedSection = (rowIndex: number) => {
     setCollapsedNestedSections((prev) => {
@@ -40,6 +41,42 @@ export function SmartGridWithNestedRows({
       return newSet;
     });
   };
+
+  // Expand all rows
+  const expandAll = () => {
+    setCollapsedNestedSections(new Set());
+    setAllExpanded(true);
+  };
+
+  // Collapse all rows
+  const collapseAll = () => {
+    const allRowIndices = new Set(
+      (smartGridProps.data || []).map((_, index) => index)
+    );
+    setCollapsedNestedSections(allRowIndices);
+    setAllExpanded(false);
+  };
+
+  // Toggle between expand all and collapse all
+  const toggleExpandCollapseAll = () => {
+    if (allExpanded) {
+      collapseAll();
+    } else {
+      expandAll();
+    }
+  };
+
+  // Update allExpanded state when individual rows are toggled
+  React.useEffect(() => {
+    const totalRows = (smartGridProps.data || []).length;
+    const collapsedCount = collapsedNestedSections.size;
+    
+    if (collapsedCount === 0) {
+      setAllExpanded(true);
+    } else if (collapsedCount === totalRows) {
+      setAllExpanded(false);
+    }
+  }, [collapsedNestedSections, smartGridProps.data]);
 
   // Create a nested row renderer that includes both the original nested content
   // (sub-row columns) and the new nested section (nested array data)
@@ -141,6 +178,8 @@ export function SmartGridWithNestedRows({
     <SmartGrid
       {...smartGridProps}
       nestedRowRenderer={finalNestedRowRenderer}
+      onExpandCollapseAll={toggleExpandCollapseAll}
+      allRowsExpanded={allExpanded}
     />
   );
 }
