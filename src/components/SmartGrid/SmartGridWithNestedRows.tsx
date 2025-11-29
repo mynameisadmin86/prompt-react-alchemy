@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { SmartGrid } from './SmartGrid';
 import { SmartGridProps, GridColumnConfig } from '@/types/smartgrid';
-import { ChevronDown, ChevronRight } from 'lucide-react';
+import { ChevronDown, ChevronRight, ChevronsDownUp, ChevronsUpDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
@@ -69,8 +69,13 @@ export function SmartGridWithNestedRows({
       name: 'Expand/Collapse Nested Rows',
       toolbar: () => (
         <div className="flex items-center gap-2">
+          {expandAll ? (
+            <ChevronsDownUp className="h-4 w-4 text-muted-foreground" />
+          ) : (
+            <ChevronsUpDown className="h-4 w-4 text-muted-foreground" />
+          )}
           <Label htmlFor="expand-toggle" className="text-sm text-muted-foreground">
-            Expand All
+            {expandAll ? 'Collapse All' : 'Expand All'}
           </Label>
           <Switch
             id="expand-toggle"
