@@ -1,10 +1,8 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import { SmartGrid } from './SmartGrid';
 import { SmartGridProps, GridColumnConfig } from '@/types/smartgrid';
-import { ChevronDown, ChevronRight, ChevronsDownUp, ChevronsUpDown } from 'lucide-react';
+import { ChevronDown, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
 
 export interface NestedSectionConfig {
   nestedDataKey: string;
@@ -30,12 +28,6 @@ export function SmartGridWithNestedRows({
   const [collapsedNestedSections, setCollapsedNestedSections] = useState<Set<number>>(
     new Set()
   );
-  const [expandAll, setExpandAll] = useState(true);
-
-  // Get all row indices from data
-  const allRowIndices = useMemo(() => {
-    return Array.from({ length: smartGridProps.data?.length || 0 }, (_, i) => i);
-  }, [smartGridProps.data?.length]);
 
   const toggleNestedSection = (rowIndex: number) => {
     setCollapsedNestedSections((prev) => {
@@ -48,50 +40,6 @@ export function SmartGridWithNestedRows({
       return newSet;
     });
   };
-
-  const handleExpandAllToggle = (checked: boolean) => {
-    setExpandAll(checked);
-    if (checked) {
-      // Expand all - clear the collapsed set
-      setCollapsedNestedSections(new Set());
-    } else {
-      // Collapse all - add all row indices to collapsed set
-      setCollapsedNestedSections(new Set(allRowIndices));
-    }
-  };
-
-  // Create plugin for expand/collapse toggle
-  const expandCollapsePlugin = useMemo(() => {
-    if (!nestedSectionConfig) return undefined;
-    
-    return {
-      id: 'expand-collapse-nested-rows',
-      name: 'Expand/Collapse Nested Rows',
-      toolbar: () => (
-        <div className="flex items-center gap-2">
-          {expandAll ? (
-            <ChevronsDownUp className="h-4 w-4 text-muted-foreground" />
-          ) : (
-            <ChevronsUpDown className="h-4 w-4 text-muted-foreground" />
-          )}
-          <Label htmlFor="expand-toggle" className="text-sm text-muted-foreground">
-            {expandAll ? 'Collapse All' : 'Expand All'}
-          </Label>
-          <Switch
-            id="expand-toggle"
-            checked={expandAll}
-            onCheckedChange={handleExpandAllToggle}
-          />
-        </div>
-      ),
-    };
-  }, [nestedSectionConfig, expandAll, handleExpandAllToggle]);
-
-  // Combine existing plugins with expand/collapse plugin
-  const finalPlugins = useMemo(() => {
-    const plugins = smartGridProps.plugins || [];
-    return expandCollapsePlugin ? [...plugins, expandCollapsePlugin] : plugins;
-  }, [smartGridProps.plugins, expandCollapsePlugin]);
 
   // Create a nested row renderer that includes both the original nested content
   // (sub-row columns) and the new nested section (nested array data)
@@ -193,7 +141,6 @@ export function SmartGridWithNestedRows({
     <SmartGrid
       {...smartGridProps}
       nestedRowRenderer={finalNestedRowRenderer}
-      plugins={finalPlugins}
     />
   );
 }
