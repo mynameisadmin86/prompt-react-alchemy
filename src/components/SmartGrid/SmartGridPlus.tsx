@@ -817,7 +817,8 @@ export function SmartGridPlus({
     const isRowEditing = editingRow === rowIndex;
 
     // Handle inline row editing for SmartGridPlus first (before any special column rendering)
-    if (isRowEditing && inlineRowEditing && column.key !== 'actions') {
+    // Respect column.editable flag - if explicitly false, don't allow editing
+    if (isRowEditing && inlineRowEditing && column.key !== 'actions' && column.editable !== false) {
       const editingValue = editingValues[column.key];
       const shouldAutoFocus = focusedColumn === column.key;
       
@@ -996,6 +997,10 @@ export function SmartGridPlus({
                     <X className="h-4 w-4" />
                   </Button>
                 </div>
+              ) : column.editable === false ? (
+                <div className="text-sm text-muted-foreground">
+                  {newRowValues[column.key] ?? defaultRowValues[column.key] ?? '-'}
+                </div>
               ) : (
                 <div className="space-y-1">
                   <EnhancedCellEditor
@@ -1048,29 +1053,35 @@ export function SmartGridPlus({
                       <label className="text-xs font-medium text-gray-600">
                         {column.label}
                       </label>
-                      <EnhancedCellEditor
-                        value={newRowValues[column.key]}
-                        column={column}
-                        onChange={(value) => {
-                          setNewRowValues(prev => ({
-                            ...prev,
-                            [column.key]: value
-                          }));
-                          // Clear validation error for this field
-                          if (validationErrors[column.key]) {
-                            setValidationErrors(prev => {
-                              const newErrors = { ...prev };
-                              delete newErrors[column.key];
-                              return newErrors;
-                            });
-                          }
-                          // Call column-specific onChange if provided
-                          if (column.onChange) {
-                            column.onChange(value, newRowValues);
-                          }
-                        }}
-                        error={validationErrors[column.key]}
-                      />
+                      {column.editable === false ? (
+                        <div className="text-sm text-muted-foreground py-2">
+                          {newRowValues[column.key] ?? defaultRowValues[column.key] ?? '-'}
+                        </div>
+                      ) : (
+                        <EnhancedCellEditor
+                          value={newRowValues[column.key]}
+                          column={column}
+                          onChange={(value) => {
+                            setNewRowValues(prev => ({
+                              ...prev,
+                              [column.key]: value
+                            }));
+                            // Clear validation error for this field
+                            if (validationErrors[column.key]) {
+                              setValidationErrors(prev => {
+                                const newErrors = { ...prev };
+                                delete newErrors[column.key];
+                                return newErrors;
+                              });
+                            }
+                            // Call column-specific onChange if provided
+                            if (column.onChange) {
+                              column.onChange(value, newRowValues);
+                            }
+                          }}
+                          error={validationErrors[column.key]}
+                        />
+                      )}
                     </div>
                   ))}
                 </div>
@@ -1450,7 +1461,7 @@ export function SmartGridPlus({
                                     maxWidth: `${column.width * 1.5}px`
                                   }}
                                   onClick={() => {
-                                    if (inlineRowEditing && !isRowEditing && column.key !== 'actions') {
+                                    if (inlineRowEditing && !isRowEditing && column.key !== 'actions' && column.editable !== false) {
                                       handleStartEditRow(actualIndex, row, column.key);
                                     }
                                   }}
@@ -1555,29 +1566,42 @@ export function SmartGridPlus({
                                   <div className="text-gray-400 text-sm">-</div>
                                 )
                               ) : isAddingRow ? (
-                                <div className="space-y-1">
-                                  <EnhancedCellEditor
-                                    value={newRowValues[column.key]}
-                                    column={column}
-                                    onChange={(value) => {
-                                      setNewRowValues(prev => ({
-                                        ...prev,
-                                        [column.key]: value
-                                      }));
-                                      if (validationErrors[column.key]) {
-                                        setValidationErrors(prev => {
-                                          const newErrors = { ...prev };
-                                          delete newErrors[column.key];
-                                          return newErrors;
-                                        });
+                                column.editable === false ? (
+                                  <div className="text-sm text-muted-foreground">
+                                    {(() => {
+                                      const value = newRowValues[column.key] ?? defaultRowValues[column.key];
+                                      if (value === null || value === undefined) return '-';
+                                      if (typeof value === 'object') {
+                                        return JSON.stringify(value);
                                       }
-                                      if (column.onChange) {
-                                        column.onChange(value, newRowValues);
-                                      }
-                                    }}
-                                    error={validationErrors[column.key]}
-                                  />
-                                </div>
+                                      return value;
+                                    })()}
+                                  </div>
+                                ) : (
+                                  <div className="space-y-1">
+                                    <EnhancedCellEditor
+                                      value={newRowValues[column.key]}
+                                      column={column}
+                                      onChange={(value) => {
+                                        setNewRowValues(prev => ({
+                                          ...prev,
+                                          [column.key]: value
+                                        }));
+                                        if (validationErrors[column.key]) {
+                                          setValidationErrors(prev => {
+                                            const newErrors = { ...prev };
+                                            delete newErrors[column.key];
+                                            return newErrors;
+                                          });
+                                        }
+                                        if (column.onChange) {
+                                          column.onChange(value, newRowValues);
+                                        }
+                                      }}
+                                      error={validationErrors[column.key]}
+                                    />
+                                  </div>
+                                )
                               ) : (
                                 <div className="text-gray-400 text-sm truncate">
                                   {(() => {
