@@ -78,7 +78,7 @@ const columns: GridColumnConfig[] = [
     type: "String",
     sortable: true,
     filterable: true,
-    editable: true,
+    editable: false,
     width: 200,
   },
   {
