@@ -68,7 +68,10 @@ export function SmartGridPlus({
   defaultRowValues = {},
   validationRules = {},
   addRowButtonLabel = "Add Row",
-  addRowButtonPosition = "top-left"
+  addRowButtonPosition = "top-left",
+  hideToolbar = false,
+  hideFilters = false,
+  customPageSize
 }: SmartGridPlusProps) {
   const {
     gridData,
@@ -1158,44 +1161,49 @@ export function SmartGridPlus({
       )}
 
       {/* Toolbar */}
-      <GridToolbar
-        globalFilter={globalFilter}
-        setGlobalFilter={setGlobalFilter}
-        showColumnFilters={showColumnFilters}
-        setShowColumnFilters={setShowColumnFilters}
-        showCheckboxes={showCheckboxes}
-        setShowCheckboxes={setShowCheckboxes}
-        viewMode={viewMode}
-        setViewMode={setViewMode}
-        loading={loading}
-        filters={filters}
-        columns={currentColumns}
-        preferences={preferences}
-        onColumnVisibilityToggle={toggleColumnVisibility}
-        onColumnHeaderChange={updateColumnHeader}
-        onResetToDefaults={handleResetPreferences}
-        onExport={handleExport}
-        onSubRowToggle={handleSubRowToggleInternal}
-        configurableButtons={configurableButtons}
-        showDefaultConfigurableButton={showDefaultConfigurableButton}
-        defaultConfigurableButtonLabel={defaultConfigurableButtonLabel}
-        gridTitle={gridTitle}
-        recordCount={recordCount}
-        showAdvancedFilter={false}
-        onToggleAdvancedFilter={() => {}}
-      />
+      {!hideToolbar && (
+        <GridToolbar
+          globalFilter={globalFilter}
+          setGlobalFilter={setGlobalFilter}
+          showColumnFilters={showColumnFilters}
+          setShowColumnFilters={setShowColumnFilters}
+          showCheckboxes={showCheckboxes}
+          setShowCheckboxes={setShowCheckboxes}
+          viewMode={viewMode}
+          setViewMode={setViewMode}
+          loading={loading}
+          filters={filters}
+          columns={currentColumns}
+          preferences={preferences}
+          onColumnVisibilityToggle={toggleColumnVisibility}
+          onColumnHeaderChange={updateColumnHeader}
+          onResetToDefaults={handleResetPreferences}
+          onExport={handleExport}
+          onSubRowToggle={handleSubRowToggleInternal}
+          configurableButtons={configurableButtons}
+          showDefaultConfigurableButton={showDefaultConfigurableButton}
+          defaultConfigurableButtonLabel={defaultConfigurableButtonLabel}
+          gridTitle={gridTitle}
+          recordCount={recordCount}
+          showAdvancedFilter={false}
+          onToggleAdvancedFilter={() => {}}
+          hideFilters={hideFilters}
+        />
+      )}
 
        {/* Advanced Filter System */}
-      <FilterSystem
-        columns={orderedColumns}
-        subRowColumns={subRowColumns}
-        showFilterRow={showFilterRow}
-        onToggleFilterRow={() => setShowFilterRow(!showFilterRow)}
-        onFiltersChange={handleFiltersChange}
-        gridId="smart-grid-plus"
-        userId="demo-user"
-        api={mockFilterAPI}
-      />
+      {!hideFilters && (
+        <FilterSystem
+          columns={orderedColumns}
+          subRowColumns={subRowColumns}
+          showFilterRow={showFilterRow}
+          onToggleFilterRow={() => setShowFilterRow(!showFilterRow)}
+          onFiltersChange={handleFiltersChange}
+          gridId="smart-grid-plus"
+          userId="demo-user"
+          api={mockFilterAPI}
+        />
+      )}
       
       {/* Table Container with horizontal scroll prevention */}
       <div className="bg-white rounded-lg border shadow-sm">
