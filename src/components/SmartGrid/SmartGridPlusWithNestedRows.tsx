@@ -111,7 +111,6 @@ export function SmartGridPlusWithNestedRows({
                     data={nestedData}
                     paginationMode="infinite"
                     hideToolbar={true}
-                    hideFilters={true}
                     customPageSize={rowCount}
                     inlineRowEditing={true}
                     onEditRow={nestedSectionConfig.onInlineEdit 

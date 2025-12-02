@@ -258,13 +258,6 @@ const Index = () => {
       path: "/equipment-calendar-demo",
       color: "text-emerald-600"
     },
-    {
-      title: "SmartGridPlus with Panels",
-      description: "Enhanced grid where each row has a dynamic form panel with different fields based on row data",
-      icon: Layers,
-      path: "/smartgrid-plus-panels-demo",
-      color: "text-purple-600"
-    },
   ];
 
   return (
