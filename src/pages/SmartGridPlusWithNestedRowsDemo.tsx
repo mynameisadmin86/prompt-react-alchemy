@@ -203,7 +203,7 @@ const SmartGridPlusWithNestedRowsDemo = () => {
   };
 
   // Handle parent order row editing
-  const handleEditOrder = async (rowIndex: number, updatedOrder: any) => {
+  const handleEditOrder = async (updatedOrder: any, rowIndex: number) => {
     console.log('Editing order:', { rowIndex, updatedOrder });
     setOrdersData(prev => {
       const updated = [...prev];
