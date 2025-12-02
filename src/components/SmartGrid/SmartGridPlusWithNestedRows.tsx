@@ -114,7 +114,7 @@ export function SmartGridPlusWithNestedRows({
                     customPageSize={rowCount}
                     inlineRowEditing={true}
                     onEditRow={nestedSectionConfig.onInlineEdit 
-                      ? async (nestedRowIndex, updatedRow) => {
+                      ? async (updatedRow, nestedRowIndex) => {
                           await nestedSectionConfig.onInlineEdit!(rowIndex, nestedRowIndex, updatedRow);
                           if (nestedSectionConfig.onServerUpdate) {
                             await nestedSectionConfig.onServerUpdate(row, nestedData[nestedRowIndex], updatedRow);
@@ -127,7 +127,7 @@ export function SmartGridPlusWithNestedRows({
                         }
                       : undefined}
                     onDeleteRow={nestedSectionConfig.onDeleteRow
-                      ? async (nestedRowIndex) => {
+                      ? async (_row, nestedRowIndex) => {
                           await nestedSectionConfig.onDeleteRow!(rowIndex, nestedRowIndex);
                         }
                       : undefined}
