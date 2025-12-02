@@ -106,6 +106,7 @@ export function SmartGridPlusWithNestedRows({
               ) : (
                 <div className="p-3">
                   <SmartGridPlus
+                    key={`nested-grid-${rowIndex}-${nestedData.length}`}
                     columns={nestedSectionConfig.columns}
                     data={nestedData}
                     paginationMode="infinite"
@@ -114,7 +115,7 @@ export function SmartGridPlusWithNestedRows({
                     inlineRowEditing={true}
                     onEditRow={nestedSectionConfig.onInlineEdit 
                       ? async (nestedRowIndex, updatedRow) => {
-                          nestedSectionConfig.onInlineEdit!(rowIndex, nestedRowIndex, updatedRow);
+                          await nestedSectionConfig.onInlineEdit!(rowIndex, nestedRowIndex, updatedRow);
                           if (nestedSectionConfig.onServerUpdate) {
                             await nestedSectionConfig.onServerUpdate(row, nestedData[nestedRowIndex], updatedRow);
                           }

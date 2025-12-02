@@ -219,21 +219,25 @@ const SmartGridPlusWithNestedRowsDemo = () => {
   };
 
   // Handle nested order item inline edit
-  const handleOrderItemEdit = (
+  const handleOrderItemEdit = async (
     parentRowIndex: number,
     nestedRowIndex: number,
     updatedItem: any
   ) => {
     console.log('Editing order item:', { parentRowIndex, nestedRowIndex, updatedItem });
+    
     setOrdersData(prev => {
       const updated = [...prev];
       const order = { ...updated[parentRowIndex] };
       const items = [...order.orderItems];
       
+      // Merge the updated fields with existing item
+      const existingItem = items[nestedRowIndex];
+      const item = { ...existingItem, ...updatedItem };
+      
       // Recalculate total if quantity or unitPrice changed
-      const item = { ...items[nestedRowIndex], ...updatedItem };
-      if (item.quantity && item.unitPrice) {
-        item.total = item.quantity * item.unitPrice;
+      if (item.quantity !== undefined && item.unitPrice !== undefined) {
+        item.total = Number(item.quantity) * Number(item.unitPrice);
       }
       
       items[nestedRowIndex] = item;
@@ -243,6 +247,8 @@ const SmartGridPlusWithNestedRowsDemo = () => {
       order.totalAmount = items.reduce((sum, item) => sum + (item.total || 0), 0);
       
       updated[parentRowIndex] = order;
+      
+      console.log('Updated order data:', updated[parentRowIndex]);
       return updated;
     });
   };
