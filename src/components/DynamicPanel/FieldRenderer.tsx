@@ -42,12 +42,12 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
       field.onChange(e); // Call react-hook-form's onChange first
       events.onChange?.(e.target.value, e);
     } : field.onChange,
-    onFocus: events?.onFocus,
-    onBlur: events?.onBlur,
-    onKeyDown: events?.onKeyDown,
-    onKeyUp: events?.onKeyUp,
-    onMouseEnter: events?.onMouseEnter,
-    onMouseLeave: events?.onMouseLeave,
+    onFocus: events?.onFocus ? (e: React.FocusEvent<any>) => events.onFocus?.(e, field.value) : undefined,
+    onBlur: events?.onBlur ? (e: React.FocusEvent<any>) => events.onBlur?.(e, field.value) : undefined,
+    onKeyDown: events?.onKeyDown ? (e: React.KeyboardEvent<any>) => events.onKeyDown?.(e, field.value) : undefined,
+    onKeyUp: events?.onKeyUp ? (e: React.KeyboardEvent<any>) => events.onKeyUp?.(e, field.value) : undefined,
+    onMouseEnter: events?.onMouseEnter ? (e: React.MouseEvent<any>) => events.onMouseEnter?.(e, field.value) : undefined,
+    onMouseLeave: events?.onMouseLeave ? (e: React.MouseEvent<any>) => events.onMouseLeave?.(e, field.value) : undefined,
   });
 
   if (!editable) {
@@ -109,8 +109,14 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
                   setShowSuggestions(true);
                   events?.onChange?.(e.target.value, e);
                 }}
-                onBlur={() => setTimeout(() => setShowSuggestions(false), 100)}
-                onFocus={() => setShowSuggestions(true)}
+                onBlur={(e) => {
+                  setTimeout(() => setShowSuggestions(false), 100);
+                  events?.onBlur?.(e, field.value);
+                }}
+                onFocus={(e) => {
+                  setShowSuggestions(true);
+                  events?.onFocus?.(e, field.value);
+                }}
                 placeholder={placeholder || 'Search...'}
                 className={`pr-8 h-8 text-[13px] rounded-md ${
                   hasError 

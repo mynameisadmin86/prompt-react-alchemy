@@ -79,12 +79,12 @@ export interface FieldConfig {
   events?: {
     onClick?: (event: React.MouseEvent, value: any) => void;
     onChange?: (value: any, event: React.ChangeEvent) => void;
-    onFocus?: (event: React.FocusEvent) => void;
-    onBlur?: (event: React.FocusEvent) => void;
-    onKeyDown?: (event: React.KeyboardEvent) => void;
-    onKeyUp?: (event: React.KeyboardEvent) => void;
-    onMouseEnter?: (event: React.MouseEvent) => void;
-    onMouseLeave?: (event: React.MouseEvent) => void;
+    onFocus?: (event: React.FocusEvent, value?: any) => void;
+    onBlur?: (event: React.FocusEvent, value?: any) => void;
+    onKeyDown?: (event: React.KeyboardEvent, value?: any) => void;
+    onKeyUp?: (event: React.KeyboardEvent, value?: any) => void;
+    onMouseEnter?: (event: React.MouseEvent, value?: any) => void;
+    onMouseLeave?: (event: React.MouseEvent, value?: any) => void;
   };
   searchData?: string[]; // For search field type, local array for suggestions
 }
