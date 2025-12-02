@@ -42,7 +42,6 @@ import TransportRouteUpdate from "./pages/TransportRouteUpdate";
 import SmartGridSelectionDemo from "./pages/SmartGridSelectionDemo";
 import BadgesListDemo from "./pages/BadgesListDemo";
 import SmartGridWithNestedRowsDemo from "./pages/SmartGridWithNestedRowsDemo";
-import SmartGridPlusWithNestedRowsDemo from "./pages/SmartGridPlusWithNestedRowsDemo";
 import EquipmentCalendarDemo from "./pages/EquipmentCalendarDemo";
 
 const queryClient = new QueryClient();
@@ -91,7 +90,6 @@ const App = () => (
           <Route path="/consignment-details" element={<ConsignmentDetailsPage />} />
           <Route path="/badges-list-demo" element={<BadgesListDemo />} />
           <Route path="/smartgrid-nested-rows-demo" element={<SmartGridWithNestedRowsDemo />} />
-          <Route path="/smartgrid-plus-nested-rows-demo" element={<SmartGridPlusWithNestedRowsDemo />} />
           <Route path="/equipment-calendar-demo" element={<EquipmentCalendarDemo />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
