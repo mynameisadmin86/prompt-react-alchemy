@@ -12,6 +12,10 @@ const initialOrdersData = [
     orderDate: '2024-01-15',
     status: 'Delivered',
     totalAmount: 15420.50,
+    shippingAddress: '123 Main St, New York, NY 10001',
+    contactPerson: 'John Smith',
+    contactPhone: '+1-555-0101',
+    deliveryNotes: 'Deliver to loading dock B, call before arrival',
     orderItems: [
       { id: 101, itemName: 'Widget A', quantity: 50, unitPrice: 125.50, total: 6275.00, status: 'Shipped' },
       { id: 102, itemName: 'Widget B', quantity: 30, unitPrice: 89.99, total: 2699.70, status: 'Shipped' },
@@ -25,6 +29,10 @@ const initialOrdersData = [
     orderDate: '2024-01-18',
     status: 'Processing',
     totalAmount: 8950.00,
+    shippingAddress: '456 Tech Park, San Francisco, CA 94105',
+    contactPerson: 'Sarah Johnson',
+    contactPhone: '+1-555-0202',
+    deliveryNotes: 'Ring doorbell, signature required',
     orderItems: [
       { id: 201, itemName: 'Component X', quantity: 25, unitPrice: 150.00, total: 3750.00, status: 'Processing' },
       { id: 202, itemName: 'Component Y', quantity: 40, unitPrice: 130.00, total: 5200.00, status: 'Processing' }
@@ -37,6 +45,10 @@ const initialOrdersData = [
     orderDate: '2024-01-20',
     status: 'Pending',
     totalAmount: 22500.00,
+    shippingAddress: '789 Corporate Blvd, Chicago, IL 60601',
+    contactPerson: 'Michael Chen',
+    contactPhone: '+1-555-0303',
+    deliveryNotes: 'Schedule delivery between 9 AM - 5 PM, weekdays only',
     orderItems: [
       { id: 301, itemName: 'Product Alpha', quantity: 150, unitPrice: 150.00, total: 22500.00, status: 'Pending' }
     ]
@@ -93,6 +105,42 @@ const SmartGridPlusWithNestedRowsDemo = () => {
       width: 140,
       sortable: true,
       filterable: true
+    },
+    {
+      key: 'shippingAddress',
+      label: 'Shipping Address',
+      type: 'EditableText',
+      width: 250,
+      sortable: true,
+      filterable: true,
+      subRow: true
+    },
+    {
+      key: 'contactPerson',
+      label: 'Contact Person',
+      type: 'EditableText',
+      width: 180,
+      sortable: true,
+      filterable: true,
+      subRow: true
+    },
+    {
+      key: 'contactPhone',
+      label: 'Contact Phone',
+      type: 'EditableText',
+      width: 150,
+      sortable: true,
+      filterable: true,
+      subRow: true
+    },
+    {
+      key: 'deliveryNotes',
+      label: 'Delivery Notes',
+      type: 'EditableText',
+      width: 300,
+      sortable: true,
+      filterable: true,
+      subRow: true
     }
   ];
 
@@ -205,7 +253,11 @@ const SmartGridPlusWithNestedRowsDemo = () => {
     customer: '',
     orderDate: new Date().toISOString().split('T')[0],
     status: 'Pending',
-    totalAmount: 0
+    totalAmount: 0,
+    shippingAddress: '',
+    contactPerson: '',
+    contactPhone: '',
+    deliveryNotes: ''
   };
 
   return (
