@@ -252,6 +252,13 @@ const Index = () => {
       color: "text-cyan-500"
     },
     {
+      title: "SmartGridPlus with Nested Panel",
+      description: "SmartGridPlus with inline editing and nested dynamic panels for detailed form data",
+      icon: Layers,
+      path: "/smartgrid-plus-nested-panel-demo",
+      color: "text-violet-500"
+    },
+    {
       title: "Equipment Calendar",
       description: "Timeline-based calendar view for equipment scheduling and availability tracking",
       icon: Calendar,

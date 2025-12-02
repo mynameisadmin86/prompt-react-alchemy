@@ -4,6 +4,7 @@ export { SmartGridPlus } from './SmartGridPlus';
 export { SmartGridWithGrouping } from './SmartGridWithGrouping';
 export { SmartGridWithNestedRows } from './SmartGridWithNestedRows';
 export { SmartGridPlusWithNestedRows } from './SmartGridPlusWithNestedRows';
+export { SmartGridPlusWithNestedPanel } from './SmartGridPlusWithNestedPanel';
 export { ServersideFilter } from './ServersideFilter';
 export { CellEditor } from './CellEditor';
 export { ColumnManager } from './ColumnManager';
