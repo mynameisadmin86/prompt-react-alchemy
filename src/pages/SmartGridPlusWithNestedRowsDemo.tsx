@@ -219,12 +219,12 @@ const SmartGridPlusWithNestedRowsDemo = () => {
   };
 
   // Handle nested order item inline edit
-  const handleOrderItemInlineEdit = (
+  const handleOrderItemEdit = (
     parentRowIndex: number,
     nestedRowIndex: number,
     updatedItem: any
   ) => {
-    console.log('Inline editing order item:', { parentRowIndex, nestedRowIndex, updatedItem });
+    console.log('Editing order item:', { parentRowIndex, nestedRowIndex, updatedItem });
     setOrdersData(prev => {
       const updated = [...prev];
       const order = { ...updated[parentRowIndex] };
@@ -247,6 +247,57 @@ const SmartGridPlusWithNestedRowsDemo = () => {
     });
   };
 
+  // Handle adding new nested order item
+  const handleAddOrderItem = async (
+    parentRowIndex: number,
+    newItem: any
+  ) => {
+    console.log('Adding new order item:', { parentRowIndex, newItem });
+    setOrdersData(prev => {
+      const updated = [...prev];
+      const order = { ...updated[parentRowIndex] };
+      const items = [...order.orderItems];
+      
+      // Generate new ID and calculate total
+      const newItemWithId = {
+        ...newItem,
+        id: Math.max(...items.map(i => i.id), 0) + 1,
+        total: (newItem.quantity || 0) * (newItem.unitPrice || 0)
+      };
+      
+      items.push(newItemWithId);
+      order.orderItems = items;
+      
+      // Recalculate order total
+      order.totalAmount = items.reduce((sum, item) => sum + (item.total || 0), 0);
+      
+      updated[parentRowIndex] = order;
+      return updated;
+    });
+  };
+
+  // Handle deleting nested order item
+  const handleDeleteOrderItem = async (
+    parentRowIndex: number,
+    nestedRowIndex: number
+  ) => {
+    console.log('Deleting order item:', { parentRowIndex, nestedRowIndex });
+    setOrdersData(prev => {
+      const updated = [...prev];
+      const order = { ...updated[parentRowIndex] };
+      const items = [...order.orderItems];
+      
+      items.splice(nestedRowIndex, 1);
+      order.orderItems = items;
+      
+      // Recalculate order total
+      order.totalAmount = items.reduce((sum, item) => sum + (item.total || 0), 0);
+      
+      updated[parentRowIndex] = order;
+      return updated;
+    });
+  };
+
   // Default values for new order rows
   const defaultOrderValues = {
     orderNumber: '',
@@ -258,6 +309,14 @@ const SmartGridPlusWithNestedRowsDemo = () => {
     contactPerson: '',
     contactPhone: '',
     deliveryNotes: ''
+  };
+
+  // Default values for new order item rows
+  const defaultOrderItemValues = {
+    itemName: '',
+    quantity: 1,
+    unitPrice: 0,
+    status: 'Pending'
   };
 
   return (
@@ -312,8 +371,10 @@ const SmartGridPlusWithNestedRowsDemo = () => {
             columns: orderItemColumns,
             title: 'Order Items',
             showNestedRowCount: true,
-            editableColumns: true,
-            onInlineEdit: handleOrderItemInlineEdit
+            onInlineEdit: handleOrderItemEdit,
+            onAddRow: handleAddOrderItem,
+            onDeleteRow: handleDeleteOrderItem,
+            defaultRowValues: defaultOrderItemValues
           }}
         />
       </Card>
