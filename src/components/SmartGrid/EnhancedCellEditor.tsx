@@ -18,6 +18,11 @@ export function EnhancedCellEditor({ value, column, onChange, onSave, error, sho
   const [editValue, setEditValue] = useState(value ?? '');
   const inputRef = useRef<HTMLInputElement>(null);
 
+  // Sync internal state when external value changes (e.g., when dependent fields are cleared)
+  useEffect(() => {
+    setEditValue(value ?? '');
+  }, [value]);
+
   useEffect(() => {
     if (shouldAutoFocus && inputRef.current && !['LazySelect', 'MultiselectLazySelect', 'Select'].includes(column.type)) {
       inputRef.current.focus();
