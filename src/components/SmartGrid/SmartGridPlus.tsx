@@ -1505,7 +1505,7 @@ export function SmartGridPlus({
                     {!loading && inlineRowAddition && (
                       <TableRow 
                         className={cn(
-                          "border-b border-gray-200 transition-all duration-200",
+                          "border-b border-gray-200 transition-all duration-200 h-[41px]",
                           isAddingRow ? "bg-blue-50" : "bg-gray-50/30 hover:bg-gray-50/60"
                         )}
                         onDoubleClick={!isAddingRow ? handleAddRowClick : undefined}
