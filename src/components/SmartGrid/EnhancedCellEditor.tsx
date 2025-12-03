@@ -9,12 +9,11 @@ interface EnhancedCellEditorProps {
   column: GridColumnConfig;
   onChange: (value: any) => void;
   onSave?: () => void;
-  onCancel?: () => void;
   error?: string;
   shouldAutoFocus?: boolean;
 }
 
-export function EnhancedCellEditor({ value, column, onChange, onSave, onCancel, error, shouldAutoFocus = false }: EnhancedCellEditorProps) {
+export function EnhancedCellEditor({ value, column, onChange, onSave, error, shouldAutoFocus = false }: EnhancedCellEditorProps) {
   const [editValue, setEditValue] = useState(value ?? '');
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -50,9 +49,6 @@ export function EnhancedCellEditor({ value, column, onChange, onSave, onCancel, 
     if (e.key === 'Enter' && onSave) {
       e.preventDefault();
       onSave();
-    } else if (e.key === 'Escape' && onCancel) {
-      e.preventDefault();
-      onCancel();
     }
   };
 
