@@ -265,6 +265,13 @@ const Index = () => {
       path: "/smartgrid-plus-nested-rows-demo",
       color: "text-orange-500"
     },
+    {
+      title: "Cascading LazySelect Demo",
+      description: "Dependent LazySelect columns where selecting a value loads options for the next column",
+      icon: Grid3x3,
+      path: "/cascading-lazyselect-demo",
+      color: "text-purple-500"
+    },
   ];
 
   return (
