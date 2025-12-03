@@ -55,7 +55,7 @@ export function EnhancedCellEditor({ value, column, onChange, onSave, error, sho
   // LazySelect renderer
   if (column.type === 'LazySelect' && column.fetchOptions) {
     return (
-      <div className="w-full">
+      <div className="w-full" onKeyDown={handleKeyDown}>
         <DynamicLazySelect
           fetchOptions={column.fetchOptions}
           value={editValue}
@@ -77,7 +77,7 @@ export function EnhancedCellEditor({ value, column, onChange, onSave, error, sho
   // MultiselectLazySelect renderer
   if (column.type === 'MultiselectLazySelect' && column.fetchOptions) {
     return (
-      <div className="w-full">
+      <div className="w-full" onKeyDown={handleKeyDown}>
         <DynamicLazySelect
           fetchOptions={column.fetchOptions}
           value={editValue}
