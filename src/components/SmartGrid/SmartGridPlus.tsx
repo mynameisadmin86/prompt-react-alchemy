@@ -849,12 +849,13 @@ export function SmartGridPlus({
                 onChange={(value) => {
                   handleEditingCellChange(rowIndex, column.key, value);
                   if (column.onChange) {
-                    column.onChange(value, row);
+                    column.onChange(value, editingValues);
                   }
                 }}
                 onSave={() => handleSaveEditRow(rowIndex)}
                 error={validationErrors[column.key]}
                 shouldAutoFocus={shouldAutoFocus}
+                rowData={editingValues}
               />
             </div>
           </div>
@@ -869,12 +870,13 @@ export function SmartGridPlus({
           onChange={(value) => {
             handleEditingCellChange(rowIndex, column.key, value);
             if (column.onChange) {
-              column.onChange(value, row);
+              column.onChange(value, editingValues);
             }
           }}
           onSave={() => handleSaveEditRow(rowIndex)}
           error={validationErrors[column.key]}
           shouldAutoFocus={shouldAutoFocus}
+          rowData={editingValues}
         />
       );
     }
@@ -1021,10 +1023,11 @@ export function SmartGridPlus({
                       }
                       // Call column-specific onChange if provided
                       if (column.onChange) {
-                        column.onChange(value, newRowValues);
+                        column.onChange(value, { ...newRowValues, [column.key]: value });
                       }
                     }}
                     error={validationErrors[column.key]}
+                    rowData={newRowValues}
                   />
                 </div>
               )}
@@ -1076,10 +1079,11 @@ export function SmartGridPlus({
                             }
                             // Call column-specific onChange if provided
                             if (column.onChange) {
-                              column.onChange(value, newRowValues);
+                              column.onChange(value, { ...newRowValues, [column.key]: value });
                             }
                           }}
                           error={validationErrors[column.key]}
+                          rowData={newRowValues}
                         />
                       )}
                     </div>
@@ -1601,10 +1605,11 @@ export function SmartGridPlus({
                                           });
                                         }
                                         if (column.onChange) {
-                                          column.onChange(value, newRowValues);
+                                          column.onChange(value, { ...newRowValues, [column.key]: value });
                                         }
                                       }}
                                       error={validationErrors[column.key]}
+                                      rowData={newRowValues}
                                     />
                                   </div>
                                 )
