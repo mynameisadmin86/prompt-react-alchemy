@@ -258,6 +258,13 @@ const Index = () => {
       path: "/equipment-calendar-demo",
       color: "text-emerald-600"
     },
+    {
+      title: "SmartGridPlus with Nested Rows",
+      description: "Extended SmartGridPlus with inline editing for both parent and nested child rows",
+      icon: Layers,
+      path: "/smartgrid-plus-nested-rows-demo",
+      color: "text-orange-500"
+    },
   ];
 
   return (
