@@ -1428,6 +1428,12 @@ export function SmartGridPlus({
                               rowClassName?.(row, actualIndex)
                             )}
                             onDoubleClick={() => handleCellDoubleClick(actualIndex, row)}
+                            onKeyDown={(e) => {
+                              if (isRowEditing && e.key === 'Escape') {
+                                e.preventDefault();
+                                handleCancelEditRow();
+                              }
+                            }}
                           >
                             {/* Checkbox column */}
                             {showCheckboxes && (
