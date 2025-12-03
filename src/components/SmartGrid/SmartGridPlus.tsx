@@ -793,10 +793,24 @@ export function SmartGridPlus({
 
   const handleEditingCellChange = useCallback((rowIndex: number, columnKey: string, value: any) => {
     if (editingRow === rowIndex) {
-      setEditingValues(prev => ({
-        ...prev,
-        [columnKey]: value
-      }));
+      // Find the column to check for dependent fields
+      const column = columns.find(c => c.key === columnKey);
+      
+      setEditingValues(prev => {
+        const newValues = {
+          ...prev,
+          [columnKey]: value
+        };
+        
+        // Clear dependent fields if specified
+        if (column?.dependentFields) {
+          column.dependentFields.forEach(depField => {
+            newValues[depField] = '';
+          });
+        }
+        
+        return newValues;
+      });
       
       // Clear validation error for this field
       if (validationErrors[columnKey]) {
@@ -807,7 +821,7 @@ export function SmartGridPlus({
         });
       }
     }
-  }, [editingRow, validationErrors]);
+  }, [editingRow, validationErrors, columns]);
 
   // renderCell function
   const renderCell = useCallback((row: any, column: GridColumnConfig, rowIndex: number, columnIndex: number) => {
@@ -1009,10 +1023,19 @@ export function SmartGridPlus({
                     value={newRowValues[column.key]}
                     column={column}
                     onChange={(value) => {
-                      setNewRowValues(prev => ({
-                        ...prev,
-                        [column.key]: value
-                      }));
+                      setNewRowValues(prev => {
+                        const newValues = {
+                          ...prev,
+                          [column.key]: value
+                        };
+                        // Clear dependent fields if specified
+                        if (column.dependentFields) {
+                          column.dependentFields.forEach(depField => {
+                            newValues[depField] = '';
+                          });
+                        }
+                        return newValues;
+                      });
                       // Clear validation error for this field
                       if (validationErrors[column.key]) {
                         setValidationErrors(prev => {
@@ -1065,10 +1088,19 @@ export function SmartGridPlus({
                           value={newRowValues[column.key]}
                           column={column}
                           onChange={(value) => {
-                            setNewRowValues(prev => ({
-                              ...prev,
-                              [column.key]: value
-                            }));
+                            setNewRowValues(prev => {
+                              const newValues = {
+                                ...prev,
+                                [column.key]: value
+                              };
+                              // Clear dependent fields if specified
+                              if (column.dependentFields) {
+                                column.dependentFields.forEach(depField => {
+                                  newValues[depField] = '';
+                                });
+                              }
+                              return newValues;
+                            });
                             // Clear validation error for this field
                             if (validationErrors[column.key]) {
                               setValidationErrors(prev => {
@@ -1593,10 +1625,19 @@ export function SmartGridPlus({
                                       value={newRowValues[column.key]}
                                       column={column}
                                       onChange={(value) => {
-                                        setNewRowValues(prev => ({
-                                          ...prev,
-                                          [column.key]: value
-                                        }));
+                                        setNewRowValues(prev => {
+                                          const newValues = {
+                                            ...prev,
+                                            [column.key]: value
+                                          };
+                                          // Clear dependent fields if specified
+                                          if (column.dependentFields) {
+                                            column.dependentFields.forEach(depField => {
+                                              newValues[depField] = '';
+                                            });
+                                          }
+                                          return newValues;
+                                        });
                                         if (validationErrors[column.key]) {
                                           setValidationErrors(prev => {
                                             const newErrors = { ...prev };
