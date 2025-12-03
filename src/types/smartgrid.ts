@@ -63,11 +63,12 @@ export interface GridColumnConfig {
   subRowColumns?: GridColumnConfig[];
   
   // LazySelect specific properties
-  fetchOptions?: (params: { searchTerm: string; offset: number; limit: number }) => Promise<Array<{ label?: string; value?: string; id?: string; name?: any }>>;
+  fetchOptions?: (params: { searchTerm: string; offset: number; limit: number; rowData?: any }) => Promise<Array<{ label?: string; value?: string; id?: string; name?: any }>>;
   hideSearch?: boolean;
   disableLazyLoading?: boolean;
   returnType?: string;
   onChange?: (value: any, rowData?: any) => void;
+  dependentFields?: string[]; // Fields to clear when this field changes (for cascading selects)
   
   // ActionButton specific properties
   actionButtons?: Array<{

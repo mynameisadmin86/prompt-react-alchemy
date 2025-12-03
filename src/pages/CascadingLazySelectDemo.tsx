@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef } from "react";
+import React, { useState, useCallback } from "react";
 import { SmartGridPlus } from "@/components/SmartGrid";
 import { GridColumnConfig } from "@/types/smartgrid";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -239,8 +239,6 @@ const initialData = [
 
 export default function CascadingLazySelectDemo() {
   const [data, setData] = useState(initialData);
-  // Store current row values to enable cascading
-  const rowValuesRef = useRef<Record<string, Record<string, any>>>({});
 
   // Fetch countries (first level)
   const fetchCountries = useCallback(async ({ searchTerm, offset, limit }: { searchTerm: string; offset: number; limit: number }) => {
@@ -292,18 +290,9 @@ export default function CascadingLazySelectDemo() {
       editable: true,
       width: 180,
       fetchOptions: fetchCountries,
+      dependentFields: ["state", "city"], // Clear state and city when country changes
       onChange: (value, rowData) => {
         console.log("Country changed:", value, "Row data:", rowData);
-        // When country changes, clear state and city
-        if (rowData) {
-          const rowId = rowData.id;
-          rowValuesRef.current[rowId] = {
-            ...rowValuesRef.current[rowId],
-            country: value,
-            state: "",
-            city: "",
-          };
-        }
       },
     },
     {
@@ -315,17 +304,9 @@ export default function CascadingLazySelectDemo() {
       editable: true,
       width: 180,
       fetchOptions: fetchStates,
+      dependentFields: ["city"], // Clear city when state changes
       onChange: (value, rowData) => {
         console.log("State changed:", value, "Row data:", rowData);
-        // When state changes, clear city
-        if (rowData) {
-          const rowId = rowData.id;
-          rowValuesRef.current[rowId] = {
-            ...rowValuesRef.current[rowId],
-            state: value,
-            city: "",
-          };
-        }
       },
     },
     {
