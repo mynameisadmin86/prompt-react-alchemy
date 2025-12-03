@@ -853,6 +853,7 @@ export function SmartGridPlus({
                   }
                 }}
                 onSave={() => handleSaveEditRow(rowIndex)}
+                onCancel={handleCancelEditRow}
                 error={validationErrors[column.key]}
                 shouldAutoFocus={shouldAutoFocus}
               />
@@ -873,6 +874,7 @@ export function SmartGridPlus({
             }
           }}
           onSave={() => handleSaveEditRow(rowIndex)}
+          onCancel={handleCancelEditRow}
           error={validationErrors[column.key]}
           shouldAutoFocus={shouldAutoFocus}
         />
@@ -1024,6 +1026,7 @@ export function SmartGridPlus({
                         column.onChange(value, newRowValues);
                       }
                     }}
+                    onCancel={handleCancelNewRow}
                     error={validationErrors[column.key]}
                   />
                 </div>
@@ -1079,6 +1082,7 @@ export function SmartGridPlus({
                               column.onChange(value, newRowValues);
                             }
                           }}
+                          onCancel={handleCancelNewRow}
                           error={validationErrors[column.key]}
                         />
                       )}
@@ -1604,6 +1608,7 @@ export function SmartGridPlus({
                                           column.onChange(value, newRowValues);
                                         }
                                       }}
+                                      onCancel={handleCancelNewRow}
                                       error={validationErrors[column.key]}
                                     />
                                   </div>
