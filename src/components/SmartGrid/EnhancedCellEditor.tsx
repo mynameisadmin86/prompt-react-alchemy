@@ -11,9 +11,10 @@ interface EnhancedCellEditorProps {
   onSave?: () => void;
   error?: string;
   shouldAutoFocus?: boolean;
+  rowData?: any;
 }
 
-export function EnhancedCellEditor({ value, column, onChange, onSave, error, shouldAutoFocus = false }: EnhancedCellEditorProps) {
+export function EnhancedCellEditor({ value, column, onChange, onSave, error, shouldAutoFocus = false, rowData }: EnhancedCellEditorProps) {
   const [editValue, setEditValue] = useState(value ?? '');
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -64,6 +65,7 @@ export function EnhancedCellEditor({ value, column, onChange, onSave, error, sho
           multiSelect={column.multiSelect}
           hideSearch={column.hideSearch}
           disableLazyLoading={column.disableLazyLoading}
+          rowData={rowData}
         />
         {error && (
           <div className="mt-1 text-xs text-destructive">
@@ -86,6 +88,7 @@ export function EnhancedCellEditor({ value, column, onChange, onSave, error, sho
           multiSelect={true}
           hideSearch={column.hideSearch}
           disableLazyLoading={column.disableLazyLoading}
+          rowData={rowData}
         />
         {error && (
           <div className="mt-1 text-xs text-destructive">
