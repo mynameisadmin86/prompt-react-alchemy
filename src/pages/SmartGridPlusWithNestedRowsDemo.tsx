@@ -308,9 +308,9 @@ const SmartGridPlusWithNestedRowsDemo = () => {
   const defaultOrderValues = {
     orderNumber: '',
     customer: '',
-    orderDate: new Date().toISOString().split('T')[0],
-    status: 'Pending',
-    totalAmount: 0,
+    orderDate: '',
+    status: '',
+    totalAmount: '',
     shippingAddress: '',
     contactPerson: '',
     contactPhone: '',
@@ -320,9 +320,9 @@ const SmartGridPlusWithNestedRowsDemo = () => {
   // Default values for new order item rows
   const defaultOrderItemValues = {
     itemName: '',
-    quantity: 1,
-    unitPrice: 0,
-    status: 'Pending'
+    quantity: '',
+    unitPrice: '',
+    status: ''
   };
 
   return (

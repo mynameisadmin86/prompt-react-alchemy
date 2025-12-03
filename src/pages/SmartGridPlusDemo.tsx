@@ -282,18 +282,18 @@ export default function SmartGridPlusDemo() {
 
   const defaultRowValues = {
     productName: "",
-    quantity: 0,
-    unitPrice: 0,
-    category: "Electronics",
-    status: "Active",
-    dateAdded: new Date().toISOString().split("T")[0],
-    deliveryTime: "09:00",
+    quantity: "",
+    unitPrice: "",
+    category: "",
+    status: "",
+    dateAdded: "",
+    deliveryTime: "",
     supplier: "",
     specifications: [],
-    reviews: [{ reviewer: "", rating: 5, comment: "" }],
+    reviews: [],
     notes: "",
     internalCode: "",
-    warehouse: "Warehouse A",
+    warehouse: "",
   };
 
   const validationRules = {
