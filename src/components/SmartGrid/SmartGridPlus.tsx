@@ -52,6 +52,7 @@ export function SmartGridPlus({
   plugins = [],
   selectedRows,
   onSelectionChange,
+  onSelectedRowsChange,
   rowClassName,
   highlightedRowIndices = [],
   configurableButtons,
@@ -1538,6 +1539,12 @@ export function SmartGridPlus({
                                       newSet.delete(index);
                                     }
                                     handleSelectionChange(newSet);
+                                    
+                                    // Call onSelectedRowsChange with actual row objects
+                                    if (onSelectedRowsChange) {
+                                      const selectedRowObjects = paginatedData.filter((_, idx) => newSet.has(idx));
+                                      onSelectedRowsChange(selectedRowObjects);
+                                    }
                                   }}
                                 />
                               </TableCell>
