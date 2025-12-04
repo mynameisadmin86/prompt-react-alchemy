@@ -13,14 +13,12 @@ export interface NestedSectionConfig {
   editableColumns?: boolean | string[];
   inlineRowAddition?: boolean; // Flag to enable/disable add row in nested grid
   inlineRowEditing?: boolean; // Flag to enable/disable inline editing in nested grid
-  showCheckboxes?: boolean; // Flag to always show checkboxes in nested grid
   onInlineEdit?: (parentRowIndex: number, nestedRowIndex: number, updatedRow: any) => void;
   onUpdate?: (parentRowIndex: number, nestedRowIndex: number, updatedRow: any) => Promise<void>;
   onServerUpdate?: (parentRow: any, nestedRow: any, updatedData: any) => Promise<void>;
   onAddRow?: (parentRowIndex: number, newRow: any) => Promise<void>;
   onDeleteRow?: (parentRowIndex: number, nestedRowIndex: number) => Promise<void>;
   defaultRowValues?: Record<string, any>;
-  onSelectionChange?: (parentRowIndex: number, selectedRows: Set<number>) => void;
 }
 
 export interface SmartGridPlusWithNestedRowsProps extends SmartGridPlusProps {
@@ -115,14 +113,9 @@ export function SmartGridPlusWithNestedRows({
                     data={nestedData}
                     paginationMode="infinite"
                     hideToolbar={true}
-                    hideCheckboxToggle={true}
-                    defaultShowCheckboxes={nestedSectionConfig.showCheckboxes ?? false}
                     customPageSize={rowCount}
                     inlineRowAddition={nestedSectionConfig.inlineRowAddition ?? false}
                     inlineRowEditing={nestedSectionConfig.inlineRowEditing ?? true}
-                    onSelectionChange={nestedSectionConfig.onSelectionChange
-                      ? (selectedRows) => nestedSectionConfig.onSelectionChange!(rowIndex, selectedRows)
-                      : undefined}
                     onEditRow={nestedSectionConfig.onInlineEdit 
                       ? async (updatedRow, nestedRowIndex) => {
                           await nestedSectionConfig.onInlineEdit!(rowIndex, nestedRowIndex, updatedRow);
