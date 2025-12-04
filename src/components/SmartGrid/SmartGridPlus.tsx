@@ -1542,7 +1542,13 @@ export function SmartGridPlus({
                                     
                                     // Call onSelectedRowsChange with actual row objects
                                     if (onSelectedRowsChange) {
-                                      const selectedRowObjects = paginatedData.filter((_, idx) => newSet.has(idx));
+                                      const selectedRowObjects: any[] = [];
+                                      paginatedData.forEach((r, idx) => {
+                                        if (newSet.has(idx)) {
+                                          selectedRowObjects.push(r);
+                                        }
+                                      });
+                                      console.log('Selected rows:', selectedRowObjects);
                                       onSelectedRowsChange(selectedRowObjects);
                                     }
                                   }}
