@@ -80,6 +80,7 @@ export function SmartGrid({
   onToggleServersideFilter,
   hideAdvancedFilter = false,
   hideCheckboxToggle = false,
+  defaultShowCheckboxes = false,
   hideToolbar = false,
   serverFilters = [],
   showFilterTypeDropdown = false,
@@ -884,7 +885,13 @@ export function SmartGrid({
     }
   }, [preferences, columns, data, savePreferences, setColumns, setGridData]);
 
-  // Error boundary component
+  // Initialize showCheckboxes based on defaultShowCheckboxes prop
+  useEffect(() => {
+    if (defaultShowCheckboxes) {
+      setShowCheckboxes(true);
+    }
+  }, []);
+
   if (error) {
     return (
       <div className="p-4 border border-red-300 rounded-lg bg-red-50">
