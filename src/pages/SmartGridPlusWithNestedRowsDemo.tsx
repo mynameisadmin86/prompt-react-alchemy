@@ -57,6 +57,7 @@ const initialOrdersData = [
 
 const SmartGridPlusWithNestedRowsDemo = () => {
   const [ordersData, setOrdersData] = useState(initialOrdersData);
+  const [selectedRows, setSelectedRows] = useState<any[]>([]);
 
   // Order columns configuration
   const orderColumns: GridColumnConfig[] = [
@@ -352,11 +353,9 @@ const SmartGridPlusWithNestedRowsDemo = () => {
             ${ordersData.reduce((sum, order) => sum + order.totalAmount, 0).toLocaleString()}
           </div>
         </Card>
-        <Card className="p-4">
-          <div className="text-sm text-muted-foreground">Pending Orders</div>
-          <div className="text-2xl font-bold">
-            {ordersData.filter(o => o.status === 'Pending').length}
-          </div>
+        <Card className="p-4 border-primary/50">
+          <div className="text-sm text-muted-foreground">Selected Rows</div>
+          <div className="text-2xl font-bold text-primary">{selectedRows.length}</div>
         </Card>
       </div>
 
@@ -373,8 +372,8 @@ const SmartGridPlusWithNestedRowsDemo = () => {
           paginationMode="pagination"
           customPageSize={10}
           inlineRowEditing={true}
-          onSelectedRowsChange={(selectedRows) => {
-            console.log('Selected rows:', selectedRows);
+          onSelectedRowsChange={(rows) => {
+            setSelectedRows(rows);
           }}
           nestedSectionConfig={{
             nestedDataKey: 'orderItems',
