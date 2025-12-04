@@ -68,8 +68,7 @@ export function SmartGridPlus({
   defaultRowValues = {},
   validationRules = {},
   addRowButtonLabel = "Add Row",
-  addRowButtonPosition = "top-left",
-  defaultShowCheckboxes = false
+  addRowButtonPosition = "top-left"
 }: SmartGridPlusProps) {
   const {
     gridData,
@@ -121,7 +120,7 @@ export function SmartGridPlus({
     handleSubRowEdit,
     handleSubRowEditStart,
     handleSubRowEditCancel
-  } = useSmartGridState({ defaultShowCheckboxes });
+  } = useSmartGridState();
 
   const [pageSize] = useState(10);
   const [showFilterRow, setShowFilterRow] = useState(false);
