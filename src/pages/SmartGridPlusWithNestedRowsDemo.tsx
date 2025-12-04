@@ -354,8 +354,12 @@ const SmartGridPlusWithNestedRowsDemo = () => {
           </div>
         </Card>
         <Card className="p-4 border-primary/50">
-          <div className="text-sm text-muted-foreground">Selected Rows</div>
-          <div className="text-2xl font-bold text-primary">{selectedRows.length}</div>
+          <div className="text-sm text-muted-foreground">Selected Orders ({selectedRows.length})</div>
+          <div className="text-sm font-medium text-primary mt-1">
+            {selectedRows.length > 0 
+              ? selectedRows.map(row => row.orderNumber).join(', ')
+              : 'None selected'}
+          </div>
         </Card>
       </div>
 
