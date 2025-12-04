@@ -363,6 +363,7 @@ const SmartGridPlusWithNestedRowsDemo = () => {
       {/* Orders Grid with Nested Items */}
       <Card className="p-6">
         <SmartGridPlusWithNestedRows
+          hideToolbar={false}
           columns={orderColumns}
           data={ordersData}
           onAddRow={handleAddOrder}
