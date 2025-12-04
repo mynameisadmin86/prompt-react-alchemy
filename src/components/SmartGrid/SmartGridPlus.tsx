@@ -68,10 +68,7 @@ export function SmartGridPlus({
   defaultRowValues = {},
   validationRules = {},
   addRowButtonLabel = "Add Row",
-  addRowButtonPosition = "top-left",
-  hideToolbar = false,
-  defaultShowCheckboxes = false,
-  customPageSize
+  addRowButtonPosition = "top-left"
 }: SmartGridPlusProps) {
   const {
     gridData,
@@ -125,7 +122,7 @@ export function SmartGridPlus({
     handleSubRowEditCancel
   } = useSmartGridState();
 
-  const [pageSize] = useState(customPageSize || 10);
+  const [pageSize] = useState(10);
   const [showFilterRow, setShowFilterRow] = useState(false);
   const [filterSystemFilters, setFilterSystemFilters] = useState<Record<string, any>>({});
   const { toast } = useToast();
@@ -1195,13 +1192,7 @@ export function SmartGridPlus({
     }
   }, [columns, setColumns]);
 
-  // Initialize showCheckboxes based on defaultShowCheckboxes prop
-  useEffect(() => {
-    if (defaultShowCheckboxes) {
-      setShowCheckboxes(true);
-    }
-  }, []);
-
+  // Initialize plugins
   useEffect(() => {
     plugins.forEach(plugin => {
       if (plugin.init) {
