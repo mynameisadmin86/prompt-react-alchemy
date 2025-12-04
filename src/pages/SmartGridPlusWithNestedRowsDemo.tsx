@@ -372,6 +372,7 @@ const SmartGridPlusWithNestedRowsDemo = () => {
           paginationMode="pagination"
           customPageSize={10}
           inlineRowEditing={true}
+          defaultShowCheckboxes={true}
           nestedSectionConfig={{
             nestedDataKey: 'orderItems',
             columns: orderItemColumns,
