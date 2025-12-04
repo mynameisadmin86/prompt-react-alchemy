@@ -1244,7 +1244,7 @@ export function SmartGridPlus({
       )}
 
       {/* Toolbar */}
-      {!hideToolbar && (
+      <div style={{ display: hideToolbar ? 'none' : undefined }}>
         <GridToolbar
           globalFilter={globalFilter}
           setGlobalFilter={setGlobalFilter}
@@ -1271,7 +1271,7 @@ export function SmartGridPlus({
           showAdvancedFilter={false}
           onToggleAdvancedFilter={() => {}}
         />
-      )}
+      </div>
 
        {/* Advanced Filter System */}
       <FilterSystem
