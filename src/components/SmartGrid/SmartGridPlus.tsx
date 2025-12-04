@@ -59,6 +59,9 @@ export function SmartGridPlus({
   defaultConfigurableButtonLabel,
   gridTitle,
   recordCount,
+  hideToolbar = false,
+  hideCheckboxToggle = false,
+  defaultShowCheckboxes = false,
   // SmartGridPlus specific props
   inlineRowAddition = true,
   inlineRowEditing = true,
@@ -120,7 +123,7 @@ export function SmartGridPlus({
     handleSubRowEdit,
     handleSubRowEditStart,
     handleSubRowEditCancel
-  } = useSmartGridState();
+  } = useSmartGridState({ defaultShowCheckboxes });
 
   const [pageSize] = useState(10);
   const [showFilterRow, setShowFilterRow] = useState(false);

@@ -1,7 +1,7 @@
 import { useState, useCallback, useRef } from 'react';
 import { SortConfig, FilterConfig, GridColumnConfig } from '@/types/smartgrid';
 
-export function useSmartGridState() {
+export function useSmartGridState(options?: { defaultShowCheckboxes?: boolean }) {
   const [gridData, setGridData] = useState<any[]>([]);
   const [columns, setColumns] = useState<GridColumnConfig[]>([]);
   const [editingCell, setEditingCell] = useState<{ rowIndex: number; columnKey: string } | null>(null);
@@ -16,7 +16,7 @@ export function useSmartGridState() {
   const [error, setError] = useState<string | null>(null);
   const [expandedRows, setExpandedRows] = useState<Set<number>>(new Set());
   const [internalSelectedRows, setInternalSelectedRows] = useState<Set<number>>(new Set());
-  const [showCheckboxes, setShowCheckboxes] = useState(false);
+  const [showCheckboxes, setShowCheckboxes] = useState(options?.defaultShowCheckboxes ?? false);
   const [viewMode, setViewMode] = useState<'table' | 'card'>('table');
   const [showColumnFilters, setShowColumnFilters] = useState(false);
   const [resizingColumn, setResizingColumn] = useState<string | null>(null);
