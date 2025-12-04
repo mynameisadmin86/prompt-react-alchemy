@@ -80,6 +80,7 @@ export function SmartGrid({
   onToggleServersideFilter,
   hideAdvancedFilter = false,
   hideCheckboxToggle = false,
+  defaultShowCheckboxes = false,
   hideToolbar = false,
   serverFilters = [],
   showFilterTypeDropdown = false,
@@ -141,7 +142,7 @@ export function SmartGrid({
     handleSubRowEdit,
     handleSubRowEditStart,
     handleSubRowEditCancel
-  } = useSmartGridState();
+  } = useSmartGridState({ defaultShowCheckboxes });
 
   const [pageSize] = useState(customPageSize || 10);
   const [showFilterRow, setShowFilterRow] = useState(false);
