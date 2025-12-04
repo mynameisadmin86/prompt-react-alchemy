@@ -59,6 +59,7 @@ export function SmartGridPlus({
   defaultConfigurableButtonLabel,
   gridTitle,
   recordCount,
+  hideToolbar = false,
   // SmartGridPlus specific props
   inlineRowAddition = true,
   inlineRowEditing = true,
@@ -1243,32 +1244,34 @@ export function SmartGridPlus({
       )}
 
       {/* Toolbar */}
-      <GridToolbar
-        globalFilter={globalFilter}
-        setGlobalFilter={setGlobalFilter}
-        showColumnFilters={showColumnFilters}
-        setShowColumnFilters={setShowColumnFilters}
-        showCheckboxes={showCheckboxes}
-        setShowCheckboxes={setShowCheckboxes}
-        viewMode={viewMode}
-        setViewMode={setViewMode}
-        loading={loading}
-        filters={filters}
-        columns={currentColumns}
-        preferences={preferences}
-        onColumnVisibilityToggle={toggleColumnVisibility}
-        onColumnHeaderChange={updateColumnHeader}
-        onResetToDefaults={handleResetPreferences}
-        onExport={handleExport}
-        onSubRowToggle={handleSubRowToggleInternal}
-        configurableButtons={configurableButtons}
-        showDefaultConfigurableButton={showDefaultConfigurableButton}
-        defaultConfigurableButtonLabel={defaultConfigurableButtonLabel}
-        gridTitle={gridTitle}
-        recordCount={recordCount}
-        showAdvancedFilter={false}
-        onToggleAdvancedFilter={() => {}}
-      />
+      {!hideToolbar && (
+        <GridToolbar
+          globalFilter={globalFilter}
+          setGlobalFilter={setGlobalFilter}
+          showColumnFilters={showColumnFilters}
+          setShowColumnFilters={setShowColumnFilters}
+          showCheckboxes={showCheckboxes}
+          setShowCheckboxes={setShowCheckboxes}
+          viewMode={viewMode}
+          setViewMode={setViewMode}
+          loading={loading}
+          filters={filters}
+          columns={currentColumns}
+          preferences={preferences}
+          onColumnVisibilityToggle={toggleColumnVisibility}
+          onColumnHeaderChange={updateColumnHeader}
+          onResetToDefaults={handleResetPreferences}
+          onExport={handleExport}
+          onSubRowToggle={handleSubRowToggleInternal}
+          configurableButtons={configurableButtons}
+          showDefaultConfigurableButton={showDefaultConfigurableButton}
+          defaultConfigurableButtonLabel={defaultConfigurableButtonLabel}
+          gridTitle={gridTitle}
+          recordCount={recordCount}
+          showAdvancedFilter={false}
+          onToggleAdvancedFilter={() => {}}
+        />
+      )}
 
        {/* Advanced Filter System */}
       <FilterSystem
