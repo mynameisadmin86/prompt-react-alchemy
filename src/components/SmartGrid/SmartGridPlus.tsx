@@ -1302,9 +1302,16 @@ export function SmartGridPlus({
                         onChange={(e) => {
                           const target = e.target as HTMLInputElement;
                           if (target.checked) {
-                            handleSelectionChange(new Set(Array.from({ length: paginatedData.length }, (_, i) => i)));
+                            const newSet = new Set(Array.from({ length: paginatedData.length }, (_, i) => i));
+                            handleSelectionChange(newSet);
+                            if (onSelectedRowsChange) {
+                              onSelectedRowsChange([...paginatedData]);
+                            }
                           } else {
                             handleSelectionChange(new Set());
+                            if (onSelectedRowsChange) {
+                              onSelectedRowsChange([]);
+                            }
                           }
                         }}
                         checked={currentSelectedRows.size === paginatedData.length && paginatedData.length > 0}
