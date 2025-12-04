@@ -243,6 +243,51 @@ export function SmartGridPlus({
     }
   }, [handleSubRowToggle, toggleSubRow, onSubRowToggle]);
 
+  // Custom sub-row edit handler that propagates changes to parent
+  const handleSubRowEditCustom = useCallback(async (rowIndex: number, columnKey: string, value: any) => {
+    console.log('Custom sub-row edit:', { rowIndex, columnKey, value });
+    
+    // Get the current row data
+    const currentRow = gridData[rowIndex];
+    if (!currentRow) return;
+    
+    // Create updated row
+    const updatedRow = {
+      ...currentRow,
+      [columnKey]: value
+    };
+    
+    // Update internal state
+    handleSubRowEdit(rowIndex, columnKey, value);
+    
+    // Call onUpdate if provided (for external state management)
+    if (onUpdate) {
+      try {
+        await onUpdate(updatedRow);
+        toast({
+          title: "Updated",
+          description: "Sub-row value updated successfully"
+        });
+      } catch (error) {
+        console.error('Failed to update sub-row:', error);
+        toast({
+          title: "Error",
+          description: "Failed to update value",
+          variant: "destructive"
+        });
+      }
+    }
+    
+    // Call onEditRow if provided
+    if (onEditRow) {
+      try {
+        await onEditRow(updatedRow, rowIndex);
+      } catch (error) {
+        console.error('Failed to edit row via onEditRow:', error);
+      }
+    }
+  }, [gridData, handleSubRowEdit, onUpdate, onEditRow, toast]);
+
   // Helper function to render collapsible cell values
   const renderCollapsibleCellValue = useCallback((value: any, column: GridColumnConfig) => {
     if (value == null) return '-';
@@ -307,7 +352,7 @@ export function SmartGridPlus({
             subRowColumnOrder={preferences.subRowColumnOrder}
             editingCell={editingCell}
             onReorderSubRowColumns={updateSubRowColumnOrder}
-            onSubRowEdit={handleSubRowEdit}
+            onSubRowEdit={handleSubRowEditCustom}
             onSubRowEditStart={handleSubRowEditStart}
             onSubRowEditCancel={handleSubRowEditCancel}
           />
@@ -319,7 +364,7 @@ export function SmartGridPlus({
 
     // Fallback to collapsible content if no sub-row columns
     return renderCollapsibleContent(row);
-  }, [hasSubRowColumns, subRowColumns, preferences.subRowColumnOrder, editingCell, updateSubRowColumnOrder, handleSubRowEdit, handleSubRowEditStart, handleSubRowEditCancel, renderCollapsibleContent, nestedRowRenderer]);
+  }, [hasSubRowColumns, subRowColumns, preferences.subRowColumnOrder, editingCell, updateSubRowColumnOrder, handleSubRowEditCustom, handleSubRowEditStart, handleSubRowEditCancel, renderCollapsibleContent, nestedRowRenderer]);
 
   // Use sub-row renderer if we have sub-row columns, otherwise use collapsible or custom renderer
   const effectiveNestedRowRenderer = hasSubRowColumns ? renderSubRowContent : (hasCollapsibleColumns ? renderCollapsibleContent : nestedRowRenderer);
