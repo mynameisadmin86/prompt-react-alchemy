@@ -373,6 +373,9 @@ const SmartGridPlusWithNestedRowsDemo = () => {
           paginationMode="pagination"
           customPageSize={10}
           inlineRowEditing={true}
+          onSelectedRowsChange={(selectedRows) => {
+            console.log('Selected rows:', selectedRows);
+          }}
           nestedSectionConfig={{
             nestedDataKey: 'orderItems',
             columns: orderItemColumns,
