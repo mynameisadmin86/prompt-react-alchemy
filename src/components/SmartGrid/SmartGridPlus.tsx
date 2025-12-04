@@ -1230,7 +1230,7 @@ export function SmartGridPlus({
     <div className="space-y-4 w-full">
       {/* Add Row Button */}
       {inlineRowAddition && addRowButtonPosition === "top-left" && (
-        <div className="flex justify-start">
+        <div className="flex justify-start" style={{ display: 'none' }}>
           <Button
             onClick={handleAddRowClick}
             disabled={isAddingRow}
