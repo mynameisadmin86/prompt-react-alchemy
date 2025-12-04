@@ -301,6 +301,10 @@ export interface SmartGridPlusProps extends SmartGridProps {
   onEditRow?: (row: any, rowIndex: number) => Promise<void> | void;
   onDeleteRow?: (row: any, rowIndex: number) => Promise<void> | void;
   
+  // Selection
+  showCheckboxes?: boolean;
+  onSelectedRowsChange?: (rows: any[]) => void;
+  
   // Default values and validation
   defaultRowValues?: Record<string, any>;
   validationRules?: {
