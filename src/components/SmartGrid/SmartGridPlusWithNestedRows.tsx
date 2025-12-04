@@ -11,6 +11,8 @@ export interface NestedSectionConfig {
   initiallyExpanded?: boolean;
   showNestedRowCount?: boolean;
   editableColumns?: boolean | string[];
+  inlineRowAddition?: boolean; // Flag to enable/disable add row in nested grid
+  inlineRowEditing?: boolean; // Flag to enable/disable inline editing in nested grid
   onInlineEdit?: (parentRowIndex: number, nestedRowIndex: number, updatedRow: any) => void;
   onUpdate?: (parentRowIndex: number, nestedRowIndex: number, updatedRow: any) => Promise<void>;
   onServerUpdate?: (parentRow: any, nestedRow: any, updatedData: any) => Promise<void>;
@@ -112,7 +114,8 @@ export function SmartGridPlusWithNestedRows({
                     paginationMode="infinite"
                     hideToolbar={true}
                     customPageSize={rowCount}
-                    inlineRowEditing={true}
+                    inlineRowAddition={nestedSectionConfig.inlineRowAddition ?? false}
+                    inlineRowEditing={nestedSectionConfig.inlineRowEditing ?? true}
                     onEditRow={nestedSectionConfig.onInlineEdit 
                       ? async (updatedRow, nestedRowIndex) => {
                           await nestedSectionConfig.onInlineEdit!(rowIndex, nestedRowIndex, updatedRow);
@@ -121,7 +124,7 @@ export function SmartGridPlusWithNestedRows({
                           }
                         }
                       : undefined}
-                    onAddRow={nestedSectionConfig.onAddRow
+                    onAddRow={nestedSectionConfig.inlineRowAddition && nestedSectionConfig.onAddRow
                       ? async (newRow) => {
                           await nestedSectionConfig.onAddRow!(rowIndex, newRow);
                         }
