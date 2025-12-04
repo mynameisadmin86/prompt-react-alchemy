@@ -89,7 +89,8 @@ export function SmartGrid({
   customPageSize,
   onSearch,
   onClearAll,
-  exportFilename = `export-${new Date().toISOString().split('T')[0]}`
+  exportFilename = `export-${new Date().toISOString().split('T')[0]}`,
+  defaultShowCheckboxes = false
 }: SmartGridProps & { exportFilename?: string }) {
   const {
     gridData,
@@ -141,7 +142,7 @@ export function SmartGrid({
     handleSubRowEdit,
     handleSubRowEditStart,
     handleSubRowEditCancel
-  } = useSmartGridState();
+  } = useSmartGridState({ defaultShowCheckboxes });
 
   const [pageSize] = useState(customPageSize || 10);
   const [showFilterRow, setShowFilterRow] = useState(false);

@@ -238,6 +238,8 @@ export interface SmartGridProps {
   hideAdvancedFilter?: boolean;
   // Control whether to show the checkbox toggle button in toolbar
   hideCheckboxToggle?: boolean;
+  // Default checkbox state
+  defaultShowCheckboxes?: boolean;
 }
 
 // Legacy interface for backward compatibility
