@@ -377,6 +377,7 @@ const SmartGridPlusWithNestedRowsDemo = () => {
           customPageSize={10}
           inlineRowEditing={true}
           showCheckboxes={true}
+          selectionMode="single"
           onSelectedRowsChange={(rows) => {
             setSelectedRows(rows);
           }}
