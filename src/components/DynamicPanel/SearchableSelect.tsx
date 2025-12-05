@@ -121,7 +121,7 @@ export function SearchableSelect({
           type="button"
           aria-expanded={isOpen}
           className={cn(
-            "w-full justify-between text-left font-normal",
+            "w-full justify-between text-left font-normal group",
             !hasValue && "text-muted-foreground",
             className
           )}
@@ -135,7 +135,7 @@ export function SearchableSelect({
           <div className="flex items-center gap-1">
             {hasValue && (
               <X
-                className="h-4 w-4 shrink-0 opacity-50 hover:opacity-100"
+                className="h-4 w-4 shrink-0 opacity-0 group-hover:opacity-50 hover:!opacity-100 transition-opacity"
                 onClick={handleClear}
               />
             )}
