@@ -1,9 +1,9 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Checkbox } from '@/components/ui/checkbox';
-import { ChevronDown, X } from 'lucide-react';
+import { ChevronDown, X, Plus, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface SearchableSelectOption {
@@ -23,6 +23,8 @@ interface SearchableSelectProps {
   onClick?: (e: React.MouseEvent, value: any) => void;
   onFocus?: (e: React.FocusEvent) => void;
   onBlur?: (e: React.FocusEvent) => void;
+  allowAddNew?: boolean; // Enable adding new items not in the list
+  onAddNew?: (newValue: string) => Promise<void> | void; // Callback when adding new item
 }
 
 export function SearchableSelect({
@@ -37,9 +39,12 @@ export function SearchableSelect({
   onClick,
   onFocus,
   onBlur,
+  allowAddNew = false,
+  onAddNew,
 }: SearchableSelectProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [isAddingNew, setIsAddingNew] = useState(false);
 
   // Filter options based on search term
   const filteredOptions = useMemo(() => {
@@ -82,6 +87,45 @@ export function SearchableSelect({
       onClick(e, value);
     }
   };
+
+  // Check if search term matches any existing option
+  const isSearchTermInOptions = useCallback(() => {
+    if (!searchTerm.trim()) return true;
+    const lowerSearch = searchTerm.toLowerCase().trim();
+    return options.some(opt => 
+      opt.label.toLowerCase() === lowerSearch || 
+      opt.value.toLowerCase() === lowerSearch ||
+      opt.label.toLowerCase().includes(lowerSearch) ||
+      opt.value.toLowerCase().includes(lowerSearch)
+    );
+  }, [searchTerm, options]);
+
+  // Handle adding new item
+  const handleAddNew = async () => {
+    if (!searchTerm.trim() || !onAddNew) return;
+    
+    setIsAddingNew(true);
+    try {
+      await onAddNew(searchTerm.trim());
+      onChange(searchTerm.trim());
+      setSearchTerm('');
+      setIsOpen(false);
+    } catch (error) {
+      console.error('Failed to add new item:', error);
+    } finally {
+      setIsAddingNew(false);
+    }
+  };
+
+  // Handle Enter key for adding new item
+  const handleSearchKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && allowAddNew && searchTerm.trim() && !isSearchTermInOptions() && onAddNew) {
+      e.preventDefault();
+      handleAddNew();
+    }
+  };
+
+  const showAddNewOption = allowAddNew && searchTerm.trim() && filteredOptions.length === 0;
 
   const getDisplayValue = () => {
     if (!value) return placeholder;
@@ -146,14 +190,32 @@ export function SearchableSelect({
       <PopoverContent className="w-[--radix-popover-trigger-width] p-0 z-50 bg-background" align="start">
         <div className="p-2 border-b">
           <Input
-            placeholder="Search..."
+            placeholder={allowAddNew ? "Search or add new..." : "Search..."}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
+            onKeyDown={handleSearchKeyDown}
             className="h-8"
           />
         </div>
         <div className="max-h-60 overflow-y-auto">
-          {filteredOptions.length === 0 ? (
+          {/* Add New Option */}
+          {showAddNewOption && (
+            <div
+              className={cn(
+                "flex items-center space-x-2 px-2 py-2 hover:bg-accent hover:text-accent-foreground cursor-pointer border-b",
+                isAddingNew && "opacity-50 pointer-events-none"
+              )}
+              onClick={handleAddNew}
+            >
+              <Plus className="h-4 w-4 text-primary" />
+              <span className="flex-1 truncate text-sm font-medium text-primary">
+                Add "{searchTerm.trim()}"
+              </span>
+              {isAddingNew && <Loader2 className="h-3 w-3 animate-spin" />}
+            </div>
+          )}
+          
+          {filteredOptions.length === 0 && !showAddNewOption ? (
             <div className="py-6 text-center text-sm text-muted-foreground">
               {searchTerm ? 'No results found.' : 'No options available.'}
             </div>
