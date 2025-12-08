@@ -73,6 +73,8 @@ export interface FieldConfig {
   }) => Promise<{ label: string; value: string }[]>;
   hideSearch?: boolean; // Hide search box in lazyselect
   disableLazyLoading?: boolean; // Disable lazy loading on scroll in lazyselect
+  allowAddNew?: boolean; // Enable adding new items not in the list
+  onAddNew?: (newValue: string) => Promise<void> | void; // Callback when adding new item
   // For searchableselect field type
   localOptions?: { label: string; value: string }[]; // Local data array for searchableselect
   // Event handlers for field interactions

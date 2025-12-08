@@ -3,7 +3,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Checkbox } from '@/components/ui/checkbox';
-import { ChevronDown, Loader2, X } from 'lucide-react';
+import { ChevronDown, Loader2, X, Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface LazySelectOption {
@@ -23,7 +23,9 @@ interface LazySelectProps {
   className?: string;
   hideSearch?: boolean;
   disableLazyLoading?: boolean;
-  returnType?: string; // 👈 NEW PROP
+  returnType?: string;
+  allowAddNew?: boolean; // Enable adding new items not in the list
+  onAddNew?: (newValue: string) => Promise<void> | void; // Callback when adding new item
 }
 
 const ITEMS_PER_PAGE = 50;
@@ -38,8 +40,9 @@ export function LazySelect({
   className,
   hideSearch = false,
   disableLazyLoading = false,
-  returnType = 'id', // default keeps existing behavior
-
+  returnType = 'id',
+  allowAddNew = false,
+  onAddNew,
 }: LazySelectProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [options, setOptions] = useState<LazySelectOption[]>([]);
@@ -48,6 +51,7 @@ export function LazySelect({
   const [hasMore, setHasMore] = useState(true);
   const [offset, setOffset] = useState(1);
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
+  const [isAddingNew, setIsAddingNew] = useState(false);
 
   const searchTimeoutRef = useRef<NodeJS.Timeout>();
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -172,6 +176,46 @@ export function LazySelect({
     onChange(undefined);
   };
 
+  // Check if search term matches any existing option
+  const isSearchTermInOptions = useCallback(() => {
+    if (!searchTerm.trim()) return true;
+    const lowerSearch = searchTerm.toLowerCase().trim();
+    return options.some((opt: any) => {
+      const optId = (opt.id ?? opt.carrierid ?? opt.wbscostcenter)?.toString().toLowerCase();
+      const optName = (opt.name ?? opt.carrierdescription ?? opt.wbscostcenterdesc)?.toString().toLowerCase();
+      return optId === lowerSearch || optName === lowerSearch || 
+             optId?.includes(lowerSearch) || optName?.includes(lowerSearch);
+    });
+  }, [searchTerm, options]);
+
+  // Handle adding new item
+  const handleAddNew = async () => {
+    if (!searchTerm.trim() || !onAddNew) return;
+    
+    setIsAddingNew(true);
+    try {
+      await onAddNew(searchTerm.trim());
+      // Select the newly added value
+      onChange(searchTerm.trim());
+      setSearchTerm('');
+      setIsOpen(false);
+    } catch (error) {
+      console.error('Failed to add new item:', error);
+    } finally {
+      setIsAddingNew(false);
+    }
+  };
+
+  // Handle Enter key in search input for adding new item
+  const handleSearchKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && allowAddNew && searchTerm.trim() && !isSearchTermInOptions() && onAddNew) {
+      e.preventDefault();
+      handleAddNew();
+    }
+  };
+
+  const showAddNewOption = allowAddNew && searchTerm.trim() && !loading && !isSearchTermInOptions();
+
   const getDisplayValue = () => {
     if (!value) return placeholder;
 
@@ -246,9 +290,10 @@ export function LazySelect({
         {!hideSearch && (
           <div className="p-2 border-b">
             <Input
-              placeholder="Search..."
+              placeholder={allowAddNew ? "Search or add new..." : "Search..."}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
+              onKeyDown={handleSearchKeyDown}
               className="h-8"
             />
           </div>
@@ -258,9 +303,25 @@ export function LazySelect({
           className="max-h-60 overflow-y-auto"
           onScroll={handleScroll}
         >
-          {options.length === 0 && !loading ? (
+          {/* Add New Option */}
+          {showAddNewOption && (
+            <div
+              className={cn(
+                "flex items-center space-x-2 px-2 py-2 hover:bg-accent hover:text-accent-foreground cursor-pointer border-b",
+                isAddingNew && "opacity-50 pointer-events-none"
+              )}
+              onClick={handleAddNew}
+            >
+              <Plus className="h-4 w-4 text-primary" />
+              <span className="flex-1 truncate text-xs font-medium text-primary">
+                Add "{searchTerm.trim()}"
+              </span>
+              {isAddingNew && <Loader2 className="h-3 w-3 animate-spin" />}
+            </div>
+          )}
+          
+          {options.length === 0 && !loading && !showAddNewOption ? (
             <div className="py-6 text-center text-sm text-muted-foreground">
-              {/* {debouncedSearchTerm ? 'No results found.' : 'Start typing to search...'} */}
               {hideSearch ? 'No options available.' : (debouncedSearchTerm ? 'No results found.' : 'Start typing to search...')}
             </div>
           ) : (
