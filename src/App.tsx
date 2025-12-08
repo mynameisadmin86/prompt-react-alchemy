@@ -45,6 +45,7 @@ import SmartGridWithNestedRowsDemo from "./pages/SmartGridWithNestedRowsDemo";
 import SmartGridPlusWithNestedRowsDemo from "./pages/SmartGridPlusWithNestedRowsDemo";
 import EquipmentCalendarDemo from "./pages/EquipmentCalendarDemo";
 import CascadingLazySelectDemo from "./pages/CascadingLazySelectDemo";
+import LazySelectAddNewDemo from "./pages/LazySelectAddNewDemo";
 
 const queryClient = new QueryClient();
 
@@ -95,6 +96,7 @@ const App = () => (
           <Route path="/smartgrid-plus-nested-rows-demo" element={<SmartGridPlusWithNestedRowsDemo />} />
           <Route path="/equipment-calendar-demo" element={<EquipmentCalendarDemo />} />
           <Route path="/cascading-lazyselect-demo" element={<CascadingLazySelectDemo />} />
+          <Route path="/lazyselect-add-new-demo" element={<LazySelectAddNewDemo />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
