@@ -272,6 +272,13 @@ const Index = () => {
       path: "/cascading-lazyselect-demo",
       color: "text-purple-500"
     },
+    {
+      title: "LazySelect Add New Demo",
+      description: "LazySelect with allowAddNew feature to add new items directly from the dropdown",
+      icon: PanelLeft,
+      path: "/lazyselect-add-new-demo",
+      color: "text-teal-500"
+    },
   ];
 
   return (
