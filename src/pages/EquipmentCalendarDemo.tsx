@@ -1,115 +1,144 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { SmartEquipmentCalendar } from '@/components/SmartEquipmentCalendar';
-import { EquipmentItem, EquipmentCalendarEvent } from '@/types/equipmentCalendar';
+import { 
+  ResourceCategoryResponse, 
+  EquipmentItem, 
+  EquipmentCalendarEvent,
+  transformResourceToEquipment,
+  transformTripDataToEvents
+} from '@/types/equipmentCalendar';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft, ChevronRight, Calendar } from 'lucide-react';
 import { addDays, addMonths, subDays, subMonths, addWeeks, subWeeks, startOfWeek, startOfMonth } from 'date-fns';
 import { toast } from 'sonner';
 import { SideDrawer } from '@/components/SideDrawer';
 
+// Sample API response data
+const sampleApiResponse: ResourceCategoryResponse = {
+  "ResourceCategory": "Equipment",
+  "ResourceDetails": [
+    {
+      "EquipmentType": "Train",
+      "EquipmentCode": "ExDAFA 5.1",
+      "EquipmentStatus": "Available",
+      "EquipmentContract": null,
+      "ContractAgent": null,
+      "EquipmentGroup": null,
+      "EquipmentOwner": "OW",
+      "WeightUOM": null,
+      "AvilableStatus": "Available for planning",
+      "IsChecked": 1,
+      "AdditionalData": null,
+      "TripData": [
+        {
+          "RefDocNo": "TP_D25_0318",
+          "RefDocType": "TRIP",
+          "RefDocStatus": "Released",
+          "PlanStart": "2025-11-27 18:00",
+          "PlanEnd": "2025-11-27 22:00",
+          "AdditionalData": [
+            { "Name": "FromGeo", "Value": "53-206581" },
+            { "Name": "ToGeo", "Value": "53-202705" },
+            { "Name": "FromDate", "Value": "2025-11-27 18:00:00" },
+            { "Name": "ToDate", "Value": "2025-11-27 22:00:00" },
+            { "Name": "Customer_id", "Value": "46700070" },
+            { "Name": "ServiceType", "Value": "" },
+            { "Name": "SubServiceType", "Value": "" }
+          ]
+        }
+      ]
+    },
+    {
+      "EquipmentType": "Train",
+      "EquipmentCode": "DASP 1",
+      "EquipmentStatus": "Available",
+      "EquipmentContract": null,
+      "ContractAgent": null,
+      "EquipmentGroup": null,
+      "EquipmentOwner": "OW",
+      "WeightUOM": null,
+      "AvilableStatus": "Available for planning",
+      "IsChecked": 0,
+      "AdditionalData": null,
+      "TripData": null
+    },
+    {
+      "EquipmentType": "Train",
+      "EquipmentCode": "EE24-ExTM6a",
+      "EquipmentStatus": "Available",
+      "EquipmentContract": null,
+      "ContractAgent": null,
+      "EquipmentGroup": null,
+      "EquipmentOwner": "OW",
+      "WeightUOM": null,
+      "AvilableStatus": "Available for planning",
+      "IsChecked": 0,
+      "AdditionalData": null,
+      "TripData": null
+    },
+    {
+      "EquipmentType": "Wagon",
+      "EquipmentCode": "W001",
+      "EquipmentStatus": "Occupied",
+      "EquipmentContract": null,
+      "ContractAgent": null,
+      "EquipmentGroup": null,
+      "EquipmentOwner": "ABC Logistics",
+      "WeightUOM": "50T",
+      "AvilableStatus": "In Use",
+      "IsChecked": 0,
+      "AdditionalData": null,
+      "TripData": [
+        {
+          "RefDocNo": "TP_D25_0320",
+          "RefDocType": "TRIP",
+          "RefDocStatus": "In Progress",
+          "PlanStart": "2025-11-27 08:00",
+          "PlanEnd": "2025-11-28 16:00",
+          "AdditionalData": []
+        }
+      ]
+    },
+    {
+      "EquipmentType": "Wagon",
+      "EquipmentCode": "W002",
+      "EquipmentStatus": "Workshop",
+      "EquipmentContract": null,
+      "ContractAgent": null,
+      "EquipmentGroup": null,
+      "EquipmentOwner": "XYZ Transport",
+      "WeightUOM": "45T",
+      "AvilableStatus": "Under Maintenance",
+      "IsChecked": 0,
+      "AdditionalData": null,
+      "TripData": [
+        {
+          "RefDocNo": "MNT_0045",
+          "RefDocType": "MAINTENANCE",
+          "RefDocStatus": "Scheduled",
+          "PlanStart": "2025-11-27 09:00",
+          "PlanEnd": "2025-11-27 17:00",
+          "AdditionalData": []
+        }
+      ]
+    }
+  ]
+};
+
 const EquipmentCalendarDemo = () => {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [view, setView] = useState<'day' | 'week' | 'month'>('week');
-  const [startDate, setStartDate] = useState(new Date('2025-11-17'));
+  const [startDate, setStartDate] = useState(new Date('2025-11-27'));
   const [showHourView, setShowHourView] = useState(false);
   const [statusFilter, setStatusFilter] = useState('all');
   const [selectedEquipments, setSelectedEquipments] = useState<string[]>([]);
 
-  // Sample equipment data
-  const equipments: EquipmentItem[] = [
-    { id: 'eq1', title: 'W001', supplier: 'ABC Logistics', status: 'available', type: 'Freight', capacity: '50T' },
-    { id: 'eq2', title: 'W002', supplier: 'XYZ Transport', status: 'available', type: 'Passenger', capacity: '80 seats' },
-    { id: 'eq3', title: 'W003', supplier: 'ABC Logistics', status: 'occupied', type: 'Tank', capacity: '40T' },
-    { id: 'eq4', title: 'W004', supplier: 'Delta Movers', status: 'available', type: 'Freight', capacity: '50T' },
-    { id: 'eq5', title: 'W005', supplier: 'XYZ Transport', status: 'occupied', type: 'Freight', capacity: '55T' },
-    { id: 'eq6', title: 'W006', supplier: 'ABC Logistics', status: 'workshop', type: 'Tank', capacity: '45T' },
-    { id: 'eq7', title: 'W007', supplier: 'Gamma Fleet', status: 'available', type: 'Freight', capacity: '50T' },
-    { id: 'eq8', title: 'W008', supplier: 'Delta Movers', status: 'workshop', type: 'Passenger', capacity: '75 seats' },
-  ];
-
-  // Sample events
-  const events: EquipmentCalendarEvent[] = [
-    {
-      id: 'ev1',
-      equipmentId: 'eq1',
-      label: 'Trip to NYC',
-      type: 'trip',
-      start: '2025-11-17T08:00:00',
-      end: '2025-11-17T16:00:00',
-    },
-    {
-      id: 'ev2',
-      equipmentId: 'eq1',
-      label: 'Trip to Boston',
-      type: 'trip',
-      start: '2025-11-18T10:00:00',
-      end: '2025-11-18T18:00:00',
-    },
-    {
-      id: 'ev3',
-      equipmentId: 'eq2',
-      label: 'Maintenance Check',
-      type: 'maintenance',
-      start: '2025-11-17T09:00:00',
-      end: '2025-11-17T12:00:00',
-    },
-    {
-      id: 'ev4',
-      equipmentId: 'eq2',
-      label: 'Trip to Chicago',
-      type: 'trip',
-      start: '2025-11-18T06:00:00',
-      end: '2025-11-19T14:00:00',
-    },
-    {
-      id: 'ev5',
-      equipmentId: 'eq3',
-      label: 'Hold for Inspection',
-      type: 'hold',
-      start: '2025-11-17T08:00:00',
-      end: '2025-11-17T17:00:00',
-    },
-    {
-      id: 'ev6',
-      equipmentId: 'eq4',
-      label: 'Scheduled Maintenance',
-      type: 'maintenance',
-      start: '2025-11-17T08:00:00',
-      end: '2025-11-19T17:00:00',
-    },
-    {
-      id: 'ev7',
-      equipmentId: 'eq5',
-      label: 'Trip to LA',
-      type: 'trip',
-      start: '2025-11-17T12:00:00',
-      end: '2025-11-20T15:00:00',
-    },
-    {
-      id: 'ev8',
-      equipmentId: 'eq6',
-      label: 'Trip to Seattle',
-      type: 'trip',
-      start: '2025-11-18T07:00:00',
-      end: '2025-11-19T19:00:00',
-    },
-    {
-      id: 'ev9',
-      equipmentId: 'eq7',
-      label: 'Trip to Portland',
-      type: 'trip',
-      start: '2025-11-19T08:00:00',
-      end: '2025-11-20T16:00:00',
-    },
-    {
-      id: 'ev10',
-      equipmentId: 'eq8',
-      label: 'Oil Change',
-      type: 'maintenance',
-      start: '2025-11-17T10:00:00',
-      end: '2025-11-17T14:00:00',
-    },
-  ];
+  // Transform API data to internal types
+  const { equipments, events } = useMemo(() => {
+    const equipments: EquipmentItem[] = sampleApiResponse.ResourceDetails.map(transformResourceToEquipment);
+    const events: EquipmentCalendarEvent[] = sampleApiResponse.ResourceDetails.flatMap(transformTripDataToEvents);
+    return { equipments, events };
+  }, []);
 
   const handlePrevious = () => {
     switch (view) {
@@ -156,19 +185,19 @@ const EquipmentCalendarDemo = () => {
 
   const handleBarClick = (event: EquipmentCalendarEvent) => {
     toast.info(`Clicked: ${event.label}`, {
-      description: `Type: ${event.type} | Equipment: ${event.equipmentId}`,
+      description: `Type: ${event.type} | Status: ${event.status || 'N/A'} | Equipment: ${event.equipmentId}`,
     });
   };
 
   const handleEquipmentClick = (equipment: EquipmentItem) => {
     toast.success(`Selected: ${equipment.title}`, {
-      description: `Supplier: ${equipment.supplier} | Status: ${equipment.status}`,
+      description: `Type: ${equipment.type} | Owner: ${equipment.supplier} | Status: ${equipment.status}`,
     });
   };
 
   const handleAddToTrip = (selectedIds: string[]) => {
-    toast.success(`Adding ${selectedIds.length} wagon(s) to CO/Trip`, {
-      description: `Wagons: ${selectedIds.join(', ')}`,
+    toast.success(`Adding ${selectedIds.length} equipment(s) to CO/Trip`, {
+      description: `Equipment: ${selectedIds.join(', ')}`,
     });
     setSelectedEquipments([]);
   };
