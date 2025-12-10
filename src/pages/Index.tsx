@@ -279,6 +279,13 @@ const Index = () => {
       path: "/lazyselect-add-new-demo",
       color: "text-teal-500"
     },
+    {
+      title: "DynamicLazySelect Add New Demo",
+      description: "DynamicLazySelect with allowAddNew feature for DynamicPanel integration",
+      icon: PanelLeft,
+      path: "/dynamic-lazyselect-add-new-demo",
+      color: "text-cyan-500"
+    },
   ];
 
   return (
