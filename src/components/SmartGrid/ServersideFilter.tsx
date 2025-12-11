@@ -444,10 +444,8 @@ export function ServersideFilter({
     });
   };
 
-  if (!visible) return null;
-
   return (
-    <div className="">
+    <div className="" style={{ display: visible ? 'block' : 'none' }}>
       {/* Filter Controls */}
       <div className="flex items-center justify-between bg-gray-50 p-2 rounded border mb-3">
         <div className="flex items-center space-x-2">
