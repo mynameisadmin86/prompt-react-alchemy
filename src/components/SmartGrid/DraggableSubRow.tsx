@@ -305,7 +305,8 @@ export const DraggableSubRow: React.FC<DraggableSubRowProps> = ({
 
   const renderSubRowCellValue = useCallback((value: any, column: GridColumnConfig) => {
     const isEditing = editingCell?.rowIndex === rowIndex && editingCell?.columnKey === column.key;
-    const isEditable = column.editable;
+    // Check isSubRowEditable - if defined use it, otherwise fall back to editable
+    const isEditable = column.isSubRowEditable !== undefined ? column.isSubRowEditable : column.editable;
 
     if (isEditing) {
       return renderEditInput(column);

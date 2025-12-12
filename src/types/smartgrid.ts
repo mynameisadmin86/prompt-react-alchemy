@@ -40,6 +40,7 @@ export interface GridColumnConfig {
   filterable?: boolean;
   filterMode?: 'local' | 'server'; // Determines if filtering is done locally or on server
   editable?: boolean;
+  isSubRowEditable?: boolean; // If true, editable in sub-row; if false, not editable in sub-row (editable in main row only if editable:true)
   mandatory?: boolean;
   hidden?: boolean;
   order?: number;
