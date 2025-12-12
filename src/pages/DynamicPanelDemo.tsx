@@ -173,7 +173,9 @@ const DynamicPanelDemo = () => {
       mandatory: true,
       visible: true,
       editable: false,
-      order: 1
+      order: 1,
+      width: 'third',
+      style: { backgroundColor: '#f0f0f0', border: '2px solid blue' }
     },
     customer: {
       fieldType: 'lazyselect',
