@@ -149,6 +149,48 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
     );
   }
   // --- END UPDATED ---
+
+  // --- searchtext fieldType: simple search input with Enter trigger ---
+  if (fieldType === 'searchtext') {
+    return (
+      <Controller
+        name={fieldId}
+        control={control}
+        render={({ field }) => {
+          return (
+            <div style={style} className="relative focus-within:z-50">
+              <Input
+                type="text"
+                value={field.value || ''}
+                onChange={e => {
+                  field.onChange(e.target.value);
+                  events?.onChange?.(e.target.value, e);
+                }}
+                onKeyDown={e => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    events?.onKeyDown?.(e);
+                  }
+                }}
+                onFocus={events?.onFocus}
+                onBlur={events?.onBlur}
+                placeholder={placeholder || 'Search...'}
+                className={`pr-8 h-8 text-[13px] rounded-md ${
+                  hasError 
+                    ? 'border-red-500 focus:border-red-500 focus:ring-red-500' 
+                    : 'border-gray-300 focus:border-blue-500'
+                }`}
+                tabIndex={tabIndex}
+                autoComplete="off"
+              />
+              <Search className="absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+            </div>
+          );
+        }}
+      />
+    );
+  }
+  // --- END searchtext ---
   
   switch (fieldType) {
     case 'text':
