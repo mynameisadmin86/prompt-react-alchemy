@@ -87,7 +87,6 @@ export interface FieldConfig {
     onKeyUp?: (event: React.KeyboardEvent) => void;
     onMouseEnter?: (event: React.MouseEvent) => void;
     onMouseLeave?: (event: React.MouseEvent) => void;
-    onEnter?: (value: any) => void; // Triggered when Enter key is pressed (for search field)
   };
   searchData?: string[]; // For search field type, local array for suggestions
   style?: React.CSSProperties; // Inline CSS styles for the field container

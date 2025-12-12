@@ -111,14 +111,6 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
                 }}
                 onBlur={() => setTimeout(() => setShowSuggestions(false), 100)}
                 onFocus={() => setShowSuggestions(true)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    e.preventDefault();
-                    setShowSuggestions(false);
-                    events?.onEnter?.(inputValue);
-                  }
-                  events?.onKeyDown?.(e);
-                }}
                 placeholder={placeholder || 'Search...'}
                 className={`pr-8 h-8 text-[13px] rounded-md ${
                   hasError 
