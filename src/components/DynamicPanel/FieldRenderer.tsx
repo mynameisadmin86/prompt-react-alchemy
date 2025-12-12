@@ -31,7 +31,7 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
   tabIndex,
   validationErrors = {}
 }) => {
-  const { fieldType, editable, placeholder, options, color, fieldColour, events } = config;
+  const { fieldType, editable, placeholder, options, color, fieldColour, events, style } = config;
 
   const searchData: string[] | undefined = (config as any).searchData;
   
@@ -56,7 +56,7 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
         name={fieldId}
         control={control}
         render={({ field }) => (
-          <div>
+          <div style={style}>
             <div className="text-xs text-blue-600 mb-1">TabIndex: {tabIndex}</div>
             <div className="text-xs text-gray-700 bg-gray-50 p-2 rounded border min-h-[32px] flex items-center">
               {field.value || '-'}
@@ -159,7 +159,7 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
           render={({ field }) => {
             const eventHandlers = createEventHandlers(field);
             return (
-              <div>
+              <div style={style}>
                 <div className="text-xs text-blue-600 mb-1">TabIndex: {tabIndex}</div>
                 <Input
                   type="text"
@@ -183,7 +183,7 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
           render={({ field }) => {
             const eventHandlers = createEventHandlers(field);
             return (
-              <div>
+              <div style={style}>
                 <div className="text-xs text-blue-600 mb-1">TabIndex: {tabIndex}</div>
                 <Textarea
                   {...field}
@@ -210,7 +210,7 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
           render={({ field }) => {
             const eventHandlers = createEventHandlers(field);
             return (
-              <div>
+              <div style={style}>
                 <div className="text-xs text-blue-600 mb-1">TabIndex: {tabIndex}</div>
                 <RadioGroup
                   value={field.value || ''}
@@ -252,7 +252,7 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
           render={({ field }) => {
             const eventHandlers = createEventHandlers(field);
             return (
-              <div>
+              <div style={style}>
                 <div className="text-xs text-blue-600 mb-1">TabIndex: {tabIndex}</div>
                 <div className="relative focus-within:z-50">
                   <select
@@ -303,7 +303,7 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
             }
 
             return (
-              <div>
+              <div style={style}>
                 <div className="text-xs text-blue-600 mb-1">TabIndex: {tabIndex}</div>
                 <DynamicLazySelect
                   fetchOptions={fetchOptions}
@@ -344,7 +344,7 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
             const dateFormat = config.dateFormat || "PPP"; // Default to "PPP" if no format specified
             
             return (
-              <div>
+              <div style={style}>
                 <div className="text-xs text-blue-600 mb-1">TabIndex: {tabIndex}</div>
                 <div className="relative focus-within:z-50">
                   <Popover>
@@ -411,7 +411,7 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
           render={({ field }) => {
             const eventHandlers = createEventHandlers(field);
             return (
-              <div>
+              <div style={style}>
                 <div className="text-xs text-blue-600 mb-1">TabIndex: {tabIndex}</div>
                 <div className="relative focus-within:z-50">
                   <Input
@@ -437,7 +437,7 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
           render={({ field }) => {
             const eventHandlers = createEventHandlers(field);
             return (
-              <div>
+              <div style={style}>
                 <div className="text-xs text-blue-600 mb-1">TabIndex: {tabIndex}</div>
                 <div className="relative focus-within:z-50">
                   <span className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-500 text-xs">
@@ -478,7 +478,7 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
             return (
               <div 
                 className="border rounded-lg p-4 shadow-sm transition-all duration-200 hover:shadow-md"
-                style={color ? cardStyle : {}}
+                style={color ? { ...cardStyle, ...style } : style}
                 onClick={events?.onClick ? (e) => events.onClick!(e, field.value) : undefined}
                 onMouseEnter={events?.onMouseEnter}
                 onMouseLeave={events?.onMouseLeave}
@@ -508,7 +508,7 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
             const fieldValue = field.value || {};
             
             return (
-              <div>
+              <div style={style}>
                 <div className="text-xs text-blue-600 mb-1">TabIndex: {tabIndex}</div>
                 <InputDropdown
                   value={fieldValue}
@@ -551,7 +551,7 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
             }
 
             return (
-              <div>
+              <div style={style}>
                 <div className="text-xs text-blue-600 mb-1">TabIndex: {tabIndex}</div>
                 <SearchableSelect
                   options={localOptions}
@@ -585,7 +585,7 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
           name={fieldId}
           control={control}
           render={({ field }) => (
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-2" style={style}>
               <Switch
                 checked={!!field.value}
                 onCheckedChange={(checked) => {
@@ -610,7 +610,7 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
           render={({ field }) => {
             const eventHandlers = createEventHandlers(field);
             return (
-              <div>
+              <div style={style}>
                 <div className="text-xs text-blue-600 mb-1">TabIndex: {tabIndex}</div>
                 <Input
                   type="text"

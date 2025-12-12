@@ -89,6 +89,7 @@ export interface FieldConfig {
     onMouseLeave?: (event: React.MouseEvent) => void;
   };
   searchData?: string[]; // For search field type, local array for suggestions
+  style?: React.CSSProperties; // Inline CSS styles for the field container
 }
 
 export interface PanelConfig {
