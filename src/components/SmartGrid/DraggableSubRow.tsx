@@ -559,7 +559,7 @@ export const DraggableSubRow: React.FC<DraggableSubRowProps> = ({
                       {/* {column.label} */}
                       {preferences?.columnHeaders[column.key] || column.label}
                     </div>
-                    {column.editable && (
+                    {(column.isSubRowEditable !== undefined ? column.isSubRowEditable : column.editable) && (
                       <div className="text-xs text-blue-600 bg-blue-50 px-2 py-0.5 rounded">
                         Editable
                       </div>
