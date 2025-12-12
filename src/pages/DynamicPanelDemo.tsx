@@ -165,6 +165,27 @@ const DynamicPanelDemo = () => {
 
   // Basic Details Panel Configuration
   const basicDetailsConfig: PanelConfig = {
+    searchWoStatus: {
+      id: 'searchWoStatus',
+      label: 'Search WO No./Status',
+      fieldType: 'searchtext',
+      value: '',
+      mandatory: false,
+      visible: true,
+      editable: true,
+      order: 0,
+      width: 'full',
+      placeholder: 'Search WO No./Status',
+      events: {
+        onKeyDown: (event) => {
+          console.log('Search triggered with value:', (event.target as HTMLInputElement).value);
+          toast({
+            title: "Search Triggered",
+            description: `Searching for: ${(event.target as HTMLInputElement).value}`,
+          });
+        }
+      }
+    },
     tripPlanNo: {
       id: 'tripPlanNo',
       label: 'Trip Plan No',

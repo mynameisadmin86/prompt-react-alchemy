@@ -50,7 +50,7 @@ export type PanelFieldConfig =
 export interface FieldConfig {
   id: string;
   label: string;
-  fieldType: 'text' | 'select' | 'search' | 'currency' | 'date' | 'time' | 'textarea' | 'radio' | 'card' | 'inputdropdown' | 'lazyselect' | 'searchableselect' | 'switch';
+  fieldType: 'text' | 'select' | 'search' | 'searchtext' | 'currency' | 'date' | 'time' | 'textarea' | 'radio' | 'card' | 'inputdropdown' | 'lazyselect' | 'searchableselect' | 'switch';
   value: any;
   mandatory: boolean;
   visible: boolean;
