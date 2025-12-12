@@ -892,10 +892,47 @@ export const CellRenderer: React.FC<CellRendererProps> = ({
         return renderTextCustomised();
       case 'String':
       case 'Integer':
+        // For String and Integer types, support inline editing
+        if (isEditing) {
+          return (
+            <Input
+              type={column.type === 'Integer' ? 'number' : 'text'}
+              value={tempValue ?? ''}
+              onChange={(e) => setTempValue(column.type === 'Integer' ? (e.target.value ? Number(e.target.value) : '') : e.target.value)}
+              onBlur={handleSave}
+              onKeyDown={handleKeyDown}
+              className="w-full min-w-0 focus:ring-2 focus:ring-blue-500"
+              autoFocus
+              disabled={loading}
+            />
+          );
+        }
+        if (isEditable) {
+          return (
+            <div
+              onClick={() => onEditStart(rowIndex, column.key)}
+              className={cn(
+                "min-h-[20px] p-2 hover:bg-blue-50 cursor-pointer rounded transition-colors duration-150 truncate",
+                loading && "opacity-50 cursor-not-allowed",
+                "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+              )}
+              title={String(value || '')}
+              tabIndex={0}
+              role="button"
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  onEditStart(rowIndex, column.key);
+                }
+              }}
+            >
+              {value !== null && value !== undefined && value !== '' ? String(value) : <span className="text-gray-400">Click to edit</span>}
+            </div>
+          );
+        }
+        return <span className="truncate" title={String(value || '')}>{value !== null && value !== undefined ? String(value) : ''}</span>;
       case 'Select':
       case 'LazySelect':
-        // For these types, just render the value as text
-        return <span className="truncate" title={String(value || '')}>{value !== null && value !== undefined ? String(value) : ''}</span>;
       case 'MultiselectLazySelect':
         // For multiselect, handle arrays of values
         if (Array.isArray(value)) {
