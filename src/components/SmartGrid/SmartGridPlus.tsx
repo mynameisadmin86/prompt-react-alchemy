@@ -1695,6 +1695,7 @@ export function SmartGridPlus({
                                     {(() => {
                                       const value = newRowValues[column.key] ?? defaultRowValues[column.key];
                                       if (value === null || value === undefined) return '-';
+                                      if (Array.isArray(value) && value.length === 0) return '-';
                                       if (typeof value === 'object') {
                                         return JSON.stringify(value);
                                       }
@@ -1741,6 +1742,7 @@ export function SmartGridPlus({
                                   {(() => {
                                     const value = defaultRowValues[column.key];
                                     if (value === null || value === undefined) return '-';
+                                    if (Array.isArray(value) && value.length === 0) return '-';
                                     if (typeof value === 'object') {
                                       return JSON.stringify(value);
                                     }
