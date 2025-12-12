@@ -1,15 +1,18 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { SmartEquipmentCalendar } from '@/components/SmartEquipmentCalendar';
 import { 
   ResourceCategoryResponse, 
   EquipmentItem, 
   EquipmentCalendarEvent,
+  DateRangeParams,
   transformResourceToEquipment,
   transformTripDataToEvents
 } from '@/types/equipmentCalendar';
 import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
 import { ChevronLeft, ChevronRight, Calendar } from 'lucide-react';
-import { addDays, addMonths, subDays, subMonths, addWeeks, subWeeks, startOfWeek, startOfMonth } from 'date-fns';
+import { addDays, addMonths, subDays, subMonths, addWeeks, subWeeks, startOfWeek, startOfMonth, format } from 'date-fns';
 import { toast } from 'sonner';
 import { SideDrawer } from '@/components/SideDrawer';
 
@@ -143,6 +146,8 @@ const EquipmentCalendarDemo = () => {
   const [showHourView, setShowHourView] = useState(false);
   const [statusFilter, setStatusFilter] = useState('all');
   const [selectedEquipments, setSelectedEquipments] = useState<string[]>([]);
+  const [filterMode, setFilterMode] = useState<'client' | 'server'>('client');
+  const [isLoading, setIsLoading] = useState(false);
 
   // Transform API data to internal types
   const { equipments, events } = useMemo(() => {
@@ -213,6 +218,20 @@ const EquipmentCalendarDemo = () => {
     setSelectedEquipments([]);
   };
 
+  // Server-side filtering callback - simulates API call
+  const handleDateRangeChange = useCallback((params: DateRangeParams) => {
+    setIsLoading(true);
+    toast.info(`Server-side filter triggered`, {
+      description: `View: ${params.view} | Range: ${format(params.startDate, 'MMM dd, yyyy')} - ${format(params.endDate, 'MMM dd, yyyy')}`,
+    });
+    
+    // Simulate API delay
+    setTimeout(() => {
+      setIsLoading(false);
+      console.log('Server-side data fetch complete:', params);
+    }, 1000);
+  }, []);
+
   return (
     <>
       <div className="h-screen w-full bg-background p-4 flex flex-col gap-4">
@@ -221,10 +240,22 @@ const EquipmentCalendarDemo = () => {
             <h1 className="text-3xl font-bold">Equipment Calendar Demo</h1>
             <p className="text-sm text-muted-foreground">Schedule and track equipment assignments</p>
           </div>
-          <Button onClick={() => setIsDrawerOpen(true)}>
-            <Calendar className="h-4 w-4 mr-2" />
-            Open Calendar
-          </Button>
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              <Switch
+                id="filter-mode"
+                checked={filterMode === 'server'}
+                onCheckedChange={(checked) => setFilterMode(checked ? 'server' : 'client')}
+              />
+              <Label htmlFor="filter-mode" className="text-sm">
+                Server-side filtering
+              </Label>
+            </div>
+            <Button onClick={() => setIsDrawerOpen(true)}>
+              <Calendar className="h-4 w-4 mr-2" />
+              Open Calendar
+            </Button>
+          </div>
         </div>
 
         <div className="flex-1 flex items-center justify-center">
@@ -273,6 +304,9 @@ const EquipmentCalendarDemo = () => {
               onBarClick={handleBarClick}
               onEquipmentClick={handleEquipmentClick}
               enableDrag={false}
+              filterMode={filterMode}
+              onDateRangeChange={handleDateRangeChange}
+              isLoading={isLoading}
             />
           </div>
         </div>
