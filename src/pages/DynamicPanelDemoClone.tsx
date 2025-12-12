@@ -61,7 +61,8 @@ const DynamicPanelDemoClone = () => {
       mandatory: true,
       visible: true,
       editable: false,
-      order: 1
+      order: 1,
+      width: 'third'
     },
     customerName: {
       id: 'customerName',
