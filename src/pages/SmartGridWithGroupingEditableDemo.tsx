@@ -28,7 +28,6 @@ const columns: GridColumnConfig[] = [
 
 export default function SmartGridWithGroupingEditableDemo() {
   const [data, setData] = useState(initialData);
-  const [groupByField, setGroupByField] = useState<string | null>('department');
 
   const handleInlineEdit = (rowIndex: number, updatedRow: any) => {
     setData(prevData => {
@@ -40,14 +39,6 @@ export default function SmartGridWithGroupingEditableDemo() {
     toast({
       title: 'Row Updated',
       description: `Row ${rowIndex + 1} has been updated`,
-    });
-  };
-
-  const handleGroupByChange = (field: string | null) => {
-    setGroupByField(field);
-    toast({
-      title: 'Grouping Changed',
-      description: field ? `Grouped by: ${field}` : 'Grouping removed',
     });
   };
 
@@ -64,10 +55,7 @@ export default function SmartGridWithGroupingEditableDemo() {
         gridTitle="Employee Directory"
         columns={columns}
         data={data}
-        groupByField={groupByField}
-        onGroupByChange={handleGroupByChange}
-        groupableColumns={['department', 'status', 'role']}
-        showGroupingDropdown={true}
+        showGroupingDropdown={false}
         editableColumns={true}
         onInlineEdit={handleInlineEdit}
         customPageSize={10}
