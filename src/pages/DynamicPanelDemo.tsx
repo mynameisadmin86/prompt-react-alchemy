@@ -163,8 +163,8 @@ const DynamicPanelDemo = () => {
   const [operationalDetailsVisible, setOperationalDetailsVisible] = useState(true);
   const [billingDetailsVisible, setBillingDetailsVisible] = useState(true);
 
-  // Basic Details Panel Configuration
-  const basicDetailsConfig: PanelConfig = {
+  // Search Panel Configuration (no heading)
+  const searchPanelConfig: PanelConfig = {
     searchWoStatus: {
       id: 'searchWoStatus',
       label: 'Search WO No./Status',
@@ -185,7 +185,11 @@ const DynamicPanelDemo = () => {
           });
         }
       }
-    },
+    }
+  };
+
+  // Basic Details Panel Configuration
+  const basicDetailsConfig: PanelConfig = {
     tripPlanNo: {
       id: 'tripPlanNo',
       label: 'Trip Plan No',
@@ -744,10 +748,27 @@ const DynamicPanelDemo = () => {
           </div>
         )}
 
+        {/* Search Panel - No Heading */}
+        <div className="grid grid-cols-12 gap-6 mb-4">
+          <DynamicPanel
+            panelId="search-panel"
+            panelOrder={0}
+            startingTabIndex={1}
+            panelTitle=""
+            panelConfig={searchPanelConfig}
+            initialData={{}}
+            onDataChange={() => {}}
+            getUserPanelConfig={getUserPanelConfig}
+            saveUserPanelConfig={saveUserPanelConfig}
+            userId="current-user"
+            panelWidth={12}
+          />
+        </div>
+
         {/* Dynamic Panels in 12-column grid */}
         <div className="grid grid-cols-12 gap-6">
           {(() => {
-            let currentTabIndex = 1;
+            let currentTabIndex = 2;
             const panels = [];
             
             // Panel 1: Basic Details
