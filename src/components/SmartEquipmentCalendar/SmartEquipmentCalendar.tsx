@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -7,9 +7,10 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Badge } from '@/components/ui/badge';
-import { Filter, ChevronLeft, ChevronRight, Calendar, MapPin, Train, Wrench } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Filter, ChevronLeft, ChevronRight, Calendar, MapPin, Train, Wrench, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { EquipmentCalendarViewProps, EquipmentItem, EquipmentCalendarEvent } from '@/types/equipmentCalendar';
+import { EquipmentCalendarViewProps, EquipmentItem, EquipmentCalendarEvent, DateRangeParams } from '@/types/equipmentCalendar';
 import { format, addHours, addDays, startOfDay, endOfDay, differenceInMinutes, differenceInDays, startOfMonth, endOfMonth, addMonths, subMonths } from 'date-fns';
 
 const eventTypeColors = {
@@ -33,6 +34,9 @@ export const SmartEquipmentCalendar = ({
   onAddToTrip,
   onBarClick,
   onEquipmentClick,
+  filterMode = 'client',
+  onDateRangeChange,
+  isLoading = false,
 }: EquipmentCalendarViewProps) => {
   const [view, setView] = useState<'day' | 'week' | 'month'>(initialView);
   const [startDate, setStartDate] = useState<Date>(initialStartDate || new Date());
@@ -43,6 +47,30 @@ export const SmartEquipmentCalendar = ({
   const timelineRef = useRef<HTMLDivElement>(null);
   const leftPanelRef = useRef<HTMLDivElement>(null);
   const headerRef = useRef<HTMLDivElement>(null);
+
+  // Calculate date range for current view
+  const getDateRange = useCallback((currentView: 'day' | 'week' | 'month', currentStartDate: Date): DateRangeParams => {
+    const viewStart = startOfDay(currentStartDate);
+    let viewEnd: Date;
+    
+    if (currentView === 'day') {
+      viewEnd = endOfDay(currentStartDate);
+    } else if (currentView === 'week') {
+      viewEnd = endOfDay(addDays(currentStartDate, 6));
+    } else {
+      viewEnd = endOfMonth(currentStartDate);
+    }
+    
+    return { view: currentView, startDate: viewStart, endDate: viewEnd };
+  }, []);
+
+  // Trigger date range change callback for server-side filtering
+  useEffect(() => {
+    if (filterMode === 'server' && onDateRangeChange) {
+      const params = getDateRange(view, startDate);
+      onDateRangeChange(params);
+    }
+  }, [view, startDate, filterMode, onDateRangeChange, getDateRange]);
 
   // Filter equipments by status
   const filteredEquipments = statusFilter === 'all' 
@@ -470,6 +498,15 @@ export const SmartEquipmentCalendar = ({
           {/* Timeline Body */}
           <div className="flex-1 overflow-auto scrollbar-thin" ref={timelineRef} style={{ scrollbarWidth: 'thin' }}>
             <div className="relative min-w-max" style={{ minHeight: filteredEquipments.length * ROW_HEIGHT }}>
+              {/* Loading overlay */}
+              {isLoading && (
+                <div className="absolute inset-0 bg-background/50 flex items-center justify-center z-10">
+                  <div className="flex items-center gap-2 bg-background px-4 py-2 rounded-lg shadow-lg border">
+                    <Loader2 className="h-5 w-5 animate-spin text-primary" />
+                    <span className="text-sm font-medium">Loading...</span>
+                  </div>
+                </div>
+              )}
               {/* Grid lines */}
               <div className="absolute inset-0 pointer-events-none flex">
                 {timelineLabels.map((label, idx) => (

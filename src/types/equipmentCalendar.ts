@@ -96,6 +96,12 @@ export const transformTripDataToEvents = (resource: ResourceDetail): EquipmentCa
   });
 };
 
+export interface DateRangeParams {
+  view: 'day' | 'week' | 'month';
+  startDate: Date;
+  endDate: Date;
+}
+
 export interface EquipmentCalendarViewProps {
   equipments: EquipmentItem[];
   events: EquipmentCalendarEvent[];
@@ -113,4 +119,10 @@ export interface EquipmentCalendarViewProps {
   onEquipmentClick?: (equipment: EquipmentItem) => void;
   scrollSyncKey?: string;
   enableDrag?: boolean;
+  /** Filter mode: 'client' filters events locally, 'server' triggers onDateRangeChange for server-side data fetch */
+  filterMode?: 'client' | 'server';
+  /** Callback when date range changes (for server-side filtering) */
+  onDateRangeChange?: (params: DateRangeParams) => void;
+  /** Loading state for server-side data fetch */
+  isLoading?: boolean;
 }
