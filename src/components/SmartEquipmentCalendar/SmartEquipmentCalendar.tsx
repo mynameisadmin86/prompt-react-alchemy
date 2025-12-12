@@ -5,7 +5,9 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Filter, ChevronLeft, ChevronRight, Calendar } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Badge } from '@/components/ui/badge';
+import { Filter, ChevronLeft, ChevronRight, Calendar, MapPin, Train, Wrench } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { EquipmentCalendarViewProps, EquipmentItem, EquipmentCalendarEvent } from '@/types/equipmentCalendar';
 import { format, addHours, addDays, startOfDay, endOfDay, differenceInMinutes, differenceInDays, startOfMonth, endOfMonth, addMonths, subMonths } from 'date-fns';
@@ -510,31 +512,100 @@ export const SmartEquipmentCalendar = ({
                         width: `${position.widthPercent}%`,
                       };
 
+                  // Extract additional data for tooltip
+                  const fromGeo = event.additionalData?.find(d => d.Name === 'FromGeo')?.Value || '-';
+                  const toGeo = event.additionalData?.find(d => d.Name === 'ToGeo')?.Value || '-';
+                  const customer = event.additionalData?.find(d => d.Name === 'Customer_id')?.Value || '-';
+                  const trainType = event.additionalData?.find(d => d.Name === 'TrainType')?.Value;
+                  const serviceType = event.additionalData?.find(d => d.Name === 'ServiceType')?.Value;
+
                   return (
-                    <div
-                      key={event.id}
-                      onClick={(e) => handleBarClickInternal(event, e)}
-                      className={cn(
-                        "absolute rounded border text-xs px-2 py-1 flex flex-col justify-center shadow-sm cursor-pointer transition-all hover:shadow-md hover:brightness-95",
-                        eventTypeColors[event.type]
-                      )}
-                      style={{
-                        ...positionStyle,
-                        top: `${top}px`,
-                        height: `${height}px`,
-                      }}
-                      title={`${event.label}\n${format(new Date(event.start), 'MMM d, HH:mm')} - ${format(new Date(event.end), 'MMM d, HH:mm')}`}
-                    >
-                      <div className="truncate font-semibold leading-tight">{event.label}</div>
-                      {event.type === 'trip' && (
-                        <div className="truncate text-[10px] opacity-80">
-                          {(event as any).code || 'CO001'}
-                        </div>
-                      )}
-                      <div className="truncate text-[10px] opacity-80">
-                        {format(new Date(event.start), 'ha')} - {format(new Date(event.end), 'ha')}
-                      </div>
-                    </div>
+                    <TooltipProvider key={event.id} delayDuration={200}>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div
+                            onClick={(e) => handleBarClickInternal(event, e)}
+                            className={cn(
+                              "absolute rounded border text-xs px-2 py-1 flex flex-col justify-center shadow-sm cursor-pointer transition-all hover:shadow-md hover:brightness-95",
+                              eventTypeColors[event.type]
+                            )}
+                            style={{
+                              ...positionStyle,
+                              top: `${top}px`,
+                              height: `${height}px`,
+                            }}
+                          >
+                            <div className="truncate font-semibold leading-tight">{event.label}</div>
+                            {event.type === 'trip' && (
+                              <div className="truncate text-[10px] opacity-80">
+                                {(event as any).code || 'CO001'}
+                              </div>
+                            )}
+                            <div className="truncate text-[10px] opacity-80">
+                              {format(new Date(event.start), 'ha')} - {format(new Date(event.end), 'ha')}
+                            </div>
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent side="top" align="start" className="p-0 w-[320px] bg-background border shadow-lg">
+                          <div className="p-3 border-b bg-muted/50">
+                            <div className="text-xs font-medium text-muted-foreground">Trip Details</div>
+                          </div>
+                          <div className="p-3 space-y-3">
+                            {/* Trip ID and Status */}
+                            <div className="flex items-center justify-between">
+                              <span className="font-semibold text-sm">{event.label}</span>
+                              <Badge 
+                                variant={event.status === 'Initiated' ? 'default' : event.status === 'Completed' ? 'secondary' : 'outline'}
+                                className="text-xs"
+                              >
+                                {event.status || 'Planned'}
+                              </Badge>
+                            </div>
+                            
+                            {/* Customer */}
+                            <div className="text-sm text-muted-foreground">{customer}</div>
+                            
+                            {/* From and To Locations */}
+                            <div className="flex items-start gap-6">
+                              <div className="flex items-start gap-2">
+                                <MapPin className="h-4 w-4 text-primary mt-0.5" />
+                                <div>
+                                  <div className="font-medium text-sm">{fromGeo}</div>
+                                  <div className="text-xs text-muted-foreground">
+                                    {format(new Date(event.start), 'dd-MMM-yyyy HH:mm:ss')}
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="flex items-start gap-2">
+                                <MapPin className="h-4 w-4 text-destructive mt-0.5" />
+                                <div>
+                                  <div className="font-medium text-sm">{toGeo}</div>
+                                  <div className="text-xs text-muted-foreground">
+                                    {format(new Date(event.end), 'dd-MMM-yyyy HH:mm:ss')}
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                            
+                            {/* Additional Info */}
+                            <div className="flex items-center gap-4 pt-2 border-t">
+                              {trainType && (
+                                <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                                  <Train className="h-3.5 w-3.5" />
+                                  <span>{trainType}</span>
+                                </div>
+                              )}
+                              {serviceType && (
+                                <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                                  <Wrench className="h-3.5 w-3.5" />
+                                  <span>{serviceType}</span>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
                   );
                 });
               })}

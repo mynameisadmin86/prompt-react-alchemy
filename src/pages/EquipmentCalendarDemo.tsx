@@ -31,19 +31,19 @@ const sampleApiResponse: ResourceCategoryResponse = {
       "AdditionalData": null,
       "TripData": [
         {
-          "RefDocNo": "TP_D25_0318",
+          "RefDocNo": "TRIP00000001",
           "RefDocType": "TRIP",
-          "RefDocStatus": "Released",
+          "RefDocStatus": "Initiated",
           "PlanStart": "2025-11-27 18:00",
           "PlanEnd": "2025-11-27 22:00",
           "AdditionalData": [
-            { "Name": "FromGeo", "Value": "53-206581" },
-            { "Name": "ToGeo", "Value": "53-202705" },
+            { "Name": "FromGeo", "Value": "VLA-70" },
+            { "Name": "ToGeo", "Value": "CUR-25" },
             { "Name": "FromDate", "Value": "2025-11-27 18:00:00" },
             { "Name": "ToDate", "Value": "2025-11-27 22:00:00" },
-            { "Name": "Customer_id", "Value": "46700070" },
-            { "Name": "ServiceType", "Value": "" },
-            { "Name": "SubServiceType", "Value": "" }
+            { "Name": "Customer_id", "Value": "ABC Customer" },
+            { "Name": "TrainType", "Value": "Block Train Conventional" },
+            { "Name": "ServiceType", "Value": "Repair" }
           ]
         }
       ]
@@ -90,12 +90,18 @@ const sampleApiResponse: ResourceCategoryResponse = {
       "AdditionalData": null,
       "TripData": [
         {
-          "RefDocNo": "TP_D25_0320",
+          "RefDocNo": "TRIP00000012",
           "RefDocType": "TRIP",
-          "RefDocStatus": "In Progress",
+          "RefDocStatus": "Initiated",
           "PlanStart": "2025-11-27 08:00",
           "PlanEnd": "2025-11-28 16:00",
-          "AdditionalData": []
+          "AdditionalData": [
+            { "Name": "FromGeo", "Value": "VLA-70" },
+            { "Name": "ToGeo", "Value": "CUR-25" },
+            { "Name": "Customer_id", "Value": "ABC Customer" },
+            { "Name": "TrainType", "Value": "Block Train Conventional" },
+            { "Name": "ServiceType", "Value": "Repair" }
+          ]
         }
       ]
     },
@@ -118,7 +124,12 @@ const sampleApiResponse: ResourceCategoryResponse = {
           "RefDocStatus": "Scheduled",
           "PlanStart": "2025-11-27 09:00",
           "PlanEnd": "2025-11-27 17:00",
-          "AdditionalData": []
+          "AdditionalData": [
+            { "Name": "FromGeo", "Value": "Workshop A" },
+            { "Name": "ToGeo", "Value": "Workshop A" },
+            { "Name": "Customer_id", "Value": "Internal Maintenance" },
+            { "Name": "ServiceType", "Value": "Scheduled Maintenance" }
+          ]
         }
       ]
     }
