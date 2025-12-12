@@ -148,6 +148,7 @@ const columns: GridColumnConfig[] = [
     filterable: true,
     editable: true,
     width: 150,
+    isSubRowEditable: false,
     fetchOptions: async ({ searchTerm, offset, limit }) => {
       // Mock async data fetching - simulate API call
       await new Promise((resolve) => setTimeout(resolve, 300));
