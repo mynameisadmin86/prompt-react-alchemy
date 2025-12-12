@@ -47,6 +47,7 @@ import EquipmentCalendarDemo from "./pages/EquipmentCalendarDemo";
 import CascadingLazySelectDemo from "./pages/CascadingLazySelectDemo";
 import LazySelectAddNewDemo from "./pages/LazySelectAddNewDemo";
 import DynamicLazySelectAddNewDemo from "./pages/DynamicLazySelectAddNewDemo";
+import SmartGridWithGroupingEditableDemo from "./pages/SmartGridWithGroupingEditableDemo";
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -98,6 +99,7 @@ const App = () => (
           <Route path="/cascading-lazyselect-demo" element={<CascadingLazySelectDemo />} />
           <Route path="/lazyselect-add-new-demo" element={<LazySelectAddNewDemo />} />
           <Route path="/dynamic-lazyselect-add-new-demo" element={<DynamicLazySelectAddNewDemo />} />
+          <Route path="/smartgrid-grouping-editable-demo" element={<SmartGridWithGroupingEditableDemo />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
