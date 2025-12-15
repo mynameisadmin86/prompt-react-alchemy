@@ -17,21 +17,10 @@ interface PropertiesPanelProps {
 export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({ pageId, component }) => {
   const { updateComponent } = useIDEStore();
   const [localConfig, setLocalConfig] = useState<Record<string, any>>({});
-  const [jsonStrings, setJsonStrings] = useState<Record<string, string>>({});
-  const [jsonErrors, setJsonErrors] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     if (component) {
       setLocalConfig(component.config);
-      // Initialize JSON strings from config
-      const newJsonStrings: Record<string, string> = {};
-      Object.entries(component.config).forEach(([key, value]) => {
-        if (typeof value === 'object' && value !== null) {
-          newJsonStrings[key] = JSON.stringify(value, null, 2);
-        }
-      });
-      setJsonStrings(newJsonStrings);
-      setJsonErrors({});
     }
   }, [component]);
 
@@ -47,27 +36,6 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({ pageId, compon
 
   const definition = getComponentByType(component.type);
   if (!definition) return null;
-
-  // Helper to parse JavaScript-style objects (with single quotes and unquoted keys)
-  const parseJsObject = (str: string): any => {
-    try {
-      return JSON.parse(str);
-    } catch {
-      // Try to convert JS object notation to JSON
-      try {
-        // Replace single quotes with double quotes
-        // Handle unquoted keys by adding quotes
-        const jsonStr = str
-          .replace(/'/g, '"')
-          .replace(/(\w+)\s*:/g, '"$1":')
-          .replace(/,\s*}/g, '}')
-          .replace(/,\s*]/g, ']');
-        return JSON.parse(jsonStr);
-      } catch {
-        throw new Error('Invalid format');
-      }
-    }
-  };
 
   const handleChange = (key: string, value: any) => {
     const newConfig = { ...localConfig, [key]: value };
@@ -123,30 +91,20 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({ pageId, compon
         );
 
       case 'json':
-        const jsonValue = jsonStrings[field.key] ?? (typeof value === 'object' ? JSON.stringify(value, null, 2) : '');
-        const hasError = jsonErrors[field.key];
         return (
-          <div className="space-y-1">
-            <Textarea
-              value={jsonValue}
-              onChange={(e) => {
-                const newValue = e.target.value;
-                setJsonStrings(prev => ({ ...prev, [field.key]: newValue }));
-                try {
-                  const parsed = parseJsObject(newValue);
-                  setJsonErrors(prev => ({ ...prev, [field.key]: false }));
-                  handleChange(field.key, parsed);
-                } catch {
-                  setJsonErrors(prev => ({ ...prev, [field.key]: true }));
-                }
-              }}
-              placeholder={`Enter ${field.label} as JSON`}
-              className={`font-mono text-xs min-h-[150px] ${hasError ? 'border-destructive' : ''}`}
-            />
-            {hasError && (
-              <p className="text-xs text-destructive">Invalid JSON format</p>
-            )}
-          </div>
+          <Textarea
+            value={typeof value === 'string' ? value : JSON.stringify(value, null, 2)}
+            onChange={(e) => {
+              try {
+                const parsed = JSON.parse(e.target.value);
+                handleChange(field.key, parsed);
+              } catch {
+                // Keep raw string if invalid JSON
+              }
+            }}
+            placeholder={`Enter ${field.label} as JSON`}
+            className="font-mono text-xs min-h-[100px]"
+          />
         );
 
       default:
