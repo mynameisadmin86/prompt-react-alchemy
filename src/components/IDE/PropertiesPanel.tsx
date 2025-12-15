@@ -18,10 +18,21 @@ interface PropertiesPanelProps {
 export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({ pageId, component }) => {
   const { updateComponent } = useIDEStore();
   const [localConfig, setLocalConfig] = useState<Record<string, any>>({});
+  const [jsonTexts, setJsonTexts] = useState<Record<string, string>>({});
+  const [jsonErrors, setJsonErrors] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     if (component) {
       setLocalConfig(component.config);
+      // Initialize JSON text fields
+      const texts: Record<string, string> = {};
+      Object.entries(component.config).forEach(([key, value]) => {
+        if (typeof value === 'object') {
+          texts[key] = JSON.stringify(value, null, 2);
+        }
+      });
+      setJsonTexts(texts);
+      setJsonErrors({});
     }
   }, [component]);
 
@@ -103,20 +114,30 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({ pageId, compon
         );
 
       case 'json':
+        const jsonText = jsonTexts[field.key] ?? JSON.stringify(value ?? field.defaultValue, null, 2);
+        const hasError = jsonErrors[field.key];
         return (
-          <Textarea
-            value={typeof value === 'string' ? value : JSON.stringify(value, null, 2)}
-            onChange={(e) => {
-              try {
-                const parsed = JSON.parse(e.target.value);
-                handleChange(field.key, parsed);
-              } catch {
-                // Keep raw string if invalid JSON
-              }
-            }}
-            placeholder={`Enter ${field.label} as JSON`}
-            className="font-mono text-xs min-h-[100px]"
-          />
+          <div className="space-y-1">
+            <Textarea
+              value={jsonText}
+              onChange={(e) => {
+                const text = e.target.value;
+                setJsonTexts(prev => ({ ...prev, [field.key]: text }));
+                try {
+                  const parsed = JSON.parse(text);
+                  handleChange(field.key, parsed);
+                  setJsonErrors(prev => ({ ...prev, [field.key]: false }));
+                } catch {
+                  setJsonErrors(prev => ({ ...prev, [field.key]: true }));
+                }
+              }}
+              placeholder={`Enter ${field.label} as JSON`}
+              className={`font-mono text-xs min-h-[100px] ${hasError ? 'border-destructive' : ''}`}
+            />
+            {hasError && (
+              <p className="text-xs text-destructive">Invalid JSON format</p>
+            )}
+          </div>
         );
 
       default:
