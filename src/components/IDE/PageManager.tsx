@@ -3,7 +3,7 @@ import { useIDEStore, IDEPage } from '@/stores/ideStore';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Plus, Trash2, FileCode, ExternalLink } from 'lucide-react';
+import { Plus, Trash2, FileCode, ExternalLink, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
   Dialog,
@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { useNavigate } from 'react-router-dom';
+import { createSampleWorkOrderPage } from '@/utils/sampleWorkOrderPage';
 
 export const PageManager: React.FC = () => {
   const navigate = useNavigate();
@@ -41,13 +42,25 @@ export const PageManager: React.FC = () => {
     navigate(page.route);
   };
 
+  const handleCreateSamplePage = () => {
+    const pageId = createSampleWorkOrderPage();
+    if (pageId) {
+      setCurrentPage(pageId);
+    }
+  };
+
   return (
     <div className="h-full flex flex-col bg-muted/30">
       <div className="p-3 border-b border-border flex items-center justify-between">
         <h3 className="text-sm font-semibold text-foreground">Pages</h3>
-        <Button size="icon" variant="ghost" onClick={() => setIsDialogOpen(true)}>
-          <Plus className="h-4 w-4" />
-        </Button>
+        <div className="flex items-center gap-1">
+          <Button size="icon" variant="ghost" onClick={handleCreateSamplePage} title="Create Sample Work Order Page">
+            <Sparkles className="h-4 w-4" />
+          </Button>
+          <Button size="icon" variant="ghost" onClick={() => setIsDialogOpen(true)} title="New Page">
+            <Plus className="h-4 w-4" />
+          </Button>
+        </div>
       </div>
 
       <ScrollArea className="flex-1">

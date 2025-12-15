@@ -12,6 +12,12 @@ export interface ComponentStyle {
   alignItems?: string;
   flexDirection?: string;
   flexWrap?: string;
+  flex?: string;
+  minHeight?: string;
+  minWidth?: string;
+  maxHeight?: string;
+  maxWidth?: string;
+  overflow?: string;
 }
 
 export interface ComponentInstance {
