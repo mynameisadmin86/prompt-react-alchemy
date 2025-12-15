@@ -1,4 +1,5 @@
 import { Grid, Table, Calendar, FileText, Layout, LayoutGrid, Layers, FormInput, Badge } from 'lucide-react';
+import { ArrayItemSchema } from './ArrayFieldEditor';
 
 export interface ComponentDefinition {
   type: string;
@@ -15,7 +16,63 @@ export interface ConfigField {
   type: 'text' | 'number' | 'boolean' | 'select' | 'json' | 'array';
   options?: { label: string; value: any }[];
   defaultValue?: any;
+  // For array type
+  itemSchema?: ArrayItemSchema[];
+  itemLabel?: string;
+  defaultItem?: Record<string, any>;
 }
+
+// Column type options for grids
+const columnTypeOptions = [
+  { label: 'Text', value: 'Text' },
+  { label: 'Editable Text', value: 'EditableText' },
+  { label: 'Integer', value: 'Integer' },
+  { label: 'Link', value: 'Link' },
+  { label: 'Badge', value: 'Badge' },
+  { label: 'Date', value: 'Date' },
+  { label: 'DateTime', value: 'DateTime' },
+  { label: 'DateTimeRange', value: 'DateTimeRange' },
+  { label: 'Select', value: 'Select' },
+  { label: 'Lazy Select', value: 'LazySelect' },
+  { label: 'Checkbox', value: 'Checkbox' },
+  { label: 'Action Button', value: 'ActionButton' },
+];
+
+// Schema for grid columns
+const gridColumnSchema: ArrayItemSchema[] = [
+  { key: 'key', label: 'Key', type: 'text', defaultValue: '' },
+  { key: 'label', label: 'Label', type: 'text', defaultValue: '' },
+  { key: 'type', label: 'Type', type: 'select', options: columnTypeOptions, defaultValue: 'Text' },
+  { key: 'sortable', label: 'Sortable', type: 'boolean', defaultValue: true },
+  { key: 'filterable', label: 'Filterable', type: 'boolean', defaultValue: true },
+  { key: 'editable', label: 'Editable', type: 'boolean', defaultValue: false },
+  { key: 'width', label: 'Width (px)', type: 'number', defaultValue: 150 },
+];
+
+// Field type options for panels
+const fieldTypeOptions = [
+  { label: 'Text', value: 'text' },
+  { label: 'Number', value: 'number' },
+  { label: 'Select', value: 'select' },
+  { label: 'Lazy Select', value: 'lazyselect' },
+  { label: 'Date', value: 'date' },
+  { label: 'DateTime', value: 'datetime' },
+  { label: 'Checkbox', value: 'checkbox' },
+  { label: 'Radio', value: 'radio' },
+  { label: 'Textarea', value: 'textarea' },
+  { label: 'Search Text', value: 'searchtext' },
+];
+
+// Schema for panel fields
+const panelFieldSchema: ArrayItemSchema[] = [
+  { key: 'id', label: 'Field ID', type: 'text', defaultValue: '' },
+  { key: 'label', label: 'Label', type: 'text', defaultValue: '' },
+  { key: 'fieldType', label: 'Field Type', type: 'select', options: fieldTypeOptions, defaultValue: 'text' },
+  { key: 'mandatory', label: 'Mandatory', type: 'boolean', defaultValue: false },
+  { key: 'visible', label: 'Visible', type: 'boolean', defaultValue: true },
+  { key: 'editable', label: 'Editable', type: 'boolean', defaultValue: true },
+  { key: 'width', label: 'Width', type: 'text', defaultValue: '50%' },
+];
 
 export const componentRegistry: ComponentDefinition[] = [
   {
@@ -34,7 +91,14 @@ export const componentRegistry: ComponentDefinition[] = [
       { key: 'showToolbar', label: 'Show Toolbar', type: 'boolean', defaultValue: true },
       { key: 'enableFiltering', label: 'Enable Filtering', type: 'boolean', defaultValue: true },
       { key: 'enableSorting', label: 'Enable Sorting', type: 'boolean', defaultValue: true },
-      { key: 'columns', label: 'Columns (JSON)', type: 'json', defaultValue: [] },
+      { 
+        key: 'columns', 
+        label: 'Columns', 
+        type: 'array', 
+        itemSchema: gridColumnSchema,
+        itemLabel: 'Column',
+        defaultItem: { key: '', label: '', type: 'Text', sortable: true, filterable: true, editable: false },
+      },
       { key: 'data', label: 'Data (JSON)', type: 'json', defaultValue: [] },
     ],
   },
@@ -54,7 +118,14 @@ export const componentRegistry: ComponentDefinition[] = [
       { key: 'showToolbar', label: 'Show Toolbar', type: 'boolean', defaultValue: true },
       { key: 'inlineRowAddition', label: 'Inline Row Addition', type: 'boolean', defaultValue: true },
       { key: 'inlineRowEditing', label: 'Inline Row Editing', type: 'boolean', defaultValue: true },
-      { key: 'columns', label: 'Columns (JSON)', type: 'json', defaultValue: [] },
+      { 
+        key: 'columns', 
+        label: 'Columns', 
+        type: 'array', 
+        itemSchema: gridColumnSchema,
+        itemLabel: 'Column',
+        defaultItem: { key: '', label: '', type: 'Text', sortable: true, filterable: true, editable: false },
+      },
       { key: 'data', label: 'Data (JSON)', type: 'json', defaultValue: [] },
     ],
   },
@@ -71,7 +142,14 @@ export const componentRegistry: ComponentDefinition[] = [
     },
     configSchema: [
       { key: 'showGroupingDropdown', label: 'Show Grouping Dropdown', type: 'boolean', defaultValue: true },
-      { key: 'columns', label: 'Columns (JSON)', type: 'json', defaultValue: [] },
+      { 
+        key: 'columns', 
+        label: 'Columns', 
+        type: 'array', 
+        itemSchema: gridColumnSchema,
+        itemLabel: 'Column',
+        defaultItem: { key: '', label: '', type: 'Text', sortable: true, filterable: true, editable: false },
+      },
       { key: 'data', label: 'Data (JSON)', type: 'json', defaultValue: [] },
     ],
   },
@@ -87,7 +165,14 @@ export const componentRegistry: ComponentDefinition[] = [
     },
     configSchema: [
       { key: 'nestedRowKey', label: 'Nested Row Key', type: 'text', defaultValue: 'children' },
-      { key: 'columns', label: 'Columns (JSON)', type: 'json', defaultValue: [] },
+      { 
+        key: 'columns', 
+        label: 'Columns', 
+        type: 'array', 
+        itemSchema: gridColumnSchema,
+        itemLabel: 'Column',
+        defaultItem: { key: '', label: '', type: 'Text', sortable: true, filterable: true, editable: false },
+      },
       { key: 'data', label: 'Data (JSON)', type: 'json', defaultValue: [] },
     ],
   },
@@ -106,7 +191,14 @@ export const componentRegistry: ComponentDefinition[] = [
       { key: 'panelId', label: 'Panel ID', type: 'text', defaultValue: 'panel-1' },
       { key: 'panelTitle', label: 'Panel Title', type: 'text', defaultValue: 'Dynamic Panel' },
       { key: 'columns', label: 'Columns', type: 'number', defaultValue: 2 },
-      { key: 'panelConfig', label: 'Panel Config (JSON)', type: 'json', defaultValue: {} },
+      { 
+        key: 'fields', 
+        label: 'Fields', 
+        type: 'array', 
+        itemSchema: panelFieldSchema,
+        itemLabel: 'Field',
+        defaultItem: { id: '', label: '', fieldType: 'text', mandatory: false, visible: true, editable: true, width: '50%' },
+      },
     ],
   },
   {
@@ -122,7 +214,14 @@ export const componentRegistry: ComponentDefinition[] = [
     configSchema: [
       { key: 'panelId', label: 'Panel ID', type: 'text', defaultValue: 'simple-panel-1' },
       { key: 'panelTitle', label: 'Panel Title', type: 'text', defaultValue: 'Simple Panel' },
-      { key: 'fields', label: 'Fields (JSON)', type: 'json', defaultValue: [] },
+      { 
+        key: 'fields', 
+        label: 'Fields', 
+        type: 'array', 
+        itemSchema: panelFieldSchema,
+        itemLabel: 'Field',
+        defaultItem: { id: '', label: '', fieldType: 'text', mandatory: false, visible: true, editable: true, width: '50%' },
+      },
     ],
   },
   {
