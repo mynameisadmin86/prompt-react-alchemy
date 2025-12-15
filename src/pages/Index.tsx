@@ -1,10 +1,12 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowRight, Grid3x3, Layout, Search, Workflow, PanelLeft, Layers, Upload, ShoppingCart, CreditCard, Tag, Calendar } from "lucide-react";
+import { ArrowRight, Grid3x3, Layout, Search, Workflow, PanelLeft, Layers, Upload, ShoppingCart, CreditCard, Tag, Calendar, Code2, FileCode } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useIDEStore } from "@/stores/ideStore";
 
 const Index = () => {
+  const { pages: idePages } = useIDEStore();
   const demos = [
     {
       title: "Grid Demo",
@@ -286,6 +288,13 @@ const Index = () => {
       path: "/dynamic-lazyselect-add-new-demo",
       color: "text-cyan-500"
     },
+    {
+      title: "Visual IDE",
+      description: "Drag-and-drop IDE to build pages with available components and configurations",
+      icon: Code2,
+      path: "/ide",
+      color: "text-violet-600"
+    },
   ];
 
   return (
@@ -329,6 +338,48 @@ const Index = () => {
             );
           })}
         </div>
+
+        {/* IDE Created Pages Section */}
+        {idePages.length > 0 && (
+          <div className="mt-16 max-w-7xl mx-auto">
+            <div className="text-center mb-8">
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                IDE Created Pages
+              </h2>
+              <p className="text-gray-600">
+                Pages built using the Visual IDE
+              </p>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {idePages.map((page) => (
+                <Card key={page.id} className="group hover:shadow-lg transition-all duration-200 border-0 shadow-md border-l-4 border-l-violet-500">
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center space-x-3">
+                      <div className="p-2 rounded-lg bg-gray-50 group-hover:bg-white transition-colors text-violet-600">
+                        <FileCode className="h-6 w-6" />
+                      </div>
+                      <CardTitle className="text-lg">{page.name}</CardTitle>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="pt-0">
+                    <CardDescription className="text-gray-600 mb-2">
+                      <span className="text-xs font-mono bg-muted px-2 py-0.5 rounded">{page.route}</span>
+                    </CardDescription>
+                    <CardDescription className="text-gray-600 mb-4">
+                      {page.components.length} component{page.components.length !== 1 ? 's' : ''}
+                    </CardDescription>
+                    <Link to={page.route}>
+                      <Button className="w-full group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
+                        View Page
+                        <ArrowRight className="ml-2 h-4 w-4" />
+                      </Button>
+                    </Link>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        )}
 
         <div className="text-center mt-12">
           <p className="text-gray-500">
