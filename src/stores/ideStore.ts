@@ -1,12 +1,28 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
+export interface ComponentStyle {
+  backgroundColor?: string;
+  padding?: string;
+  margin?: string;
+  border?: string;
+  borderRadius?: string;
+  gap?: string;
+  justifyContent?: string;
+  alignItems?: string;
+  flexDirection?: string;
+  flexWrap?: string;
+}
+
 export interface ComponentInstance {
   id: string;
   type: string;
   config: Record<string, any>;
   position: { x: number; y: number };
   size: { width: string; height: string };
+  parentId?: string | null; // For nested components
+  style?: ComponentStyle;
+  order?: number; // For ordering within parent
 }
 
 export interface IDEPage {
@@ -16,6 +32,7 @@ export interface IDEPage {
   components: ComponentInstance[];
   createdAt: string;
   updatedAt: string;
+  pageStyle?: ComponentStyle;
 }
 
 interface IDEState {
@@ -29,8 +46,11 @@ interface IDEState {
   addComponent: (pageId: string, component: Omit<ComponentInstance, 'id'>) => void;
   updateComponent: (pageId: string, componentId: string, updates: Partial<ComponentInstance>) => void;
   deleteComponent: (pageId: string, componentId: string) => void;
+  moveComponent: (pageId: string, componentId: string, newParentId: string | null, newOrder: number) => void;
   setSelectedComponent: (id: string | null) => void;
   getPageByRoute: (route: string) => IDEPage | undefined;
+  getChildComponents: (pageId: string, parentId: string | null) => ComponentInstance[];
+  reorderComponents: (pageId: string, parentId: string | null, orderedIds: string[]) => void;
 }
 
 export const useIDEStore = create<IDEState>()(
@@ -70,11 +90,20 @@ export const useIDEStore = create<IDEState>()(
       setCurrentPage: (id) => set({ currentPageId: id, selectedComponentId: null }),
 
       addComponent: (pageId, component) => {
-        const id = `comp-${Date.now()}`;
+        const id = `comp-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+        const state = get();
+        const page = state.pages.find(p => p.id === pageId);
+        const siblings = page?.components.filter(c => c.parentId === component.parentId) || [];
+        const order = siblings.length;
+        
         set((state) => ({
           pages: state.pages.map((p) =>
             p.id === pageId
-              ? { ...p, components: [...p.components, { ...component, id }], updatedAt: new Date().toISOString() }
+              ? { 
+                  ...p, 
+                  components: [...p.components, { ...component, id, order }], 
+                  updatedAt: new Date().toISOString() 
+                }
               : p
           ),
         }));
@@ -95,19 +124,75 @@ export const useIDEStore = create<IDEState>()(
       },
 
       deleteComponent: (pageId, componentId) => {
+        // Also delete all children recursively
+        const deleteRecursive = (components: ComponentInstance[], idToDelete: string): ComponentInstance[] => {
+          const childIds = components.filter(c => c.parentId === idToDelete).map(c => c.id);
+          let remaining = components.filter(c => c.id !== idToDelete);
+          childIds.forEach(childId => {
+            remaining = deleteRecursive(remaining, childId);
+          });
+          return remaining;
+        };
+
         set((state) => ({
           pages: state.pages.map((p) =>
             p.id === pageId
-              ? { ...p, components: p.components.filter((c) => c.id !== componentId), updatedAt: new Date().toISOString() }
+              ? { ...p, components: deleteRecursive(p.components, componentId), updatedAt: new Date().toISOString() }
               : p
           ),
           selectedComponentId: state.selectedComponentId === componentId ? null : state.selectedComponentId,
         }));
       },
 
+      moveComponent: (pageId, componentId, newParentId, newOrder) => {
+        set((state) => ({
+          pages: state.pages.map((p) =>
+            p.id === pageId
+              ? {
+                  ...p,
+                  components: p.components.map((c) => 
+                    c.id === componentId 
+                      ? { ...c, parentId: newParentId, order: newOrder } 
+                      : c
+                  ),
+                  updatedAt: new Date().toISOString(),
+                }
+              : p
+          ),
+        }));
+      },
+
       setSelectedComponent: (id) => set({ selectedComponentId: id }),
 
       getPageByRoute: (route) => get().pages.find((p) => p.route === route),
+
+      getChildComponents: (pageId, parentId) => {
+        const page = get().pages.find(p => p.id === pageId);
+        if (!page) return [];
+        return page.components
+          .filter(c => c.parentId === parentId)
+          .sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+      },
+
+      reorderComponents: (pageId, parentId, orderedIds) => {
+        set((state) => ({
+          pages: state.pages.map((p) =>
+            p.id === pageId
+              ? {
+                  ...p,
+                  components: p.components.map((c) => {
+                    if (c.parentId === parentId) {
+                      const newOrder = orderedIds.indexOf(c.id);
+                      return newOrder >= 0 ? { ...c, order: newOrder } : c;
+                    }
+                    return c;
+                  }),
+                  updatedAt: new Date().toISOString(),
+                }
+              : p
+          ),
+        }));
+      },
     }),
     { name: 'ide-pages-storage' }
   )
