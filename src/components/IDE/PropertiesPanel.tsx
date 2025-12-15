@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { ComponentInstance, useIDEStore } from '@/stores/ideStore';
 import { getComponentByType, ConfigField } from './ComponentRegistry';
+import { ArrayFieldEditor } from './ArrayFieldEditor';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 interface PropertiesPanelProps {
   pageId: string;
@@ -90,6 +91,17 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({ pageId, compon
           </Select>
         );
 
+      case 'array':
+        return (
+          <ArrayFieldEditor
+            value={Array.isArray(value) ? value : []}
+            onChange={(newValue) => handleChange(field.key, newValue)}
+            itemSchema={field.itemSchema || []}
+            itemLabel={field.itemLabel || 'Item'}
+            defaultItem={field.defaultItem}
+          />
+        );
+
       case 'json':
         return (
           <Textarea
@@ -112,6 +124,10 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({ pageId, compon
     }
   };
 
+  // Separate array fields from other fields
+  const arrayFields = definition.configSchema.filter(f => f.type === 'array');
+  const otherFields = definition.configSchema.filter(f => f.type !== 'array');
+
   return (
     <ScrollArea className="h-full">
       <div className="p-4 bg-muted/30 space-y-4">
@@ -120,46 +136,108 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({ pageId, compon
           <h3 className="font-semibold text-foreground">{definition.label}</h3>
         </div>
 
-        <div className="space-y-4">
-          {definition.configSchema.map((field) => (
-            <div key={field.key} className="space-y-2">
-              <Label className="text-sm font-medium text-foreground">
-                {field.label}
-              </Label>
-              {renderField(field)}
+        {arrayFields.length > 0 ? (
+          <Tabs defaultValue="properties" className="w-full">
+            <TabsList className="w-full">
+              <TabsTrigger value="properties" className="flex-1 text-xs">Properties</TabsTrigger>
+              {arrayFields.map((field) => (
+                <TabsTrigger key={field.key} value={field.key} className="flex-1 text-xs">
+                  {field.label}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+            
+            <TabsContent value="properties" className="mt-4 space-y-4">
+              {otherFields.map((field) => (
+                <div key={field.key} className="space-y-2">
+                  <Label className="text-sm font-medium text-foreground">
+                    {field.label}
+                  </Label>
+                  {renderField(field)}
+                </div>
+              ))}
+              
+              <div className="pt-4 border-t border-border">
+                <Label className="text-sm font-medium text-foreground mb-2 block">Size</Label>
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <Label className="text-xs text-muted-foreground">Width</Label>
+                    <Input
+                      value={component.size.width}
+                      onChange={(e) =>
+                        updateComponent(pageId, component.id, {
+                          size: { ...component.size, width: e.target.value },
+                        })
+                      }
+                      placeholder="100%"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-xs text-muted-foreground">Height</Label>
+                    <Input
+                      value={component.size.height}
+                      onChange={(e) =>
+                        updateComponent(pageId, component.id, {
+                          size: { ...component.size, height: e.target.value },
+                        })
+                      }
+                      placeholder="auto"
+                    />
+                  </div>
+                </div>
+              </div>
+            </TabsContent>
+            
+            {arrayFields.map((field) => (
+              <TabsContent key={field.key} value={field.key} className="mt-4">
+                {renderField(field)}
+              </TabsContent>
+            ))}
+          </Tabs>
+        ) : (
+          <>
+            <div className="space-y-4">
+              {definition.configSchema.map((field) => (
+                <div key={field.key} className="space-y-2">
+                  <Label className="text-sm font-medium text-foreground">
+                    {field.label}
+                  </Label>
+                  {renderField(field)}
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
 
-        <div className="pt-4 border-t border-border">
-          <Label className="text-sm font-medium text-foreground mb-2 block">Size</Label>
-          <div className="grid grid-cols-2 gap-2">
-            <div>
-              <Label className="text-xs text-muted-foreground">Width</Label>
-              <Input
-                value={component.size.width}
-                onChange={(e) =>
-                  updateComponent(pageId, component.id, {
-                    size: { ...component.size, width: e.target.value },
-                  })
-                }
-                placeholder="100%"
-              />
+            <div className="pt-4 border-t border-border">
+              <Label className="text-sm font-medium text-foreground mb-2 block">Size</Label>
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <Label className="text-xs text-muted-foreground">Width</Label>
+                  <Input
+                    value={component.size.width}
+                    onChange={(e) =>
+                      updateComponent(pageId, component.id, {
+                        size: { ...component.size, width: e.target.value },
+                      })
+                    }
+                    placeholder="100%"
+                  />
+                </div>
+                <div>
+                  <Label className="text-xs text-muted-foreground">Height</Label>
+                  <Input
+                    value={component.size.height}
+                    onChange={(e) =>
+                      updateComponent(pageId, component.id, {
+                        size: { ...component.size, height: e.target.value },
+                      })
+                    }
+                    placeholder="auto"
+                  />
+                </div>
+              </div>
             </div>
-            <div>
-              <Label className="text-xs text-muted-foreground">Height</Label>
-              <Input
-                value={component.size.height}
-                onChange={(e) =>
-                  updateComponent(pageId, component.id, {
-                    size: { ...component.size, height: e.target.value },
-                  })
-                }
-                placeholder="auto"
-              />
-            </div>
-          </div>
-        </div>
+          </>
+        )}
       </div>
     </ScrollArea>
   );
