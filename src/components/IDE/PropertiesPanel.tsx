@@ -48,6 +48,27 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({ pageId, compon
   const definition = getComponentByType(component.type);
   if (!definition) return null;
 
+  // Helper to parse JavaScript-style objects (with single quotes and unquoted keys)
+  const parseJsObject = (str: string): any => {
+    try {
+      return JSON.parse(str);
+    } catch {
+      // Try to convert JS object notation to JSON
+      try {
+        // Replace single quotes with double quotes
+        // Handle unquoted keys by adding quotes
+        const jsonStr = str
+          .replace(/'/g, '"')
+          .replace(/(\w+)\s*:/g, '"$1":')
+          .replace(/,\s*}/g, '}')
+          .replace(/,\s*]/g, ']');
+        return JSON.parse(jsonStr);
+      } catch {
+        throw new Error('Invalid format');
+      }
+    }
+  };
+
   const handleChange = (key: string, value: any) => {
     const newConfig = { ...localConfig, [key]: value };
     setLocalConfig(newConfig);
@@ -112,7 +133,7 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({ pageId, compon
                 const newValue = e.target.value;
                 setJsonStrings(prev => ({ ...prev, [field.key]: newValue }));
                 try {
-                  const parsed = JSON.parse(newValue);
+                  const parsed = parseJsObject(newValue);
                   setJsonErrors(prev => ({ ...prev, [field.key]: false }));
                   handleChange(field.key, parsed);
                 } catch {
