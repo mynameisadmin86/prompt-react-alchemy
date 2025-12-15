@@ -116,6 +116,35 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({ pageId, compon
       case 'json':
         const jsonText = jsonTexts[field.key] ?? JSON.stringify(value ?? field.defaultValue, null, 2);
         const hasError = jsonErrors[field.key];
+        
+        const parseJsOrJson = (text: string): any => {
+          // First try standard JSON
+          try {
+            return JSON.parse(text);
+          } catch {
+            // Try to convert JS object syntax to JSON
+            try {
+              // Remove "data:" or similar labels at the start
+              let cleaned = text.trim().replace(/^\w+\s*:\s*/, '');
+              // Replace single quotes with double quotes
+              cleaned = cleaned.replace(/'/g, '"');
+              // Add quotes around unquoted keys
+              cleaned = cleaned.replace(/(\{|\,)\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*:/g, '$1"$2":');
+              // Remove trailing commas
+              cleaned = cleaned.replace(/,\s*([\}\]])/g, '$1');
+              return JSON.parse(cleaned);
+            } catch {
+              // Try using Function constructor as last resort (safer than eval)
+              try {
+                const fn = new Function('return ' + text.trim().replace(/^\w+\s*:\s*/, ''));
+                return fn();
+              } catch {
+                throw new Error('Invalid syntax');
+              }
+            }
+          }
+        };
+        
         return (
           <div className="space-y-1">
             <Textarea
@@ -124,18 +153,18 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({ pageId, compon
                 const text = e.target.value;
                 setJsonTexts(prev => ({ ...prev, [field.key]: text }));
                 try {
-                  const parsed = JSON.parse(text);
+                  const parsed = parseJsOrJson(text);
                   handleChange(field.key, parsed);
                   setJsonErrors(prev => ({ ...prev, [field.key]: false }));
                 } catch {
                   setJsonErrors(prev => ({ ...prev, [field.key]: true }));
                 }
               }}
-              placeholder={`Enter ${field.label} as JSON`}
+              placeholder={`Enter ${field.label} as JSON or JS object syntax`}
               className={`font-mono text-xs min-h-[100px] ${hasError ? 'border-destructive' : ''}`}
             />
             {hasError && (
-              <p className="text-xs text-destructive">Invalid JSON format</p>
+              <p className="text-xs text-destructive">Invalid JSON/JS format</p>
             )}
           </div>
         );
