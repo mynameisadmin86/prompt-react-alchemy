@@ -971,6 +971,26 @@ export function SmartGridPlus({
     [inlineRowEditing, editingRow, handleStartEditRow],
   );
 
+  // Handle row blur - save when focus leaves the row
+  const handleRowBlur = useCallback(
+    (e: React.FocusEvent<HTMLTableRowElement>, rowIndex: number) => {
+      // Check if focus is moving outside the current row
+      const relatedTarget = e.relatedTarget as HTMLElement;
+      const currentRow = e.currentTarget;
+      
+      // If relatedTarget is null or not within the current row, save the edit
+      if (!relatedTarget || !currentRow.contains(relatedTarget)) {
+        if (editingRow === rowIndex) {
+          // Use setTimeout to allow any pending state updates to complete
+          setTimeout(() => {
+            handleSaveEditRow(rowIndex);
+          }, 0);
+        }
+      }
+    },
+    [editingRow, handleSaveEditRow],
+  );
+
   const handleEditingCellChange = useCallback(
     (rowIndex: number, columnKey: string, value: any) => {
       if (editingRow === rowIndex) {
@@ -1665,6 +1685,7 @@ export function SmartGridPlus({
                               rowClassName?.(row, actualIndex),
                             )}
                             onDoubleClick={() => handleCellDoubleClick(actualIndex, row)}
+                            onBlur={(e) => isRowEditing && handleRowBlur(e, actualIndex)}
                             onKeyDown={(e) => {
                               if (isRowEditing && e.key === "Escape") {
                                 e.preventDefault();
