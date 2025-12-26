@@ -1,6 +1,8 @@
 import React, { useState } from "react";
-import { SmartGridWithNestedRows } from "@/components/SmartGrid";
+import { SmartGridWithNestedRows, NestedRowSelection } from "@/components/SmartGrid";
 import { GridColumnConfig } from "@/types/smartgrid";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
 // Mock data for trips with nested legs
 const initialTripsData = [
@@ -134,6 +136,10 @@ export default function SmartGridWithNestedRowsDemo() {
   // State for trips and orders
   const [tripsData, setTripsData] = useState(initialTripsData);
   const [ordersData, setOrdersData] = useState(initialOrdersData);
+  
+  // State for nested row selections
+  const [selectedTripLegs, setSelectedTripLegs] = useState<NestedRowSelection[]>([]);
+  const [selectedOrderItems, setSelectedOrderItems] = useState<NestedRowSelection[]>([]);
 
   // Handler to update nested trip legs
   const handleTripLegUpdate = (parentRowIndex: number, legIndex: number, updatedLeg: any) => {
@@ -169,19 +175,6 @@ export default function SmartGridWithNestedRowsDemo() {
         legNo: nestedRow.legNo,
         updatedData,
       });
-
-      // Replace with your actual API call
-      // const response = await fetch('YOUR_API_ENDPOINT', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({
-      //     tripId: parentRow.tripId,
-      //     legNo: nestedRow.legNo,
-      //     ...updatedData
-      //   })
-      // });
-      //
-      // if (!response.ok) throw new Error('Failed to update');
     } catch (error) {
       console.error("Failed to update server:", error);
     }
@@ -195,19 +188,6 @@ export default function SmartGridWithNestedRowsDemo() {
         itemNo: nestedRow.itemNo,
         updatedData,
       });
-
-      // Replace with your actual API call
-      // const response = await fetch('YOUR_API_ENDPOINT', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({
-      //     orderId: parentRow.orderId,
-      //     itemNo: nestedRow.itemNo,
-      //     ...updatedData
-      //   })
-      // });
-      //
-      // if (!response.ok) throw new Error('Failed to update');
     } catch (error) {
       console.error("Failed to update server:", error);
     }
@@ -236,17 +216,16 @@ export default function SmartGridWithNestedRowsDemo() {
   // Column config for trip legs (nested)
   const tripLegColumns: GridColumnConfig[] = [
     { key: "legNo", label: "Leg No", type: "Text", width: 80 },
-    { key: "from", label: "From", type: "Text", width: 160, editable: true },
-    { key: "to", label: "To", type: "Text", width: 160, editable: true },
-    { key: "distance", label: "Distance (KM)", type: "Text", width: 120, editable: true },
-    { key: "departureTime", label: "Departure Time", type: "Time", width: 140, editable: true },
-    { key: "eta", label: "ETA", type: "Date", width: 180, editable: true },
+    { key: "from", label: "From", type: "Text", width: 160 },
+    { key: "to", label: "To", type: "Text", width: 160 },
+    { key: "distance", label: "Distance (KM)", type: "Text", width: 120 },
+    { key: "departureTime", label: "Departure Time", type: "Time", width: 140 },
+    { key: "eta", label: "ETA", type: "Date", width: 180 },
     {
       key: "status",
       label: "Status",
       type: "Badge",
       width: 120,
-      editable: true,
       statusMap: {
         Completed: "Completed",
         "In Progress": "In Progress",
@@ -277,9 +256,9 @@ export default function SmartGridWithNestedRowsDemo() {
   // Column config for order items (nested)
   const orderItemColumns: GridColumnConfig[] = [
     { key: "itemNo", label: "Item No", type: "Text", width: 80 },
-    { key: "productName", label: "Product Name", type: "Text", width: 200, editable: true },
-    { key: "quantity", label: "Quantity", type: "Text", width: 100, editable: true },
-    { key: "unitPrice", label: "Unit Price", type: "Text", width: 120, editable: true },
+    { key: "productName", label: "Product Name", type: "Text", width: 200 },
+    { key: "quantity", label: "Quantity", type: "Text", width: 100 },
+    { key: "unitPrice", label: "Unit Price", type: "Text", width: 120 },
     { key: "total", label: "Total", type: "Text", width: 120 },
   ];
 
@@ -288,19 +267,40 @@ export default function SmartGridWithNestedRowsDemo() {
       <div>
         <h1 className="text-3xl font-bold mb-2">SmartGrid with Nested Rows Demo</h1>
         <p className="text-muted-foreground mb-6">
-          Extended SmartGrid component that displays nested array data in collapsible sections. All base SmartGrid
-          features (sorting, filtering, selection, etc.) remain intact.
+          Extended SmartGrid component that displays nested array data with configurable selection modes.
         </p>
       </div>
 
-      {/* Example 1: Trips with Legs */}
+      {/* Example 1: Trips with Multi Selection */}
       <div className="space-y-4">
         <div>
-          <h2 className="text-2xl font-semibold mb-1">Trip Management with Nested Legs</h2>
+          <h2 className="text-2xl font-semibold mb-1">Trip Management - Multi Selection</h2>
           <p className="text-sm text-muted-foreground">
-            Each trip can be expanded to view its leg details in a nested grid.
+            Select multiple trip legs across any trip. Use the checkbox in header to select all legs in a trip.
           </p>
         </div>
+        
+        {/* Selection Summary */}
+        {selectedTripLegs.length > 0 && (
+          <Card className="bg-primary/5 border-primary/20">
+            <CardHeader className="py-3">
+              <CardTitle className="text-sm font-medium flex items-center gap-2">
+                <Badge variant="secondary">{selectedTripLegs.length}</Badge>
+                Trip Leg(s) Selected
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="py-2">
+              <div className="flex flex-wrap gap-2">
+                {selectedTripLegs.map((sel, idx) => (
+                  <Badge key={idx} variant="outline" className="text-xs">
+                    {sel.parentRow.tripId} - Leg {sel.nestedRow.legNo}: {sel.nestedRow.from} → {sel.nestedRow.to}
+                  </Badge>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+        
         <SmartGridWithNestedRows
           columns={tripColumns}
           data={tripsData}
@@ -311,7 +311,9 @@ export default function SmartGridWithNestedRowsDemo() {
             title: "Trip Legs",
             initiallyExpanded: true,
             showNestedRowCount: true,
-            editableColumns: true,
+            selectionMode: "multi",
+            selectedRows: selectedTripLegs,
+            onSelectionChange: setSelectedTripLegs,
             onInlineEdit: (parentRowIndex, legIndex, updatedLeg) => {
               handleTripLegUpdate(parentRowIndex, legIndex, updatedLeg);
             },
@@ -323,14 +325,35 @@ export default function SmartGridWithNestedRowsDemo() {
         />
       </div>
 
-      {/* Example 2: Orders with Items */}
+      {/* Example 2: Orders with Single Selection */}
       <div className="space-y-4">
         <div>
-          <h2 className="text-2xl font-semibold mb-1">Order Management with Nested Items</h2>
+          <h2 className="text-2xl font-semibold mb-1">Order Management - Single Selection</h2>
           <p className="text-sm text-muted-foreground">
-            Each order can be expanded to view its line items in a nested grid.
+            Select only one order item at a time across all orders.
           </p>
         </div>
+        
+        {/* Selection Summary */}
+        {selectedOrderItems.length > 0 && (
+          <Card className="bg-primary/5 border-primary/20">
+            <CardHeader className="py-3">
+              <CardTitle className="text-sm font-medium flex items-center gap-2">
+                Selected Item
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="py-2">
+              <div className="flex flex-wrap gap-2">
+                {selectedOrderItems.map((sel, idx) => (
+                  <Badge key={idx} variant="outline" className="text-xs">
+                    {sel.parentRow.orderId} - {sel.nestedRow.productName} (Qty: {sel.nestedRow.quantity})
+                  </Badge>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+        
         <SmartGridWithNestedRows
           columns={orderColumns}
           data={ordersData}
@@ -339,9 +362,11 @@ export default function SmartGridWithNestedRowsDemo() {
             nestedDataKey: "orderItems",
             columns: orderItemColumns,
             title: "Order Line Items",
-            initiallyExpanded: false,
+            initiallyExpanded: true,
             showNestedRowCount: true,
-            editableColumns: ["productName", "quantity", "unitPrice"],
+            selectionMode: "single",
+            selectedRows: selectedOrderItems,
+            onSelectionChange: setSelectedOrderItems,
             onInlineEdit: (parentRowIndex, itemIndex, updatedItem) => {
               handleOrderItemUpdate(parentRowIndex, itemIndex, updatedItem);
             },
@@ -353,19 +378,26 @@ export default function SmartGridWithNestedRowsDemo() {
         />
       </div>
 
-      {/* Example 3: Without nested section (base SmartGrid behavior) */}
+      {/* Example 3: No Selection Mode */}
       <div className="space-y-4">
         <div>
-          <h2 className="text-2xl font-semibold mb-1">Base SmartGrid (No Nested Section)</h2>
+          <h2 className="text-2xl font-semibold mb-1">Base SmartGrid - No Selection</h2>
           <p className="text-sm text-muted-foreground">
-            SmartGridWithNestedRows works as a regular SmartGrid when no nestedSectionConfig is provided.
+            Default mode with no nested row selection enabled.
           </p>
         </div>
         <SmartGridWithNestedRows
           columns={tripColumns}
           data={tripsData}
           gridTitle="Simple Trips View"
-          editableColumns={true}
+          nestedSectionConfig={{
+            nestedDataKey: "tripLegs",
+            columns: tripLegColumns,
+            title: "Trip Legs",
+            initiallyExpanded: true,
+            showNestedRowCount: true,
+            selectionMode: "none",
+          }}
           paginationMode="pagination"
           customPageSize={10}
         />

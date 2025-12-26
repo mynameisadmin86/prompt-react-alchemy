@@ -2,7 +2,7 @@
 export { SmartGrid } from './SmartGrid';
 export { SmartGridPlus } from './SmartGridPlus';
 export { SmartGridWithGrouping } from './SmartGridWithGrouping';
-export { SmartGridWithNestedRows } from './SmartGridWithNestedRows';
+export { SmartGridWithNestedRows, type NestedRowSelection, type NestedSelectionMode, type NestedSectionConfig } from './SmartGridWithNestedRows';
 export { SmartGridPlusWithNestedRows } from './SmartGridPlusWithNestedRows';
 export { ServersideFilter } from './ServersideFilter';
 export { CellEditor } from './CellEditor';
