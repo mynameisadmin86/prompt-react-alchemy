@@ -276,7 +276,7 @@ export default function SmartGridWithNestedRowsDemo() {
         <div>
           <h2 className="text-2xl font-semibold mb-1">Trip Management - Multi Selection</h2>
           <p className="text-sm text-muted-foreground">
-            Select multiple trip legs across any trip. Use the checkbox in header to select all legs in a trip.
+            Click on rows to select multiple trip legs across any trip. Click again to deselect.
           </p>
         </div>
         
@@ -330,7 +330,7 @@ export default function SmartGridWithNestedRowsDemo() {
         <div>
           <h2 className="text-2xl font-semibold mb-1">Order Management - Single Selection</h2>
           <p className="text-sm text-muted-foreground">
-            Select only one order item at a time across all orders.
+            Click on a row to select one order item at a time. Click again to deselect.
           </p>
         </div>
         
