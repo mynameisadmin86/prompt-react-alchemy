@@ -3,7 +3,6 @@ import { SmartGrid } from './SmartGrid';
 import { SmartGridProps, GridColumnConfig } from '@/types/smartgrid';
 import { ChevronDown, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Checkbox } from '@/components/ui/checkbox';
 
 export type NestedSelectionMode = 'none' | 'single' | 'multi';
 
@@ -68,8 +67,8 @@ export function SmartGridWithNestedRows({
     );
   }, [selectedRows]);
 
-  // Handle nested row selection
-  const handleNestedRowSelect = useCallback((
+  // Handle nested row selection via row click
+  const handleNestedRowClick = useCallback((
     parentRowIndex: number,
     nestedRowIndex: number,
     parentRow: any,
@@ -86,7 +85,7 @@ export function SmartGridWithNestedRows({
     };
 
     if (selectionMode === 'single') {
-      // Single selection - replace all
+      // Single selection - toggle or replace
       if (isCurrentlySelected) {
         onSelectionChange([]);
       } else {
@@ -105,56 +104,6 @@ export function SmartGridWithNestedRows({
       }
     }
   }, [selectionMode, selectedRows, onSelectionChange, isNestedRowSelected]);
-
-  // Select all nested rows in a parent row
-  const handleSelectAllNestedInParent = useCallback((
-    parentRowIndex: number,
-    parentRow: any,
-    nestedData: any[]
-  ) => {
-    if (selectionMode !== 'multi') return;
-
-    const allNestedInParent = nestedData.map((nestedRow, nestedIdx) => ({
-      parentRowIndex,
-      nestedRowIndex: nestedIdx,
-      parentRow,
-      nestedRow,
-    }));
-
-    const currentlySelectedInParent = selectedRows.filter(
-      (sel) => sel.parentRowIndex === parentRowIndex
-    );
-
-    if (currentlySelectedInParent.length === nestedData.length) {
-      // Deselect all in this parent
-      onSelectionChange(
-        selectedRows.filter((sel) => sel.parentRowIndex !== parentRowIndex)
-      );
-    } else {
-      // Select all in this parent (add those not already selected)
-      const otherSelections = selectedRows.filter(
-        (sel) => sel.parentRowIndex !== parentRowIndex
-      );
-      onSelectionChange([...otherSelections, ...allNestedInParent]);
-    }
-  }, [selectionMode, selectedRows, onSelectionChange]);
-
-  // Check if all nested rows in a parent are selected
-  const areAllNestedSelected = useCallback((parentRowIndex: number, nestedCount: number) => {
-    if (nestedCount === 0) return false;
-    const selectedInParent = selectedRows.filter(
-      (sel) => sel.parentRowIndex === parentRowIndex
-    );
-    return selectedInParent.length === nestedCount;
-  }, [selectedRows]);
-
-  // Check if some (but not all) nested rows in a parent are selected
-  const areSomeNestedSelected = useCallback((parentRowIndex: number, nestedCount: number) => {
-    const selectedInParent = selectedRows.filter(
-      (sel) => sel.parentRowIndex === parentRowIndex
-    );
-    return selectedInParent.length > 0 && selectedInParent.length < nestedCount;
-  }, [selectedRows]);
 
   // Create a nested row renderer that includes both the original nested content
   // (sub-row columns) and the new nested section (nested array data)
@@ -218,27 +167,11 @@ export function SmartGridWithNestedRows({
                 </div>
               ) : (
                 <div className="p-3">
-                  {/* Custom table for nested rows with selection */}
+                  {/* Custom table for nested rows with row-level selection */}
                   <div className="overflow-x-auto">
                     <table className="w-full text-sm">
                       <thead>
                         <tr className="border-b border-border">
-                          {selectionMode !== 'none' && (
-                            <th className="px-3 py-2 text-left w-10">
-                              {selectionMode === 'multi' && (
-                                <Checkbox
-                                  checked={areAllNestedSelected(rowIndex, rowCount)}
-                                  ref={(el) => {
-                                    if (el) {
-                                      (el as any).indeterminate = areSomeNestedSelected(rowIndex, rowCount);
-                                    }
-                                  }}
-                                  onCheckedChange={() => handleSelectAllNestedInParent(rowIndex, row, nestedData)}
-                                  aria-label="Select all nested rows"
-                                />
-                              )}
-                            </th>
-                          )}
                           {nestedSectionConfig.columns.map((col) => (
                             <th
                               key={col.key}
@@ -257,21 +190,13 @@ export function SmartGridWithNestedRows({
                             <tr
                               key={nestedIdx}
                               className={cn(
-                                "border-b border-border/50 hover:bg-muted/30 transition-colors cursor-pointer",
-                                isSelected && "bg-primary/10"
+                                "border-b border-border/50 transition-colors",
+                                selectionMode !== 'none' && "cursor-pointer hover:bg-muted/30",
+                                selectionMode === 'none' && "hover:bg-muted/20",
+                                isSelected && "bg-primary/10 hover:bg-primary/15"
                               )}
-                              onClick={() => handleNestedRowSelect(rowIndex, nestedIdx, row, nestedRow)}
+                              onClick={() => handleNestedRowClick(rowIndex, nestedIdx, row, nestedRow)}
                             >
-                              {selectionMode !== 'none' && (
-                                <td className="px-3 py-2 w-10">
-                                  <Checkbox
-                                    checked={isSelected}
-                                    onCheckedChange={() => handleNestedRowSelect(rowIndex, nestedIdx, row, nestedRow)}
-                                    onClick={(e) => e.stopPropagation()}
-                                    aria-label={`Select row ${nestedIdx + 1}`}
-                                  />
-                                </td>
-                              )}
                               {nestedSectionConfig.columns.map((col) => (
                                 <td
                                   key={col.key}
