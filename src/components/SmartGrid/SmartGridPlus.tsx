@@ -892,11 +892,11 @@ export function SmartGridPlus({
   }, []);
 
   const handleSaveEditRow = useCallback(
-    async (rowIndex: number): Promise<boolean> => {
+    async (rowIndex: number) => {
       const errors = validateRow(editingValues);
       if (Object.keys(errors).length > 0) {
         setValidationErrors(errors);
-        return false; // Return false to indicate validation failed
+        return;
       }
 
       try {
@@ -917,14 +917,12 @@ export function SmartGridPlus({
           title: "Row Updated",
           description: "Row has been updated successfully.",
         });
-        return true; // Return true to indicate success
       } catch (error) {
         toast({
           title: "Error",
           description: "Failed to update row.",
           variant: "destructive",
         });
-        return false; // Return false on error
       }
     },
     [editingValues, validateRow, gridData, setGridData, onEditRow, toast],
@@ -973,33 +971,24 @@ export function SmartGridPlus({
     [inlineRowEditing, editingRow, handleStartEditRow],
   );
 
-  // Handle row blur - save when focus leaves the row, show errors if validation fails
+  // Handle row blur - save when focus leaves the row
   const handleRowBlur = useCallback(
     (e: React.FocusEvent<HTMLTableRowElement>, rowIndex: number) => {
       // Check if focus is moving outside the current row
       const relatedTarget = e.relatedTarget as HTMLElement;
       const currentRow = e.currentTarget;
       
-      // If relatedTarget is null or not within the current row, attempt to save the edit
+      // If relatedTarget is null or not within the current row, save the edit
       if (!relatedTarget || !currentRow.contains(relatedTarget)) {
         if (editingRow === rowIndex) {
           // Use setTimeout to allow any pending state updates to complete
-          setTimeout(async () => {
-            // Validate the row - errors will be set in state if validation fails
-            const errors = validateRow(editingValues);
-            if (Object.keys(errors).length > 0) {
-              // Set validation errors to display in cells - row stays in edit mode
-              setValidationErrors(errors);
-              // Don't close edit mode, keep the row editable so user can fix errors
-              return;
-            }
-            // If validation passes, save the row
-            await handleSaveEditRow(rowIndex);
+          setTimeout(() => {
+            handleSaveEditRow(rowIndex);
           }, 0);
         }
       }
     },
-    [editingRow, editingValues, validateRow, handleSaveEditRow],
+    [editingRow, handleSaveEditRow],
   );
 
   const handleEditingCellChange = useCallback(
