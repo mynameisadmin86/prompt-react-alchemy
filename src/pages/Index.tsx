@@ -1,7 +1,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowRight, Grid3x3, Layout, Search, Workflow, PanelLeft, Layers, Upload, ShoppingCart, CreditCard, Tag, Calendar, Code2, FileCode } from "lucide-react";
+import { ArrowRight, Grid3x3, Layout, Search, Workflow, PanelLeft, Layers, Upload, ShoppingCart, CreditCard, Tag, Calendar, Code2, FileCode, FileText } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useIDEStore } from "@/stores/ideStore";
 
@@ -294,6 +294,13 @@ const Index = () => {
       icon: Code2,
       path: "/ide",
       color: "text-violet-600"
+    },
+    {
+      title: "Receivables Authorization",
+      description: "Customer invoice authorization with invoice details grid and financial management",
+      icon: FileText,
+      path: "/receivables-authorization",
+      color: "text-green-600"
     },
   ];
 

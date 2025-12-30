@@ -50,6 +50,7 @@ import DynamicLazySelectAddNewDemo from "./pages/DynamicLazySelectAddNewDemo";
 import SmartGridWithGroupingEditableDemo from "./pages/SmartGridWithGroupingEditableDemo";
 import IDEPage from "./pages/IDEPage";
 import IDEPreviewPage from "./pages/IDEPreviewPage";
+import ReceivablesAuthorizationPage from "./pages/ReceivablesAuthorizationPage";
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -104,6 +105,7 @@ const App = () => (
           <Route path="/smartgrid-grouping-editable-demo" element={<SmartGridWithGroupingEditableDemo />} />
           <Route path="/ide" element={<IDEPage />} />
           <Route path="/ide-preview/*" element={<IDEPreviewPage />} />
+          <Route path="/receivables-authorization" element={<ReceivablesAuthorizationPage />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
