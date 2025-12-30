@@ -971,24 +971,33 @@ export function SmartGridPlus({
     [inlineRowEditing, editingRow, handleStartEditRow],
   );
 
-  // Handle row blur - save when focus leaves the row
+  // Handle row blur - validate and save when focus leaves the row (same as Enter)
   const handleRowBlur = useCallback(
     (e: React.FocusEvent<HTMLTableRowElement>, rowIndex: number) => {
       // Check if focus is moving outside the current row
       const relatedTarget = e.relatedTarget as HTMLElement;
       const currentRow = e.currentTarget;
       
-      // If relatedTarget is null or not within the current row, save the edit
+      // If relatedTarget is null or not within the current row, validate and attempt to save
       if (!relatedTarget || !currentRow.contains(relatedTarget)) {
         if (editingRow === rowIndex) {
           // Use setTimeout to allow any pending state updates to complete
           setTimeout(() => {
+            // Validate first - this will show errors in cells if validation fails
+            const errors = validateRow(editingValues);
+            if (Object.keys(errors).length > 0) {
+              // Set validation errors to display in cells (same as on Enter)
+              setValidationErrors(errors);
+              // Keep the row in editing mode so user can fix errors
+              return;
+            }
+            // If validation passes, save the row
             handleSaveEditRow(rowIndex);
           }, 0);
         }
       }
     },
-    [editingRow, handleSaveEditRow],
+    [editingRow, editingValues, validateRow, handleSaveEditRow],
   );
 
   const handleEditingCellChange = useCallback(
