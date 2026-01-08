@@ -141,6 +141,24 @@ export default function SmartGridWithNestedRowsDemo() {
   const [selectedTripLegs, setSelectedTripLegs] = useState<NestedRowSelection[]>([]);
   const [selectedOrderItems, setSelectedOrderItems] = useState<NestedRowSelection[]>([]);
 
+  // Handler to update main trip row
+  const handleTripInlineEdit = (rowIndex: number, updatedRow: any) => {
+    setTripsData((prevData) => {
+      const newData = [...prevData];
+      newData[rowIndex] = { ...newData[rowIndex], ...updatedRow };
+      return newData;
+    });
+  };
+
+  // Handler to update main order row
+  const handleOrderInlineEdit = (rowIndex: number, updatedRow: any) => {
+    setOrdersData((prevData) => {
+      const newData = [...prevData];
+      newData[rowIndex] = { ...newData[rowIndex], ...updatedRow };
+      return newData;
+    });
+  };
+
   // Handler to update nested trip legs
   const handleTripLegUpdate = (parentRowIndex: number, legIndex: number, updatedLeg: any) => {
     setTripsData((prevData) => {
@@ -305,6 +323,7 @@ export default function SmartGridWithNestedRowsDemo() {
           columns={tripColumns}
           data={tripsData}
           gridTitle="Trips"
+          onInlineEdit={handleTripInlineEdit}
           nestedSectionConfig={{
             nestedDataKey: "tripLegs",
             columns: tripLegColumns,
@@ -356,6 +375,7 @@ export default function SmartGridWithNestedRowsDemo() {
           columns={orderColumns}
           data={ordersData}
           gridTitle="Orders"
+          onInlineEdit={handleOrderInlineEdit}
           nestedSectionConfig={{
             nestedDataKey: "orderItems",
             columns: orderItemColumns,
