@@ -202,7 +202,7 @@ export const CellRenderer: React.FC<CellRendererProps> = ({
   const renderTextData = () => {
     return (
       <div className="text-sm min-w-0">
-        <div className="text-Gray-800 font-normal truncate text-[13px]">{value}</div>
+        <div className="text-foreground font-normal truncate text-[13px]">{value}</div>
         {/* {column.key == 'Contract' && (<div className="text-gray-500 text-[11px] truncate">{row?.ContractDescription}</div>)}
         {column.key == 'CustomerOrVendor' && (<div className="text-gray-500 text-[11px] truncate">{row?.CustomerOrVendorName}</div>)} */}
       </div>
