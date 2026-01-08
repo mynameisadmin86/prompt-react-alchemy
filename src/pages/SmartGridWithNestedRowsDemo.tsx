@@ -136,7 +136,7 @@ export default function SmartGridWithNestedRowsDemo() {
   // State for trips and orders
   const [tripsData, setTripsData] = useState(initialTripsData);
   const [ordersData, setOrdersData] = useState(initialOrdersData);
-  
+
   // State for nested row selections
   const [selectedTripLegs, setSelectedTripLegs] = useState<NestedRowSelection[]>([]);
   const [selectedOrderItems, setSelectedOrderItems] = useState<NestedRowSelection[]>([]);
@@ -197,7 +197,7 @@ export default function SmartGridWithNestedRowsDemo() {
   const tripColumns: GridColumnConfig[] = [
     { key: "tripId", label: "Trip ID", type: "Text", width: 120 },
     { key: "vehicleNo", label: "Vehicle No", type: "Text", width: 140 },
-    { key: "driverName", label: "Driver Name", type: "Text", width: 150 },
+    { key: "driverName", label: "Driver Name", type: "Text", width: 150, editable: true },
     {
       key: "status",
       label: "Status",
@@ -279,7 +279,7 @@ export default function SmartGridWithNestedRowsDemo() {
             Click on rows to select multiple trip legs across any trip. Click again to deselect.
           </p>
         </div>
-        
+
         {/* Selection Summary */}
         {selectedTripLegs.length > 0 && (
           <Card className="bg-primary/5 border-primary/20">
@@ -300,7 +300,7 @@ export default function SmartGridWithNestedRowsDemo() {
             </CardContent>
           </Card>
         )}
-        
+
         <SmartGridWithNestedRows
           columns={tripColumns}
           data={tripsData}
@@ -333,14 +333,12 @@ export default function SmartGridWithNestedRowsDemo() {
             Click on a row to select one order item at a time. Click again to deselect.
           </p>
         </div>
-        
+
         {/* Selection Summary */}
         {selectedOrderItems.length > 0 && (
           <Card className="bg-primary/5 border-primary/20">
             <CardHeader className="py-3">
-              <CardTitle className="text-sm font-medium flex items-center gap-2">
-                Selected Item
-              </CardTitle>
+              <CardTitle className="text-sm font-medium flex items-center gap-2">Selected Item</CardTitle>
             </CardHeader>
             <CardContent className="py-2">
               <div className="flex flex-wrap gap-2">
@@ -353,7 +351,7 @@ export default function SmartGridWithNestedRowsDemo() {
             </CardContent>
           </Card>
         )}
-        
+
         <SmartGridWithNestedRows
           columns={orderColumns}
           data={ordersData}
@@ -382,9 +380,7 @@ export default function SmartGridWithNestedRowsDemo() {
       <div className="space-y-4">
         <div>
           <h2 className="text-2xl font-semibold mb-1">Base SmartGrid - No Selection</h2>
-          <p className="text-sm text-muted-foreground">
-            Default mode with no nested row selection enabled.
-          </p>
+          <p className="text-sm text-muted-foreground">Default mode with no nested row selection enabled.</p>
         </div>
         <SmartGridWithNestedRows
           columns={tripColumns}
