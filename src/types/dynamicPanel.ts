@@ -50,7 +50,7 @@ export type PanelFieldConfig =
 export interface FieldConfig {
   id: string;
   label: string;
-  fieldType: 'text' | 'select' | 'search' | 'searchtext' | 'currency' | 'date' | 'time' | 'textarea' | 'radio' | 'card' | 'inputdropdown' | 'lazyselect' | 'searchableselect' | 'switch';
+  fieldType: 'text' | 'select' | 'search' | 'searchtext' | 'currency' | 'date' | 'time' | 'textarea' | 'radio' | 'card' | 'inputdropdown' | 'lazyselect' | 'multiselectlazyselect' | 'searchableselect' | 'switch';
   value: any;
   mandatory: boolean;
   visible: boolean;
@@ -65,7 +65,7 @@ export interface FieldConfig {
   color?: string; // For card field type background color
   fieldColour?: string; // For card field type color
   dateFormat?: string; // For date field type - format string for date-fns
-  // For lazyselect field type
+  // For lazyselect and multiselectlazyselect field types
   fetchOptions?: (params: {
     searchTerm: string;
     offset: number;
@@ -75,6 +75,7 @@ export interface FieldConfig {
   disableLazyLoading?: boolean; // Disable lazy loading on scroll in lazyselect
   allowAddNew?: boolean; // Enable adding new items not in the list
   onAddNew?: (newValue: string) => Promise<void> | void; // Callback when adding new item
+  maxVisibleChips?: number; // For multiselectlazyselect - max chips to show before +N indicator
   // For searchableselect field type
   localOptions?: { label: string; value: string }[]; // Local data array for searchableselect
   // Event handlers for field interactions

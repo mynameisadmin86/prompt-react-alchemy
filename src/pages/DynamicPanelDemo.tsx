@@ -362,6 +362,52 @@ const DynamicPanelDemo = () => {
           console.log('Category dropdown clicked:', { event, value });
         }
       }
+    },
+    wagonNo: {
+      id: 'wagonNo',
+      label: 'Wagon No.',
+      fieldType: 'multiselectlazyselect',
+      value: [],
+      mandatory: false,
+      visible: true,
+      editable: true,
+      order: 7,
+      width: 'half',
+      placeholder: 'Select wagons...',
+      maxVisibleChips: 2,
+      fetchOptions: async ({ searchTerm, offset, limit }) => {
+        // Simulate API delay
+        await new Promise(resolve => setTimeout(resolve, 300));
+        
+        // Mock wagon data
+        const allWagons = [
+          { label: 'W000005', value: 'W000005' },
+          { label: 'W000233', value: 'W000233' },
+          { label: 'W000456', value: 'W000456' },
+          { label: 'W000789', value: 'W000789' },
+          { label: 'W001001', value: 'W001001' },
+          { label: 'W001234', value: 'W001234' },
+          { label: 'W001567', value: 'W001567' },
+          { label: 'W001890', value: 'W001890' },
+          { label: 'W002123', value: 'W002123' },
+          { label: 'W002456', value: 'W002456' },
+        ];
+        
+        // Filter by search term
+        const filtered = searchTerm 
+          ? allWagons.filter(wagon => 
+              wagon.label.toLowerCase().includes(searchTerm.toLowerCase())
+            )
+          : allWagons;
+        
+        // Paginate results
+        return filtered.slice(offset, offset + limit);
+      },
+      events: {
+        onChange: (value, event) => {
+          console.log('Wagons changed:', value);
+        }
+      }
     }
   };
 
