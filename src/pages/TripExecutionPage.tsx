@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { FlexGridLayout } from '@/components/FlexGridLayout';
 import { LayoutConfig } from '@/components/FlexGridLayout/types';
@@ -21,29 +21,73 @@ const TripExecutionPage = () => {
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   
   // Handle save draft
-  const handleSaveDraft = async () => {
+  const handleSaveDraft = useCallback(async () => {
     if (selectedTrip) {
       await saveTrip(selectedTrip, selectedTrip.id);
       setHasUnsavedChanges(false);
       toast.success('Trip saved as draft');
     }
-  };
+  }, [selectedTrip, saveTrip]);
 
   // Handle confirm trip
-  const handleConfirmTrip = async () => {
+  const handleConfirmTrip = useCallback(async () => {
     if (selectedTrip) {
       await saveTrip({ ...selectedTrip, status: 'approved' }, selectedTrip.id);
       setHasUnsavedChanges(false);
       toast.success('Trip confirmed successfully');
     }
-  };
+  }, [selectedTrip, saveTrip]);
 
   // Track field changes
-  const handleFieldChange = (field: any, value: any) => {
+  const handleFieldChange = useCallback((field: any, value: any) => {
     setHasUnsavedChanges(true);
     updateField(field, value);
-  };
+  }, [updateField]);
   
+  // Left panel content component to avoid stale closures
+  const LeftPanelContent = React.useMemo(() => (
+    <div className="h-full flex flex-col overflow-hidden">
+      {loading ? (
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-muted-foreground">Loading trip details...</div>
+        </div>
+      ) : (
+        <>
+          <div className="flex-1 overflow-auto p-4 space-y-0">
+            <TripStatusBadge status={selectedTrip?.status} />
+            <TripDetailsForm 
+              tripData={selectedTrip} 
+              onFieldChange={handleFieldChange}
+            />
+          </div>
+          <ActionIconBar />
+        </>
+      )}
+    </div>
+  ), [loading, selectedTrip, handleFieldChange]);
+
+  // Center panel content
+  const CenterPanelContent = React.useMemo(() => (
+    <div className="h-full flex flex-col">
+      <div className="flex-1 p-6 space-y-6 overflow-auto">
+        <EnhancedSmartGrid />
+        <div>
+          <h3 className="text-lg font-semibold mb-4">Summary</h3>
+          <SummaryCardsGrid />
+        </div>
+      </div>
+    </div>
+  ), []);
+
+  // Bottom panel content
+  const BottomPanelContent = React.useMemo(() => (
+    <TripFooterActions 
+      onSaveDraft={handleSaveDraft}
+      onConfirmTrip={handleConfirmTrip}
+      loading={loading}
+    />
+  ), [handleSaveDraft, handleConfirmTrip, loading]);
+
   const [layoutConfig, setLayoutConfig] = useState<LayoutConfig>({
     sections: {
       top: {
@@ -60,27 +104,8 @@ const TripExecutionPage = () => {
         collapsible: true,
         collapsed: false,
         minWidth: '0',
-        title: selectedTrip?.id || 'Loading...',
-        content: (
-          <div className="h-full flex flex-col overflow-hidden">
-            {loading ? (
-              <div className="flex-1 flex items-center justify-center">
-                <div className="text-muted-foreground">Loading trip details...</div>
-              </div>
-            ) : (
-              <>
-                <div className="flex-1 overflow-auto p-4 space-y-0">
-                  <TripStatusBadge status={selectedTrip?.status} />
-                  <TripDetailsForm 
-                    tripData={selectedTrip} 
-                    onFieldChange={handleFieldChange}
-                  />
-                </div>
-                <ActionIconBar />
-              </>
-            )}
-          </div>
-        )
+        title: 'Trip Details',
+        content: null
       },
       center: {
         id: 'center',
@@ -88,17 +113,7 @@ const TripExecutionPage = () => {
         width: 'calc(100% - 380px)',
         collapsible: false,
         title: '',
-        content: (
-          <div className="h-full flex flex-col">
-            <div className="flex-1 p-6 space-y-6 overflow-auto">
-              <EnhancedSmartGrid />
-              <div>
-                <h3 className="text-lg font-semibold mb-4">Summary</h3>
-                <SummaryCardsGrid />
-              </div>
-            </div>
-          </div>
-        )
+        content: null
       },
       right: {
         id: 'right',
@@ -114,16 +129,33 @@ const TripExecutionPage = () => {
         height: 'auto',
         collapsible: false,
         title: '',
-        content: (
-          <TripFooterActions 
-            onSaveDraft={handleSaveDraft}
-            onConfirmTrip={handleConfirmTrip}
-            loading={loading}
-          />
-        )
+        content: null
       }
     }
   });
+
+  // Update layout config content when dependencies change
+  React.useEffect(() => {
+    setLayoutConfig(prev => ({
+      ...prev,
+      sections: {
+        ...prev.sections,
+        left: {
+          ...prev.sections.left,
+          title: selectedTrip?.id || 'Loading...',
+          content: LeftPanelContent
+        },
+        center: {
+          ...prev.sections.center,
+          content: CenterPanelContent
+        },
+        bottom: {
+          ...prev.sections.bottom,
+          content: BottomPanelContent
+        }
+      }
+    }));
+  }, [LeftPanelContent, CenterPanelContent, BottomPanelContent, selectedTrip?.id]);
 
   const handleConfigChange = (newConfig: LayoutConfig) => {
     // Auto-adjust center width when left panel collapses/expands
