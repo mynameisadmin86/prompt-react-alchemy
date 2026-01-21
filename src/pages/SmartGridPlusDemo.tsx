@@ -78,7 +78,6 @@ const columns: GridColumnConfig[] = [
     type: "String",
     sortable: true,
     filterable: true,
-    editable: false,
     width: 200,
   },
   {
@@ -87,7 +86,6 @@ const columns: GridColumnConfig[] = [
     type: "Integer",
     sortable: true,
     filterable: true,
-    editable: true,
     width: 100,
   },
   {
@@ -96,7 +94,6 @@ const columns: GridColumnConfig[] = [
     type: "Integer",
     sortable: true,
     filterable: true,
-    editable: true,
     width: 120,
   },
   {
@@ -105,22 +102,17 @@ const columns: GridColumnConfig[] = [
     type: "Select",
     sortable: true,
     filterable: true,
-    editable: true,
     width: 120,
     options: ["Electronics", "Furniture", "Office Supplies", "Tools"],
   },
   {
     key: "status",
     label: "Status",
-    type: "Badge",
+    type: "Select",
     sortable: true,
     filterable: true,
     width: 100,
-    statusMap: {
-      Active: "green",
-      "Low Stock": "orange",
-      "Out of Stock": "red",
-    },
+    options: ["Active", "Low Stock", "Out of Stock"],
   },
   {
     key: "dateAdded",
@@ -128,7 +120,6 @@ const columns: GridColumnConfig[] = [
     type: "Date",
     sortable: true,
     filterable: true,
-    editable: true,
     width: 120,
   },
   {
@@ -137,7 +128,6 @@ const columns: GridColumnConfig[] = [
     type: "Time",
     sortable: true,
     filterable: true,
-    editable: true,
     width: 130,
   },
   {
@@ -146,7 +136,6 @@ const columns: GridColumnConfig[] = [
     type: "LazySelect",
     sortable: true,
     filterable: true,
-    editable: true,
     width: 150,
     isSubRowEditable: false,
     fetchOptions: async ({ searchTerm, offset, limit }) => {
@@ -175,7 +164,6 @@ const columns: GridColumnConfig[] = [
     type: "MultiselectLazySelect",
     sortable: false,
     filterable: false,
-    editable: true,
     width: 200,
     fetchOptions: async ({ searchTerm, offset, limit }) => {
       // Mock async data fetching for specifications
@@ -225,7 +213,6 @@ const columns: GridColumnConfig[] = [
     type: "Text",
     sortable: false,
     filterable: false,
-    editable: true,
     width: 200,
     subRow: true,
   },
@@ -235,7 +222,6 @@ const columns: GridColumnConfig[] = [
     type: "String",
     sortable: false,
     filterable: false,
-    editable: true,
     width: 150,
     subRow: true,
   },
@@ -245,7 +231,6 @@ const columns: GridColumnConfig[] = [
     type: "Select",
     sortable: false,
     filterable: false,
-    editable: true,
     width: 150,
     subRow: true,
     options: ["Warehouse A", "Warehouse B", "Warehouse C", "Warehouse D"],
