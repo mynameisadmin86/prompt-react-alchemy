@@ -16,10 +16,7 @@ import {
   EllipsisVertical,
   SlidersHorizontal,
   Calendar,
-  Package,
-  Copy,
-  ClipboardPaste,
-  Upload
+  Package
 } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
@@ -34,6 +31,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
 import { useFilterStore } from '@/stores/filterStore';
+import { spawn } from 'child_process';
 
 interface GridToolbarProps {
   globalFilter?: string;
@@ -80,13 +78,6 @@ interface GridToolbarProps {
   // Selection props
   selectedRowsCount?: number;
   onClearSelection?: () => void;
-  // Copy/Paste props
-  onCopyRows?: () => void;
-  onPasteRows?: () => void;
-  canCopy?: boolean;
-  canPaste?: boolean;
-  // Import props
-  onImportExcel?: (file: File) => void;
 }
 
 export function GridToolbar({
@@ -129,27 +120,8 @@ export function GridToolbar({
   gridId,
   hideCheckboxToggle = false,
   selectedRowsCount = 0,
-  onClearSelection,
-  // Copy/Paste props
-  onCopyRows,
-  onPasteRows,
-  canCopy = false,
-  canPaste = false,
-  onImportExcel
+  onClearSelection
 }: GridToolbarProps) {
-  // File input ref for Excel import
-  const fileInputRef = React.useRef<HTMLInputElement>(null);
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file && onImportExcel) {
-      onImportExcel(file);
-    }
-    // Reset input value to allow re-uploading same file
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
-    }
-  };
   // Default configurable button configuration
   const defaultConfigurableButton: ConfigurableButtonConfig = {
     label: defaultConfigurableButtonLabel,
@@ -313,39 +285,6 @@ export function GridToolbar({
           </div>
         )}
 
-        {/* Copy/Paste Buttons */}
-        {onCopyRows && (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onCopyRows}
-            disabled={!canCopy || loading}
-            title="Copy selected rows (Ctrl+C)"
-            className={cn(
-              "w-9 h-9 flex items-center justify-center rounded-lg hover:bg-gray-100 p-0 border border-gray-300",
-              !canCopy && "opacity-50 cursor-not-allowed"
-            )}
-          >
-            <Copy className="h-4 w-4 text-gray-600" />
-          </Button>
-        )}
-
-        {onPasteRows && (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onPasteRows}
-            disabled={!canPaste || loading}
-            title="Paste rows (Ctrl+V)"
-            className={cn(
-              "w-9 h-9 flex items-center justify-center rounded-lg hover:bg-gray-100 p-0 border border-gray-300",
-              !canPaste && "opacity-50 cursor-not-allowed"
-            )}
-          >
-            <ClipboardPaste className="h-4 w-4 text-gray-600" />
-          </Button>
-        )}
-
         {/* Icon buttons */}
         <Button
           variant="ghost"
@@ -404,29 +343,6 @@ export function GridToolbar({
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-        )}
-
-        {/* Import Excel Button */}
-        {onImportExcel && gridTitle !== "Leg Details" && (
-          <>
-            <input
-              type="file"
-              ref={fileInputRef}
-              onChange={handleFileChange}
-              accept=".xlsx,.xls,.csv"
-              className="hidden"
-            />
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => fileInputRef.current?.click()}
-              disabled={loading}
-              title="Import from Excel"
-              className="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-gray-100 p-0 border border-gray-300"
-            >
-              <Upload className="h-4 w-4 text-gray-600" />
-            </Button>
-          </>
         )}
 
         {/* Filter System Toggle Button */}
