@@ -145,6 +145,9 @@ export function SmartGridPlus({
   const [isAddingRow, setIsAddingRow] = useState(false);
   const [newRowValues, setNewRowValues] = useState<Record<string, any>>(defaultRowValues);
 
+  // Clipboard state for copy/paste functionality
+  const [clipboardRows, setClipboardRows] = useState<any[]>([]);
+
   // Use external selectedRows if provided, otherwise use internal state
   const currentSelectedRows = selectedRows || internalSelectedRows;
   const handleSelectionChange = onSelectionChange || setInternalSelectedRows;
@@ -453,6 +456,76 @@ export function SmartGridPlus({
     },
     [setFilters, currentColumns, onServerFilter, toast],
   );
+
+  // Copy rows handler
+  const handleCopyRows = useCallback(() => {
+    const rowsToCopy = Array.from(currentSelectedRows)
+      .map((index) => processedData[index])
+      .filter(Boolean)
+      .map((row) => JSON.parse(JSON.stringify(row))); // Deep clone
+
+    if (rowsToCopy.length > 0) {
+      setClipboardRows(rowsToCopy);
+      toast({
+        title: "Copied",
+        description: `${rowsToCopy.length} row(s) copied to clipboard`,
+      });
+    }
+  }, [currentSelectedRows, processedData, toast]);
+
+  // Paste rows handler
+  const handlePasteRows = useCallback(async () => {
+    if (clipboardRows.length === 0) return;
+
+    const newRows = clipboardRows.map((row) => ({
+      ...row,
+      id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+    }));
+
+    setGridData((prev) => [...prev, ...newRows]);
+
+    if (onAddRow) {
+      for (const row of newRows) {
+        try {
+          await onAddRow(row);
+        } catch (error) {
+          console.error("Failed to add pasted row:", error);
+        }
+      }
+    }
+
+    toast({
+      title: "Pasted",
+      description: `${newRows.length} row(s) added`,
+    });
+  }, [clipboardRows, setGridData, onAddRow, toast]);
+
+  // Keyboard shortcuts for copy/paste
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const isMac = navigator.platform.toUpperCase().indexOf("MAC") >= 0;
+      const modifierKey = isMac ? e.metaKey : e.ctrlKey;
+
+      // Check if the event target is an input/textarea to avoid interfering with text editing
+      const target = e.target as HTMLElement;
+      const isInputElement = target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable;
+      
+      if (isInputElement) return;
+
+      if (modifierKey && e.key === "c" && currentSelectedRows.size > 0) {
+        e.preventDefault();
+        handleCopyRows();
+      }
+
+      if (modifierKey && e.key === "v" && clipboardRows.length > 0) {
+        e.preventDefault();
+        handlePasteRows();
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [handleCopyRows, handlePasteRows, currentSelectedRows.size, clipboardRows.length]);
 
   // Define handleExport and handleResetPreferences after processedData and orderedColumns
   const handleExport = useCallback(
@@ -1429,6 +1502,10 @@ export function SmartGridPlus({
           recordCount={recordCount}
           showAdvancedFilter={false}
           onToggleAdvancedFilter={() => {}}
+          onCopyRows={handleCopyRows}
+          onPasteRows={handlePasteRows}
+          canCopy={currentSelectedRows.size > 0}
+          canPaste={clipboardRows.length > 0}
         />
       </div>
 
