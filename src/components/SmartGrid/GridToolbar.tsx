@@ -16,7 +16,9 @@ import {
   EllipsisVertical,
   SlidersHorizontal,
   Calendar,
-  Package
+  Package,
+  Copy,
+  ClipboardPaste
 } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
@@ -31,7 +33,6 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
 import { useFilterStore } from '@/stores/filterStore';
-import { spawn } from 'child_process';
 
 interface GridToolbarProps {
   globalFilter?: string;
@@ -78,6 +79,11 @@ interface GridToolbarProps {
   // Selection props
   selectedRowsCount?: number;
   onClearSelection?: () => void;
+  // Copy/Paste props
+  onCopyRows?: () => void;
+  onPasteRows?: () => void;
+  canCopy?: boolean;
+  canPaste?: boolean;
 }
 
 export function GridToolbar({
@@ -120,7 +126,12 @@ export function GridToolbar({
   gridId,
   hideCheckboxToggle = false,
   selectedRowsCount = 0,
-  onClearSelection
+  onClearSelection,
+  // Copy/Paste props
+  onCopyRows,
+  onPasteRows,
+  canCopy = false,
+  canPaste = false
 }: GridToolbarProps) {
   // Default configurable button configuration
   const defaultConfigurableButton: ConfigurableButtonConfig = {
@@ -283,6 +294,39 @@ export function GridToolbar({
               </Badge>
             )}
           </div>
+        )}
+
+        {/* Copy/Paste Buttons */}
+        {onCopyRows && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onCopyRows}
+            disabled={!canCopy || loading}
+            title="Copy selected rows (Ctrl+C)"
+            className={cn(
+              "w-9 h-9 flex items-center justify-center rounded-lg hover:bg-gray-100 p-0 border border-gray-300",
+              !canCopy && "opacity-50 cursor-not-allowed"
+            )}
+          >
+            <Copy className="h-4 w-4 text-gray-600" />
+          </Button>
+        )}
+
+        {onPasteRows && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onPasteRows}
+            disabled={!canPaste || loading}
+            title="Paste rows (Ctrl+V)"
+            className={cn(
+              "w-9 h-9 flex items-center justify-center rounded-lg hover:bg-gray-100 p-0 border border-gray-300",
+              !canPaste && "opacity-50 cursor-not-allowed"
+            )}
+          >
+            <ClipboardPaste className="h-4 w-4 text-gray-600" />
+          </Button>
         )}
 
         {/* Icon buttons */}
