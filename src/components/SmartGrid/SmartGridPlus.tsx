@@ -26,6 +26,7 @@ import {
 } from "lucide-react";
 import { SmartGridPlusProps, GridColumnConfig, SortConfig, FilterConfig, GridAPI } from "@/types/smartgrid";
 import { exportToCSV, exportToExcel } from "@/utils/gridExport";
+import * as XLSX from "xlsx";
 import { useToast } from "@/hooks/use-toast";
 import { useGridPreferences } from "@/hooks/useGridPreferences";
 import { useSmartGridState } from "@/hooks/useSmartGridState";
@@ -526,6 +527,106 @@ export function SmartGridPlus({
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [handleCopyRows, handlePasteRows, currentSelectedRows.size, clipboardRows.length]);
+
+  // Import Excel handler
+  const handleImportExcel = useCallback(
+    async (file: File) => {
+      try {
+        setLoading(true);
+        const reader = new FileReader();
+
+        reader.onload = async (e) => {
+          try {
+            const data = e.target?.result;
+            const workbook = XLSX.read(data, { type: "binary" });
+            const sheetName = workbook.SheetNames[0];
+            const worksheet = workbook.Sheets[sheetName];
+            const jsonData = XLSX.utils.sheet_to_json(worksheet);
+
+            if (jsonData.length === 0) {
+              toast({
+                title: "No data found",
+                description: "The Excel file appears to be empty",
+                variant: "destructive",
+              });
+              setLoading(false);
+              return;
+            }
+
+            // Map column keys from Excel headers to grid column keys
+            const columnKeyMap = new Map<string, string>();
+            currentColumns.forEach((col) => {
+              columnKeyMap.set(col.label.toLowerCase(), col.key);
+              columnKeyMap.set(col.key.toLowerCase(), col.key);
+            });
+
+            // Transform Excel rows to match grid column keys
+            const transformedRows = jsonData.map((row: any) => {
+              const newRow: Record<string, any> = {
+                id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+              };
+
+              Object.entries(row).forEach(([key, value]) => {
+                const lowerKey = key.toLowerCase();
+                const mappedKey = columnKeyMap.get(lowerKey) || key;
+                newRow[mappedKey] = value;
+              });
+
+              return newRow;
+            });
+
+            // Add rows to grid
+            setGridData((prev) => [...prev, ...transformedRows]);
+
+            // Call onAddRow for each new row if provided
+            if (onAddRow) {
+              for (const row of transformedRows) {
+                try {
+                  await onAddRow(row);
+                } catch (error) {
+                  console.error("Failed to add imported row:", error);
+                }
+              }
+            }
+
+            toast({
+              title: "Import successful",
+              description: `${transformedRows.length} row(s) imported from Excel`,
+            });
+          } catch (error) {
+            console.error("Error parsing Excel file:", error);
+            toast({
+              title: "Import failed",
+              description: "Failed to parse the Excel file. Please check the file format.",
+              variant: "destructive",
+            });
+          } finally {
+            setLoading(false);
+          }
+        };
+
+        reader.onerror = () => {
+          toast({
+            title: "Import failed",
+            description: "Failed to read the file",
+            variant: "destructive",
+          });
+          setLoading(false);
+        };
+
+        reader.readAsBinaryString(file);
+      } catch (error) {
+        console.error("Error importing Excel:", error);
+        toast({
+          title: "Import failed",
+          description: "An error occurred during import",
+          variant: "destructive",
+        });
+        setLoading(false);
+      }
+    },
+    [currentColumns, setGridData, onAddRow, toast, setLoading],
+  );
 
   // Define handleExport and handleResetPreferences after processedData and orderedColumns
   const handleExport = useCallback(
@@ -1506,6 +1607,7 @@ export function SmartGridPlus({
           onPasteRows={handlePasteRows}
           canCopy={currentSelectedRows.size > 0}
           canPaste={clipboardRows.length > 0}
+          onImportExcel={handleImportExcel}
         />
       </div>
 
