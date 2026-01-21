@@ -721,19 +721,13 @@ export function SmartGridPlus({
   }, [resizingColumn, setDraggedColumn, setDragOverColumn]);
 
   // Determine if a column is editable
-  // When editableColumns is true (default), columns are editable unless explicitly set to editable: false
   const isColumnEditable = useCallback(
     (column: GridColumnConfig, columnIndex: number) => {
       if (Array.isArray(editableColumns)) {
         return editableColumns.includes(column.key);
       }
 
-      // If editableColumns is true, default to editable unless column.editable is explicitly false
-      if (editableColumns) {
-        return column.editable !== false;
-      }
-
-      return false;
+      return editableColumns && column.editable;
     },
     [editableColumns],
   );
