@@ -1048,12 +1048,33 @@ export function SmartGridPlus({
       const isEditing = editingCell?.rowIndex === rowIndex && editingCell?.columnKey === column.key;
       const isEditable = isColumnEditable(column, columnIndex);
       const isRowEditing = editingRow === rowIndex;
-
-      // Handle inline row editing for SmartGridPlus first (before any special column rendering)
+      
+      // When inlineRowEditing is enabled, all cells are always editable (no row selection required)
       // Respect column.editable flag - if explicitly false, don't allow editing
-      if (isRowEditing && inlineRowEditing && column.key !== "actions" && column.editable !== false) {
-        const editingValue = editingValues[column.key];
-        const shouldAutoFocus = focusedColumn === column.key;
+      const shouldRenderAsEditable = inlineRowEditing && column.key !== "actions" && column.editable !== false && isEditable;
+
+      // Handle inline row editing for SmartGridPlus - always render as editable when enabled
+      if (shouldRenderAsEditable) {
+        // Use editingValues if row is being edited, otherwise use actual row value
+        const cellValue = isRowEditing ? editingValues[column.key] : value;
+        const shouldAutoFocus = focusedColumn === column.key && isRowEditing;
+
+        // Handler for cell value changes - works whether row is in edit mode or not
+        const handleCellChange = (newValue: any) => {
+          if (isRowEditing) {
+            // If already in row edit mode, update editingValues
+            handleEditingCellChange(rowIndex, column.key, newValue);
+            if (column.onChange) {
+              column.onChange(newValue, editingValues);
+            }
+          } else {
+            // Direct cell edit without row selection - save immediately
+            handleCellEdit(rowIndex, column.key, newValue);
+            if (column.onChange) {
+              column.onChange(newValue, row);
+            }
+          }
+        };
 
         // For first column with expand/collapse, show button + editor
         if (columnIndex === 0 && (effectiveNestedRowRenderer || hasCollapsibleColumns)) {
@@ -1073,18 +1094,13 @@ export function SmartGridPlus({
               </Button>
               <div className="flex-1 min-w-0">
                 <EnhancedCellEditor
-                  value={editingValue}
+                  value={cellValue}
                   column={column}
-                  onChange={(value) => {
-                    handleEditingCellChange(rowIndex, column.key, value);
-                    if (column.onChange) {
-                      column.onChange(value, editingValues);
-                    }
-                  }}
-                  onSave={() => handleSaveEditRow(rowIndex)}
-                  error={validationErrors[column.key]}
+                  onChange={handleCellChange}
+                  onSave={isRowEditing ? () => handleSaveEditRow(rowIndex) : undefined}
+                  error={isRowEditing ? validationErrors[column.key] : undefined}
                   shouldAutoFocus={shouldAutoFocus}
-                  rowData={editingValues}
+                  rowData={isRowEditing ? editingValues : row}
                 />
               </div>
             </div>
@@ -1094,18 +1110,13 @@ export function SmartGridPlus({
         // Regular editing for other columns
         return (
           <EnhancedCellEditor
-            value={editingValue}
+            value={cellValue}
             column={column}
-            onChange={(value) => {
-              handleEditingCellChange(rowIndex, column.key, value);
-              if (column.onChange) {
-                column.onChange(value, editingValues);
-              }
-            }}
-            onSave={() => handleSaveEditRow(rowIndex)}
-            error={validationErrors[column.key]}
+            onChange={handleCellChange}
+            onSave={isRowEditing ? () => handleSaveEditRow(rowIndex) : undefined}
+            error={isRowEditing ? validationErrors[column.key] : undefined}
             shouldAutoFocus={shouldAutoFocus}
-            rowData={editingValues}
+            rowData={isRowEditing ? editingValues : row}
           />
         );
       }
