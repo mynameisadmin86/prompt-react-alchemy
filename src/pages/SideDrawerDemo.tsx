@@ -7,7 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const SideDrawerDemo = () => {
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(true);
   const [currentStep, setCurrentStep] = useState(1);
   const [transitionDuration, setTransitionDuration] = useState(300);
   const [drawerWidth, setDrawerWidth] = useState('400px');
