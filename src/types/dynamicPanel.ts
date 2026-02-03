@@ -129,6 +129,7 @@ export interface DynamicPanelProps {
   userId?: string;
   panelWidth?: 'full' | 'half' | 'third' | 'quarter' | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12;
   collapsible?: boolean;
+  defaultOpen?: boolean; // Default expanded state for collapsible panels
   showPreview?: boolean;
   className?: string;
   panelSubTitle?: string;
