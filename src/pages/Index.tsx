@@ -302,6 +302,13 @@ const Index = () => {
       path: "/receivables-authorization",
       color: "text-green-600"
     },
+    {
+      title: "Draft Bill Details",
+      description: "Detailed bill management with tariff details, summary sections, and editable fields",
+      icon: FileText,
+      path: "/draft-bill-details",
+      color: "text-blue-500"
+    },
   ];
 
   return (
