@@ -51,6 +51,7 @@ import SmartGridWithGroupingEditableDemo from "./pages/SmartGridWithGroupingEdit
 import IDEPage from "./pages/IDEPage";
 import IDEPreviewPage from "./pages/IDEPreviewPage";
 import ReceivablesAuthorizationPage from "./pages/ReceivablesAuthorizationPage";
+import DraftBillDetailsPage from "./pages/DraftBillDetailsPage";
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -106,6 +107,7 @@ const App = () => (
           <Route path="/ide" element={<IDEPage />} />
           <Route path="/ide-preview/*" element={<IDEPreviewPage />} />
           <Route path="/receivables-authorization" element={<ReceivablesAuthorizationPage />} />
+          <Route path="/draft-bill-details" element={<DraftBillDetailsPage />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
