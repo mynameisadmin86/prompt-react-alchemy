@@ -9,11 +9,54 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { useNavigate } from 'react-router-dom';
 import { ChevronUp, ChevronDown } from 'lucide-react';
+import { DynamicPanel } from '@/components/DynamicPanel';
+import { PanelConfig } from '@/types/dynamicPanel';
 
 const DraftBillDetailsPage: React.FC = () => {
   const navigate = useNavigate();
-  const [summaryOpen, setSummaryOpen] = useState(true);
   const [basicDetailsOpen, setBasicDetailsOpen] = useState(true);
+  
+  // Summary panel data state
+  const [summaryData, setSummaryData] = useState({
+    tariffId: 'TAR_HR_DR_22_00007',
+    triggeringDoc: 'CN000009193/Dispatch Document',
+    basicCharge: '€ 50.00',
+    triggeringDate: '07-Apr-2025',
+    minMaxCharge: '€ 100.00/€ 200.00',
+    referenceDocNo: 'IO_D25_003',
+    referenceDocType: 'Internal Order',
+    agent: 'AGN0323 - ABC Agent',
+    equipment: 'WAG0322 - Habbins Wagon',
+    invoiceNo: '--',
+    invoiceStatus: '--',
+    invoiceDate: '--',
+    reasonForAmendment: '--',
+    reasonForCancellation: '--',
+    remarks: '--',
+  });
+
+  // Summary panel configuration using PanelConfig (record of FieldConfig)
+  const summaryPanelConfig: PanelConfig = {
+    tariffId: { id: 'tariffId', label: 'Tariff ID', fieldType: 'text', value: summaryData.tariffId, mandatory: false, visible: true, editable: false, order: 1, width: 'third' },
+    triggeringDoc: { id: 'triggeringDoc', label: 'Triggering Doc.', fieldType: 'text', value: summaryData.triggeringDoc, mandatory: false, visible: true, editable: false, order: 2, width: 'third' },
+    basicCharge: { id: 'basicCharge', label: 'Basic Charge', fieldType: 'text', value: summaryData.basicCharge, mandatory: false, visible: true, editable: false, order: 3, width: 'third' },
+    triggeringDate: { id: 'triggeringDate', label: 'Triggering Date', fieldType: 'text', value: summaryData.triggeringDate, mandatory: false, visible: true, editable: false, order: 4, width: 'third' },
+    minMaxCharge: { id: 'minMaxCharge', label: 'Minimum/Maximum Charge', fieldType: 'text', value: summaryData.minMaxCharge, mandatory: false, visible: true, editable: false, order: 5, width: 'third' },
+    referenceDocNo: { id: 'referenceDocNo', label: 'Reference Doc. No.', fieldType: 'text', value: summaryData.referenceDocNo, mandatory: false, visible: true, editable: false, order: 6, width: 'third' },
+    referenceDocType: { id: 'referenceDocType', label: 'Reference Doc. Type', fieldType: 'text', value: summaryData.referenceDocType, mandatory: false, visible: true, editable: false, order: 7, width: 'third' },
+    agent: { id: 'agent', label: 'Agent', fieldType: 'text', value: summaryData.agent, mandatory: false, visible: true, editable: false, order: 8, width: 'third' },
+    equipment: { id: 'equipment', label: 'Equipment', fieldType: 'text', value: summaryData.equipment, mandatory: false, visible: true, editable: false, order: 9, width: 'third' },
+    invoiceNo: { id: 'invoiceNo', label: 'Invoice No.', fieldType: 'text', value: summaryData.invoiceNo, mandatory: false, visible: true, editable: false, order: 10, width: 'third' },
+    invoiceStatus: { id: 'invoiceStatus', label: 'Invoice Status', fieldType: 'text', value: summaryData.invoiceStatus, mandatory: false, visible: true, editable: false, order: 11, width: 'third' },
+    invoiceDate: { id: 'invoiceDate', label: 'Invoice Date', fieldType: 'text', value: summaryData.invoiceDate, mandatory: false, visible: true, editable: false, order: 12, width: 'third' },
+    reasonForAmendment: { id: 'reasonForAmendment', label: 'Reason for Amendment', fieldType: 'text', value: summaryData.reasonForAmendment, mandatory: false, visible: true, editable: false, order: 13, width: 'third' },
+    reasonForCancellation: { id: 'reasonForCancellation', label: 'Reason for Cancellation', fieldType: 'text', value: summaryData.reasonForCancellation, mandatory: false, visible: true, editable: false, order: 14, width: 'third' },
+    remarks: { id: 'remarks', label: 'Remarks', fieldType: 'text', value: summaryData.remarks, mandatory: false, visible: true, editable: false, order: 15, width: 'third' },
+  };
+
+  const handleSummaryChange = (updatedData: Record<string, any>) => {
+    setSummaryData(prev => ({ ...prev, ...updatedData }));
+  };
 
   // Mock data
   const billData = {
@@ -31,20 +74,6 @@ const DraftBillDetailsPage: React.FC = () => {
     reason: 'Mismatch in consignee details between shipping manifest and bill.',
   };
 
-  const tariffSummary = {
-    tariffId: 'TAR_HR_DR_22_00007',
-    triggeringDoc: 'CN000009193/Dispatch Document',
-    basicCharge: '€ 50.00',
-    triggeringDate: '07-Apr-2025',
-    minMaxCharge: '€ 100.00/€ 200.00',
-    referenceDocNo: 'IO_D25_003',
-    referenceDocType: 'Internal Order',
-    agent: 'AGN0323 - ABC Agent',
-    equipment: 'WAG0322 - Habbins Wagon',
-    invoiceNo: '--',
-    invoiceStatus: '--',
-    invoiceDate: '--',
-  };
 
   const tariffLines = [
     {
@@ -196,99 +225,20 @@ const DraftBillDetailsPage: React.FC = () => {
             </Button>
           </div>
 
-          {/* Summary Section */}
-          <Collapsible open={summaryOpen} onOpenChange={setSummaryOpen} className="mb-4">
-            <Card>
-              <CollapsibleTrigger asChild>
-                <div className="flex items-center justify-between p-4 cursor-pointer hover:bg-muted/50">
-                  <div className="flex items-center gap-2">
-                    <FileText className="h-5 w-5 text-primary" />
-                    <span className="font-medium">Summary</span>
-                  </div>
-                  {summaryOpen ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
-                </div>
-              </CollapsibleTrigger>
-              <CollapsibleContent>
-                <CardContent className="pt-0 pb-4 px-4">
-                  <div className="grid grid-cols-4 gap-6 mb-6">
-                    <div>
-                      <p className="text-xs text-muted-foreground mb-1">Tariff ID</p>
-                      <p className="text-sm font-medium">{tariffSummary.tariffId}</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-muted-foreground mb-1">Triggering Doc.</p>
-                      <p className="text-sm font-medium">{tariffSummary.triggeringDoc}</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-muted-foreground mb-1">Basic Charge</p>
-                      <p className="text-sm font-medium">{tariffSummary.basicCharge}</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-muted-foreground mb-1">Triggering Date</p>
-                      <p className="text-sm font-medium">{tariffSummary.triggeringDate}</p>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-4 gap-6 mb-6">
-                    <div>
-                      <p className="text-xs text-muted-foreground mb-1">Minimum/Maximum Charge</p>
-                      <p className="text-sm font-medium">{tariffSummary.minMaxCharge}</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-muted-foreground mb-1">Reference Doc. No.</p>
-                      <p className="text-sm font-medium">{tariffSummary.referenceDocNo}</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-muted-foreground mb-1">Reference Doc. Type</p>
-                      <p className="text-sm font-medium">{tariffSummary.referenceDocType}</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-muted-foreground mb-1">Agent</p>
-                      <p className="text-sm font-medium">{tariffSummary.agent}</p>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-4 gap-6 mb-6">
-                    <div>
-                      <p className="text-xs text-muted-foreground mb-1">Equipment</p>
-                      <p className="text-sm font-medium">{tariffSummary.equipment}</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-muted-foreground mb-1">Invoice No.</p>
-                      <p className="text-sm font-medium">{tariffSummary.invoiceNo}</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-muted-foreground mb-1">Invoice Status</p>
-                      <p className="text-sm font-medium">{tariffSummary.invoiceStatus}</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-muted-foreground mb-1">Invoice Date</p>
-                      <p className="text-sm font-medium">{tariffSummary.invoiceDate}</p>
-                    </div>
-                  </div>
-
-                  {/* Reason Details */}
-                  <div className="border-t border-border pt-4">
-                    <h4 className="font-medium mb-4">Reason Details</h4>
-                    <div className="grid grid-cols-3 gap-6">
-                      <div>
-                        <p className="text-xs text-muted-foreground mb-1">Reason for Amendment.</p>
-                        <p className="text-sm font-medium">--</p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-muted-foreground mb-1">Reason for Cancellation</p>
-                        <p className="text-sm font-medium">--</p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-muted-foreground mb-1">Remarks</p>
-                        <p className="text-sm font-medium">--</p>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </CollapsibleContent>
-            </Card>
-          </Collapsible>
+          {/* Summary Section - DynamicPanel */}
+          <div className="mb-4">
+            <DynamicPanel
+              panelId="summary-panel"
+              panelTitle="Summary"
+              panelIcon={<FileText className="h-5 w-5" />}
+              panelConfig={summaryPanelConfig}
+              initialData={summaryData}
+              onDataChange={handleSummaryChange}
+              collapsible={true}
+              defaultOpen={true}
+              panelWidth="full"
+            />
+          </div>
 
           {/* Basic Details Section */}
           <Collapsible open={basicDetailsOpen} onOpenChange={setBasicDetailsOpen}>
